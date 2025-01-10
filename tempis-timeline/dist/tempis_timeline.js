@@ -21,13 +21,13 @@ var tempis_timeline = (() => {
   // src/index.ts
   var src_exports = {};
   __export(src_exports, {
-    Timeline: () => Timeline
+    TempisTimeline: () => TempisTimeline
   });
 
-  // src/Timeline.ts
-  var Timeline = class {
-    constructor() {
-      this._thing = "hello";
+  // src/TempisTimeline.ts
+  var TempisTimeline = class {
+    constructor(context, options) {
+      this._options = options;
     }
   };
   return __toCommonJS(src_exports);

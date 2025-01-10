@@ -1,3 +1,6 @@
-import { Timeline } from "./Timeline";
+import { TempisTimeline } from "./TempisTimeline";
+import { TempisTimelineOptions } from "./TempisTimelineOptions";
 
-export { Timeline };
+export { TempisTimeline };
+
+export type { TempisTimelineOptions };

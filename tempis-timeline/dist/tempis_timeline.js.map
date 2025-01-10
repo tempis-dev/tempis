@@ -1,7 +1,7 @@
 {
   "version": 3,
-  "sources": ["../src/index.ts", "../src/Timeline.ts"],
-  "sourcesContent": ["import { Timeline } from \"./Timeline\";\r\n\r\nexport { Timeline };", "export class Timeline {\r\n    private _thing: string = \"hello\";\r\n}"],
-  "mappings": ";;;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;;;ACAO,MAAM,WAAN,MAAe;AAAA,IAAf;AACH,WAAQ,SAAiB;AAAA;AAAA,EAC7B;",
+  "sources": ["../src/index.ts", "../src/TempisTimeline.ts"],
+  "sourcesContent": ["import { TempisTimeline } from \"./TempisTimeline\";\r\nimport { TempisTimelineOptions } from \"./TempisTimelineOptions\";\r\n\r\nexport { TempisTimeline };\r\n\r\nexport type { TempisTimelineOptions };", "import { TempisTimelineOptions } from \"./TempisTimelineOptions\";\r\n\r\nexport class TempisTimeline {\r\n    private readonly _options: TempisTimelineOptions;\r\n\r\n    public constructor(context: string | CanvasRenderingContext2D | HTMLCanvasElement, options: TempisTimelineOptions) {\r\n        this._options = options;\r\n    }\r\n}"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;;;ACEO,MAAM,iBAAN,MAAqB;AAAA,IAGjB,YAAY,SAAgE,SAAgC;AAC/G,WAAK,WAAW;AAAA,IACpB;AAAA,EACJ;",
   "names": []
 }
