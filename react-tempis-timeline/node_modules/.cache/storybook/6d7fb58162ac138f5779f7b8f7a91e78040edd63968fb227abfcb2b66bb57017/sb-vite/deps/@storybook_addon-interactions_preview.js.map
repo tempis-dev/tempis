@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../@storybook/addon-interactions/dist/preview.mjs"],
+  "sourcesContent": ["import { instrument } from '@storybook/instrumenter';\nimport '@storybook/test';\n\nvar {step:runStep}=instrument({step:(label,play,context)=>play(context)},{intercept:!0}),parameters={throwPlayFunctionExceptions:!1};\n\nexport { parameters, runStep };\n"],
+  "mappings": ";;;;;;;;;;AAGA,IAAI,EAAC,MAAK,QAAO,IAAE,WAAW,EAAC,MAAK,CAAC,OAAM,MAAK,YAAU,KAAK,OAAO,EAAC,GAAE,EAAC,WAAU,KAAE,CAAC;AAAvF,IAAyF,aAAW,EAAC,6BAA4B,MAAE;",
+  "names": []
+}

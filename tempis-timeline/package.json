@@ -1,0 +1,21 @@
+{
+  "name": "tempis-timeline",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:node": "esbuild ./src/index.ts --bundle --sourcemap --outdir=dist --platform=node",
+    "build:web": "esbuild ./src/index.ts --bundle --sourcemap --platform=browser --global-name=tempis_timeline --outfile=dist/tempis_timeline.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "typescript": "^5.7.3",
+    "esbuild": "^0.15.18",
+    "ts-node": "^10.9.2"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/index.ts", "../src/Timeline.ts"],
+  "sourcesContent": ["import { Timeline } from \"./Timeline\";\r\n\r\nexport { Timeline };", "export class Timeline {\r\n    private _thing: string = \"hello\";\r\n}"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;;;ACAO,MAAM,WAAN,MAAe;AAAA,IAAf;AACH,WAAQ,SAAiB;AAAA;AAAA,EAC7B;",
+  "names": []
+}
