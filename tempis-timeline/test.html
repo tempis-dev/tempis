@@ -5,7 +5,30 @@
   <title></title>
   <script src="./dist/tempis_timeline.js"></script>
 </head>
+<style>
+  .canvas-container {
+    width: 400px;
+    height: 400px;
+  }
+</style>
 <body>
-
+  <div class="canvas-container">
+    <canvas id="canvas">
+  </div>
 </body>
+<script>
+  // Get a reference to our canvas.
+  const canvas = document.getElementById("canvas");
+
+  // Create our timeline options.
+  const timelineOptions = {
+    items: []
+  };
+
+  // Create our timeline!
+  const timeline = new tempis_timeline.TempisTimeline(canvas, timelineOptions);
+
+  // Stick a reference to our timeline instance on the window for easy access.
+  window["timeline"] = timeline;
+</script>
 </html>
