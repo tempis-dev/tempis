@@ -17,18 +17,13 @@
   </div>
 </body>
 <script>
-  // Get a reference to our canvas.
-  const canvas = document.getElementById("canvas");
-
   // Create our timeline options.
   const timelineOptions = {
+    responsive: true,
     items: []
   };
 
-  // Create our timeline!
-  const timeline = new tempis_timeline.TempisTimeline(canvas, timelineOptions);
-
-  // Stick a reference to our timeline instance on the window for easy access.
-  window["timeline"] = timeline;
+  // Create our timeline and stick a reference to it on the window for easy access.
+  window["timeline"] = new tempis_timeline.TempisTimeline("#canvas", timelineOptions);
 </script>
 </html>
