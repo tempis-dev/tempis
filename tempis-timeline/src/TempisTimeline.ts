@@ -1,4 +1,5 @@
-import { TempisTimelineOptions } from "./TempisTimelineOptions";
+import { TempisTimelineItem, TempisTimelineOptions } from "./TempisTimelineOptions";
+import { TimelineItemGrouping } from "./TimelineItemGrouping";
 
 export class TempisTimeline {
     /** The timeline canvas. */
@@ -10,10 +11,16 @@ export class TempisTimeline {
     /** The canvas container resize observer. */
     private _canvasContainerResizeObserver: ResizeObserver | null = null;
 
+    /** The timeline item groupings. */
+    private _itemGroupings: TimelineItemGrouping[] = [];
+
     public constructor(context: string | HTMLCanvasElement, options: TempisTimelineOptions) {
         this._options = options;
 
         this._canvas = this._getCanvas(context);
+
+        // Create our initial item groupings.
+        this._createItemGroupings();
 
         // Do our initial canvas resize.
         this._resizeCanvas();
@@ -46,6 +53,42 @@ export class TempisTimeline {
         throw new Error("whatcha doing this isn't a valid value!") 
     }
 
+    /**
+     * Creates the timeline item groupings.
+     */
+    private _createItemGroupings() {
+        // Clear any existing item groupings.
+        this._itemGroupings = [];
+
+        // Create a mapping of group names to item group item definitions.
+        const itemGroupingMap: { [key: string]: TempisTimelineItem[] } = {};
+
+        for (const itemDefinition of this._options.items ?? []) {
+            // Our grouping key will default to just an empty string.
+            const groupingKey = itemDefinition.grouping ?? "";
+
+            // Try to get the existing grouping for this item.
+            let group = itemGroupingMap[groupingKey];
+
+            // Create a new group if there isn't one for this grouping.
+            if (!group) {
+                group = [];
+                itemGroupingMap[groupingKey] = group;
+            }
+
+            // Add the definition for the current item to its group.
+            group.push(itemDefinition);
+        }
+
+        // Create our new item groupings.
+        for (const [key, value] of Object.entries(itemGroupingMap)) {
+            this._itemGroupings.push(new TimelineItemGrouping(key, value));
+        }
+    }
+
+    /**
+     * Creates the canvas container resize observer.
+     */
     private _createCanvasContainerResizeObserver() {
         // Get the canvas parent element.
         const canvasContainerElement = this._canvas.parentElement;

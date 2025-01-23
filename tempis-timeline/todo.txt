@@ -1,0 +1,2 @@
+- Create TimelineItemGrouping and populate with user-defined items.
+- Create TimelineDateAxis based on min-max date range which works out sensible units and steps.

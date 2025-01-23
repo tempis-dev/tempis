@@ -24,12 +24,75 @@ var tempis_timeline = (() => {
     TempisTimeline: () => TempisTimeline
   });
 
+  // src/Utilities.ts
+  function parseDate(input) {
+    if (!input) {
+      throw new Error("Cannot parse input as date as it is not defined");
+    }
+    if (input instanceof Date) {
+      if (isNaN(input.getTime())) {
+        throw new Error(`Date is not valid`);
+      }
+      return input;
+    } else if (typeof input === "string") {
+      if (isNaN(Date.parse(input))) {
+        throw new Error(`Cannot parse input string '${input}' as date as it is not a valid date`);
+      }
+      return new Date(input);
+    } else if (typeof input === "number") {
+      if (isNaN(Date.parse(`${input}`))) {
+        throw new Error(`Cannot parse input string '${input}' as date as it is not a valid date`);
+      }
+      return new Date(`${input}`);
+    }
+    throw new Error(`Cannot parse input '${input}' as date`);
+  }
+
+  // src/TimelineItem.ts
+  var TimelineItem = class {
+    constructor(definition) {
+      var _a;
+      this._id = definition.id;
+      this._caption = (_a = definition.caption) != null ? _a : "";
+      this._start = parseDate(definition.start);
+      this._end = parseDate(definition.end);
+    }
+    get id() {
+      return this._id;
+    }
+    get caption() {
+      return this._caption;
+    }
+    get start() {
+      return this._start;
+    }
+    get end() {
+      return this._end;
+    }
+  };
+
+  // src/TimelineItemGrouping.ts
+  var TimelineItemGrouping = class {
+    constructor(group, items) {
+      this._group = group;
+      this._items = items.map((itemDefinition) => new TimelineItem(itemDefinition));
+    }
+    get group() {
+      return this._group;
+    }
+    get items() {
+      return this._items;
+    }
+  };
+
   // src/TempisTimeline.ts
   var TempisTimeline = class {
     constructor(context, options) {
       this._canvasContainerResizeObserver = null;
+      this._itemGroupings = [];
       this._options = options;
       this._canvas = this._getCanvas(context);
+      this._createItemGroupings();
       this._resizeCanvas();
       if (options.responsive !== false) {
         this._createCanvasContainerResizeObserver();
@@ -49,6 +112,23 @@ var tempis_timeline = (() => {
         return targetElement;
       }
       throw new Error("whatcha doing this isn't a valid value!");
+    }
+    _createItemGroupings() {
+      var _a, _b;
+      this._itemGroupings = [];
+      const itemGroupingMap = {};
+      for (const itemDefinition of (_a = this._options.items) != null ? _a : []) {
+        const groupingKey = (_b = itemDefinition.grouping) != null ? _b : "";
+        let group = itemGroupingMap[groupingKey];
+        if (!group) {
+          group = [];
+          itemGroupingMap[groupingKey] = group;
+        }
+        group.push(itemDefinition);
+      }
+      for (const [key, value] of Object.entries(itemGroupingMap)) {
+        this._itemGroupings.push(new TimelineItemGrouping(key, value));
+      }
     }
     _createCanvasContainerResizeObserver() {
       const canvasContainerElement = this._canvas.parentElement;

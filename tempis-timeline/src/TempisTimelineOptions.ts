@@ -9,6 +9,8 @@ export type TempisTimelineOptions = {
 export type TempisTimelineItem = {
     id: string | number;
     start: string | number | Date;
-    end?: string | number | Date;
-    display: string;
+    // TODO Make optional to allow for point-in-time items.
+    end: string | number | Date;
+    caption?: string;
+    grouping?: string;
 };
