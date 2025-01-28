@@ -6,6 +6,7 @@
     "build": "tsc",
     "build:node": "esbuild ./src/index.ts --bundle --sourcemap --outdir=dist --platform=node",
     "build:web": "esbuild ./src/index.ts --bundle --sourcemap --platform=browser --global-name=tempis_timeline --outfile=dist/tempis_timeline.js",
+    "build:web-watch": "esbuild ./src/index.ts --bundle --watch --sourcemap --platform=browser --global-name=tempis_timeline --outfile=dist/tempis_timeline.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

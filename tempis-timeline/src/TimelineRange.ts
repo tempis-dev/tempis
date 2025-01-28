@@ -19,18 +19,6 @@ export class TimelineRange {
     private _toDt: Date = new Date(4102444800000);
 
     /**
-     * The current major unit of the timeline range.
-     * Defaults to "year" for the default timeline range of 100 years.
-     */
-    private _majorUnit: Unit = "year";
-
-    /**
-     * The current major unit step value of the timeline range.
-     * Defaults to 20 for the default timeline range of 100 years, giving 5 major ticks.
-     */
-    private _majorUnitStep: number = 20;
-
-    /**
      * Creates a new instance of the TimelineRange class.
      * @param options The timeline range options.
      */
@@ -43,7 +31,20 @@ export class TimelineRange {
         this._toDt = to;
     }
 
-    public setSensibleMajorUnitAndStep(targetMajorTickCount: number = 5): void {
+    /**
+     * Draw the timeline range onto the canvas.
+     * @param context The canvas 2D context.
+     */
+    public draw(context: CanvasRenderingContext2D): void {
+        // Calculate a sensible minor unit and step for the range.
+        const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep();
+
+        // console.log(sensibleUnitAndStep);
+
+        // TODO We can work out major/minor tick position by doing getTime on each major/minor unit date.
+    }
+
+    private _findSensibleMinorUnitAndStep(targetMinorTickCount: number = 5): { unit: Unit, step: number } {
         // Get the millis difference between the two dates.
         const millisDiff = this._toDt.getTime() - this._fromDt.getTime();
 
@@ -58,7 +59,21 @@ export class TimelineRange {
             { unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 }, // Approximate a year.
         ];
 
-        // Calculate how many major ticks we would show for each unit if using a step value of one.
-        const unitMajorTickCounts = units.map(({ unit, factor }) => ({ unit, ticks: millisDiff / factor }));
+         // Calculate how many major ticks we would show for each unit if using a step value of one.
+        const unitMinorTickCounts = units.map(({ unit, factor }) => {
+            return { unit, ticks: millisDiff / factor };
+        });
+
+        console.log(unitMinorTickCounts);
+
+        const sortedUnitMinorTickCounts = unitMinorTickCounts.sort((a, b) => {
+            return Math.abs(a.ticks - targetMinorTickCount) - Math.abs(b.ticks - targetMinorTickCount);
+        });
+
+        // TODO For each ticks get a new ticks where new ticks is ticks divided by 2, 5, 10, 20, 50 then 100 
+
+        console.log(sortedUnitMinorTickCounts);
+
+        return { unit: "day", step: 1 };
     }
 }

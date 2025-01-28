@@ -156,7 +156,7 @@ var tempis_timeline = (() => {
       var context = this._canvas.getContext("2d");
       context.fillStyle = "black";
       context.font = "12px Arial";
-      context.fillText(`Got ${this._itemGroupings.length} groups!`, 0, 50);
+      context.fillText(`Got ${this._itemGroupings.length} groups!!!!`, 0, 50);
       context.globalCompositeOperation = "destination-over";
       context.fillStyle = "#00FFFF";
       context.fillRect(0, 0, this._canvas.width, this._canvas.height);
