@@ -39,16 +39,25 @@ export class TimelineRange {
         // Calculate a sensible minor unit and step for the range.
         const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep();
 
-        // console.log(sensibleUnitAndStep);
-
-        // TODO We can work out major/minor tick position by doing getTime on each major/minor unit date.
+        // TODO
+        // We need to draw our minor unit ticks, to do this:
+        // Make a copy of fromDt and strip all unit values from the date UP TO the unit we are using. If the unit is minutes strip the seconds and millis, if its days then strip hours, minutes, seconds and millis.
+        // e.g. Our fromDT is 'Jan 20 2025 09:00:00' and our toDt is 'Jan 26 2025 09:00:00' and our unit is 'day' and our step is 1.
+        // Stripping everything below day from fromDt gives 'Jan 20 2025 00:00:00', this gives us the date of our first tick. In this case it is before fromDt so we don't draw it.
+        // Keep modifying this copied date, adding unit*step and rendering the resulting date until it exceeds toDt.
+        // We should get ticks for 'Jan 20 2025 00:00:00', 'Jan 21 2025 00:00:00', 'Jan 22 2025 00:00:00', 'Jan 23 2025 00:00:00', 'Jan 24 2025 00:00:00' and 'Jan 26 2025 00:00:00'
     }
 
+    /**
+     * https://jsfiddle.net/h2drotkz/6/
+     * @param targetMinorTickCount 
+     * @returns 
+     */
     private _findSensibleMinorUnitAndStep(targetMinorTickCount: number = 5): { unit: Unit, step: number } {
         // Get the millis difference between the two dates.
         const millisDiff = this._toDt.getTime() - this._fromDt.getTime();
 
-        const units = [
+        const units: { unit: Unit, factor: number }[] = [
             { unit: 'millisecond', factor: 1 },
             { unit: 'second', factor: 1000 },
             { unit: 'minute', factor: 60 * 1000 },
@@ -59,21 +68,19 @@ export class TimelineRange {
             { unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 }, // Approximate a year.
         ];
 
-         // Calculate how many major ticks we would show for each unit if using a step value of one.
-        const unitMinorTickCounts = units.map(({ unit, factor }) => {
-            return { unit, ticks: millisDiff / factor };
+        const unitMinorTickCounts: { unit: Unit, ticks: number, step: number }[] = [];
+
+        units.forEach(({ unit, factor }) => {
+            // TODO The step values we use should really depend on the unit type. (50 or 100 minutes is silly, but 20 makes sense...maybe)
+            [1, 2, 5, 10, 20, 50, 100].forEach((step) => {
+                unitMinorTickCounts.push({ unit, ticks: (millisDiff / factor) / step, step })    
+            });
         });
 
-        console.log(unitMinorTickCounts);
-
-        const sortedUnitMinorTickCounts = unitMinorTickCounts.sort((a, b) => {
+        unitMinorTickCounts.sort((a, b) => {
             return Math.abs(a.ticks - targetMinorTickCount) - Math.abs(b.ticks - targetMinorTickCount);
         });
 
-        // TODO For each ticks get a new ticks where new ticks is ticks divided by 2, 5, 10, 20, 50 then 100 
-
-        console.log(sortedUnitMinorTickCounts);
-
-        return { unit: "day", step: 1 };
+        return { unit: unitMinorTickCounts[0].unit, step: unitMinorTickCounts[0].step };
     }
 }
