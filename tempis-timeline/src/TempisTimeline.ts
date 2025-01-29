@@ -150,7 +150,8 @@ export class TempisTimeline {
      */
     private _createCanvasEventHandlers() {
         this._canvas.addEventListener("wheel", (evt) => {
-            this._range.moveRange("minute", evt.deltaY * 0.1);
+            // this._range.moveRange("minute", evt.deltaY * 0.1);
+            this._range.zoomRange("minute", evt.deltaY * 0.5);
             this._draw();
         });
     }
@@ -194,6 +195,8 @@ export class TempisTimeline {
         context.lineWidth = 2;
         context.strokeStyle="#000000";
         context.strokeRect(0, 0, this._canvas.width, this._canvas.height);//for white background
+
+        // TODO We shouldn't render a groups box to the left! We should split the view above the range bar and have the group label ON the group and have it sticky to the top. 
 
         // Draw the range.
         this._range.draw(context);

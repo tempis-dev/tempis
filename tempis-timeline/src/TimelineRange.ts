@@ -60,6 +60,30 @@ export class TimelineRange {
         }
     }
 
+    /**
+     * Zooms the from and to date value of the range.
+     * @param unit 
+     * @param step 
+     */
+    public zoomRange(unit: Unit, step: number): void {
+        if (unit === "millisecond") {
+            this._fromDt.setMilliseconds(this._fromDt.getMilliseconds() - step);
+            this._toDt.setMilliseconds(this._toDt.getMilliseconds() + step);
+        }
+        else if (unit === "second") {
+            this._fromDt.setSeconds(this._fromDt.getSeconds() - step);
+            this._toDt.setSeconds(this._toDt.getSeconds() + step);
+        }
+        else if (unit === "minute") {
+            this._fromDt.setMinutes(this._fromDt.getMinutes() - step);
+            this._toDt.setMinutes(this._toDt.getMinutes() + step);
+        }
+        else if (unit === "hour") {
+            this._fromDt.setHours(this._fromDt.getHours() - step);
+            this._toDt.setHours(this._toDt.getHours() + step);
+        }
+    }
+
     public clear(): void {
         // Clearing the range is just a matter of putting the default from/to back.
         this.setRange(new Date(0), new Date(4102444800000));
@@ -85,8 +109,7 @@ export class TimelineRange {
         // Get our minor tick dates.
         const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
 
-        console.log({ sizeWidth, sizeHeight });
-
+        // Figure out our range container dimensions.
         const rangeContainerHeight = 50;
         const rangeContainerWidth = sizeWidth;
 

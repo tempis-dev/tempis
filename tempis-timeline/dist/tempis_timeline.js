@@ -111,6 +111,21 @@ var tempis_timeline = (() => {
         this._toDt.setHours(this._toDt.getHours() + step);
       }
     }
+    zoomRange(unit, step) {
+      if (unit === "millisecond") {
+        this._fromDt.setMilliseconds(this._fromDt.getMilliseconds() - step);
+        this._toDt.setMilliseconds(this._toDt.getMilliseconds() + step);
+      } else if (unit === "second") {
+        this._fromDt.setSeconds(this._fromDt.getSeconds() - step);
+        this._toDt.setSeconds(this._toDt.getSeconds() + step);
+      } else if (unit === "minute") {
+        this._fromDt.setMinutes(this._fromDt.getMinutes() - step);
+        this._toDt.setMinutes(this._toDt.getMinutes() + step);
+      } else if (unit === "hour") {
+        this._fromDt.setHours(this._fromDt.getHours() - step);
+        this._toDt.setHours(this._toDt.getHours() + step);
+      }
+    }
     clear() {
       this.setRange(new Date(0), new Date(41024448e5));
     }
@@ -122,7 +137,6 @@ var tempis_timeline = (() => {
       const targetTickCount = Math.floor(sizeWidth / 120);
       const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep(targetTickCount);
       const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
-      console.log({ sizeWidth, sizeHeight });
       const rangeContainerHeight = 50;
       const rangeContainerWidth = sizeWidth;
       context.globalCompositeOperation = "source-over";
@@ -302,7 +316,7 @@ var tempis_timeline = (() => {
     }
     _createCanvasEventHandlers() {
       this._canvas.addEventListener("wheel", (evt) => {
-        this._range.moveRange("minute", evt.deltaY * 0.1);
+        this._range.zoomRange("minute", evt.deltaY * 0.5);
         this._draw();
       });
     }
