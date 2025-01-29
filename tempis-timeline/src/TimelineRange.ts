@@ -31,6 +31,11 @@ export class TimelineRange {
         this._toDt = to;
     }
 
+    public clear(): void {
+        // Clearing the range is just a matter of putting the default from/to back.
+        this.setRange(new Date(0), new Date(4102444800000));
+    }
+
     /**
      * Draw the timeline range onto the canvas.
      * @param context The canvas 2D context.
@@ -39,13 +44,11 @@ export class TimelineRange {
         // Calculate a sensible minor unit and step for the range.
         const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep();
 
-        // TODO
-        // We need to draw our minor unit ticks, to do this:
-        // Make a copy of fromDt and strip all unit values from the date UP TO the unit we are using. If the unit is minutes strip the seconds and millis, if its days then strip hours, minutes, seconds and millis.
-        // e.g. Our fromDT is 'Jan 20 2025 09:00:00' and our toDt is 'Jan 26 2025 09:00:00' and our unit is 'day' and our step is 1.
-        // Stripping everything below day from fromDt gives 'Jan 20 2025 00:00:00', this gives us the date of our first tick. In this case it is before fromDt so we don't draw it.
-        // Keep modifying this copied date, adding unit*step and rendering the resulting date until it exceeds toDt.
-        // We should get ticks for 'Jan 20 2025 00:00:00', 'Jan 21 2025 00:00:00', 'Jan 22 2025 00:00:00', 'Jan 23 2025 00:00:00', 'Jan 24 2025 00:00:00' and 'Jan 26 2025 00:00:00'
+        // Get our minor tick dates.
+        const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
+
+        // TODO Remove
+        console.log(minorTickDates);
     }
 
     /**
@@ -73,7 +76,7 @@ export class TimelineRange {
         units.forEach(({ unit, factor }) => {
             // TODO The step values we use should really depend on the unit type. (50 or 100 minutes is silly, but 20 makes sense...maybe)
             [1, 2, 5, 10, 20, 50, 100].forEach((step) => {
-                unitMinorTickCounts.push({ unit, ticks: (millisDiff / factor) / step, step })    
+                unitMinorTickCounts.push({ unit, ticks: (millisDiff / factor) / step, step })
             });
         });
 
@@ -82,5 +85,90 @@ export class TimelineRange {
         });
 
         return { unit: unitMinorTickCounts[0].unit, step: unitMinorTickCounts[0].step };
+    }
+
+    /**
+     * https://jsfiddle.net/mxh08wLd/1/
+     * @param unitAndStep 
+     * @returns 
+     */
+    private _getMinorTickDates(unitAndStep: { unit: Unit, step: number }): any {
+        // Make a copy of fromDt and strip all unit values from the date UP TO the unit we are using. If the unit is minutes strip the seconds and millis, if its days then strip hours, minutes, seconds and millis.
+        // e.g. Our fromDT is 'Jan 20 2025 09:00:00' and our toDt is 'Jan 26 2025 09:00:00' and our unit is 'day' and our step is 1.
+        // Stripping everything below day from fromDt gives 'Jan 20 2025 00:00:00', this gives us the date of our first tick. In this case it is before fromDt so we don't draw it.
+        // Keep modifying this copied date, adding unit*step and rendering the resulting date until it exceeds toDt.
+        // We should get ticks for 'Jan 20 2025 00:00:00', 'Jan 21 2025 00:00:00', 'Jan 22 2025 00:00:00', 'Jan 23 2025 00:00:00', 'Jan 24 2025 00:00:00' and 'Jan 26 2025 00:00:00'
+
+        let currentDate;
+
+        // We need to strip unit values below the tick unit
+        if (unitAndStep.unit === "year") {
+            currentDate = new Date(this._fromDt.getFullYear(), 0);
+        }
+        else if (unitAndStep.unit === "month") {
+            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth());
+        }
+        else if (unitAndStep.unit === "week") {
+            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth());
+            //currentDate.setWeek(fromDt.getWeek());
+        }
+        else if (unitAndStep.unit === "day") {
+            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate());
+            //currentDate.setWeek(fromDt.getWeek());
+        }
+        else if (unitAndStep.unit === "hour") {
+            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours());
+            //currentDate.setWeek(fromDt.getWeek());
+        }
+        else if (unitAndStep.unit === "minute") {
+            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes());
+            //currentDate.setWeek(fromDt.getWeek());
+        }
+        else if (unitAndStep.unit === "second") {
+            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds());
+            //currentDate.setWeek(fromDt.getWeek());
+        }
+        else if (unitAndStep.unit === "millisecond") {
+            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds(), this._fromDt.getMilliseconds());
+            //currentDate.setWeek(fromDt.getWeek());
+        } else {
+            throw new Error("unknown unit!");
+        }
+
+        const minorTickDates = [currentDate];
+
+        // This should give an array of tick dates with the first and last being outsite the from/to range (wont be rendered)
+        while (currentDate.getTime() < this._toDt.getTime()) {
+            currentDate = new Date(currentDate.getTime());
+
+            if (unitAndStep.unit === "year") {
+                currentDate.setFullYear(currentDate.getFullYear() + unitAndStep.step);
+            }
+            if (unitAndStep.unit === "month") {
+                currentDate.setMonth(currentDate.getMonth() + unitAndStep.step);
+            }
+            if (unitAndStep.unit === "week") {
+                // TODO Figure out what to do here.
+            }
+            if (unitAndStep.unit === "day") {
+                currentDate.setDate(currentDate.getDate() + unitAndStep.step);
+            }
+            if (unitAndStep.unit === "hour") {
+                currentDate.setHours(currentDate.getHours() + unitAndStep.step);
+            }
+            if (unitAndStep.unit === "minute") {
+                currentDate.setMinutes(currentDate.getMinutes() + unitAndStep.step);
+            }
+            if (unitAndStep.unit === "second") {
+                currentDate.setSeconds(currentDate.getSeconds() + unitAndStep.step);
+            }
+            if (unitAndStep.unit === "millisecond") {
+                currentDate.setMilliseconds(currentDate.getMilliseconds() + unitAndStep.step);
+            }
+
+            minorTickDates.push(currentDate);
+        }
+
+        return minorTickDates;
     }
 }

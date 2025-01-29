@@ -85,6 +85,101 @@ var tempis_timeline = (() => {
     }
   };
 
+  // src/TimelineRange.ts
+  var TimelineRange = class {
+    constructor(options = {}) {
+      this._fromDt = new Date(0);
+      this._toDt = new Date(41024448e5);
+      this._options = options;
+    }
+    setRange(from, to) {
+      this._fromDt = from;
+      this._toDt = to;
+    }
+    clear() {
+      this.setRange(new Date(0), new Date(41024448e5));
+    }
+    draw(context) {
+      const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep();
+      const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
+      console.log(minorTickDates);
+    }
+    _findSensibleMinorUnitAndStep(targetMinorTickCount = 5) {
+      const millisDiff = this._toDt.getTime() - this._fromDt.getTime();
+      const units = [
+        { unit: "millisecond", factor: 1 },
+        { unit: "second", factor: 1e3 },
+        { unit: "minute", factor: 60 * 1e3 },
+        { unit: "hour", factor: 60 * 60 * 1e3 },
+        { unit: "day", factor: 24 * 60 * 60 * 1e3 },
+        { unit: "week", factor: 7 * 24 * 60 * 60 * 1e3 },
+        { unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 },
+        { unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 }
+      ];
+      const unitMinorTickCounts = [];
+      units.forEach(({ unit, factor }) => {
+        [1, 2, 5, 10, 20, 50, 100].forEach((step) => {
+          unitMinorTickCounts.push({ unit, ticks: millisDiff / factor / step, step });
+        });
+      });
+      unitMinorTickCounts.sort((a, b) => {
+        return Math.abs(a.ticks - targetMinorTickCount) - Math.abs(b.ticks - targetMinorTickCount);
+      });
+      return { unit: unitMinorTickCounts[0].unit, step: unitMinorTickCounts[0].step };
+    }
+    _getMinorTickDates(unitAndStep) {
+      let currentDate;
+      if (unitAndStep.unit === "year") {
+        currentDate = new Date(this._fromDt.getFullYear(), 0);
+      } else if (unitAndStep.unit === "month") {
+        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth());
+      } else if (unitAndStep.unit === "week") {
+        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth());
+      } else if (unitAndStep.unit === "day") {
+        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate());
+      } else if (unitAndStep.unit === "hour") {
+        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours());
+      } else if (unitAndStep.unit === "minute") {
+        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes());
+      } else if (unitAndStep.unit === "second") {
+        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds());
+      } else if (unitAndStep.unit === "millisecond") {
+        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds(), this._fromDt.getMilliseconds());
+      } else {
+        throw new Error("unknown unit!");
+      }
+      const minorTickDates = [currentDate];
+      while (currentDate.getTime() < this._toDt.getTime()) {
+        currentDate = new Date(currentDate.getTime());
+        if (unitAndStep.unit === "year") {
+          currentDate.setFullYear(currentDate.getFullYear() + unitAndStep.step);
+        }
+        if (unitAndStep.unit === "month") {
+          currentDate.setMonth(currentDate.getMonth() + unitAndStep.step);
+        }
+        if (unitAndStep.unit === "week") {
+        }
+        if (unitAndStep.unit === "day") {
+          currentDate.setDate(currentDate.getDate() + unitAndStep.step);
+        }
+        if (unitAndStep.unit === "hour") {
+          currentDate.setHours(currentDate.getHours() + unitAndStep.step);
+        }
+        if (unitAndStep.unit === "minute") {
+          currentDate.setMinutes(currentDate.getMinutes() + unitAndStep.step);
+        }
+        if (unitAndStep.unit === "second") {
+          currentDate.setSeconds(currentDate.getSeconds() + unitAndStep.step);
+        }
+        if (unitAndStep.unit === "millisecond") {
+          currentDate.setMilliseconds(currentDate.getMilliseconds() + unitAndStep.step);
+        }
+        minorTickDates.push(currentDate);
+      }
+      return minorTickDates;
+    }
+  };
+
   // src/TempisTimeline.ts
   var TempisTimeline = class {
     constructor(context, options) {
@@ -92,7 +187,9 @@ var tempis_timeline = (() => {
       this._itemGroupings = [];
       this._options = options;
       this._canvas = this._getCanvas(context);
+      this._range = new TimelineRange(this._options.range);
       this._createItemGroupings();
+      this._setRange();
       this._resizeCanvas();
       if (options.responsive !== false) {
         this._createCanvasContainerResizeObserver();
@@ -130,6 +227,25 @@ var tempis_timeline = (() => {
         this._itemGroupings.push(new TimelineItemGrouping(key, value));
       }
     }
+    _setRange() {
+      if (this._itemGroupings.length === 0 || this._itemGroupings[0].items.length === 0) {
+        this._range.clear();
+        return;
+      }
+      let minDate = null;
+      let maxDate = null;
+      for (const grouping of this._itemGroupings) {
+        for (const item of grouping.items) {
+          if (minDate === null || item.start.getTime() < minDate.getTime()) {
+            minDate = item.start;
+          }
+          if (maxDate === null || item.end.getTime() > maxDate.getTime()) {
+            maxDate = item.end;
+          }
+        }
+      }
+      this._range.setRange(minDate, maxDate);
+    }
     _createCanvasContainerResizeObserver() {
       const canvasContainerElement = this._canvas.parentElement;
       if (!canvasContainerElement) {
@@ -164,6 +280,7 @@ var tempis_timeline = (() => {
       context.lineWidth = 2;
       context.strokeStyle = "#FF0000";
       context.strokeRect(0, 0, this._canvas.width, this._canvas.height);
+      this._range.draw(context);
     }
   };
   return __toCommonJS(src_exports);

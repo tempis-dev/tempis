@@ -1,5 +1,6 @@
 import { TempisTimelineItem, TempisTimelineOptions } from "./TempisTimelineOptions";
 import { TimelineItemGrouping } from "./TimelineItemGrouping";
+import { TimelineRange } from "./TimelineRange";
 
 export class TempisTimeline {
     /** The timeline canvas. */
@@ -7,6 +8,9 @@ export class TempisTimeline {
 
     /** The timeline options. */
     private readonly _options: TempisTimelineOptions;
+    
+    /** The timeline range. */
+    private readonly _range: TimelineRange;
 
     /** The canvas container resize observer. */
     private _canvasContainerResizeObserver: ResizeObserver | null = null;
@@ -18,9 +22,13 @@ export class TempisTimeline {
         this._options = options;
 
         this._canvas = this._getCanvas(context);
+        this._range = new TimelineRange(this._options.range);
 
         // Create our initial item groupings.
         this._createItemGroupings();
+
+        // Set the initial timeline range.
+        this._setRange();
 
         // Do our initial canvas resize.
         this._resizeCanvas();
@@ -87,6 +95,33 @@ export class TempisTimeline {
     }
 
     /**
+     * Sets the range.
+     */
+    private _setRange(): void {
+        // Do we have no items to use in finding a range?
+        if (this._itemGroupings.length === 0 || this._itemGroupings[0].items.length === 0) {
+            this._range.clear();
+            return;
+        }
+
+        let minDate: Date | null = null;
+        let maxDate: Date | null = null;
+
+        for (const grouping of this._itemGroupings) {
+            for (const item of grouping.items) {
+                if (minDate === null || item.start.getTime() < minDate.getTime()) {
+                    minDate = item.start;
+                }
+                if (maxDate === null || item.end.getTime() > maxDate.getTime()) {
+                    maxDate = item.end;
+                }
+            }
+        }
+
+        this._range.setRange(minDate!, maxDate!);
+    }
+
+    /**
      * Creates the canvas container resize observer.
      */
     private _createCanvasContainerResizeObserver() {
@@ -142,5 +177,8 @@ export class TempisTimeline {
         context.lineWidth = 2;
         context.strokeStyle="#FF0000";
         context.strokeRect(0, 0, this._canvas.width, this._canvas.height);//for white background
+
+        // Draw the range.
+        this._range.draw(context);
     }
 }
