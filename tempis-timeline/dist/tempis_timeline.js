@@ -102,7 +102,36 @@ var tempis_timeline = (() => {
     draw(context) {
       const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep();
       const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
-      console.log(minorTickDates);
+      var sizeWidth = context.canvas.clientWidth;
+      var sizeHeight = context.canvas.clientHeight;
+      var scaleWidth = sizeWidth / 100;
+      var scaleHeight = sizeHeight / 100;
+      console.log({ sizeWidth, sizeHeight });
+      const rangeContainerHeight = 40;
+      const rangeContainerWidth = sizeWidth;
+      context.globalCompositeOperation = "source-over";
+      context.fillStyle = "#FFFFFF";
+      context.fillRect(0, sizeHeight - rangeContainerHeight, rangeContainerWidth, rangeContainerHeight);
+      context.globalCompositeOperation = "source-over";
+      context.lineWidth = 2;
+      context.strokeStyle = "#8a8a8a";
+      context.strokeRect(0, sizeHeight - rangeContainerHeight, rangeContainerWidth, rangeContainerHeight);
+      const milliRenderWidth = sizeWidth / (this._toDt.getTime() - this._fromDt.getTime());
+      for (const minorTickDate of minorTickDates) {
+        if (minorTickDate.getTime() < this._fromDt.getTime() || minorTickDate.getTime() >= this._toDt.getTime()) {
+          continue;
+        }
+        const tickX = milliRenderWidth * (minorTickDate.getTime() - this._fromDt.getTime());
+        const tickY = sizeHeight - rangeContainerHeight;
+        context.beginPath();
+        context.moveTo(tickX, tickY);
+        context.lineTo(tickX, tickY + 26);
+        context.stroke();
+        context.font = "10px Arial";
+        context.fillStyle = "#8a8a8a";
+        context.fillText(minorTickDate.toLocaleDateString(), tickX + 3, tickY + 12);
+        context.fillText(minorTickDate.toLocaleTimeString(), tickX + 3, tickY + 26);
+      }
     }
     _findSensibleMinorUnitAndStep(targetMinorTickCount = 5) {
       const millisDiff = this._toDt.getTime() - this._fromDt.getTime();

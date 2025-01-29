@@ -47,8 +47,48 @@ export class TimelineRange {
         // Get our minor tick dates.
         const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
 
-        // TODO Remove
-        console.log(minorTickDates);
+        var sizeWidth = context.canvas.clientWidth;
+        var sizeHeight = context.canvas.clientHeight;
+        var scaleWidth = sizeWidth/100;
+        var scaleHeight = sizeHeight/100;
+
+        console.log({ sizeWidth, sizeHeight });
+
+        const rangeContainerHeight = 40;
+        const rangeContainerWidth = sizeWidth;
+
+        context.globalCompositeOperation = "source-over";
+        context.fillStyle = "#FFFFFF";
+        context.fillRect(0 , sizeHeight - rangeContainerHeight, rangeContainerWidth, rangeContainerHeight);
+        context.globalCompositeOperation = "source-over";
+        context.lineWidth = 2;
+        context.strokeStyle="#8a8a8a";
+        context.strokeRect(0, sizeHeight - rangeContainerHeight, rangeContainerWidth, rangeContainerHeight);
+
+        const milliRenderWidth = sizeWidth / (this._toDt.getTime() - this._fromDt.getTime());
+
+        for (const minorTickDate of minorTickDates) {
+            if (minorTickDate.getTime() < this._fromDt.getTime() || minorTickDate.getTime() >= this._toDt.getTime()) {
+                // This tick is outside the timeline range, don't draw it.
+                continue;
+            }
+            const tickX = milliRenderWidth * (minorTickDate.getTime() - this._fromDt.getTime());
+            const tickY = sizeHeight - rangeContainerHeight;
+
+            // Start a new Path
+            context.beginPath();
+            context.moveTo(tickX, tickY);
+            context.lineTo(tickX, tickY + 26);
+
+            // Draw the Path
+            context.stroke();
+
+            // Draw the date label text
+            context.font = "10px Arial";
+            context.fillStyle = "#8a8a8a";
+            context.fillText(minorTickDate.toLocaleDateString(), tickX + 3, tickY + 12);
+            context.fillText(minorTickDate.toLocaleTimeString(), tickX + 3, tickY + 26);
+        }
     }
 
     /**
@@ -137,7 +177,7 @@ export class TimelineRange {
 
         const minorTickDates = [currentDate];
 
-        // This should give an array of tick dates with the first and last being outsite the from/to range (wont be rendered)
+        // This should give an array of tick dates with the first and last being outside the from/to range (wont be rendered)
         while (currentDate.getTime() < this._toDt.getTime()) {
             currentDate = new Date(currentDate.getTime());
 
