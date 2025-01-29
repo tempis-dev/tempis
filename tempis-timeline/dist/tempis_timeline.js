@@ -96,6 +96,21 @@ var tempis_timeline = (() => {
       this._fromDt = from;
       this._toDt = to;
     }
+    moveRange(unit, step) {
+      if (unit === "millisecond") {
+        this._fromDt.setMilliseconds(this._fromDt.getMilliseconds() + step);
+        this._toDt.setMilliseconds(this._toDt.getMilliseconds() + step);
+      } else if (unit === "second") {
+        this._fromDt.setSeconds(this._fromDt.getSeconds() + step);
+        this._toDt.setSeconds(this._toDt.getSeconds() + step);
+      } else if (unit === "minute") {
+        this._fromDt.setMinutes(this._fromDt.getMinutes() + step);
+        this._toDt.setMinutes(this._toDt.getMinutes() + step);
+      } else if (unit === "hour") {
+        this._fromDt.setHours(this._fromDt.getHours() + step);
+        this._toDt.setHours(this._toDt.getHours() + step);
+      }
+    }
     clear() {
       this.setRange(new Date(0), new Date(41024448e5));
     }
@@ -104,11 +119,11 @@ var tempis_timeline = (() => {
       var sizeHeight = context.canvas.clientHeight;
       var scaleWidth = sizeWidth / 100;
       var scaleHeight = sizeHeight / 100;
-      const targetTickCount = Math.floor(sizeWidth / 150);
+      const targetTickCount = Math.floor(sizeWidth / 120);
       const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep(targetTickCount);
       const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
       console.log({ sizeWidth, sizeHeight });
-      const rangeContainerHeight = 40;
+      const rangeContainerHeight = 50;
       const rangeContainerWidth = sizeWidth;
       context.globalCompositeOperation = "source-over";
       context.fillStyle = "#FFFFFF";
@@ -119,19 +134,16 @@ var tempis_timeline = (() => {
       context.strokeRect(0, sizeHeight - rangeContainerHeight, rangeContainerWidth, rangeContainerHeight);
       const milliRenderWidth = sizeWidth / (this._toDt.getTime() - this._fromDt.getTime());
       for (const minorTickDate of minorTickDates) {
-        if (minorTickDate.getTime() < this._fromDt.getTime() || minorTickDate.getTime() >= this._toDt.getTime()) {
-          continue;
-        }
         const tickX = milliRenderWidth * (minorTickDate.getTime() - this._fromDt.getTime());
         const tickY = sizeHeight - rangeContainerHeight;
         context.beginPath();
         context.moveTo(tickX, tickY);
-        context.lineTo(tickX, tickY + 26);
+        context.lineTo(tickX, tickY + 30);
         context.stroke();
-        context.font = "10px Arial";
+        context.font = "12px Arial";
         context.fillStyle = "#8a8a8a";
-        context.fillText(minorTickDate.toLocaleDateString(), tickX + 3, tickY + 12);
-        context.fillText(minorTickDate.toLocaleTimeString(), tickX + 3, tickY + 26);
+        context.fillText(minorTickDate.toLocaleDateString(), tickX + 3, tickY + 14);
+        context.fillText(minorTickDate.toLocaleTimeString(), tickX + 3, tickY + 28);
       }
     }
     _findSensibleMinorUnitAndStep(targetMinorTickCount = 5) {
@@ -224,6 +236,7 @@ var tempis_timeline = (() => {
       if (options.responsive !== false) {
         this._createCanvasContainerResizeObserver();
       }
+      this._createCanvasEventHandlers();
       this._draw();
     }
     _getCanvas(context) {
@@ -287,6 +300,12 @@ var tempis_timeline = (() => {
       });
       this._canvasContainerResizeObserver.observe(canvasContainerElement);
     }
+    _createCanvasEventHandlers() {
+      this._canvas.addEventListener("wheel", (evt) => {
+        this._range.moveRange("minute", evt.deltaY * 0.1);
+        this._draw();
+      });
+    }
     _resizeCanvas() {
       if (this._options.responsive === false) {
         return;
@@ -300,15 +319,15 @@ var tempis_timeline = (() => {
     }
     _draw() {
       var context = this._canvas.getContext("2d");
+      context.clearRect(0, 0, this._canvas.width, this._canvas.height);
       context.fillStyle = "black";
       context.font = "12px Arial";
-      context.fillText(`Got ${this._itemGroupings.length} groups!!!!`, 0, 50);
       context.globalCompositeOperation = "destination-over";
-      context.fillStyle = "#00FFFF";
+      context.fillStyle = "#edebeb";
       context.fillRect(0, 0, this._canvas.width, this._canvas.height);
       context.globalCompositeOperation = "source-over";
       context.lineWidth = 2;
-      context.strokeStyle = "#FF0000";
+      context.strokeStyle = "#000000";
       context.strokeRect(0, 0, this._canvas.width, this._canvas.height);
       this._range.draw(context);
     }

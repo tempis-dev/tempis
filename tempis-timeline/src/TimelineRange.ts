@@ -26,9 +26,38 @@ export class TimelineRange {
         this._options = options;
     }
 
+    /**
+     * Sets the from and to date value of the range.
+     * @param from 
+     * @param to 
+     */
     public setRange(from: Date, to: Date): void {
         this._fromDt = from;
         this._toDt = to;
+    }
+
+    /**
+     * Moves the from and to date value of the range uniformly.
+     * @param unit 
+     * @param step 
+     */
+    public moveRange(unit: Unit, step: number): void {
+        if (unit === "millisecond") {
+            this._fromDt.setMilliseconds(this._fromDt.getMilliseconds() + step);
+            this._toDt.setMilliseconds(this._toDt.getMilliseconds() + step);
+        }
+        else if (unit === "second") {
+            this._fromDt.setSeconds(this._fromDt.getSeconds() + step);
+            this._toDt.setSeconds(this._toDt.getSeconds() + step);
+        }
+        else if (unit === "minute") {
+            this._fromDt.setMinutes(this._fromDt.getMinutes() + step);
+            this._toDt.setMinutes(this._toDt.getMinutes() + step);
+        }
+        else if (unit === "hour") {
+            this._fromDt.setHours(this._fromDt.getHours() + step);
+            this._toDt.setHours(this._toDt.getHours() + step);
+        }
     }
 
     public clear(): void {
@@ -48,7 +77,7 @@ export class TimelineRange {
         var scaleHeight = sizeHeight/100;
 
         // Find a sensible number of minor ticks to render.
-        const targetTickCount = Math.floor(sizeWidth / 150);
+        const targetTickCount = Math.floor(sizeWidth / 120);
 
         // Calculate a sensible minor unit and step for the range.
         const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep(targetTickCount);
@@ -58,7 +87,7 @@ export class TimelineRange {
 
         console.log({ sizeWidth, sizeHeight });
 
-        const rangeContainerHeight = 40;
+        const rangeContainerHeight = 50;
         const rangeContainerWidth = sizeWidth;
 
         context.globalCompositeOperation = "source-over";
@@ -72,26 +101,22 @@ export class TimelineRange {
         const milliRenderWidth = sizeWidth / (this._toDt.getTime() - this._fromDt.getTime());
 
         for (const minorTickDate of minorTickDates) {
-            if (minorTickDate.getTime() < this._fromDt.getTime() || minorTickDate.getTime() >= this._toDt.getTime()) {
-                // This tick is outside the timeline range, don't draw it.
-                continue;
-            }
             const tickX = milliRenderWidth * (minorTickDate.getTime() - this._fromDt.getTime());
             const tickY = sizeHeight - rangeContainerHeight;
 
             // Start a new Path
             context.beginPath();
             context.moveTo(tickX, tickY);
-            context.lineTo(tickX, tickY + 26);
+            context.lineTo(tickX, tickY + 30);
 
             // Draw the Path
             context.stroke();
 
             // Draw the date label text
-            context.font = "10px Arial";
+            context.font = "12px Arial";
             context.fillStyle = "#8a8a8a";
-            context.fillText(minorTickDate.toLocaleDateString(), tickX + 3, tickY + 12);
-            context.fillText(minorTickDate.toLocaleTimeString(), tickX + 3, tickY + 26);
+            context.fillText(minorTickDate.toLocaleDateString(), tickX + 3, tickY + 14);
+            context.fillText(minorTickDate.toLocaleTimeString(), tickX + 3, tickY + 28);
         }
     }
 

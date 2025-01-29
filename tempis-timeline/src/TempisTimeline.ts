@@ -38,6 +38,9 @@ export class TempisTimeline {
            this._createCanvasContainerResizeObserver();
         }
 
+        // Create the canvas event handlers.
+        this._createCanvasEventHandlers();
+
         // Do our initial draw.
         this._draw();
     }
@@ -143,6 +146,16 @@ export class TempisTimeline {
     }
 
     /**
+     * Creates the canvas event handlers.
+     */
+    private _createCanvasEventHandlers() {
+        this._canvas.addEventListener("wheel", (evt) => {
+            this._range.moveRange("minute", evt.deltaY * 0.1);
+            this._draw();
+        });
+    }
+
+    /**
      * Resize the canvas to match the size of its parent element if the timeline is configured to be responsive.
      * @returns 
      */
@@ -166,16 +179,20 @@ export class TempisTimeline {
     }
 
     private _draw(): void {
+        // Grab the canvas context.
         var context = this._canvas.getContext('2d')!;
+
+        // Clear the canvas before doing a fresh draw.
+        context.clearRect(0, 0, this._canvas.width, this._canvas.height);
+
         context.fillStyle = "black";
         context.font = "12px Arial";
-        context.fillText(`Got ${this._itemGroupings.length} groups!!!!`, 0, 50);
         context.globalCompositeOperation = "destination-over";
-        context.fillStyle = "#00FFFF";
+        context.fillStyle = "#edebeb";
         context.fillRect(0,0,this._canvas.width,this._canvas.height);//for white background
         context.globalCompositeOperation = "source-over";
         context.lineWidth = 2;
-        context.strokeStyle="#FF0000";
+        context.strokeStyle="#000000";
         context.strokeRect(0, 0, this._canvas.width, this._canvas.height);//for white background
 
         // Draw the range.
