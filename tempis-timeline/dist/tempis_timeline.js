@@ -100,12 +100,13 @@ var tempis_timeline = (() => {
       this.setRange(new Date(0), new Date(41024448e5));
     }
     draw(context) {
-      const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep();
-      const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
       var sizeWidth = context.canvas.clientWidth;
       var sizeHeight = context.canvas.clientHeight;
       var scaleWidth = sizeWidth / 100;
       var scaleHeight = sizeHeight / 100;
+      const targetTickCount = Math.floor(sizeWidth / 150);
+      const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep(targetTickCount);
+      const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
       console.log({ sizeWidth, sizeHeight });
       const rangeContainerHeight = 40;
       const rangeContainerWidth = sizeWidth;

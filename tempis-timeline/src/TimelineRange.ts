@@ -41,16 +41,20 @@ export class TimelineRange {
      * @param context The canvas 2D context.
      */
     public draw(context: CanvasRenderingContext2D): void {
-        // Calculate a sensible minor unit and step for the range.
-        const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep();
-
-        // Get our minor tick dates.
-        const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
-
+        // Get the dimensions of the canvas
         var sizeWidth = context.canvas.clientWidth;
         var sizeHeight = context.canvas.clientHeight;
         var scaleWidth = sizeWidth/100;
         var scaleHeight = sizeHeight/100;
+
+        // Find a sensible number of minor ticks to render.
+        const targetTickCount = Math.floor(sizeWidth / 150);
+
+        // Calculate a sensible minor unit and step for the range.
+        const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep(targetTickCount);
+
+        // Get our minor tick dates.
+        const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
 
         console.log({ sizeWidth, sizeHeight });
 
