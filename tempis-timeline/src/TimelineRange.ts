@@ -89,6 +89,11 @@ export class TimelineRange {
         this.setRange(new Date(0), new Date(4102444800000));
     }
 
+    public calculateRequiredHeight(): number {
+        // TODO Work this out properly by determining how much height the minor/major unit labels take up.
+        return 50;
+    }
+
     /**
      * Draw the timeline range onto the canvas.
      * @param context The canvas 2D context.
@@ -110,18 +115,18 @@ export class TimelineRange {
         const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
 
         // Figure out our range container dimensions.
-        const rangeContainerHeight = 50;
-        const rangeContainerWidth = sizeWidth;
-
-        context.globalCompositeOperation = "source-over";
-        context.fillStyle = "#FFFFFF";
-        context.fillRect(0 , sizeHeight - rangeContainerHeight, rangeContainerWidth, rangeContainerHeight);
-        context.globalCompositeOperation = "source-over";
-        context.lineWidth = 2;
-        context.strokeStyle="#8a8a8a";
-        context.strokeRect(0, sizeHeight - rangeContainerHeight, rangeContainerWidth, rangeContainerHeight);
+        const rangeContainerHeight = this.calculateRequiredHeight();
+        const rangeContainerWidth = sizeWidth;    
 
         const milliRenderWidth = sizeWidth / (this._toDt.getTime() - this._fromDt.getTime());
+
+        // Draw the top line of the range bar.
+        context.lineWidth = 0.8;
+        context.strokeStyle="#8a8a8a";
+        context.beginPath();
+        context.moveTo(0, sizeHeight - rangeContainerHeight);
+        context.lineTo(rangeContainerWidth, sizeHeight - rangeContainerHeight);
+        context.stroke();
 
         for (const minorTickDate of minorTickDates) {
             const tickX = milliRenderWidth * (minorTickDate.getTime() - this._fromDt.getTime());
@@ -136,8 +141,9 @@ export class TimelineRange {
             context.stroke();
 
             // Draw the date label text
-            context.font = "12px Arial";
-            context.fillStyle = "#8a8a8a";
+            context.lineWidth = 0.5;
+            context.font = "14px Arial";
+            context.fillStyle = "#595959";
             context.fillText(minorTickDate.toLocaleDateString(), tickX + 3, tickY + 14);
             context.fillText(minorTickDate.toLocaleTimeString(), tickX + 3, tickY + 28);
         }

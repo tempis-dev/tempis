@@ -24,6 +24,21 @@ var tempis_timeline = (() => {
     TempisTimeline: () => TempisTimeline
   });
 
+  // src/TimelineDataView.ts
+  var TimelineDataView = class {
+    constructor() {
+      this._itemGroupings = [];
+    }
+    setGroupings(groupings) {
+      this._itemGroupings = groupings;
+    }
+    draw(context, maxHeight) {
+      context.fillStyle = "#F1F0F0";
+      context.fillRect(0, 0, context.canvas.width, maxHeight);
+    }
+  };
+  TimelineDataView._minimumHeight = 50;
+
   // src/Utilities.ts
   function parseDate(input) {
     if (!input) {
@@ -129,6 +144,9 @@ var tempis_timeline = (() => {
     clear() {
       this.setRange(new Date(0), new Date(41024448e5));
     }
+    calculateRequiredHeight() {
+      return 50;
+    }
     draw(context) {
       var sizeWidth = context.canvas.clientWidth;
       var sizeHeight = context.canvas.clientHeight;
@@ -137,16 +155,15 @@ var tempis_timeline = (() => {
       const targetTickCount = Math.floor(sizeWidth / 120);
       const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep(targetTickCount);
       const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
-      const rangeContainerHeight = 50;
+      const rangeContainerHeight = this.calculateRequiredHeight();
       const rangeContainerWidth = sizeWidth;
-      context.globalCompositeOperation = "source-over";
-      context.fillStyle = "#FFFFFF";
-      context.fillRect(0, sizeHeight - rangeContainerHeight, rangeContainerWidth, rangeContainerHeight);
-      context.globalCompositeOperation = "source-over";
-      context.lineWidth = 2;
-      context.strokeStyle = "#8a8a8a";
-      context.strokeRect(0, sizeHeight - rangeContainerHeight, rangeContainerWidth, rangeContainerHeight);
       const milliRenderWidth = sizeWidth / (this._toDt.getTime() - this._fromDt.getTime());
+      context.lineWidth = 0.8;
+      context.strokeStyle = "#8a8a8a";
+      context.beginPath();
+      context.moveTo(0, sizeHeight - rangeContainerHeight);
+      context.lineTo(rangeContainerWidth, sizeHeight - rangeContainerHeight);
+      context.stroke();
       for (const minorTickDate of minorTickDates) {
         const tickX = milliRenderWidth * (minorTickDate.getTime() - this._fromDt.getTime());
         const tickY = sizeHeight - rangeContainerHeight;
@@ -154,8 +171,9 @@ var tempis_timeline = (() => {
         context.moveTo(tickX, tickY);
         context.lineTo(tickX, tickY + 30);
         context.stroke();
-        context.font = "12px Arial";
-        context.fillStyle = "#8a8a8a";
+        context.lineWidth = 0.5;
+        context.font = "14px Arial";
+        context.fillStyle = "#595959";
         context.fillText(minorTickDate.toLocaleDateString(), tickX + 3, tickY + 14);
         context.fillText(minorTickDate.toLocaleTimeString(), tickX + 3, tickY + 28);
       }
@@ -244,6 +262,7 @@ var tempis_timeline = (() => {
       this._options = options;
       this._canvas = this._getCanvas(context);
       this._range = new TimelineRange(this._options.range);
+      this._dataView = new TimelineDataView();
       this._createItemGroupings();
       this._setRange();
       this._resizeCanvas();
@@ -283,6 +302,7 @@ var tempis_timeline = (() => {
       for (const [key, value] of Object.entries(itemGroupingMap)) {
         this._itemGroupings.push(new TimelineItemGrouping(key, value));
       }
+      this._dataView.setGroupings(this._itemGroupings);
     }
     _setRange() {
       if (this._itemGroupings.length === 0 || this._itemGroupings[0].items.length === 0) {
@@ -334,15 +354,8 @@ var tempis_timeline = (() => {
     _draw() {
       var context = this._canvas.getContext("2d");
       context.clearRect(0, 0, this._canvas.width, this._canvas.height);
-      context.fillStyle = "black";
-      context.font = "12px Arial";
-      context.globalCompositeOperation = "destination-over";
-      context.fillStyle = "#edebeb";
-      context.fillRect(0, 0, this._canvas.width, this._canvas.height);
-      context.globalCompositeOperation = "source-over";
-      context.lineWidth = 2;
-      context.strokeStyle = "#000000";
-      context.strokeRect(0, 0, this._canvas.width, this._canvas.height);
+      const maxDataViewHeight = this._canvas.height - this._range.calculateRequiredHeight();
+      this._dataView.draw(context, maxDataViewHeight);
       this._range.draw(context);
     }
   };

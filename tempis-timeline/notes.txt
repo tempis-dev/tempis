@@ -1,0 +1,7 @@
+We can copy one canvas to another, this may be good for tooltips and things.
+
+//grab the context from your destination canvas
+var destCtx = destinationCanvas.getContext('2d');
+    
+//call its drawImage() function passing it the source canvas directly
+destCtx.drawImage(sourceCanvas, 0, 0);

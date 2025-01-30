@@ -1,4 +1,5 @@
 import { TempisTimelineItem, TempisTimelineOptions } from "./TempisTimelineOptions";
+import { TimelineDataView } from "./TimelineDataView";
 import { TimelineItemGrouping } from "./TimelineItemGrouping";
 import { TimelineRange } from "./TimelineRange";
 
@@ -12,6 +13,9 @@ export class TempisTimeline {
     /** The timeline range. */
     private readonly _range: TimelineRange;
 
+    /** The timeline data view. */
+    private readonly _dataView: TimelineDataView;
+
     /** The canvas container resize observer. */
     private _canvasContainerResizeObserver: ResizeObserver | null = null;
 
@@ -23,6 +27,7 @@ export class TempisTimeline {
 
         this._canvas = this._getCanvas(context);
         this._range = new TimelineRange(this._options.range);
+        this._dataView = new TimelineDataView();
 
         // Create our initial item groupings.
         this._createItemGroupings();
@@ -95,6 +100,9 @@ export class TempisTimeline {
         for (const [key, value] of Object.entries(itemGroupingMap)) {
             this._itemGroupings.push(new TimelineItemGrouping(key, value));
         }
+
+        // Update our data view.
+        this._dataView.setGroupings(this._itemGroupings);
     }
 
     /**
@@ -186,19 +194,19 @@ export class TempisTimeline {
         // Clear the canvas before doing a fresh draw.
         context.clearRect(0, 0, this._canvas.width, this._canvas.height);
 
-        context.fillStyle = "black";
-        context.font = "12px Arial";
-        context.globalCompositeOperation = "destination-over";
-        context.fillStyle = "#edebeb";
-        context.fillRect(0,0,this._canvas.width,this._canvas.height);//for white background
-        context.globalCompositeOperation = "source-over";
-        context.lineWidth = 2;
-        context.strokeStyle="#000000";
-        context.strokeRect(0, 0, this._canvas.width, this._canvas.height);//for white background
+        // TODO If not responsive then the canvas MUST be already set to the expected width/height.
 
-        // TODO We shouldn't render a groups box to the left! We should split the view above the range bar and have the group label ON the group and have it sticky to the top. 
+        // Find the max height that we can render the data view before we need to have it scroll.
+        // This is determined by how much vertical space is taken up by the range bar.
+        // TODO This will eventually have to cope with the position of the range changing or the number of them (top and bottom range)
+        const maxDataViewHeight = this._canvas.height - this._range.calculateRequiredHeight();
+
+        // Draw the data view
+        this._dataView.draw(context, maxDataViewHeight);
 
         // Draw the range.
         this._range.draw(context);
+
+        // TODO Need to draw color grouping legend if using groups and colours.
     }
 }
