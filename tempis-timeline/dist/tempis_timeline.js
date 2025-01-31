@@ -32,9 +32,11 @@ var tempis_timeline = (() => {
     setGroupings(groupings) {
       this._itemGroupings = groupings;
     }
-    draw(context, maxHeight) {
+    draw(context, range) {
+      const maxDataViewHeight = context.canvas.height - range.calculateRequiredHeight();
+      const milliRenderWidth = context.canvas.width / (range.toDt.getTime() - range.fromDt.getTime());
       context.fillStyle = "#F1F0F0";
-      context.fillRect(0, 0, context.canvas.width, maxHeight);
+      context.fillRect(0, 0, context.canvas.width, maxDataViewHeight);
     }
   };
   TimelineDataView._minimumHeight = 50;
@@ -106,14 +108,23 @@ var tempis_timeline = (() => {
       this._fromDt = new Date();
       this._toDt = new Date(this._fromDt.getTime() + 31556952e4);
       this._minorTickUnitAndStep = { unit: "year", step: 2 };
-      this._minorTickUnitDates = [];
+      this._minorUnitTicks = [];
       this._canvas = canvas;
       this._options = options;
+    }
+    get fromDt() {
+      return this._fromDt;
+    }
+    get toDt() {
+      return this._toDt;
+    }
+    get minorTicks() {
+      return this._minorUnitTicks;
     }
     setRange(from, to) {
       this._fromDt = from;
       this._toDt = to;
-      this.calculateMinorUnitTickDates();
+      this.calculateMinorUnitTicks();
     }
     moveRange(unit, step) {
       if (unit === "millisecond") {
@@ -131,7 +142,7 @@ var tempis_timeline = (() => {
       } else {
         return;
       }
-      this.calculateMinorUnitTickDates();
+      this.calculateMinorUnitTicks();
     }
     zoomRange(unit, step) {
       if (unit === "millisecond") {
@@ -149,7 +160,7 @@ var tempis_timeline = (() => {
       } else {
         return;
       }
-      this.calculateMinorUnitTickDates();
+      this.calculateMinorUnitTicks();
     }
     clear() {
       this.setRange(new Date(0), new Date(41024448e5));
@@ -157,10 +168,17 @@ var tempis_timeline = (() => {
     calculateRequiredHeight() {
       return 50;
     }
-    calculateMinorUnitTickDates() {
+    calculateMinorUnitTicks() {
       const targetTickCount = Math.floor(this._canvas.width / 120);
       const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep(targetTickCount);
-      this._minorTickUnitDates = this._getMinorTickDates(sensibleUnitAndStep);
+      const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
+      const milliRenderWidth = this._canvas.width / (this._toDt.getTime() - this._fromDt.getTime());
+      this._minorUnitTicks = minorTickDates.map((tickDate) => {
+        return {
+          date: tickDate,
+          xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
+        };
+      });
     }
     draw(context) {
       var sizeWidth = context.canvas.clientWidth;
@@ -174,18 +192,17 @@ var tempis_timeline = (() => {
       context.moveTo(0, sizeHeight - rangeContainerHeight);
       context.lineTo(rangeContainerWidth, sizeHeight - rangeContainerHeight);
       context.stroke();
-      for (const minorTickDate of this._minorTickUnitDates) {
-        const tickX = milliRenderWidth * (minorTickDate.getTime() - this._fromDt.getTime());
+      for (const { date, xPosition } of this._minorUnitTicks) {
         const tickY = sizeHeight - rangeContainerHeight;
         context.beginPath();
-        context.moveTo(tickX, tickY);
-        context.lineTo(tickX, tickY + 30);
+        context.moveTo(xPosition, tickY);
+        context.lineTo(xPosition, tickY + 30);
         context.stroke();
         context.lineWidth = 0.5;
         context.font = "14px Arial";
         context.fillStyle = "#595959";
-        context.fillText(minorTickDate.toLocaleDateString(), tickX + 3, tickY + 14);
-        context.fillText(minorTickDate.toLocaleTimeString(), tickX + 3, tickY + 28);
+        context.fillText(date.toLocaleDateString(), xPosition + 3, tickY + 14);
+        context.fillText(date.toLocaleTimeString(), xPosition + 3, tickY + 28);
       }
     }
     _findSensibleMinorUnitAndStep(targetMinorTickCount = 5) {
@@ -360,13 +377,13 @@ var tempis_timeline = (() => {
       }
       this._canvas.width = canvasContainerElement.getBoundingClientRect().width;
       this._canvas.height = canvasContainerElement.getBoundingClientRect().height;
-      this._range.calculateMinorUnitTickDates();
+      this._range.calculateMinorUnitTicks();
     }
     _draw() {
       var context = this._canvas.getContext("2d");
       context.clearRect(0, 0, this._canvas.width, this._canvas.height);
       const maxDataViewHeight = this._canvas.height - this._range.calculateRequiredHeight();
-      this._dataView.draw(context, maxDataViewHeight);
+      this._dataView.draw(context, this._range);
       this._range.draw(context);
     }
   };

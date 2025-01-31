@@ -4,6 +4,8 @@ export type Unit = 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'week'
 
 export type UnitAndStep = { unit: Unit, step: number };
 
+export type RangeTick = { xPosition: number, date: Date };
+
 export class TimelineRange {
     /** The timeline canvas. */
     private readonly _canvas: HTMLCanvasElement;
@@ -27,7 +29,7 @@ export class TimelineRange {
     private _minorTickUnitAndStep: UnitAndStep = { unit: 'year', step: 2 };
 
     /** The calculated minor unit tick dates fro the current range and canvas width. */
-    private _minorTickUnitDates: Date[] = [];
+    private _minorUnitTicks: RangeTick[] = [];
 
     /**
      * Creates a new instance of the TimelineRange class.
@@ -40,6 +42,27 @@ export class TimelineRange {
     }
 
     /**
+     * Gets the fromDt of the range. DO NOT MODIFY!
+     */
+    public get fromDt(): Date {
+        return this._fromDt;
+    }
+
+    /**
+     * Gets the toDt of the range. DO NOT MODIFY!
+     */
+    public get toDt(): Date {
+        return this._toDt;
+    }
+
+    /**
+     * Gets the calculated minor unit ticks for the current range and canvas width.
+     */
+    public get minorTicks(): RangeTick[] {
+        return this._minorUnitTicks;
+    }
+
+    /**
      * Sets the from and to date value of the range.
      * @param from 
      * @param to 
@@ -49,7 +72,7 @@ export class TimelineRange {
         this._toDt = to;
 
         // Our range has changed so we will need to recalculate our minor unit ticks.
-        this.calculateMinorUnitTickDates();
+        this.calculateMinorUnitTicks();
     }
 
     /**
@@ -76,7 +99,7 @@ export class TimelineRange {
         }
 
         // Our range has changed so we will need to recalculate our minor unit ticks.
-        this.calculateMinorUnitTickDates();
+        this.calculateMinorUnitTicks();
     }
 
     /**
@@ -103,7 +126,7 @@ export class TimelineRange {
         }
 
         // Our range has changed so we will need to recalculate our minor unit ticks.
-        this.calculateMinorUnitTickDates();
+        this.calculateMinorUnitTicks();
     }
 
     public clear(): void {
@@ -116,7 +139,7 @@ export class TimelineRange {
         return 50;
     }
     
-    public calculateMinorUnitTickDates(): void {
+    public calculateMinorUnitTicks(): void {
         // Find a sensible number of minor ticks to render.
         const targetTickCount = Math.floor(this._canvas.width / 120);
 
@@ -124,7 +147,18 @@ export class TimelineRange {
         const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep(targetTickCount);
 
         // Get our minor unit tick dates.
-        this._minorTickUnitDates = this._getMinorTickDates(sensibleUnitAndStep);
+        const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
+
+        // Calculate the width of one millisecond as it would be rendered on the canvas.
+        const milliRenderWidth = this._canvas.width / (this._toDt.getTime() - this._fromDt.getTime());
+
+        // Convert our dates into tick objects representing the date and the x position of that date on the canvas.
+        this._minorUnitTicks = minorTickDates.map((tickDate) => {
+            return {
+                date: tickDate,
+                xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
+            }
+        });
     }
 
     /**
@@ -140,6 +174,7 @@ export class TimelineRange {
         const rangeContainerHeight = this.calculateRequiredHeight();
         const rangeContainerWidth = sizeWidth;    
 
+        // Calculate the width of one millisecond as it would be rendered on the canvas.
         const milliRenderWidth = sizeWidth / (this._toDt.getTime() - this._fromDt.getTime());
 
         // Draw the top line of the range bar.
@@ -150,14 +185,13 @@ export class TimelineRange {
         context.lineTo(rangeContainerWidth, sizeHeight - rangeContainerHeight);
         context.stroke();
 
-        for (const minorTickDate of this._minorTickUnitDates) {
-            const tickX = milliRenderWidth * (minorTickDate.getTime() - this._fromDt.getTime());
+        for (const { date, xPosition } of this._minorUnitTicks) {
             const tickY = sizeHeight - rangeContainerHeight;
 
             // Start a new Path
             context.beginPath();
-            context.moveTo(tickX, tickY);
-            context.lineTo(tickX, tickY + 30);
+            context.moveTo(xPosition, tickY);
+            context.lineTo(xPosition, tickY + 30);
 
             // Draw the Path
             context.stroke();
@@ -166,8 +200,8 @@ export class TimelineRange {
             context.lineWidth = 0.5;
             context.font = "14px Arial";
             context.fillStyle = "#595959";
-            context.fillText(minorTickDate.toLocaleDateString(), tickX + 3, tickY + 14);
-            context.fillText(minorTickDate.toLocaleTimeString(), tickX + 3, tickY + 28);
+            context.fillText(date.toLocaleDateString(), xPosition + 3, tickY + 14);
+            context.fillText(date.toLocaleTimeString(), xPosition + 3, tickY + 28);
         }
     }
 
@@ -212,7 +246,7 @@ export class TimelineRange {
      * @param unitAndStep 
      * @returns 
      */
-    private _getMinorTickDates(unitAndStep: { unit: Unit, step: number }): any {
+    private _getMinorTickDates(unitAndStep: { unit: Unit, step: number }): Date[] {
         let currentDate;
 
         // We need to strip unit values below the tick unit
@@ -249,7 +283,7 @@ export class TimelineRange {
             throw new Error("unknown unit!");
         }
 
-        const minorTickDates = [currentDate];
+        const minorTickDates: Date[] = [currentDate];
 
         // This should give an array of tick dates with the first and last being outside the from/to range (wont be rendered)
         while (currentDate.getTime() < this._toDt.getTime()) {

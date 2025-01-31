@@ -187,7 +187,7 @@ export class TempisTimeline {
         this._canvas.height = canvasContainerElement.getBoundingClientRect().height;
 
         // Now that the canvas has resized we will need to recalculate the ticks for our range.
-        this._range.calculateMinorUnitTickDates();
+        this._range.calculateMinorUnitTicks();
     }
 
     private _draw(): void {
@@ -205,7 +205,7 @@ export class TempisTimeline {
         const maxDataViewHeight = this._canvas.height - this._range.calculateRequiredHeight();
 
         // Draw the data view
-        this._dataView.draw(context, maxDataViewHeight);
+        this._dataView.draw(context, this._range);
 
         // Draw the range.
         this._range.draw(context);
