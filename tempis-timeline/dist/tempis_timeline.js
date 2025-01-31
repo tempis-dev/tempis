@@ -102,14 +102,18 @@ var tempis_timeline = (() => {
 
   // src/TimelineRange.ts
   var TimelineRange = class {
-    constructor(options = {}) {
-      this._fromDt = new Date(0);
-      this._toDt = new Date(41024448e5);
+    constructor(canvas, options = {}) {
+      this._fromDt = new Date();
+      this._toDt = new Date(this._fromDt.getTime() + 31556952e4);
+      this._minorTickUnitAndStep = { unit: "year", step: 2 };
+      this._minorTickUnitDates = [];
+      this._canvas = canvas;
       this._options = options;
     }
     setRange(from, to) {
       this._fromDt = from;
       this._toDt = to;
+      this.calculateMinorUnitTickDates();
     }
     moveRange(unit, step) {
       if (unit === "millisecond") {
@@ -124,7 +128,10 @@ var tempis_timeline = (() => {
       } else if (unit === "hour") {
         this._fromDt.setHours(this._fromDt.getHours() + step);
         this._toDt.setHours(this._toDt.getHours() + step);
+      } else {
+        return;
       }
+      this.calculateMinorUnitTickDates();
     }
     zoomRange(unit, step) {
       if (unit === "millisecond") {
@@ -139,7 +146,10 @@ var tempis_timeline = (() => {
       } else if (unit === "hour") {
         this._fromDt.setHours(this._fromDt.getHours() - step);
         this._toDt.setHours(this._toDt.getHours() + step);
+      } else {
+        return;
       }
+      this.calculateMinorUnitTickDates();
     }
     clear() {
       this.setRange(new Date(0), new Date(41024448e5));
@@ -147,14 +157,14 @@ var tempis_timeline = (() => {
     calculateRequiredHeight() {
       return 50;
     }
+    calculateMinorUnitTickDates() {
+      const targetTickCount = Math.floor(this._canvas.width / 120);
+      const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep(targetTickCount);
+      this._minorTickUnitDates = this._getMinorTickDates(sensibleUnitAndStep);
+    }
     draw(context) {
       var sizeWidth = context.canvas.clientWidth;
       var sizeHeight = context.canvas.clientHeight;
-      var scaleWidth = sizeWidth / 100;
-      var scaleHeight = sizeHeight / 100;
-      const targetTickCount = Math.floor(sizeWidth / 120);
-      const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep(targetTickCount);
-      const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
       const rangeContainerHeight = this.calculateRequiredHeight();
       const rangeContainerWidth = sizeWidth;
       const milliRenderWidth = sizeWidth / (this._toDt.getTime() - this._fromDt.getTime());
@@ -164,7 +174,7 @@ var tempis_timeline = (() => {
       context.moveTo(0, sizeHeight - rangeContainerHeight);
       context.lineTo(rangeContainerWidth, sizeHeight - rangeContainerHeight);
       context.stroke();
-      for (const minorTickDate of minorTickDates) {
+      for (const minorTickDate of this._minorTickUnitDates) {
         const tickX = milliRenderWidth * (minorTickDate.getTime() - this._fromDt.getTime());
         const tickY = sizeHeight - rangeContainerHeight;
         context.beginPath();
@@ -261,11 +271,11 @@ var tempis_timeline = (() => {
       this._itemGroupings = [];
       this._options = options;
       this._canvas = this._getCanvas(context);
-      this._range = new TimelineRange(this._options.range);
+      this._range = new TimelineRange(this._canvas, this._options.range);
       this._dataView = new TimelineDataView();
       this._createItemGroupings();
-      this._setRange();
       this._resizeCanvas();
+      this._setRange();
       if (options.responsive !== false) {
         this._createCanvasContainerResizeObserver();
       }
@@ -350,6 +360,7 @@ var tempis_timeline = (() => {
       }
       this._canvas.width = canvasContainerElement.getBoundingClientRect().width;
       this._canvas.height = canvasContainerElement.getBoundingClientRect().height;
+      this._range.calculateMinorUnitTickDates();
     }
     _draw() {
       var context = this._canvas.getContext("2d");

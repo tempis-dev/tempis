@@ -26,17 +26,17 @@ export class TempisTimeline {
         this._options = options;
 
         this._canvas = this._getCanvas(context);
-        this._range = new TimelineRange(this._options.range);
+        this._range = new TimelineRange(this._canvas, this._options.range);
         this._dataView = new TimelineDataView();
 
         // Create our initial item groupings.
         this._createItemGroupings();
 
-        // Set the initial timeline range.
-        this._setRange();
-
         // Do our initial canvas resize.
         this._resizeCanvas();
+
+        // Set the initial timeline range.
+        this._setRange();
 
         // We should set up a resize observer to keep our canvas dimensions inline with that of its parent element if the timeline is responsive.
         if (options.responsive !== false) {
@@ -185,6 +185,9 @@ export class TempisTimeline {
         // Update the size of the canvas to match the size of it's container.
         this._canvas.width = canvasContainerElement.getBoundingClientRect().width;
         this._canvas.height = canvasContainerElement.getBoundingClientRect().height;
+
+        // Now that the canvas has resized we will need to recalculate the ticks for our range.
+        this._range.calculateMinorUnitTickDates();
     }
 
     private _draw(): void {
