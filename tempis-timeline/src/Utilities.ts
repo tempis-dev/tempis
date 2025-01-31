@@ -31,3 +31,20 @@ export function parseDate(input: string | number | Date): Date {
 
     throw new Error(`Cannot parse input '${input}' as date`);
 }
+
+/**
+ * Clamps the value to the min and max range.
+ * @param value 
+ * @param min 
+ * @param max 
+ * @returns 
+ */
+export function clamp(value: number, min: number, max: number): number {
+    if (value < min) {
+        return min;
+    } else if (value > max) {
+        return max;
+    }
+
+    return value;
+}

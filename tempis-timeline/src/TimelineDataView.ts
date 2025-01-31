@@ -30,7 +30,7 @@ export class TimelineDataView {
         const height = context.canvas.height - range.calculateRequiredHeight();
 
         // Draw a grey background for the entire dataview.
-        context.fillStyle = "#F1F0F0";
+        context.fillStyle = "#F6F5F5";
         context.fillRect(0, 0, context.canvas.width, height);
 
         // TODO Draw minor unit tick bars IF configured.

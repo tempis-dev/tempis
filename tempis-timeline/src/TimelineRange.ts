@@ -1,6 +1,7 @@
 import { TempisTimelineRangeOptions } from "./TempisTimelineOptions";
+import { clamp } from "./Utilities";
 
-export type Unit = 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
+export type Unit = 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'month' | 'year';
 
 export type UnitAndStep = { unit: Unit, step: number };
 
@@ -93,9 +94,15 @@ export class TimelineRange {
         } else if (unit === "hour") {
             this._fromDt.setHours(this._fromDt.getHours() + step);
             this._toDt.setHours(this._toDt.getHours() + step);
-        } else {
-            // This is a unit that we cannot move.
-            return;
+        } else if (unit === "day") {
+            this._fromDt.setDate(this._fromDt.getDate() + step);
+            this._toDt.setDate(this._toDt.getDate() + step);
+        } else if (unit === "month") {
+            this._fromDt.setMonth(this._fromDt.getMonth() + step);
+            this._toDt.setMonth(this._toDt.getMonth() + step);
+        } else if (unit === "year") {
+            this._fromDt.setFullYear(this._fromDt.getFullYear() + step);
+            this._toDt.setFullYear(this._toDt.getFullYear() + step);
         }
 
         // Our range has changed so we will need to recalculate our minor unit ticks.
@@ -104,26 +111,14 @@ export class TimelineRange {
 
     /**
      * Zooms the from and to date value of the range.
-     * @param unit 
-     * @param step 
+     * @param unit amount
      */
-    public zoomRange(unit: Unit, step: number): void {
-        if (unit === "millisecond") {
-            this._fromDt.setMilliseconds(this._fromDt.getMilliseconds() - step);
-            this._toDt.setMilliseconds(this._toDt.getMilliseconds() + step);
-        } else if (unit === "second") {
-            this._fromDt.setSeconds(this._fromDt.getSeconds() - step);
-            this._toDt.setSeconds(this._toDt.getSeconds() + step);
-        } else if (unit === "minute") {
-            this._fromDt.setMinutes(this._fromDt.getMinutes() - step);
-            this._toDt.setMinutes(this._toDt.getMinutes() + step);
-        } else if (unit === "hour") {
-            this._fromDt.setHours(this._fromDt.getHours() - step);
-            this._toDt.setHours(this._toDt.getHours() + step);
-        } else {
-            // This is a unit that we cannot zoom.
-            return;
-        }
+    public zoomRange(amount: number): void {
+        // Get the millis difference between the two dates.
+        const zoomValue = (this._toDt.getTime() - this._fromDt.getTime()) * (clamp(amount, -1, 1) * 0.1);
+
+        this._fromDt.setMilliseconds(this._fromDt.getMilliseconds() - zoomValue);
+        this._toDt.setMilliseconds(this._toDt.getMilliseconds() + zoomValue);
 
         // Our range has changed so we will need to recalculate our minor unit ticks.
         this.calculateMinorUnitTicks();
@@ -144,10 +139,10 @@ export class TimelineRange {
         const targetTickCount = Math.floor(this._canvas.width / 120);
 
         // Calculate a sensible minor unit and step for the range.
-        const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep(targetTickCount);
+        this._minorTickUnitAndStep = this._findSensibleMinorUnitAndStep(targetTickCount);
 
         // Get our minor unit tick dates.
-        const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
+        const minorTickDates = this._getMinorTickDates(this._minorTickUnitAndStep);
 
         // Calculate the width of one millisecond as it would be rendered on the canvas.
         const milliRenderWidth = this._canvas.width / (this._toDt.getTime() - this._fromDt.getTime());
@@ -220,7 +215,6 @@ export class TimelineRange {
             { unit: 'minute', factor: 60 * 1000 },
             { unit: 'hour', factor: 60 * 60 * 1000 },
             { unit: 'day', factor: 24 * 60 * 60 * 1000 },
-            { unit: 'week', factor: 7 * 24 * 60 * 60 * 1000 },
             { unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 }, // Approximate a month.
             { unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 }, // Approximate a year.
         ];
@@ -256,31 +250,22 @@ export class TimelineRange {
         else if (unitAndStep.unit === "month") {
             currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth());
         }
-        else if (unitAndStep.unit === "week") {
-            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth());
-            //currentDate.setWeek(fromDt.getWeek());
-        }
         else if (unitAndStep.unit === "day") {
             currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate());
-            //currentDate.setWeek(fromDt.getWeek());
         }
         else if (unitAndStep.unit === "hour") {
             currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours());
-            //currentDate.setWeek(fromDt.getWeek());
         }
         else if (unitAndStep.unit === "minute") {
             currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes());
-            //currentDate.setWeek(fromDt.getWeek());
         }
         else if (unitAndStep.unit === "second") {
             currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds());
-            //currentDate.setWeek(fromDt.getWeek());
         }
         else if (unitAndStep.unit === "millisecond") {
             currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds(), this._fromDt.getMilliseconds());
-            //currentDate.setWeek(fromDt.getWeek());
         } else {
-            throw new Error("unknown unit!");
+            throw new Error(`unknown unit: ${unitAndStep.unit}`);
         }
 
         const minorTickDates: Date[] = [currentDate];
@@ -289,29 +274,37 @@ export class TimelineRange {
         while (currentDate.getTime() < this._toDt.getTime()) {
             currentDate = new Date(currentDate.getTime());
 
-            if (unitAndStep.unit === "year") {
-                currentDate.setFullYear(currentDate.getFullYear() + unitAndStep.step);
-            }
-            if (unitAndStep.unit === "month") {
-                currentDate.setMonth(currentDate.getMonth() + unitAndStep.step);
-            }
-            if (unitAndStep.unit === "week") {
-                // TODO Figure out what to do here.
-            }
-            if (unitAndStep.unit === "day") {
-                currentDate.setDate(currentDate.getDate() + unitAndStep.step);
-            }
-            if (unitAndStep.unit === "hour") {
-                currentDate.setHours(currentDate.getHours() + unitAndStep.step);
-            }
-            if (unitAndStep.unit === "minute") {
-                currentDate.setMinutes(currentDate.getMinutes() + unitAndStep.step);
-            }
-            if (unitAndStep.unit === "second") {
-                currentDate.setSeconds(currentDate.getSeconds() + unitAndStep.step);
-            }
-            if (unitAndStep.unit === "millisecond") {
-                currentDate.setMilliseconds(currentDate.getMilliseconds() + unitAndStep.step);
+            switch (unitAndStep.unit) {
+                case "year":
+                    currentDate.setFullYear(currentDate.getFullYear() + unitAndStep.step);
+                    break;
+                
+                case "month":
+                    currentDate.setMonth(currentDate.getMonth() + unitAndStep.step);
+                    break;
+
+                case "day":
+                    currentDate.setDate(currentDate.getDate() + unitAndStep.step);
+                    break;
+
+                case "hour":
+                    currentDate.setHours(currentDate.getHours() + unitAndStep.step);
+                    break;
+
+                case "minute":
+                    currentDate.setMinutes(currentDate.getMinutes() + unitAndStep.step);
+                    break;
+
+                case "second":
+                    currentDate.setSeconds(currentDate.getSeconds() + unitAndStep.step);
+                    break;
+
+                case "millisecond":
+                    currentDate.setMilliseconds(currentDate.getMilliseconds() + unitAndStep.step);
+                    break;
+
+                default:
+                    throw new Error(`unknown unit: ${unitAndStep.unit}`);
             }
 
             minorTickDates.push(currentDate);

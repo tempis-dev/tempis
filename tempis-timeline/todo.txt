@@ -1,2 +1,3 @@
 - Create TimelineItemGrouping and populate with user-defined items.
 - Create TimelineDateAxis based on min-max date range which works out sensible units and steps.
+- Add support for weeks, nothing fancy, just do the days logic * 7

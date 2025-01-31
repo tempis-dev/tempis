@@ -157,11 +157,27 @@ export class TempisTimeline {
      * Creates the canvas event handlers.
      */
     private _createCanvasEventHandlers() {
+
+        const getMousePos = (evt: MouseEvent) => {
+            var rect = this._canvas.getBoundingClientRect();
+            return {
+                x: (evt.clientX - rect.left) / (rect.right - rect.left) * this._canvas.width,
+                y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.height
+            };
+        }
+
         this._canvas.addEventListener("wheel", (evt) => {
             // this._range.moveRange("minute", evt.deltaY * 0.1);
-            this._range.zoomRange("minute", evt.deltaY * 0.5);
+            this._range.zoomRange(evt.deltaY);
             this._draw();
         });
+
+        this._canvas.addEventListener('mousemove', (evt) => {
+            var pos = getMousePos(evt);
+            var context = this._canvas.getContext('2d')!;
+            context.fillStyle = "#000000";
+            context.fillRect(pos.x, pos.y, 2, 2);
+        }, false);
     }
 
     /**

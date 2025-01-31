@@ -34,7 +34,7 @@ var tempis_timeline = (() => {
     }
     draw(context, range) {
       const height = context.canvas.height - range.calculateRequiredHeight();
-      context.fillStyle = "#F1F0F0";
+      context.fillStyle = "#F6F5F5";
       context.fillRect(0, 0, context.canvas.width, height);
       this._drawMinorUnitBars(context, range.minorTicks, height);
     }
@@ -75,6 +75,14 @@ var tempis_timeline = (() => {
       return new Date(`${input}`);
     }
     throw new Error(`Cannot parse input '${input}' as date`);
+  }
+  function clamp(value, min, max) {
+    if (value < min) {
+      return min;
+    } else if (value > max) {
+      return max;
+    }
+    return value;
   }
 
   // src/TimelineItem.ts
@@ -151,27 +159,22 @@ var tempis_timeline = (() => {
       } else if (unit === "hour") {
         this._fromDt.setHours(this._fromDt.getHours() + step);
         this._toDt.setHours(this._toDt.getHours() + step);
-      } else {
-        return;
+      } else if (unit === "day") {
+        this._fromDt.setDate(this._fromDt.getDate() + step);
+        this._toDt.setDate(this._toDt.getDate() + step);
+      } else if (unit === "month") {
+        this._fromDt.setMonth(this._fromDt.getMonth() + step);
+        this._toDt.setMonth(this._toDt.getMonth() + step);
+      } else if (unit === "year") {
+        this._fromDt.setFullYear(this._fromDt.getFullYear() + step);
+        this._toDt.setFullYear(this._toDt.getFullYear() + step);
       }
       this.calculateMinorUnitTicks();
     }
-    zoomRange(unit, step) {
-      if (unit === "millisecond") {
-        this._fromDt.setMilliseconds(this._fromDt.getMilliseconds() - step);
-        this._toDt.setMilliseconds(this._toDt.getMilliseconds() + step);
-      } else if (unit === "second") {
-        this._fromDt.setSeconds(this._fromDt.getSeconds() - step);
-        this._toDt.setSeconds(this._toDt.getSeconds() + step);
-      } else if (unit === "minute") {
-        this._fromDt.setMinutes(this._fromDt.getMinutes() - step);
-        this._toDt.setMinutes(this._toDt.getMinutes() + step);
-      } else if (unit === "hour") {
-        this._fromDt.setHours(this._fromDt.getHours() - step);
-        this._toDt.setHours(this._toDt.getHours() + step);
-      } else {
-        return;
-      }
+    zoomRange(amount) {
+      const zoomValue = (this._toDt.getTime() - this._fromDt.getTime()) * (clamp(amount, -1, 1) * 0.1);
+      this._fromDt.setMilliseconds(this._fromDt.getMilliseconds() - zoomValue);
+      this._toDt.setMilliseconds(this._toDt.getMilliseconds() + zoomValue);
       this.calculateMinorUnitTicks();
     }
     clear() {
@@ -182,8 +185,8 @@ var tempis_timeline = (() => {
     }
     calculateMinorUnitTicks() {
       const targetTickCount = Math.floor(this._canvas.width / 120);
-      const sensibleUnitAndStep = this._findSensibleMinorUnitAndStep(targetTickCount);
-      const minorTickDates = this._getMinorTickDates(sensibleUnitAndStep);
+      this._minorTickUnitAndStep = this._findSensibleMinorUnitAndStep(targetTickCount);
+      const minorTickDates = this._getMinorTickDates(this._minorTickUnitAndStep);
       const milliRenderWidth = this._canvas.width / (this._toDt.getTime() - this._fromDt.getTime());
       this._minorUnitTicks = minorTickDates.map((tickDate) => {
         return {
@@ -225,7 +228,6 @@ var tempis_timeline = (() => {
         { unit: "minute", factor: 60 * 1e3 },
         { unit: "hour", factor: 60 * 60 * 1e3 },
         { unit: "day", factor: 24 * 60 * 60 * 1e3 },
-        { unit: "week", factor: 7 * 24 * 60 * 60 * 1e3 },
         { unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 },
         { unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 }
       ];
@@ -246,8 +248,6 @@ var tempis_timeline = (() => {
         currentDate = new Date(this._fromDt.getFullYear(), 0);
       } else if (unitAndStep.unit === "month") {
         currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth());
-      } else if (unitAndStep.unit === "week") {
-        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth());
       } else if (unitAndStep.unit === "day") {
         currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate());
       } else if (unitAndStep.unit === "hour") {
@@ -259,33 +259,35 @@ var tempis_timeline = (() => {
       } else if (unitAndStep.unit === "millisecond") {
         currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds(), this._fromDt.getMilliseconds());
       } else {
-        throw new Error("unknown unit!");
+        throw new Error(`unknown unit: ${unitAndStep.unit}`);
       }
       const minorTickDates = [currentDate];
       while (currentDate.getTime() < this._toDt.getTime()) {
         currentDate = new Date(currentDate.getTime());
-        if (unitAndStep.unit === "year") {
-          currentDate.setFullYear(currentDate.getFullYear() + unitAndStep.step);
-        }
-        if (unitAndStep.unit === "month") {
-          currentDate.setMonth(currentDate.getMonth() + unitAndStep.step);
-        }
-        if (unitAndStep.unit === "week") {
-        }
-        if (unitAndStep.unit === "day") {
-          currentDate.setDate(currentDate.getDate() + unitAndStep.step);
-        }
-        if (unitAndStep.unit === "hour") {
-          currentDate.setHours(currentDate.getHours() + unitAndStep.step);
-        }
-        if (unitAndStep.unit === "minute") {
-          currentDate.setMinutes(currentDate.getMinutes() + unitAndStep.step);
-        }
-        if (unitAndStep.unit === "second") {
-          currentDate.setSeconds(currentDate.getSeconds() + unitAndStep.step);
-        }
-        if (unitAndStep.unit === "millisecond") {
-          currentDate.setMilliseconds(currentDate.getMilliseconds() + unitAndStep.step);
+        switch (unitAndStep.unit) {
+          case "year":
+            currentDate.setFullYear(currentDate.getFullYear() + unitAndStep.step);
+            break;
+          case "month":
+            currentDate.setMonth(currentDate.getMonth() + unitAndStep.step);
+            break;
+          case "day":
+            currentDate.setDate(currentDate.getDate() + unitAndStep.step);
+            break;
+          case "hour":
+            currentDate.setHours(currentDate.getHours() + unitAndStep.step);
+            break;
+          case "minute":
+            currentDate.setMinutes(currentDate.getMinutes() + unitAndStep.step);
+            break;
+          case "second":
+            currentDate.setSeconds(currentDate.getSeconds() + unitAndStep.step);
+            break;
+          case "millisecond":
+            currentDate.setMilliseconds(currentDate.getMilliseconds() + unitAndStep.step);
+            break;
+          default:
+            throw new Error(`unknown unit: ${unitAndStep.unit}`);
         }
         minorTickDates.push(currentDate);
       }
@@ -374,10 +376,23 @@ var tempis_timeline = (() => {
       this._canvasContainerResizeObserver.observe(canvasContainerElement);
     }
     _createCanvasEventHandlers() {
+      const getMousePos = (evt) => {
+        var rect = this._canvas.getBoundingClientRect();
+        return {
+          x: (evt.clientX - rect.left) / (rect.right - rect.left) * this._canvas.width,
+          y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.height
+        };
+      };
       this._canvas.addEventListener("wheel", (evt) => {
-        this._range.zoomRange("minute", evt.deltaY * 0.5);
+        this._range.zoomRange(evt.deltaY);
         this._draw();
       });
+      this._canvas.addEventListener("mousemove", (evt) => {
+        var pos = getMousePos(evt);
+        var context = this._canvas.getContext("2d");
+        context.fillStyle = "#000000";
+        context.fillRect(pos.x, pos.y, 2, 2);
+      }, false);
     }
     _resizeCanvas() {
       if (this._options.responsive === false) {
