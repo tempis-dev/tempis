@@ -1,5 +1,5 @@
 import { TimelineItemGrouping } from "./TimelineItemGrouping";
-import { TimelineRange } from "./TimelineRange";
+import { RangeTick, TimelineRange } from "./TimelineRange";
 
 export class TimelineDataView {
     /** The minimum height of the data view. */
@@ -27,15 +27,34 @@ export class TimelineDataView {
         // Find the max height that we can render the data view before we need to have it scroll.
         // This is determined by how much vertical space is taken up by the range bar.
         // TODO This will eventually have to cope with the position of the range changing or the number of them (top and bottom range)
-        const maxDataViewHeight = context.canvas.height - range.calculateRequiredHeight();
-
-        // Calculate the width of one millisecond as it would be rendered on the canvas.
-        const milliRenderWidth = context.canvas.width / (range.toDt.getTime() - range.fromDt.getTime());
+        const height = context.canvas.height - range.calculateRequiredHeight();
 
         // Draw a grey background for the entire dataview.
         context.fillStyle = "#F1F0F0";
-        context.fillRect(0, 0, context.canvas.width, maxDataViewHeight);
+        context.fillRect(0, 0, context.canvas.width, height);
 
+        // TODO Draw minor unit tick bars IF configured.
+        this._drawMinorUnitBars(context, range.minorTicks, height);
+    }
 
+    /**
+     * Draw a vertical bar for every minor unit tick.
+     * @param context
+     * @param rangeMinorTicks 
+     * @param height 
+     */
+    private _drawMinorUnitBars(context: CanvasRenderingContext2D, rangeMinorTicks: RangeTick[], height: number): void {
+        context.lineWidth = 1;
+        context.strokeStyle = "#c2c2c2";
+        context.setLineDash([3, 3]); /* dashes are 5px and spaces are 3px */
+        context.beginPath();
+
+        for (const { xPosition } of rangeMinorTicks) {
+            context.moveTo(xPosition, 0);
+            context.lineTo(xPosition, height);
+        }
+
+        context.stroke();
+        context.setLineDash([]);
     }
 }

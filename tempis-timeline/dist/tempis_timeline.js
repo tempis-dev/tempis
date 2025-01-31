@@ -33,10 +33,22 @@ var tempis_timeline = (() => {
       this._itemGroupings = groupings;
     }
     draw(context, range) {
-      const maxDataViewHeight = context.canvas.height - range.calculateRequiredHeight();
-      const milliRenderWidth = context.canvas.width / (range.toDt.getTime() - range.fromDt.getTime());
+      const height = context.canvas.height - range.calculateRequiredHeight();
       context.fillStyle = "#F1F0F0";
-      context.fillRect(0, 0, context.canvas.width, maxDataViewHeight);
+      context.fillRect(0, 0, context.canvas.width, height);
+      this._drawMinorUnitBars(context, range.minorTicks, height);
+    }
+    _drawMinorUnitBars(context, rangeMinorTicks, height) {
+      context.lineWidth = 1;
+      context.strokeStyle = "#c2c2c2";
+      context.setLineDash([3, 3]);
+      context.beginPath();
+      for (const { xPosition } of rangeMinorTicks) {
+        context.moveTo(xPosition, 0);
+        context.lineTo(xPosition, height);
+      }
+      context.stroke();
+      context.setLineDash([]);
     }
   };
   TimelineDataView._minimumHeight = 50;
