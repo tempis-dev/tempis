@@ -128,7 +128,9 @@ var tempis_timeline = (() => {
       this._fromDt = new Date();
       this._toDt = new Date(this._fromDt.getTime() + 31556952e4);
       this._minorTickUnitAndStep = { unit: "year", step: 2 };
+      this._majorTickUnitAndStep = { unit: "year", step: 10 };
       this._minorUnitTicks = [];
+      this._majorUnitTicks = [];
       this._canvas = canvas;
       this._options = options;
     }
@@ -144,7 +146,7 @@ var tempis_timeline = (() => {
     setRange(from, to) {
       this._fromDt = from;
       this._toDt = to;
-      this.calculateMinorUnitTicks();
+      this.calculateMinorAndMajorUnitTicks();
     }
     moveRange(unit, step) {
       if (unit === "millisecond") {
@@ -169,13 +171,13 @@ var tempis_timeline = (() => {
         this._fromDt.setFullYear(this._fromDt.getFullYear() + step);
         this._toDt.setFullYear(this._toDt.getFullYear() + step);
       }
-      this.calculateMinorUnitTicks();
+      this.calculateMinorAndMajorUnitTicks();
     }
     zoomRange(amount) {
       const zoomValue = (this._toDt.getTime() - this._fromDt.getTime()) * (clamp(amount, -1, 1) * 0.1);
       this._fromDt.setMilliseconds(this._fromDt.getMilliseconds() - zoomValue);
       this._toDt.setMilliseconds(this._toDt.getMilliseconds() + zoomValue);
-      this.calculateMinorUnitTicks();
+      this.calculateMinorAndMajorUnitTicks();
     }
     clear() {
       this.setRange(new Date(0), new Date(41024448e5));
@@ -183,12 +185,20 @@ var tempis_timeline = (() => {
     calculateRequiredHeight() {
       return 50;
     }
-    calculateMinorUnitTicks() {
+    calculateMinorAndMajorUnitTicks() {
       const targetTickCount = Math.floor(this._canvas.width / 120);
-      this._minorTickUnitAndStep = this._findSensibleMinorUnitAndStep(targetTickCount);
-      const minorTickDates = this._getMinorTickDates(this._minorTickUnitAndStep);
       const milliRenderWidth = this._canvas.width / (this._toDt.getTime() - this._fromDt.getTime());
+      this._minorTickUnitAndStep = this._findSensibleUnitAndStep(targetTickCount);
+      this._majorTickUnitAndStep = this._findSensibleUnitAndStep(targetTickCount, this._minorTickUnitAndStep.unit);
+      const minorTickDates = this._getTickDates(this._minorTickUnitAndStep);
+      const majorTickDates = this._getTickDates(this._majorTickUnitAndStep);
       this._minorUnitTicks = minorTickDates.map((tickDate) => {
+        return {
+          date: tickDate,
+          xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
+        };
+      });
+      this._majorUnitTicks = majorTickDates.map((tickDate) => {
         return {
           date: tickDate,
           xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
@@ -200,7 +210,6 @@ var tempis_timeline = (() => {
       var sizeHeight = context.canvas.clientHeight;
       const rangeContainerHeight = this.calculateRequiredHeight();
       const rangeContainerWidth = sizeWidth;
-      const milliRenderWidth = sizeWidth / (this._toDt.getTime() - this._fromDt.getTime());
       context.lineWidth = 0.8;
       context.strokeStyle = "#8a8a8a";
       context.beginPath();
@@ -211,38 +220,79 @@ var tempis_timeline = (() => {
         const tickY = sizeHeight - rangeContainerHeight;
         context.beginPath();
         context.moveTo(xPosition, tickY);
-        context.lineTo(xPosition, tickY + 30);
+        context.lineTo(xPosition, tickY + rangeContainerHeight / 2);
         context.stroke();
         context.lineWidth = 0.5;
-        context.font = "14px Arial";
+        context.font = "16px Arial";
         context.fillStyle = "#595959";
         context.fillText(date.toLocaleDateString(), xPosition + 3, tickY + 14);
         context.fillText(date.toLocaleTimeString(), xPosition + 3, tickY + 28);
       }
+      for (const { date, xPosition } of this._majorUnitTicks) {
+        const tickY = sizeHeight - rangeContainerHeight;
+        context.beginPath();
+        context.moveTo(xPosition, tickY);
+        context.lineTo(xPosition, tickY + rangeContainerHeight);
+        context.stroke();
+        context.lineWidth = 0.5;
+        context.font = "16px Arial";
+        context.fillStyle = "#595959";
+        context.fillText(date.toLocaleString(), xPosition + 3, tickY + 45);
+      }
     }
-    _findSensibleMinorUnitAndStep(targetMinorTickCount = 5) {
+    _findSensibleUnitAndStep(targetTickCount, minorUnit) {
       const millisDiff = this._toDt.getTime() - this._fromDt.getTime();
-      const units = [
-        { unit: "millisecond", factor: 1 },
-        { unit: "second", factor: 1e3 },
-        { unit: "minute", factor: 60 * 1e3 },
-        { unit: "hour", factor: 60 * 60 * 1e3 },
-        { unit: "day", factor: 24 * 60 * 60 * 1e3 },
-        { unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 },
-        { unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 }
-      ];
-      const unitMinorTickCounts = [];
+      const units = [];
+      if (minorUnit === "millisecond") {
+        units.push({ unit: "second", factor: 1e3 });
+        units.push({ unit: "minute", factor: 60 * 1e3 });
+        units.push({ unit: "hour", factor: 60 * 60 * 1e3 });
+        units.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
+        units.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
+        units.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnit === "second") {
+        units.push({ unit: "minute", factor: 60 * 1e3 });
+        units.push({ unit: "hour", factor: 60 * 60 * 1e3 });
+        units.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
+        units.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
+        units.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnit === "minute") {
+        units.push({ unit: "hour", factor: 60 * 60 * 1e3 });
+        units.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
+        units.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
+        units.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnit === "hour") {
+        units.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
+        units.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
+        units.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnit === "day") {
+        units.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
+        units.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnit === "month") {
+        units.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnit === "year") {
+        units.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else {
+        units.push({ unit: "millisecond", factor: 1 });
+        units.push({ unit: "second", factor: 1e3 });
+        units.push({ unit: "minute", factor: 60 * 1e3 });
+        units.push({ unit: "hour", factor: 60 * 60 * 1e3 });
+        units.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
+        units.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
+        units.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      }
+      const unitTickCounts = [];
       units.forEach(({ unit, factor }) => {
         [1, 2, 5, 10, 20, 50, 100].forEach((step) => {
-          unitMinorTickCounts.push({ unit, ticks: millisDiff / factor / step, step });
+          unitTickCounts.push({ unit, ticks: millisDiff / factor / step, step });
         });
       });
-      unitMinorTickCounts.sort((a, b) => {
-        return Math.abs(a.ticks - targetMinorTickCount) - Math.abs(b.ticks - targetMinorTickCount);
+      unitTickCounts.sort((a, b) => {
+        return Math.abs(a.ticks - targetTickCount) - Math.abs(b.ticks - targetTickCount);
       });
-      return { unit: unitMinorTickCounts[0].unit, step: unitMinorTickCounts[0].step };
+      return { unit: unitTickCounts[0].unit, step: unitTickCounts[0].step };
     }
-    _getMinorTickDates(unitAndStep) {
+    _getTickDates(unitAndStep) {
       let currentDate;
       if (unitAndStep.unit === "year") {
         currentDate = new Date(this._fromDt.getFullYear(), 0);
@@ -390,8 +440,6 @@ var tempis_timeline = (() => {
       this._canvas.addEventListener("mousemove", (evt) => {
         var pos = getMousePos(evt);
         var context = this._canvas.getContext("2d");
-        context.fillStyle = "#000000";
-        context.fillRect(pos.x, pos.y, 2, 2);
       }, false);
     }
     _resizeCanvas() {
@@ -404,7 +452,7 @@ var tempis_timeline = (() => {
       }
       this._canvas.width = canvasContainerElement.getBoundingClientRect().width;
       this._canvas.height = canvasContainerElement.getBoundingClientRect().height;
-      this._range.calculateMinorUnitTicks();
+      this._range.calculateMinorAndMajorUnitTicks();
     }
     _draw() {
       var context = this._canvas.getContext("2d");

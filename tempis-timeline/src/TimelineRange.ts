@@ -1,7 +1,7 @@
 import { TempisTimelineRangeOptions } from "./TempisTimelineOptions";
 import { clamp } from "./Utilities";
 
-export type Unit = 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'month' | 'year';
+export type Unit = 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'month' | 'year' | 'none';
 
 export type UnitAndStep = { unit: Unit, step: number };
 
@@ -29,8 +29,14 @@ export class TimelineRange {
     /** The current minor tick unit and step. */
     private _minorTickUnitAndStep: UnitAndStep = { unit: 'year', step: 2 };
 
-    /** The calculated minor unit tick dates fro the current range and canvas width. */
+    /** The current major tick unit and step. */
+    private _majorTickUnitAndStep: UnitAndStep = { unit: 'year', step: 10 };
+
+    /** The calculated minor unit tick dates for the current range and canvas width. */
     private _minorUnitTicks: RangeTick[] = [];
+
+    /** The calculated major unit tick dates for the current range and canvas width. */
+    private _majorUnitTicks: RangeTick[] = [];
 
     /**
      * Creates a new instance of the TimelineRange class.
@@ -73,7 +79,7 @@ export class TimelineRange {
         this._toDt = to;
 
         // Our range has changed so we will need to recalculate our minor unit ticks.
-        this.calculateMinorUnitTicks();
+        this.calculateMinorAndMajorUnitTicks();
     }
 
     /**
@@ -106,7 +112,7 @@ export class TimelineRange {
         }
 
         // Our range has changed so we will need to recalculate our minor unit ticks.
-        this.calculateMinorUnitTicks();
+        this.calculateMinorAndMajorUnitTicks();
     }
 
     /**
@@ -121,7 +127,7 @@ export class TimelineRange {
         this._toDt.setMilliseconds(this._toDt.getMilliseconds() + zoomValue);
 
         // Our range has changed so we will need to recalculate our minor unit ticks.
-        this.calculateMinorUnitTicks();
+        this.calculateMinorAndMajorUnitTicks();
     }
 
     public clear(): void {
@@ -134,21 +140,35 @@ export class TimelineRange {
         return 50;
     }
     
-    public calculateMinorUnitTicks(): void {
+    public calculateMinorAndMajorUnitTicks(): void {
         // Find a sensible number of minor ticks to render.
         const targetTickCount = Math.floor(this._canvas.width / 120);
-
-        // Calculate a sensible minor unit and step for the range.
-        this._minorTickUnitAndStep = this._findSensibleMinorUnitAndStep(targetTickCount);
-
-        // Get our minor unit tick dates.
-        const minorTickDates = this._getMinorTickDates(this._minorTickUnitAndStep);
 
         // Calculate the width of one millisecond as it would be rendered on the canvas.
         const milliRenderWidth = this._canvas.width / (this._toDt.getTime() - this._fromDt.getTime());
 
-        // Convert our dates into tick objects representing the date and the x position of that date on the canvas.
+        // Calculate a sensible minor unit and step for the range.
+        this._minorTickUnitAndStep = this._findSensibleUnitAndStep(targetTickCount);
+
+        // We need to determine the major tick unit now, this will be based on the minor unit.
+        this._majorTickUnitAndStep = this._findSensibleUnitAndStep(targetTickCount, this._minorTickUnitAndStep.unit);
+
+        // Get our minor unit tick dates.
+        const minorTickDates = this._getTickDates(this._minorTickUnitAndStep);
+
+        // Get our major unit tick dates.
+        const majorTickDates = this._getTickDates(this._majorTickUnitAndStep);
+
+        // Convert our minor unit tick dates into tick objects representing the date and the x position of that date on the canvas.
         this._minorUnitTicks = minorTickDates.map((tickDate) => {
+            return {
+                date: tickDate,
+                xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
+            }
+        });
+
+        // Convert our major unit tick dates into tick objects representing the date and the x position of that date on the canvas.
+        this._majorUnitTicks = majorTickDates.map((tickDate) => {
             return {
                 date: tickDate,
                 xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
@@ -169,9 +189,6 @@ export class TimelineRange {
         const rangeContainerHeight = this.calculateRequiredHeight();
         const rangeContainerWidth = sizeWidth;    
 
-        // Calculate the width of one millisecond as it would be rendered on the canvas.
-        const milliRenderWidth = sizeWidth / (this._toDt.getTime() - this._fromDt.getTime());
-
         // Draw the top line of the range bar.
         context.lineWidth = 0.8;
         context.strokeStyle="#8a8a8a";
@@ -180,59 +197,113 @@ export class TimelineRange {
         context.lineTo(rangeContainerWidth, sizeHeight - rangeContainerHeight);
         context.stroke();
 
+        // Draw our minor unit ticks.
         for (const { date, xPosition } of this._minorUnitTicks) {
             const tickY = sizeHeight - rangeContainerHeight;
 
             // Start a new Path
             context.beginPath();
             context.moveTo(xPosition, tickY);
-            context.lineTo(xPosition, tickY + 30);
+            context.lineTo(xPosition, tickY + (rangeContainerHeight / 2));
 
             // Draw the Path
             context.stroke();
 
             // Draw the date label text
             context.lineWidth = 0.5;
-            context.font = "14px Arial";
+            context.font = "16px Arial";
             context.fillStyle = "#595959";
             context.fillText(date.toLocaleDateString(), xPosition + 3, tickY + 14);
             context.fillText(date.toLocaleTimeString(), xPosition + 3, tickY + 28);
+        }
+
+        // Draw our major unit ticks.
+        for (const { date, xPosition } of this._majorUnitTicks) {
+            const tickY = sizeHeight - rangeContainerHeight;
+
+            // Start a new Path
+            context.beginPath();
+            context.moveTo(xPosition, tickY);
+            context.lineTo(xPosition, tickY + rangeContainerHeight);
+
+            // Draw the Path
+            context.stroke();
+
+            // Draw the date label text
+            context.lineWidth = 0.5;
+            context.font = "16px Arial";
+            context.fillStyle = "#595959";
+            context.fillText(date.toLocaleString(), xPosition + 3, tickY + 45);
         }
     }
 
     /**
      * https://jsfiddle.net/h2drotkz/6/
-     * @param targetMinorTickCount 
+     * @param targetTickCount 
      * @returns 
      */
-    private _findSensibleMinorUnitAndStep(targetMinorTickCount: number = 5): UnitAndStep {
+    private _findSensibleUnitAndStep(targetTickCount: number, minorUnit?: Unit): UnitAndStep {
         // Get the millis difference between the two dates.
         const millisDiff = this._toDt.getTime() - this._fromDt.getTime();
 
-        const units: { unit: Unit, factor: number }[] = [
-            { unit: 'millisecond', factor: 1 },
-            { unit: 'second', factor: 1000 },
-            { unit: 'minute', factor: 60 * 1000 },
-            { unit: 'hour', factor: 60 * 60 * 1000 },
-            { unit: 'day', factor: 24 * 60 * 60 * 1000 },
-            { unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 }, // Approximate a month.
-            { unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 }, // Approximate a year.
-        ];
+        // An array of potential units and their factors.
+        const units: { unit: Unit, factor: number }[] = [];
 
-        const unitMinorTickCounts: { unit: Unit, ticks: number, step: number }[] = [];
+        // If we already have a minor unit then we must exclude it as an option for the major unit.
+        if (minorUnit === "millisecond") {
+            units.push({ unit: 'second', factor: 1000 });
+            units.push({ unit: 'minute', factor: 60 * 1000 });
+            units.push({ unit: 'hour', factor: 60 * 60 * 1000 });
+            units.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
+            units.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
+            units.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+        } else if (minorUnit === "second") {
+            units.push({ unit: 'minute', factor: 60 * 1000 });
+            units.push({ unit: 'hour', factor: 60 * 60 * 1000 });
+            units.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
+            units.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
+            units.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+        } else if (minorUnit === "minute") {
+            units.push({ unit: 'hour', factor: 60 * 60 * 1000 });
+            units.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
+            units.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
+            units.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+        } else if (minorUnit === "hour") {
+            units.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
+            units.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
+            units.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+        } else if (minorUnit === "day") {
+            units.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
+            units.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+        } else if (minorUnit === "month") {
+            units.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+        } else if (minorUnit === "year") {
+            units.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+        } else {
+            // We have no minor unit, so we much be trying to find our minor unit.
+            units.push({ unit: 'millisecond', factor: 1 });
+            units.push({ unit: 'second', factor: 1000 });
+            units.push({ unit: 'minute', factor: 60 * 1000 });
+            units.push({ unit: 'hour', factor: 60 * 60 * 1000 });
+            units.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
+            units.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
+            units.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+        }
+
+        const unitTickCounts: { unit: Unit, ticks: number, step: number }[] = [];
 
         units.forEach(({ unit, factor }) => {
             // TODO The step values we use should really depend on the unit type. (50 or 100 minutes is silly, but 20 makes sense...maybe)
             [1, 2, 5, 10, 20, 50, 100].forEach((step) => {
-                unitMinorTickCounts.push({ unit, ticks: (millisDiff / factor) / step, step })
+                unitTickCounts.push({ unit, ticks: (millisDiff / factor) / step, step })
             });
         });
 
-        unitMinorTickCounts.sort((a, b) => {
-            return Math.abs(a.ticks - targetMinorTickCount) - Math.abs(b.ticks - targetMinorTickCount);
+        unitTickCounts.sort((a, b) => {
+            return Math.abs(a.ticks - targetTickCount) - Math.abs(b.ticks - targetTickCount);
         });
 
-        return { unit: unitMinorTickCounts[0].unit, step: unitMinorTickCounts[0].step };
+        return { unit: unitTickCounts[0].unit, step: unitTickCounts[0].step };
     }
 
     /**
@@ -240,7 +311,7 @@ export class TimelineRange {
      * @param unitAndStep 
      * @returns 
      */
-    private _getMinorTickDates(unitAndStep: { unit: Unit, step: number }): Date[] {
+    private _getTickDates(unitAndStep: { unit: Unit, step: number }): Date[] {
         let currentDate;
 
         // We need to strip unit values below the tick unit

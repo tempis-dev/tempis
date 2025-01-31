@@ -175,8 +175,8 @@ export class TempisTimeline {
         this._canvas.addEventListener('mousemove', (evt) => {
             var pos = getMousePos(evt);
             var context = this._canvas.getContext('2d')!;
-            context.fillStyle = "#000000";
-            context.fillRect(pos.x, pos.y, 2, 2);
+            // context.fillStyle = "#000000";
+            // context.fillRect(pos.x, pos.y, 2, 2);
         }, false);
     }
 
@@ -203,7 +203,7 @@ export class TempisTimeline {
         this._canvas.height = canvasContainerElement.getBoundingClientRect().height;
 
         // Now that the canvas has resized we will need to recalculate the ticks for our range.
-        this._range.calculateMinorUnitTicks();
+        this._range.calculateMinorAndMajorUnitTicks();
     }
 
     private _draw(): void {
