@@ -640,8 +640,8 @@ var tempis_timeline = (() => {
       var sizeHeight = context.canvas.clientHeight;
       const rangeContainerHeight = this.calculateRequiredHeight();
       const rangeContainerWidth = sizeWidth;
+      const tickY = sizeHeight - rangeContainerHeight;
       for (const { date, xPosition } of this._minorUnitTicks) {
-        const tickY = sizeHeight - rangeContainerHeight;
         context.lineWidth = 0.5;
         context.beginPath();
         context.moveTo(xPosition, tickY);
@@ -655,18 +655,28 @@ var tempis_timeline = (() => {
         context.stroke();
       }
       if (this._minorTickUnitAndStep.unit !== "year") {
-        for (const { date, xPosition } of this._majorUnitTicks) {
-          const tickY = sizeHeight - rangeContainerHeight;
-          context.lineWidth = 0.5;
-          context.beginPath();
-          context.moveTo(xPosition, tickY + rangeContainerHeight / 2);
-          context.lineTo(xPosition, tickY + rangeContainerHeight);
-          context.stroke();
+        for (let tickIndex = 0; tickIndex < this._majorUnitTicks.length; tickIndex++) {
+          const { date, xPosition } = this._majorUnitTicks[tickIndex];
+          const isStickyLabel = date.getTime() < this._fromDt.getTime();
+          if (!isStickyLabel) {
+            context.lineWidth = 0.5;
+            context.beginPath();
+            context.moveTo(xPosition, tickY + rangeContainerHeight / 2);
+            context.lineTo(xPosition, tickY + rangeContainerHeight);
+            context.stroke();
+          }
+          const tickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
+          let labelXPosition = xPosition + 3;
+          if (isStickyLabel) {
+            const labelWidth = context.measureText(tickLabel).width + 5;
+            const nextTickXPosition = this._majorUnitTicks[tickIndex + 1].xPosition;
+            labelXPosition = nextTickXPosition > labelWidth ? 3 : nextTickXPosition - labelWidth;
+          }
           context.lineWidth = 0.5;
           context.font = "16px Arial";
           context.fillStyle = "#595959";
           context.beginPath();
-          context.fillText(this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS), xPosition + 3, tickY + 43);
+          context.fillText(tickLabel, labelXPosition, tickY + 43);
           context.stroke();
         }
       }
