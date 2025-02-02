@@ -309,7 +309,23 @@ var tempis_timeline = (() => {
       }
       const unitTickCounts = [];
       units.forEach(({ unit, factor }) => {
-        [1, 2, 5, 10, 20, 50, 100].forEach((step) => {
+        const viableStepValues = [];
+        if (unit === "millisecond") {
+          viableStepValues.push(1, 10, 50, 100, 500);
+        } else if (unit === "second") {
+          viableStepValues.push(1, 10, 15, 30);
+        } else if (unit === "minute") {
+          viableStepValues.push(1, 10, 15, 30);
+        } else if (unit === "hour") {
+          viableStepValues.push(1, 2, 6, 12);
+        } else if (unit === "day") {
+          viableStepValues.push(1, 2, 5, 10);
+        } else if (unit === "month") {
+          viableStepValues.push(1, 3, 6);
+        } else if (unit === "year") {
+          viableStepValues.push(1, 2, 5, 10, 20, 50, 100, 500);
+        }
+        viableStepValues.forEach((step) => {
           unitTickCounts.push({ unit, ticks: millisDiff / factor / step, step });
         });
       });
