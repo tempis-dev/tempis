@@ -159,7 +159,7 @@ export class TimelineRange {
     public calculateMinorAndMajorUnitTicks(): void {
         // Find a sensible number of minor and major ticks to render, this will depend on the canvas width.
         const minorTargetTickCount = Math.floor(this._canvas.width / 120);
-        const majorTargetTickCount = Math.floor(this._canvas.width / 240);
+        const majorTargetTickCount = Math.floor(this._canvas.width / 320);
 
         // Calculate the width of one millisecond as it would be rendered on the canvas.
         const milliRenderWidth = this._canvas.width / (this._toDt.getTime() - this._fromDt.getTime());

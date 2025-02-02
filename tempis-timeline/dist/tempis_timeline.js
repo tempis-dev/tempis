@@ -195,7 +195,7 @@ var tempis_timeline = (() => {
     }
     calculateMinorAndMajorUnitTicks() {
       const minorTargetTickCount = Math.floor(this._canvas.width / 120);
-      const majorTargetTickCount = Math.floor(this._canvas.width / 240);
+      const majorTargetTickCount = Math.floor(this._canvas.width / 320);
       const milliRenderWidth = this._canvas.width / (this._toDt.getTime() - this._fromDt.getTime());
       this._minorTickUnitAndStep = this._findSensibleUnitAndStep(minorTargetTickCount);
       this._majorTickUnitAndStep = this._findSensibleUnitAndStep(majorTargetTickCount, this._minorTickUnitAndStep.unit);
