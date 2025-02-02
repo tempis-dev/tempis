@@ -211,15 +211,12 @@ export class TimelineRange {
 
         // Figure out our range container dimensions.
         const rangeContainerHeight = this.calculateRequiredHeight();
-        const rangeContainerWidth = sizeWidth;    
+        const rangeContainerWidth = sizeWidth;
 
-        // Draw the top line of the range bar.
-        context.lineWidth = 0.8;
-        context.strokeStyle="#8a8a8a";
-        context.beginPath();
-        context.moveTo(0, sizeHeight - rangeContainerHeight);
-        context.lineTo(rangeContainerWidth, sizeHeight - rangeContainerHeight);
-        context.stroke();
+        // TODO This is to determine if we are showing the time or date string for each unit.
+        // TODO Eventually this will be taken from a user-configured format.
+        const isMinorUnitDate = ["year", "month", "day"].includes(this._minorTickUnitAndStep.unit);
+        const isMajorUnitDate = ["year", "month", "day"].includes(this._majorTickUnitAndStep.unit);
 
         // Draw our minor unit ticks.
         for (const { date, xPosition } of this._minorUnitTicks) {
@@ -235,10 +232,9 @@ export class TimelineRange {
 
             // Draw the date label text
             context.lineWidth = 0.5;
-            context.font = "12px Arial";
+            context.font = "16px Arial";
             context.fillStyle = "#595959";
-            context.fillText(date.toLocaleDateString(), xPosition + 3, tickY + 12);
-            context.fillText(date.toLocaleTimeString(), xPosition + 3, tickY + 24);
+            context.fillText(isMinorUnitDate ? date.toLocaleDateString() : date.toLocaleTimeString(), xPosition + 3, tickY + 18);
         }
 
         // Draw our major unit ticks.
@@ -247,7 +243,7 @@ export class TimelineRange {
 
             // Start a new Path
             context.beginPath();
-            context.moveTo(xPosition, tickY);
+            context.moveTo(xPosition, tickY + (rangeContainerHeight / 2));
             context.lineTo(xPosition, tickY + rangeContainerHeight);
 
             // Draw the Path
@@ -255,10 +251,24 @@ export class TimelineRange {
 
             // Draw the date label text
             context.lineWidth = 0.5;
-            context.font = "14px Arial";
+            context.font = "16px Arial";
             context.fillStyle = "#595959";
-            context.fillText(date.toLocaleString(), xPosition + 3, tickY + 45);
+            context.fillText(isMajorUnitDate ? date.toLocaleDateString() : date.toLocaleTimeString(), xPosition + 3, tickY + 43);
         }
+
+        // Draw the rect around the range.
+        context.lineWidth = 1;
+        context.strokeStyle="#8a8a8a";
+        context.beginPath();
+        context.rect(0, sizeHeight - rangeContainerHeight, sizeWidth, rangeContainerHeight);
+        context.stroke();
+
+        // Draw the minor/major unit split.
+        context.lineWidth = 0.5;
+        context.beginPath();
+        context.moveTo(0, sizeHeight - (rangeContainerHeight / 2));
+        context.lineTo(rangeContainerWidth, sizeHeight - (rangeContainerHeight / 2));
+        context.stroke();
     }
 
     /**

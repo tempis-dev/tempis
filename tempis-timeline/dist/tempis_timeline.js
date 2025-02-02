@@ -225,12 +225,8 @@ var tempis_timeline = (() => {
       var sizeHeight = context.canvas.clientHeight;
       const rangeContainerHeight = this.calculateRequiredHeight();
       const rangeContainerWidth = sizeWidth;
-      context.lineWidth = 0.8;
-      context.strokeStyle = "#8a8a8a";
-      context.beginPath();
-      context.moveTo(0, sizeHeight - rangeContainerHeight);
-      context.lineTo(rangeContainerWidth, sizeHeight - rangeContainerHeight);
-      context.stroke();
+      const isMinorUnitDate = ["year", "month", "day"].includes(this._minorTickUnitAndStep.unit);
+      const isMajorUnitDate = ["year", "month", "day"].includes(this._majorTickUnitAndStep.unit);
       for (const { date, xPosition } of this._minorUnitTicks) {
         const tickY = sizeHeight - rangeContainerHeight;
         context.beginPath();
@@ -238,22 +234,31 @@ var tempis_timeline = (() => {
         context.lineTo(xPosition, tickY + rangeContainerHeight / 2);
         context.stroke();
         context.lineWidth = 0.5;
-        context.font = "12px Arial";
+        context.font = "16px Arial";
         context.fillStyle = "#595959";
-        context.fillText(date.toLocaleDateString(), xPosition + 3, tickY + 12);
-        context.fillText(date.toLocaleTimeString(), xPosition + 3, tickY + 24);
+        context.fillText(isMinorUnitDate ? date.toLocaleDateString() : date.toLocaleTimeString(), xPosition + 3, tickY + 18);
       }
       for (const { date, xPosition } of this._majorUnitTicks) {
         const tickY = sizeHeight - rangeContainerHeight;
         context.beginPath();
-        context.moveTo(xPosition, tickY);
+        context.moveTo(xPosition, tickY + rangeContainerHeight / 2);
         context.lineTo(xPosition, tickY + rangeContainerHeight);
         context.stroke();
         context.lineWidth = 0.5;
-        context.font = "14px Arial";
+        context.font = "16px Arial";
         context.fillStyle = "#595959";
-        context.fillText(date.toLocaleString(), xPosition + 3, tickY + 45);
+        context.fillText(isMajorUnitDate ? date.toLocaleDateString() : date.toLocaleTimeString(), xPosition + 3, tickY + 43);
       }
+      context.lineWidth = 1;
+      context.strokeStyle = "#8a8a8a";
+      context.beginPath();
+      context.rect(0, sizeHeight - rangeContainerHeight, sizeWidth, rangeContainerHeight);
+      context.stroke();
+      context.lineWidth = 0.5;
+      context.beginPath();
+      context.moveTo(0, sizeHeight - rangeContainerHeight / 2);
+      context.lineTo(rangeContainerWidth, sizeHeight - rangeContainerHeight / 2);
+      context.stroke();
     }
     _findSensibleUnitAndStep(targetTickCount, minorUnit) {
       const millisDiff = this._toDt.getTime() - this._fromDt.getTime();
