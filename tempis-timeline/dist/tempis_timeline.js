@@ -230,10 +230,10 @@ var tempis_timeline = (() => {
         context.lineTo(xPosition, tickY + rangeContainerHeight / 2);
         context.stroke();
         context.lineWidth = 0.5;
-        context.font = "16px Arial";
+        context.font = "12px Arial";
         context.fillStyle = "#595959";
-        context.fillText(date.toLocaleDateString(), xPosition + 3, tickY + 14);
-        context.fillText(date.toLocaleTimeString(), xPosition + 3, tickY + 28);
+        context.fillText(date.toLocaleDateString(), xPosition + 3, tickY + 12);
+        context.fillText(date.toLocaleTimeString(), xPosition + 3, tickY + 24);
       }
       for (const { date, xPosition } of this._majorUnitTicks) {
         const tickY = sizeHeight - rangeContainerHeight;

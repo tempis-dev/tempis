@@ -219,10 +219,10 @@ export class TimelineRange {
 
             // Draw the date label text
             context.lineWidth = 0.5;
-            context.font = "16px Arial";
+            context.font = "12px Arial";
             context.fillStyle = "#595959";
-            context.fillText(date.toLocaleDateString(), xPosition + 3, tickY + 14);
-            context.fillText(date.toLocaleTimeString(), xPosition + 3, tickY + 28);
+            context.fillText(date.toLocaleDateString(), xPosition + 3, tickY + 12);
+            context.fillText(date.toLocaleTimeString(), xPosition + 3, tickY + 24);
         }
 
         // Draw our major unit ticks.
