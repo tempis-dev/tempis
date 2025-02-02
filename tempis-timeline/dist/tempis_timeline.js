@@ -186,10 +186,11 @@ var tempis_timeline = (() => {
       return 50;
     }
     calculateMinorAndMajorUnitTicks() {
-      const targetTickCount = Math.floor(this._canvas.width / 120);
+      const minorTargetTickCount = Math.floor(this._canvas.width / 120);
+      const majorTargetTickCount = Math.floor(this._canvas.width / 240);
       const milliRenderWidth = this._canvas.width / (this._toDt.getTime() - this._fromDt.getTime());
-      this._minorTickUnitAndStep = this._findSensibleUnitAndStep(targetTickCount);
-      this._majorTickUnitAndStep = this._findSensibleUnitAndStep(targetTickCount, this._minorTickUnitAndStep.unit);
+      this._minorTickUnitAndStep = this._findSensibleUnitAndStep(minorTargetTickCount);
+      this._majorTickUnitAndStep = this._findSensibleUnitAndStep(majorTargetTickCount, this._minorTickUnitAndStep.unit);
       const minorTickDates = this._getTickDates(this._minorTickUnitAndStep);
       const majorTickDates = this._getTickDates(this._majorTickUnitAndStep);
       this._minorUnitTicks = minorTickDates.map((tickDate) => {
@@ -203,6 +204,12 @@ var tempis_timeline = (() => {
           date: tickDate,
           xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
         };
+      });
+      console.log({
+        minorUnit: this._minorTickUnitAndStep.unit,
+        minorStep: this._minorTickUnitAndStep.step,
+        majorUnit: this._majorTickUnitAndStep.unit,
+        majorStep: this._majorTickUnitAndStep.step
       });
     }
     draw(context) {

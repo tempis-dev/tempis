@@ -141,17 +141,18 @@ export class TimelineRange {
     }
     
     public calculateMinorAndMajorUnitTicks(): void {
-        // Find a sensible number of minor ticks to render.
-        const targetTickCount = Math.floor(this._canvas.width / 120);
+        // Find a sensible number of minor and major ticks to render, this will depend on the canvas width.
+        const minorTargetTickCount = Math.floor(this._canvas.width / 120);
+        const majorTargetTickCount = Math.floor(this._canvas.width / 240);
 
         // Calculate the width of one millisecond as it would be rendered on the canvas.
         const milliRenderWidth = this._canvas.width / (this._toDt.getTime() - this._fromDt.getTime());
 
         // Calculate a sensible minor unit and step for the range.
-        this._minorTickUnitAndStep = this._findSensibleUnitAndStep(targetTickCount);
+        this._minorTickUnitAndStep = this._findSensibleUnitAndStep(minorTargetTickCount);
 
         // We need to determine the major tick unit now, this will be based on the minor unit.
-        this._majorTickUnitAndStep = this._findSensibleUnitAndStep(targetTickCount, this._minorTickUnitAndStep.unit);
+        this._majorTickUnitAndStep = this._findSensibleUnitAndStep(majorTargetTickCount, this._minorTickUnitAndStep.unit);
 
         // Get our minor unit tick dates.
         const minorTickDates = this._getTickDates(this._minorTickUnitAndStep);
@@ -174,6 +175,13 @@ export class TimelineRange {
                 xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
             }
         });
+
+        console.log({
+            minorUnit: this._minorTickUnitAndStep.unit,
+            minorStep: this._minorTickUnitAndStep.step,
+            majorUnit: this._majorTickUnitAndStep.unit,
+            majorStep: this._majorTickUnitAndStep.step
+        })
     }
 
     /**
