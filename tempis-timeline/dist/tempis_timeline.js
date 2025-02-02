@@ -539,9 +539,9 @@ var tempis_timeline = (() => {
     year: "YYYY"
   };
   var DEFAULT_MAJOR_UNIT_LABEL_FORMATS = {
-    second: "HH:mm:ss",
+    second: "D MMMM HH:mm:ss",
     minute: "D MMMM HH:mm",
-    hour: "ddd D MMMM",
+    hour: "ddd D MMMM HH:mm",
     day: "ddd D MMMM",
     month: "MMMM YYYY",
     year: "YYYY"

@@ -20,9 +20,9 @@ const DEFAULT_MINOR_UNIT_LABEL_FORMATS: TempisTimelineRangeUnitLabelFormats = {
 }
 
 const DEFAULT_MAJOR_UNIT_LABEL_FORMATS: TempisTimelineRangeUnitLabelFormats = {
-    second: 'HH:mm:ss',
+    second: 'D MMMM HH:mm:ss',
     minute: 'D MMMM HH:mm',
-    hour: 'ddd D MMMM',
+    hour: 'ddd D MMMM HH:mm',
     day: 'ddd D MMMM',
     month: 'MMMM YYYY',
     year: 'YYYY'
