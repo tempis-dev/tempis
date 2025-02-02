@@ -157,7 +157,7 @@ export class TempisTimeline {
      * Creates the canvas event handlers.
      */
     private _createCanvasEventHandlers() {
-
+        // Gets the position on the canvas for the mouse event.
         const getMousePos = (evt: MouseEvent) => {
             var rect = this._canvas.getBoundingClientRect();
             return {
@@ -166,17 +166,42 @@ export class TempisTimeline {
             };
         }
 
+        // The mouse wheel should zoom the data range (for now)
         this._canvas.addEventListener("wheel", (evt) => {
-            // this._range.moveRange("minute", evt.deltaY * 0.1);
             this._range.zoomRange(evt.deltaY);
             this._draw();
         });
 
+        let isMouseDown = false;
+
+        this._canvas.addEventListener('mousedown', (evt) => {
+            isMouseDown = true;
+        }, false);
+
+        this._canvas.addEventListener('mouseup', (evt) => {
+            isMouseDown = false;
+        }, false);
+
+        this._canvas.addEventListener('mouseleave', (evt) => {
+            isMouseDown = false;
+        }, false);
+
         this._canvas.addEventListener('mousemove', (evt) => {
-            var pos = getMousePos(evt);
-            var context = this._canvas.getContext('2d')!;
-            // context.fillStyle = "#000000";
-            // context.fillRect(pos.x, pos.y, 2, 2);
+            // We only care about this event if the user is holding the mouse button down.
+            if (isMouseDown) {
+                // Use movementX for range scrolling.
+                if (Math.abs(evt.movementX) >= 1) {
+                    this._range.moveByXMovement(-evt.movementX);
+                }
+
+                // Use movementY for data view scrolling.
+                if (Math.abs(evt.movementY) >= 1) {
+                    this._dataView.scrollByYMovement(evt.movementY);
+                }
+
+                // Our view may have changed, let's redraw.
+                this._draw();
+            }
         }, false);
     }
 

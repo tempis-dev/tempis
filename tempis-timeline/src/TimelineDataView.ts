@@ -14,6 +14,10 @@ export class TimelineDataView {
         this._itemGroupings = groupings;
     }
 
+    public scrollByYMovement(movementY: number): void {
+        // TODO Do the scrolling baby!
+    }
+
     /**
      * Draw the timeline data view onto the canvas.
      * @param context The canvas 2D context.

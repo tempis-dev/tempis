@@ -84,10 +84,26 @@ export class TimelineRange {
 
     /**
      * Moves the from and to date value of the range uniformly.
-     * @param unit 
-     * @param step 
+     * @param movementX The x movement value.
      */
-    public moveRange(unit: Unit, step: number): void {
+    public moveByXMovement(movementX: number): void {
+        // Get the number of milliseconds shown in the current range.
+        const rangeXMillisValue = (this._toDt.getTime() - this._fromDt.getTime()) / this._canvas.width;
+
+        // Update the from and to date to account for the movement.
+        this._fromDt.setTime(this._fromDt.getTime() + (rangeXMillisValue * movementX));
+        this._toDt.setTime(this._toDt.getTime() + (rangeXMillisValue * movementX));
+
+        // Our range has changed so we will need to recalculate our minor unit ticks.
+        this.calculateMinorAndMajorUnitTicks();
+    }
+
+    /**
+     * Moves the from and to date value of the range uniformly.
+     * @param unit The unit of the step.
+     * @param step The step value.
+     */
+    public moveByStep(unit: Unit, step: number): void {
         if (unit === "millisecond") {
             this._fromDt.setMilliseconds(this._fromDt.getMilliseconds() + step);
             this._toDt.setMilliseconds(this._toDt.getMilliseconds() + step);
@@ -239,7 +255,7 @@ export class TimelineRange {
 
             // Draw the date label text
             context.lineWidth = 0.5;
-            context.font = "16px Arial";
+            context.font = "14px Arial";
             context.fillStyle = "#595959";
             context.fillText(date.toLocaleString(), xPosition + 3, tickY + 45);
         }

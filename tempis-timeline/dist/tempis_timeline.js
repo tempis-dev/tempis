@@ -32,6 +32,8 @@ var tempis_timeline = (() => {
     setGroupings(groupings) {
       this._itemGroupings = groupings;
     }
+    scrollByYMovement(movementY) {
+    }
     draw(context, range) {
       const height = context.canvas.height - range.calculateRequiredHeight();
       context.fillStyle = "#F6F5F5";
@@ -148,7 +150,13 @@ var tempis_timeline = (() => {
       this._toDt = to;
       this.calculateMinorAndMajorUnitTicks();
     }
-    moveRange(unit, step) {
+    moveByXMovement(movementX) {
+      const rangeXMillisValue = (this._toDt.getTime() - this._fromDt.getTime()) / this._canvas.width;
+      this._fromDt.setTime(this._fromDt.getTime() + rangeXMillisValue * movementX);
+      this._toDt.setTime(this._toDt.getTime() + rangeXMillisValue * movementX);
+      this.calculateMinorAndMajorUnitTicks();
+    }
+    moveByStep(unit, step) {
       if (unit === "millisecond") {
         this._fromDt.setMilliseconds(this._fromDt.getMilliseconds() + step);
         this._toDt.setMilliseconds(this._toDt.getMilliseconds() + step);
@@ -242,7 +250,7 @@ var tempis_timeline = (() => {
         context.lineTo(xPosition, tickY + rangeContainerHeight);
         context.stroke();
         context.lineWidth = 0.5;
-        context.font = "16px Arial";
+        context.font = "14px Arial";
         context.fillStyle = "#595959";
         context.fillText(date.toLocaleString(), xPosition + 3, tickY + 45);
       }
@@ -444,9 +452,26 @@ var tempis_timeline = (() => {
         this._range.zoomRange(evt.deltaY);
         this._draw();
       });
+      let isMouseDown = false;
+      this._canvas.addEventListener("mousedown", (evt) => {
+        isMouseDown = true;
+      }, false);
+      this._canvas.addEventListener("mouseup", (evt) => {
+        isMouseDown = false;
+      }, false);
+      this._canvas.addEventListener("mouseleave", (evt) => {
+        isMouseDown = false;
+      }, false);
       this._canvas.addEventListener("mousemove", (evt) => {
-        var pos = getMousePos(evt);
-        var context = this._canvas.getContext("2d");
+        if (isMouseDown) {
+          if (Math.abs(evt.movementX) >= 1) {
+            this._range.moveByXMovement(-evt.movementX);
+          }
+          if (Math.abs(evt.movementY) >= 1) {
+            this._dataView.scrollByYMovement(evt.movementY);
+          }
+          this._draw();
+        }
       }, false);
     }
     _resizeCanvas() {
