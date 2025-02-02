@@ -229,6 +229,7 @@ var tempis_timeline = (() => {
       const isMajorUnitDate = ["year", "month", "day"].includes(this._majorTickUnitAndStep.unit);
       for (const { date, xPosition } of this._minorUnitTicks) {
         const tickY = sizeHeight - rangeContainerHeight;
+        context.lineWidth = 0.5;
         context.beginPath();
         context.moveTo(xPosition, tickY);
         context.lineTo(xPosition, tickY + rangeContainerHeight / 2);
@@ -236,10 +237,13 @@ var tempis_timeline = (() => {
         context.lineWidth = 0.5;
         context.font = "16px Arial";
         context.fillStyle = "#595959";
+        context.beginPath();
         context.fillText(isMinorUnitDate ? date.toLocaleDateString() : date.toLocaleTimeString(), xPosition + 3, tickY + 18);
+        context.stroke();
       }
       for (const { date, xPosition } of this._majorUnitTicks) {
         const tickY = sizeHeight - rangeContainerHeight;
+        context.lineWidth = 0.5;
         context.beginPath();
         context.moveTo(xPosition, tickY + rangeContainerHeight / 2);
         context.lineTo(xPosition, tickY + rangeContainerHeight);
@@ -247,7 +251,9 @@ var tempis_timeline = (() => {
         context.lineWidth = 0.5;
         context.font = "16px Arial";
         context.fillStyle = "#595959";
+        context.beginPath();
         context.fillText(isMajorUnitDate ? date.toLocaleDateString() : date.toLocaleTimeString(), xPosition + 3, tickY + 43);
+        context.stroke();
       }
       context.lineWidth = 1;
       context.strokeStyle = "#8a8a8a";

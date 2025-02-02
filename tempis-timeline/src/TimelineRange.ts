@@ -222,38 +222,40 @@ export class TimelineRange {
         for (const { date, xPosition } of this._minorUnitTicks) {
             const tickY = sizeHeight - rangeContainerHeight;
 
-            // Start a new Path
+            // Draw the actual tick.
+            context.lineWidth = 0.5;
             context.beginPath();
             context.moveTo(xPosition, tickY);
             context.lineTo(xPosition, tickY + (rangeContainerHeight / 2));
-
-            // Draw the Path
             context.stroke();
 
-            // Draw the date label text
+            // Draw the minor date/time label text.
             context.lineWidth = 0.5;
             context.font = "16px Arial";
             context.fillStyle = "#595959";
+            context.beginPath();
             context.fillText(isMinorUnitDate ? date.toLocaleDateString() : date.toLocaleTimeString(), xPosition + 3, tickY + 18);
+            context.stroke();
         }
 
         // Draw our major unit ticks.
         for (const { date, xPosition } of this._majorUnitTicks) {
             const tickY = sizeHeight - rangeContainerHeight;
 
-            // Start a new Path
+            // Draw the actual tick.
+            context.lineWidth = 0.5;
             context.beginPath();
             context.moveTo(xPosition, tickY + (rangeContainerHeight / 2));
             context.lineTo(xPosition, tickY + rangeContainerHeight);
-
-            // Draw the Path
             context.stroke();
 
-            // Draw the date label text
+            // Draw the major date/time label text.
             context.lineWidth = 0.5;
             context.font = "16px Arial";
             context.fillStyle = "#595959";
+            context.beginPath();
             context.fillText(isMajorUnitDate ? date.toLocaleDateString() : date.toLocaleTimeString(), xPosition + 3, tickY + 43);
+            context.stroke();
         }
 
         // Draw the rect around the range.
