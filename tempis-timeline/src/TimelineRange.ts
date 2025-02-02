@@ -1,4 +1,6 @@
-import { TempisTimelineRangeOptions } from "./TempisTimelineOptions";
+import { format } from 'date-format-parse';
+
+import { TempisTimelineRangeOptions, TempisTimelineRangeUnitLabelFormats } from "./TempisTimelineOptions";
 import { clamp } from "./Utilities";
 
 export type Unit = 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'month' | 'year' | 'none';
@@ -6,6 +8,25 @@ export type Unit = 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'month
 export type UnitAndStep = { unit: Unit, step: number };
 
 export type RangeTick = { xPosition: number, date: Date };
+
+const DEFAULT_MINOR_UNIT_LABEL_FORMATS: TempisTimelineRangeUnitLabelFormats = {
+    millisecond: 'SSS',
+    second: 'HH:mm:ss',
+    minute: 'HH:mm',
+    hour: 'HH:mm',
+    day: 'D',
+    month: 'MMM',
+    year: 'YYYY'
+}
+
+const DEFAULT_MAJOR_UNIT_LABEL_FORMATS: TempisTimelineRangeUnitLabelFormats = {
+    second: 'HH:mm:ss',
+    minute: 'D MMMM HH:mm',
+    hour: 'ddd D MMMM',
+    day: 'ddd D MMMM',
+    month: 'MMMM YYYY',
+    year: 'YYYY'
+}
 
 export class TimelineRange {
     /** The timeline canvas. */
@@ -191,13 +212,6 @@ export class TimelineRange {
                 xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
             }
         });
-
-        console.log({
-            minorUnit: this._minorTickUnitAndStep.unit,
-            minorStep: this._minorTickUnitAndStep.step,
-            majorUnit: this._majorTickUnitAndStep.unit,
-            majorStep: this._majorTickUnitAndStep.step
-        })
     }
 
     /**
@@ -212,11 +226,6 @@ export class TimelineRange {
         // Figure out our range container dimensions.
         const rangeContainerHeight = this.calculateRequiredHeight();
         const rangeContainerWidth = sizeWidth;
-
-        // TODO This is to determine if we are showing the time or date string for each unit.
-        // TODO Eventually this will be taken from a user-configured format.
-        const isMinorUnitDate = ["year", "month", "day"].includes(this._minorTickUnitAndStep.unit);
-        const isMajorUnitDate = ["year", "month", "day"].includes(this._majorTickUnitAndStep.unit);
 
         // Draw our minor unit ticks.
         for (const { date, xPosition } of this._minorUnitTicks) {
@@ -234,28 +243,30 @@ export class TimelineRange {
             context.font = "16px Arial";
             context.fillStyle = "#595959";
             context.beginPath();
-            context.fillText(isMinorUnitDate ? date.toLocaleDateString() : date.toLocaleTimeString(), xPosition + 3, tickY + 18);
+            context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + 3, tickY + 18);
             context.stroke();
         }
 
-        // Draw our major unit ticks.
-        for (const { date, xPosition } of this._majorUnitTicks) {
-            const tickY = sizeHeight - rangeContainerHeight;
-
-            // Draw the actual tick.
-            context.lineWidth = 0.5;
-            context.beginPath();
-            context.moveTo(xPosition, tickY + (rangeContainerHeight / 2));
-            context.lineTo(xPosition, tickY + rangeContainerHeight);
-            context.stroke();
-
-            // Draw the major date/time label text.
-            context.lineWidth = 0.5;
-            context.font = "16px Arial";
-            context.fillStyle = "#595959";
-            context.beginPath();
-            context.fillText(isMajorUnitDate ? date.toLocaleDateString() : date.toLocaleTimeString(), xPosition + 3, tickY + 43);
-            context.stroke();
+        // Draw our major unit ticks, but only if our minor unit isn't 'year'.
+        if (this._minorTickUnitAndStep.unit !== "year") {
+            for (const { date, xPosition } of this._majorUnitTicks) {
+                const tickY = sizeHeight - rangeContainerHeight;
+    
+                // Draw the actual tick.
+                context.lineWidth = 0.5;
+                context.beginPath();
+                context.moveTo(xPosition, tickY + (rangeContainerHeight / 2));
+                context.lineTo(xPosition, tickY + rangeContainerHeight);
+                context.stroke();
+    
+                // Draw the major date/time label text.
+                context.lineWidth = 0.5;
+                context.font = "16px Arial";
+                context.fillStyle = "#595959";
+                context.beginPath();
+                context.fillText(this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS), xPosition + 3, tickY + 43);
+                context.stroke();
+            }
         }
 
         // Draw the rect around the range.
@@ -436,5 +447,18 @@ export class TimelineRange {
         }
 
         return minorTickDates;
+    }
+
+    /**
+     * Formats the given date as a string, using the label format for the specified unit.
+     * @param date 
+     * @param unit 
+     * @param labelFormats 
+     * @returns 
+     */
+    private _formatDate(date: Date, unit: Unit, labelFormats: TempisTimelineRangeUnitLabelFormats): string {
+        // TODO We should be checking the range options for a non-default label format for this unit.
+        // TODO We should be using a date adapter to get this label.
+        return format(date, (labelFormats as any)[unit]);
     }
 }

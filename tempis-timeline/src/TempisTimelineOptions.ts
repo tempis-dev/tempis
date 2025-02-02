@@ -1,4 +1,4 @@
-export type TempisTimelineOptions = {
+export interface TempisTimelineOptions {
     /** Whether the canvas should resize to match the dimensions of its parent container. */
     responsive?: boolean;
 
@@ -9,12 +9,26 @@ export type TempisTimelineOptions = {
     items: TempisTimelineItem[];
 };
 
-export type TempisTimelineRangeOptions = {
-
+export interface TempisTimelineRangeOptions {
+    minorUnit?: TempisTimelineRangeUnitOptions;
+    majorUnit?: TempisTimelineRangeUnitOptions;
 };
 
+export interface TempisTimelineRangeUnitOptions {
+    labelFormats?: TempisTimelineRangeUnitLabelFormats;
+};
 
-export type TempisTimelineItem = {
+export type TempisTimelineRangeUnitLabelFormats = {
+    millisecond?: string,
+    second?: string,
+    minute?: string,
+    hour?: string,
+    day?: string,
+    month?: string,
+    year?: string
+};
+
+export interface TempisTimelineItem {
     id: string | number;
     start: string | number | Date;
     // TODO Make optional to allow for point-in-time items.

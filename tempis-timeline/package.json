@@ -15,8 +15,11 @@
   "description": "",
   "devDependencies": {
     "@types/node": "^22.10.5",
-    "typescript": "^5.7.3",
     "esbuild": "^0.15.18",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "date-format-parse": "^0.2.7"
   }
 }
