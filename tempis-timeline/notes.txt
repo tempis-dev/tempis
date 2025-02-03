@@ -5,3 +5,7 @@ var destCtx = destinationCanvas.getContext('2d');
     
 //call its drawImage() function passing it the source canvas directly
 destCtx.drawImage(sourceCanvas, 0, 0);
+
+
+For individual points (no end date) we should show a vertical line with a default colour BUT this colour could be the colour group colour is using that, would look pretty.
+

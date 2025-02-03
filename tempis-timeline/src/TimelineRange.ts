@@ -286,7 +286,7 @@ export class TimelineRange {
                 context.font = "16px Arial";
                 context.fillStyle = "#595959";
                 context.beginPath();
-                context.fillText(tickLabel, labelXPosition, tickY + 43);
+                context.fillText(tickLabel, labelXPosition, tickY + 44);
                 context.stroke();
             }
         }

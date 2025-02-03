@@ -36,7 +36,7 @@ var tempis_timeline = (() => {
     }
     draw(context, range) {
       const height = context.canvas.height - range.calculateRequiredHeight();
-      context.fillStyle = "#F6F5F5";
+      context.fillStyle = "#f5f5f5";
       context.fillRect(0, 0, context.canvas.width, height);
       this._drawMinorUnitBars(context, range.minorTicks, height);
     }
@@ -676,7 +676,7 @@ var tempis_timeline = (() => {
           context.font = "16px Arial";
           context.fillStyle = "#595959";
           context.beginPath();
-          context.fillText(tickLabel, labelXPosition, tickY + 43);
+          context.fillText(tickLabel, labelXPosition, tickY + 44);
           context.stroke();
         }
       }
