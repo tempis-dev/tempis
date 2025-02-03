@@ -681,9 +681,10 @@ var tempis_timeline = (() => {
         }
       }
       context.lineWidth = 0.5;
-      context.strokeStyle = "#595959";
+      context.fillStyle = "#595959";
       context.beginPath();
-      context.rect(0, sizeHeight - rangeContainerHeight, sizeWidth, rangeContainerHeight);
+      context.moveTo(0, tickY);
+      context.lineTo(this._canvas.width, tickY);
       context.stroke();
     }
     _findSensibleUnitAndStep(targetTickCount, minorUnit) {
