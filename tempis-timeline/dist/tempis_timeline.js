@@ -639,34 +639,34 @@ var tempis_timeline = (() => {
       var sizeWidth = context.canvas.clientWidth;
       var sizeHeight = context.canvas.clientHeight;
       const rangeContainerHeight = this.calculateRequiredHeight();
-      const rangeContainerWidth = sizeWidth;
       const tickY = sizeHeight - rangeContainerHeight;
       for (const { date, xPosition } of this._minorUnitTicks) {
-        context.lineWidth = 0.5;
+        context.lineWidth = 3;
+        context.lineCap = "round";
         context.beginPath();
-        context.moveTo(xPosition, tickY);
-        context.lineTo(xPosition, tickY + rangeContainerHeight / 2);
+        context.moveTo(xPosition, tickY + 5);
+        context.lineTo(xPosition, tickY + rangeContainerHeight / 2 - 2);
         context.stroke();
-        context.lineWidth = 0.5;
         context.font = "16px Arial";
         context.fillStyle = "#595959";
         context.beginPath();
-        context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + 3, tickY + 18);
+        context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + 4, tickY + 20);
         context.stroke();
       }
       if (this._minorTickUnitAndStep.unit !== "year") {
         for (let tickIndex = 0; tickIndex < this._majorUnitTicks.length; tickIndex++) {
           const { date, xPosition } = this._majorUnitTicks[tickIndex];
-          const isStickyLabel = date.getTime() < this._fromDt.getTime();
+          const isStickyLabel = date.getTime() <= this._fromDt.getTime();
           if (!isStickyLabel) {
-            context.lineWidth = 0.5;
+            context.lineWidth = 3;
+            context.lineCap = "round";
             context.beginPath();
-            context.moveTo(xPosition, tickY + rangeContainerHeight / 2);
-            context.lineTo(xPosition, tickY + rangeContainerHeight);
+            context.moveTo(xPosition, tickY + rangeContainerHeight / 2 + 5);
+            context.lineTo(xPosition, tickY + rangeContainerHeight - 4);
             context.stroke();
           }
           const tickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
-          let labelXPosition = xPosition + 3;
+          let labelXPosition = xPosition + 5;
           if (isStickyLabel) {
             const labelWidth = context.measureText(tickLabel).width + 5;
             const nextTickXPosition = this._majorUnitTicks[tickIndex + 1].xPosition;
@@ -680,15 +680,10 @@ var tempis_timeline = (() => {
           context.stroke();
         }
       }
-      context.lineWidth = 1;
-      context.strokeStyle = "#8a8a8a";
+      context.lineWidth = 0.5;
+      context.strokeStyle = "#595959";
       context.beginPath();
       context.rect(0, sizeHeight - rangeContainerHeight, sizeWidth, rangeContainerHeight);
-      context.stroke();
-      context.lineWidth = 0.5;
-      context.beginPath();
-      context.moveTo(0, sizeHeight - rangeContainerHeight / 2);
-      context.lineTo(rangeContainerWidth, sizeHeight - rangeContainerHeight / 2);
       context.stroke();
     }
     _findSensibleUnitAndStep(targetTickCount, minorUnit) {
