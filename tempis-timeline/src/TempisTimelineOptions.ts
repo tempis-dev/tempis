@@ -31,8 +31,7 @@ export type TempisTimelineRangeUnitLabelFormats = {
 export interface TempisTimelineItem {
     id: string | number;
     start: string | number | Date;
-    // TODO Make optional to allow for point-in-time items.
-    end: string | number | Date;
+    end?: string | number | Date;
     caption?: string;
     grouping?: string;
 };

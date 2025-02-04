@@ -63,7 +63,7 @@ var tempis_timeline = (() => {
       this._id = definition.id;
       this._caption = (_a = definition.caption) != null ? _a : "";
       this._start = parseDate(definition.start);
-      this._end = parseDate(definition.end);
+      this._end = definition.end ? parseDate(definition.end) : null;
     }
     get id() {
       return this._id;
@@ -134,6 +134,7 @@ var tempis_timeline = (() => {
       (_b = this._onChange) == null ? void 0 : _b.call(this);
     }
     _findMinAndMaxDates() {
+      var _a, _b;
       if (this._itemGroupings.length === 0 || this._itemGroupings[0].items.length === 0) {
         this._minDate = null;
         this._maxDate = null;
@@ -146,8 +147,8 @@ var tempis_timeline = (() => {
           if (minDate === null || item.start.getTime() < minDate.getTime()) {
             minDate = item.start;
           }
-          if (maxDate === null || item.end.getTime() > maxDate.getTime()) {
-            maxDate = item.end;
+          if (maxDate === null || ((_a = item.end) != null ? _a : item.start).getTime() > maxDate.getTime()) {
+            maxDate = (_b = item.end) != null ? _b : item.start;
           }
         }
       }

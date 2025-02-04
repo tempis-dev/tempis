@@ -5,13 +5,13 @@ export class TimelineItem {
     private readonly _id: string | number;
     private readonly _caption: string;
     private readonly _start: Date;
-    private readonly _end: Date;
+    private readonly _end: Date | null;
 
     public constructor(definition: TimelineItemDefinition) {
         this._id = definition.id;
         this._caption = definition.caption ?? "";
         this._start = parseDate(definition.start);
-        this._end = parseDate(definition.end);
+        this._end = definition.end ? parseDate(definition.end) : null;
     }
 
     public get id(): string | number {
@@ -26,7 +26,7 @@ export class TimelineItem {
         return this._start;
     }
 
-    public get end(): Date {
+    public get end(): Date | null {
         return this._end;
     }
 }

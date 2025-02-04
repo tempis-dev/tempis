@@ -97,8 +97,8 @@ export class TimelineDataSet {
                 if (minDate === null || item.start.getTime() < minDate.getTime()) {
                     minDate = item.start;
                 }
-                if (maxDate === null || item.end.getTime() > maxDate.getTime()) {
-                    maxDate = item.end;
+                if (maxDate === null || (item.end ?? item.start).getTime() > maxDate.getTime()) {
+                    maxDate = item.end ?? item.start;
                 }
             }
         }
