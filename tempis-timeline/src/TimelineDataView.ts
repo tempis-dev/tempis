@@ -1,5 +1,8 @@
-import { TimelineItemGrouping } from "./TimelineItemGrouping";
+import { TimelineDataSet } from "./TimelineDataSet";
 import { RangeTick, TimelineRangeView } from "./TimelineRangeView";
+
+/** The default item background colour. */
+const DEFAULT_ITEM_BACKGROUND_COLOUR: string = "#2c318f";
 
 export class TimelineDataView {
     /** The minimum height of the data view. */
@@ -16,7 +19,7 @@ export class TimelineDataView {
      * @param context The canvas 2D context.
      * @param maxHeight The max height that we can draw the data view before it must start scrolling.
      */
-    public draw(context: CanvasRenderingContext2D, range: TimelineRangeView): void {
+    public draw(context: CanvasRenderingContext2D, dataSet: TimelineDataSet, range: TimelineRangeView): void {
         // TODO We shouldn't render a groups box to the left! We should split the view above the range bar and have the group label ON the group and have it sticky to the top.
 
         // TODO We need to calculate how much height this data view is ACTUALLY going to use before we use it
@@ -32,6 +35,9 @@ export class TimelineDataView {
 
         // TODO Draw minor unit tick bars IF configured.
         this._drawMinorUnitBars(context, range.minorTicks, height);
+
+        // Draw our groups and items!
+        this._drawGroups(context, dataSet, range, height);
     }
 
     /**
@@ -53,5 +59,61 @@ export class TimelineDataView {
 
         context.stroke();
         context.setLineDash([]);
+    }
+
+    private _drawGroups(context: CanvasRenderingContext2D, dataSet: TimelineDataSet, range: TimelineRangeView, height: number): void {
+        // TODO Work this out sensibly!
+        const scrollYOffset = 0;
+
+        // Calculate the width of one millisecond as it would be rendered on the canvas.
+        const milliRenderWidth = context.canvas.width / (range.toDt.getTime() - range.fromDt.getTime());
+
+        for (const grouping of dataSet.groupings) {
+            // Get all items in the current visible range.
+            const itemsInRange = grouping.getItemsInRange(range.fromDt, range.toDt);
+
+            // If there are no items in this group that are within the current range view then we should just skip this group.
+            if (!itemsInRange.length) {
+                continue;
+            }
+
+            // Draw the group label if we have one.
+            if (grouping.group) {
+                context.font = "14px Arial";
+                context.fillStyle = "#595959";
+                context.beginPath();
+                context.fillText(grouping.group, 4, scrollYOffset + 16);
+                context.stroke();
+            }
+
+            for (const item of itemsInRange) {
+                // Determine the x position of the start of this item.
+                const startPositionX = milliRenderWidth * (item.start.getTime() - range.fromDt.getTime());
+
+                // Is this a range item or a PIT item?
+                if (item.end) {
+                    // Determine the x position of the end of this item.
+                    const endPositionX = milliRenderWidth * (item.end.getTime() - range.fromDt.getTime());
+
+                    // Draw the item range rectangle.
+                    context.fillStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
+                    context.beginPath();
+                    context.fillRect(startPositionX, scrollYOffset + 40, endPositionX - startPositionX, 40);
+                    context.stroke();
+
+                    // Draw the item label (if there is one)
+                    if (item.caption) {
+                        context.font = "14px Arial";
+                        context.fillStyle = "#FFFFFF";
+                        context.beginPath();
+                        context.roundRect(startPositionX, scrollYOffset + 40, endPositionX - startPositionX, 40);
+                        context.fillText(item.caption, startPositionX + 2, scrollYOffset + 60);
+                        context.stroke();
+                    }
+                } else {
+
+                }
+            }
+        }
     }
 }

@@ -92,6 +92,15 @@ var tempis_timeline = (() => {
     get items() {
       return this._items;
     }
+    getItemsInRange(fromDt, toDt) {
+      return this._items.filter((item) => {
+        if (item.end) {
+          return item.start.getTime() >= fromDt.getTime() && item.start.getTime() <= toDt.getTime() || item.end.getTime() >= fromDt.getTime() && item.end.getTime() <= toDt.getTime();
+        } else {
+          return item.start.getTime() >= fromDt.getTime() && item.start.getTime() <= toDt.getTime();
+        }
+      });
+    }
     _sortItemsByStartDate() {
       this._items.sort((a2, b) => b.start.getTime() - a2.start.getTime());
     }
@@ -158,16 +167,18 @@ var tempis_timeline = (() => {
   };
 
   // src/TimelineDataView.ts
+  var DEFAULT_ITEM_BACKGROUND_COLOUR = "#2c318f";
   var TimelineDataView = class {
     constructor() {
     }
     scrollByYMovement(movementY) {
     }
-    draw(context, range) {
+    draw(context, dataSet, range) {
       const height = context.canvas.height - range.calculateRequiredHeight();
       context.fillStyle = "#f5f5f5";
       context.fillRect(0, 0, context.canvas.width, height);
       this._drawMinorUnitBars(context, range.minorTicks, height);
+      this._drawGroups(context, dataSet, range, height);
     }
     _drawMinorUnitBars(context, rangeMinorTicks, height) {
       context.lineWidth = 1;
@@ -180,6 +191,42 @@ var tempis_timeline = (() => {
       }
       context.stroke();
       context.setLineDash([]);
+    }
+    _drawGroups(context, dataSet, range, height) {
+      const scrollYOffset = 0;
+      const milliRenderWidth = context.canvas.width / (range.toDt.getTime() - range.fromDt.getTime());
+      for (const grouping of dataSet.groupings) {
+        const itemsInRange = grouping.getItemsInRange(range.fromDt, range.toDt);
+        if (!itemsInRange.length) {
+          continue;
+        }
+        if (grouping.group) {
+          context.font = "14px Arial";
+          context.fillStyle = "#595959";
+          context.beginPath();
+          context.fillText(grouping.group, 4, scrollYOffset + 16);
+          context.stroke();
+        }
+        for (const item of itemsInRange) {
+          const startPositionX = milliRenderWidth * (item.start.getTime() - range.fromDt.getTime());
+          if (item.end) {
+            const endPositionX = milliRenderWidth * (item.end.getTime() - range.fromDt.getTime());
+            context.fillStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
+            context.beginPath();
+            context.fillRect(startPositionX, scrollYOffset + 40, endPositionX - startPositionX, 40);
+            context.stroke();
+            if (item.caption) {
+              context.font = "14px Arial";
+              context.fillStyle = "#FFFFFF";
+              context.beginPath();
+              context.roundRect(startPositionX, scrollYOffset + 40, endPositionX - startPositionX, 40);
+              context.fillText(item.caption, startPositionX + 2, scrollYOffset + 60);
+              context.stroke();
+            }
+          } else {
+          }
+        }
+      }
     }
   };
   TimelineDataView._minimumHeight = 50;
@@ -974,7 +1021,7 @@ var tempis_timeline = (() => {
       var context = this._canvas.getContext("2d");
       context.clearRect(0, 0, this._canvas.width, this._canvas.height);
       const maxDataViewHeight = this._canvas.height - this._rangeView.calculateRequiredHeight();
-      this._dataView.draw(context, this._rangeView);
+      this._dataView.draw(context, this._dataSet, this._rangeView);
       this._rangeView.draw(context);
     }
   };

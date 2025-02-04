@@ -30,6 +30,23 @@ export class TimelineItemGrouping {
     }
 
     /**
+     * Gats all items in this group that have a start or end date that lies within the specified range inclusively.
+     * @param fromDt The range from date.
+     * @param toDt The range to date.
+     * @returns All items in this group that have a start or end date that lies within the specified range inclusively.
+     */
+    public getItemsInRange(fromDt: Date, toDt: Date): TimelineItem[] {
+        return this._items.filter((item) => {
+            if (item.end) {
+                return (item.start.getTime() >= fromDt.getTime() && item.start.getTime() <= toDt.getTime()) || 
+                    (item.end.getTime() >= fromDt.getTime() && item.end.getTime() <= toDt.getTime());
+            } else {
+                return item.start.getTime() >= fromDt.getTime() && item.start.getTime() <= toDt.getTime();
+            }
+        });
+    }
+
+    /**
      * Sort the group items by start date.
      */
     private _sortItemsByStartDate() : void {

@@ -197,8 +197,8 @@ export class TempisTimeline {
         // TODO This will eventually have to cope with the position of the range changing or the number of them (top and bottom range)
         const maxDataViewHeight = this._canvas.height - this._rangeView.calculateRequiredHeight();
 
-        // Draw the data view
-        this._dataView.draw(context, this._rangeView);
+        // Draw the data view.
+        this._dataView.draw(context, this._dataSet, this._rangeView);
 
         // Draw the range.
         this._rangeView.draw(context);
