@@ -222,14 +222,13 @@ var tempis_timeline = (() => {
             const endPositionX = milliRenderWidth * (item.end.getTime() - range.fromDt.getTime());
             context.fillStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
             context.beginPath();
-            context.fillRect(startPositionX, scrollYOffset + 40, endPositionX - startPositionX, 40);
-            context.stroke();
+            context.roundRect(startPositionX, scrollYOffset + 40, endPositionX - startPositionX, 30, 5);
+            context.fill();
             if (item.caption) {
               context.font = "14px Arial";
               context.fillStyle = "#FFFFFF";
               context.beginPath();
-              context.roundRect(startPositionX, scrollYOffset + 40, endPositionX - startPositionX, 40);
-              context.fillText(item.caption, startPositionX + 2, scrollYOffset + 60);
+              context.fillText(item.caption, startPositionX + 4, scrollYOffset + 60);
               context.stroke();
             }
           } else {
