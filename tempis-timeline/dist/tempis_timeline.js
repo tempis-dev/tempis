@@ -674,8 +674,8 @@ var tempis_timeline = (() => {
       return this._minorUnitTicks;
     }
     setRange(from, to) {
-      this._fromDt = from;
-      this._toDt = to;
+      this._fromDt = new Date(from);
+      this._toDt = new Date(to);
       if (this._fromDt.getTime() === this._toDt.getTime()) {
         this._fromDt.setTime(this._fromDt.getTime() - 60 * 1e3);
         this._toDt.setTime(this._toDt.getTime() + 60 * 1e3);

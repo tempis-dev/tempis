@@ -96,8 +96,8 @@ export class TimelineRangeView {
      * @param to 
      */
     public setRange(from: Date, to: Date): void {
-        this._fromDt = from;
-        this._toDt = to;
+        this._fromDt = new Date(from);
+        this._toDt = new Date(to);
 
         // If our from and to date are the same then we cannot represent this single point in time on the timeline.
         // To get around this we should pad the time out by some arbitrary amount either side of the date.
