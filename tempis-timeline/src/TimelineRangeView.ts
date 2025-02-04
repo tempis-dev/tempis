@@ -99,6 +99,14 @@ export class TimelineRangeView {
         this._fromDt = from;
         this._toDt = to;
 
+        // If our from and to date are the same then we cannot represent this single point in time on the timeline.
+        // To get around this we should pad the time out by some arbitrary amount either side of the date.
+        // TODO For now we can just add a minute either side, but we should probably make this configurable.
+        if (this._fromDt.getTime() === this._toDt.getTime()) {
+            this._fromDt.setTime(this._fromDt.getTime() - (60 * 1000));
+            this._toDt.setTime(this._toDt.getTime() + (60 * 1000));
+        }
+
         // Our range has changed so we will need to recalculate our minor unit ticks.
         this.calculateMinorAndMajorUnitTicks();
     }

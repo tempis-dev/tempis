@@ -84,6 +84,7 @@ var tempis_timeline = (() => {
     constructor(group, items) {
       this._group = group;
       this._items = items.map((itemDefinition) => new TimelineItem(itemDefinition));
+      this._sortItemsByStartDate();
     }
     get group() {
       return this._group;
@@ -91,10 +92,8 @@ var tempis_timeline = (() => {
     get items() {
       return this._items;
     }
-    get stacks() {
-      return [];
-    }
-    calculateStacks(getItemRenderWidth) {
+    _sortItemsByStartDate() {
+      this._items.sort((a2, b) => b.start.getTime() - a2.start.getTime());
     }
   };
 
@@ -629,6 +628,10 @@ var tempis_timeline = (() => {
     setRange(from, to) {
       this._fromDt = from;
       this._toDt = to;
+      if (this._fromDt.getTime() === this._toDt.getTime()) {
+        this._fromDt.setTime(this._fromDt.getTime() - 60 * 1e3);
+        this._toDt.setTime(this._toDt.getTime() + 60 * 1e3);
+      }
       this.calculateMinorAndMajorUnitTicks();
     }
     moveByXMovement(movementX) {

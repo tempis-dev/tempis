@@ -11,7 +11,12 @@ export class TimelineItemGrouping {
     /** Creates a new instance of the TimelineItemGrouping class. */
     public constructor(group: string, items: TimelineItemDefinition[]) {
         this._group = group;
+
+        // Create the group items. 
         this._items = items.map((itemDefinition) => new TimelineItem(itemDefinition));
+
+        // Our items should always be sorted by start date.
+        this._sortItemsByStartDate();
     }
 
     /** Gets the group name. */
@@ -24,11 +29,10 @@ export class TimelineItemGrouping {
         return this._items;
     }
 
-    public get stacks(): TimelineItem[][] {
-        return [];
-    }
-
-    public calculateStacks(getItemRenderWidth: (item: TimelineItem) => number): void {
-
+    /**
+     * Sort the group items by start date.
+     */
+    private _sortItemsByStartDate() : void {
+        this._items.sort((a, b) => b.start.getTime() - a.start.getTime());
     }
 }
