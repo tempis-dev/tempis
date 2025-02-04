@@ -48,3 +48,18 @@ export function clamp(value: number, min: number, max: number): number {
 
     return value;
 }
+
+/**
+ * Gets whether the two specified two date ranges overlap.
+ * @param aStart The start date of the first range.
+ * @param aEnd The end date of the first range.
+ * @param bStart The start date of the second range.
+ * @param bEnd The end date of the second range.
+ * @returns Whether the two specified two date ranges overlap.
+ */
+export function doDateRangesOverlap(aStart: Date, aEnd: Date, bStart: Date, bEnd: Date): boolean {
+    if (aStart <= bStart && bStart <= aEnd) return true; // The second range starts in the first.
+    if (aStart <= bEnd && bEnd <= aEnd) return true; // The second range ends in the first.
+    if (bStart < aStart && aEnd < bEnd) return true; // The first range starts and ends in the second.
+    return false;
+}

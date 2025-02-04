@@ -1,5 +1,6 @@
 import { TempisTimelineItem as TimelineItemDefinition } from "./TempisTimelineOptions";
 import { TimelineItem } from "./TimelineItem";
+import { doDateRangesOverlap } from "./Utilities";
 
 export class TimelineItemGrouping {
     /** The group name. */
@@ -38,8 +39,7 @@ export class TimelineItemGrouping {
     public getItemsInRange(fromDt: Date, toDt: Date): TimelineItem[] {
         return this._items.filter((item) => {
             if (item.end) {
-                return (item.start.getTime() >= fromDt.getTime() && item.start.getTime() <= toDt.getTime()) || 
-                    (item.end.getTime() >= fromDt.getTime() && item.end.getTime() <= toDt.getTime());
+                return doDateRangesOverlap(item.start, item.end, fromDt, toDt);
             } else {
                 return item.start.getTime() >= fromDt.getTime() && item.start.getTime() <= toDt.getTime();
             }

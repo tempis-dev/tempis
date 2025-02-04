@@ -55,6 +55,15 @@ var tempis_timeline = (() => {
     }
     return value;
   }
+  function doDateRangesOverlap(aStart, aEnd, bStart, bEnd) {
+    if (aStart <= bStart && bStart <= aEnd)
+      return true;
+    if (aStart <= bEnd && bEnd <= aEnd)
+      return true;
+    if (bStart < aStart && aEnd < bEnd)
+      return true;
+    return false;
+  }
 
   // src/TimelineItem.ts
   var TimelineItem = class {
@@ -95,7 +104,7 @@ var tempis_timeline = (() => {
     getItemsInRange(fromDt, toDt) {
       return this._items.filter((item) => {
         if (item.end) {
-          return item.start.getTime() >= fromDt.getTime() && item.start.getTime() <= toDt.getTime() || item.end.getTime() >= fromDt.getTime() && item.end.getTime() <= toDt.getTime();
+          return doDateRangesOverlap(item.start, item.end, fromDt, toDt);
         } else {
           return item.start.getTime() >= fromDt.getTime() && item.start.getTime() <= toDt.getTime();
         }
