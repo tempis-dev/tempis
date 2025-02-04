@@ -28,7 +28,7 @@ const DEFAULT_MAJOR_UNIT_LABEL_FORMATS: TempisTimelineRangeUnitLabelFormats = {
     year: 'YYYY'
 }
 
-export class TimelineRange {
+export class TimelineRangeView {
     /** The timeline canvas. */
     private readonly _canvas: HTMLCanvasElement;
 
@@ -167,7 +167,7 @@ export class TimelineRange {
         this.calculateMinorAndMajorUnitTicks();
     }
 
-    public clear(): void {
+    public clearRange(): void {
         // Clearing the range is just a matter of putting the default from/to back.
         this.setRange(new Date(0), new Date(4102444800000));
     }

@@ -24,37 +24,6 @@ var tempis_timeline = (() => {
     TempisTimeline: () => TempisTimeline
   });
 
-  // src/TimelineDataView.ts
-  var TimelineDataView = class {
-    constructor() {
-      this._itemGroupings = [];
-    }
-    setGroupings(groupings) {
-      this._itemGroupings = groupings;
-    }
-    scrollByYMovement(movementY) {
-    }
-    draw(context, range) {
-      const height = context.canvas.height - range.calculateRequiredHeight();
-      context.fillStyle = "#f5f5f5";
-      context.fillRect(0, 0, context.canvas.width, height);
-      this._drawMinorUnitBars(context, range.minorTicks, height);
-    }
-    _drawMinorUnitBars(context, rangeMinorTicks, height) {
-      context.lineWidth = 1;
-      context.strokeStyle = "#c2c2c2";
-      context.setLineDash([3, 3]);
-      context.beginPath();
-      for (const { xPosition } of rangeMinorTicks) {
-        context.moveTo(xPosition, 0);
-        context.lineTo(xPosition, height);
-      }
-      context.stroke();
-      context.setLineDash([]);
-    }
-  };
-  TimelineDataView._minimumHeight = 50;
-
   // src/Utilities.ts
   function parseDate(input) {
     if (!input) {
@@ -122,7 +91,98 @@ var tempis_timeline = (() => {
     get items() {
       return this._items;
     }
+    get stacks() {
+      return [];
+    }
+    calculateStacks(getItemRenderWidth) {
+    }
   };
+
+  // src/TimelineDataSet.ts
+  var TimelineDataSet = class {
+    constructor(onChange) {
+      this._itemGroupings = [];
+      this._minDate = null;
+      this._maxDate = null;
+      this._onChange = onChange != null ? onChange : null;
+    }
+    get groupings() {
+      return [...this._itemGroupings];
+    }
+    get minDate() {
+      return this._minDate;
+    }
+    get maxDate() {
+      return this._maxDate;
+    }
+    createGroupings(itemDefinitions) {
+      var _a, _b;
+      this._itemGroupings = [];
+      const itemGroupingMap = {};
+      for (const itemDefinition of itemDefinitions != null ? itemDefinitions : []) {
+        const groupingKey = (_a = itemDefinition.grouping) != null ? _a : "";
+        let group = itemGroupingMap[groupingKey];
+        if (!group) {
+          group = [];
+          itemGroupingMap[groupingKey] = group;
+        }
+        group.push(itemDefinition);
+      }
+      for (const [key, value] of Object.entries(itemGroupingMap)) {
+        this._itemGroupings.push(new TimelineItemGrouping(key, value));
+      }
+      this._findMinAndMaxDates();
+      (_b = this._onChange) == null ? void 0 : _b.call(this);
+    }
+    _findMinAndMaxDates() {
+      if (this._itemGroupings.length === 0 || this._itemGroupings[0].items.length === 0) {
+        this._minDate = null;
+        this._maxDate = null;
+        return;
+      }
+      let minDate = null;
+      let maxDate = null;
+      for (const grouping of this._itemGroupings) {
+        for (const item of grouping.items) {
+          if (minDate === null || item.start.getTime() < minDate.getTime()) {
+            minDate = item.start;
+          }
+          if (maxDate === null || item.end.getTime() > maxDate.getTime()) {
+            maxDate = item.end;
+          }
+        }
+      }
+      this._minDate = minDate;
+      this._maxDate = maxDate;
+    }
+  };
+
+  // src/TimelineDataView.ts
+  var TimelineDataView = class {
+    constructor() {
+    }
+    scrollByYMovement(movementY) {
+    }
+    draw(context, range) {
+      const height = context.canvas.height - range.calculateRequiredHeight();
+      context.fillStyle = "#f5f5f5";
+      context.fillRect(0, 0, context.canvas.width, height);
+      this._drawMinorUnitBars(context, range.minorTicks, height);
+    }
+    _drawMinorUnitBars(context, rangeMinorTicks, height) {
+      context.lineWidth = 1;
+      context.strokeStyle = "#c2c2c2";
+      context.setLineDash([3, 3]);
+      context.beginPath();
+      for (const { xPosition } of rangeMinorTicks) {
+        context.moveTo(xPosition, 0);
+        context.lineTo(xPosition, height);
+      }
+      context.stroke();
+      context.setLineDash([]);
+    }
+  };
+  TimelineDataView._minimumHeight = 50;
 
   // node_modules/date-format-parse/es/util.js
   function isDate(value) {
@@ -528,7 +588,7 @@ var tempis_timeline = (() => {
   addParseFlag("w", match1to2, "week");
   addParseFlag("ww", match2, "week");
 
-  // src/TimelineRange.ts
+  // src/TimelineRangeView.ts
   var DEFAULT_MINOR_UNIT_LABEL_FORMATS = {
     millisecond: "SSS",
     second: "HH:mm:ss",
@@ -546,7 +606,7 @@ var tempis_timeline = (() => {
     month: "MMMM YYYY",
     year: "YYYY"
   };
-  var TimelineRange = class {
+  var TimelineRangeView = class {
     constructor(canvas, options = {}) {
       this._fromDt = new Date();
       this._toDt = new Date(this._fromDt.getTime() + 31556952e4);
@@ -608,7 +668,7 @@ var tempis_timeline = (() => {
       this._toDt.setMilliseconds(this._toDt.getMilliseconds() + zoomValue);
       this.calculateMinorAndMajorUnitTicks();
     }
-    clear() {
+    clearRange() {
       this.setRange(new Date(0), new Date(41024448e5));
     }
     calculateRequiredHeight() {
@@ -815,14 +875,13 @@ var tempis_timeline = (() => {
   var TempisTimeline = class {
     constructor(context, options) {
       this._canvasContainerResizeObserver = null;
-      this._itemGroupings = [];
       this._options = options;
       this._canvas = this._getCanvas(context);
-      this._range = new TimelineRange(this._canvas, this._options.range);
       this._dataView = new TimelineDataView();
-      this._createItemGroupings();
+      this._rangeView = new TimelineRangeView(this._canvas, this._options.range);
+      this._dataSet = new TimelineDataSet(() => this._onDataSetChange());
+      this._dataSet.createGroupings(this._options.items);
       this._resizeCanvas();
-      this._setRange();
       if (options.responsive !== false) {
         this._createCanvasContainerResizeObserver();
       }
@@ -842,43 +901,6 @@ var tempis_timeline = (() => {
         return targetElement;
       }
       throw new Error("whatcha doing this isn't a valid value!");
-    }
-    _createItemGroupings() {
-      var _a, _b;
-      this._itemGroupings = [];
-      const itemGroupingMap = {};
-      for (const itemDefinition of (_a = this._options.items) != null ? _a : []) {
-        const groupingKey = (_b = itemDefinition.grouping) != null ? _b : "";
-        let group = itemGroupingMap[groupingKey];
-        if (!group) {
-          group = [];
-          itemGroupingMap[groupingKey] = group;
-        }
-        group.push(itemDefinition);
-      }
-      for (const [key, value] of Object.entries(itemGroupingMap)) {
-        this._itemGroupings.push(new TimelineItemGrouping(key, value));
-      }
-      this._dataView.setGroupings(this._itemGroupings);
-    }
-    _setRange() {
-      if (this._itemGroupings.length === 0 || this._itemGroupings[0].items.length === 0) {
-        this._range.clear();
-        return;
-      }
-      let minDate = null;
-      let maxDate = null;
-      for (const grouping of this._itemGroupings) {
-        for (const item of grouping.items) {
-          if (minDate === null || item.start.getTime() < minDate.getTime()) {
-            minDate = item.start;
-          }
-          if (maxDate === null || item.end.getTime() > maxDate.getTime()) {
-            maxDate = item.end;
-          }
-        }
-      }
-      this._range.setRange(minDate, maxDate);
     }
     _createCanvasContainerResizeObserver() {
       const canvasContainerElement = this._canvas.parentElement;
@@ -900,7 +922,7 @@ var tempis_timeline = (() => {
         };
       };
       this._canvas.addEventListener("wheel", (evt) => {
-        this._range.zoomRange(evt.deltaY);
+        this._rangeView.zoomRange(evt.deltaY);
         this._draw();
       });
       let isMouseDown = false;
@@ -916,7 +938,7 @@ var tempis_timeline = (() => {
       this._canvas.addEventListener("mousemove", (evt) => {
         if (isMouseDown) {
           if (Math.abs(evt.movementX) >= 1) {
-            this._range.moveByXMovement(-evt.movementX);
+            this._rangeView.moveByXMovement(-evt.movementX);
           }
           if (Math.abs(evt.movementY) >= 1) {
             this._dataView.scrollByYMovement(evt.movementY);
@@ -935,14 +957,21 @@ var tempis_timeline = (() => {
       }
       this._canvas.width = canvasContainerElement.getBoundingClientRect().width;
       this._canvas.height = canvasContainerElement.getBoundingClientRect().height;
-      this._range.calculateMinorAndMajorUnitTicks();
+      this._rangeView.calculateMinorAndMajorUnitTicks();
+    }
+    _onDataSetChange() {
+      if (this._dataSet.minDate && this._dataSet.maxDate) {
+        this._rangeView.setRange(this._dataSet.minDate, this._dataSet.maxDate);
+      } else {
+        this._rangeView.clearRange();
+      }
     }
     _draw() {
       var context = this._canvas.getContext("2d");
       context.clearRect(0, 0, this._canvas.width, this._canvas.height);
-      const maxDataViewHeight = this._canvas.height - this._range.calculateRequiredHeight();
-      this._dataView.draw(context, this._range);
-      this._range.draw(context);
+      const maxDataViewHeight = this._canvas.height - this._rangeView.calculateRequiredHeight();
+      this._dataView.draw(context, this._rangeView);
+      this._rangeView.draw(context);
     }
   };
   return __toCommonJS(src_exports);
