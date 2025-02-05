@@ -190,6 +190,7 @@ var tempis_timeline = (() => {
       context.fillStyle = "#f5f5f5";
       context.fillRect(0, 0, context.canvas.width, height);
       this._drawMinorUnitBars(context, range.minorTicks, height);
+      console.log(this._createViewDrawPlan(context, range.fromDt, range.toDt));
       this._drawGroups(context, range, height);
     }
     _drawMinorUnitBars(context, rangeMinorTicks, height) {
@@ -239,14 +240,49 @@ var tempis_timeline = (() => {
       }
     }
     _createViewDrawPlan(context, rangeFromDt, rangeToDt) {
+      var _a;
       const groupDrawPlans = [];
+      const milliRenderWidth = context.canvas.width / (rangeToDt.getTime() - rangeFromDt.getTime());
       for (const grouping of this._dataSet.groupings) {
         const itemsInRange = grouping.getItemsInRange(rangeFromDt, rangeToDt);
         if (!itemsInRange.length) {
           continue;
         }
-        const itemDrawPlanStacks = [];
+        const itemDrawPlanStacks = [[]];
         for (const item of itemsInRange) {
+          let startPositionX = 0;
+          let endPositionX = 0;
+          if (item.end) {
+            startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
+            endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
+          } else {
+            const itemLabelWidth = context.measureText((_a = item.caption) != null ? _a : "?").width;
+            startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime()) - itemLabelWidth / 2;
+            endPositionX = startPositionX + itemLabelWidth;
+            if (startPositionX < 0) {
+              startPositionX = 0;
+              endPositionX = itemLabelWidth;
+            } else if (endPositionX > context.canvas.width) {
+              startPositionX = context.canvas.width - itemLabelWidth;
+              endPositionX = context.canvas.width;
+            }
+          }
+          const itemDrawPlan = {
+            item,
+            xPositionStart: startPositionX,
+            xPositionEnd: endPositionX
+          };
+          let wasItemAddedToExistingRowStack = false;
+          for (const rowStack of itemDrawPlanStacks) {
+            if (rowStack.length === 0 || rowStack[rowStack.length - 1].xPositionEnd < itemDrawPlan.xPositionStart) {
+              rowStack.push(itemDrawPlan);
+              wasItemAddedToExistingRowStack = true;
+              break;
+            }
+          }
+          if (!wasItemAddedToExistingRowStack) {
+            itemDrawPlanStacks.push([itemDrawPlan]);
+          }
         }
         groupDrawPlans.push({
           label: grouping.group,

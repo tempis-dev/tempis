@@ -108,6 +108,9 @@ export class TimelineDataView {
         // TODO Draw minor unit tick bars IF configured.
         this._drawMinorUnitBars(context, range.minorTicks, height);
 
+        // TODO Remove this, just testing for now.
+        console.log(this._createViewDrawPlan(context, range.fromDt, range.toDt));
+
         // Draw our groups and items!
         this._drawGroups(context, range, height);
     }
@@ -189,7 +192,10 @@ export class TimelineDataView {
         // Create an array to store all of our group draw plans.
         const groupDrawPlans: DataViewGroupDrawPlan[] = [];
 
-        //  Work out all item stacks first. We aren't calculating any y positions of heights here we can do that after.
+        // Calculate the width of one millisecond as it would be rendered on the canvas.
+        const milliRenderWidth = context.canvas.width / (rangeToDt.getTime() - rangeFromDt.getTime());
+
+        // Work out all item stacks first. We aren't calculating any y positions or heights here we can do that after.
         for (const grouping of this._dataSet.groupings) {
             // Get all items in the current visible range.
             const itemsInRange = grouping.getItemsInRange(rangeFromDt, rangeToDt);
@@ -199,11 +205,68 @@ export class TimelineDataView {
                 continue;
             }
 
-            const itemDrawPlanStacks: DataViewItemDrawPlan[][] = [];
+            const itemDrawPlanStacks: DataViewItemDrawPlan[][] = [[]];
 
-            // TODO Create our item draw plan stacks!
+            // Populate the item draw plan stacks for this group.
             for (const item of itemsInRange) {
-               
+                let startPositionX = 0;
+                let endPositionX = 0;
+
+                // Figure out the xPositionStart and xPositionEnd of the current item. Whether the item is a range or PIT will influence this.
+                if (item.end) {
+                    // This is a range item, the start and end positions of our x axis will always be derived from the start and end date. 
+                    startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
+                    endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
+                } else {
+                    // This is a PIT item, the start and end positions of our x axis will be derived from the width of the label and the start date.
+                    const itemLabelWidth = context.measureText(item.caption ?? "?" /* TODO Determine what to do when we have PIT item with no caption */).width;
+
+                    // Let's set the start and end x position to be equidistant from the actual point in time that this item is for.
+                    startPositionX = (milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime())) - (itemLabelWidth / 2);
+                    endPositionX = startPositionX + itemLabelWidth;
+
+                    // We may have to shift this item so that it is actually in the bounds of the range view.
+                    if (startPositionX < 0) {
+                        startPositionX = 0;
+                        endPositionX = itemLabelWidth;
+                    } else if (endPositionX > context.canvas.width) {
+                        startPositionX = context.canvas.width - itemLabelWidth;
+                        endPositionX = context.canvas.width;
+                    }
+                }
+
+                // Create the draw plan for the current item.
+                const itemDrawPlan: DataViewItemDrawPlan = {
+                    item,
+                    xPositionStart: startPositionX,
+                    xPositionEnd: endPositionX
+                } as any;
+
+                // Iterate over each row stack (starting from the first which will be at the top row in the view) and:
+                //      - If the xPositionStart of the item is >= the xPositionEnd of the last item in the current row stack then add the item to the end of the row stack.
+                //      - If the xPositionStart of the item is < the xPositionEnd of the last item in the current row stack then:
+                //          - Move on to the next row stack if there is one.
+                //          - Create a new empty row stack if there is no next row stack and add the item to it.
+
+                let wasItemAddedToExistingRowStack = false;
+
+                // Look for an existing row to place this item in. It may not fit in any due to overlaps.
+                for (const rowStack of itemDrawPlanStacks) {
+                    if (rowStack.length === 0 || rowStack[rowStack.length - 1].xPositionEnd < itemDrawPlan.xPositionStart) {
+                        // The current item will fit nicely into the current row.
+                        rowStack.push(itemDrawPlan);
+
+                        wasItemAddedToExistingRowStack = true;
+
+                        // We found the right row for our item so there is no need to keep looking.
+                        break;
+                    }
+                }
+
+                // We were not able to place this item in any existing rows due to overlaps, so we will have to add it to a new row.
+                if (!wasItemAddedToExistingRowStack) {
+                    itemDrawPlanStacks.push([itemDrawPlan]);
+                }
             }
 
             // Add the group draw plan to the array.
