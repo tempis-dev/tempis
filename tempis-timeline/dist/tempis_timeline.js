@@ -178,16 +178,19 @@ var tempis_timeline = (() => {
   // src/TimelineDataView.ts
   var DEFAULT_ITEM_BACKGROUND_COLOUR = "#2c318f";
   var TimelineDataView = class {
-    constructor() {
+    constructor(dataSet) {
+      this._scrollYOffset = 0;
+      this._dataSet = dataSet;
     }
     scrollByYMovement(movementY) {
+      this._scrollYOffset = clamp(this._scrollYOffset + movementY, 0, 100);
     }
-    draw(context, dataSet, range) {
+    draw(context, range) {
       const height = context.canvas.height - range.calculateRequiredHeight();
       context.fillStyle = "#f5f5f5";
       context.fillRect(0, 0, context.canvas.width, height);
       this._drawMinorUnitBars(context, range.minorTicks, height);
-      this._drawGroups(context, dataSet, range, height);
+      this._drawGroups(context, range, height);
     }
     _drawMinorUnitBars(context, rangeMinorTicks, height) {
       context.lineWidth = 1;
@@ -201,10 +204,9 @@ var tempis_timeline = (() => {
       context.stroke();
       context.setLineDash([]);
     }
-    _drawGroups(context, dataSet, range, height) {
-      const scrollYOffset = 0;
+    _drawGroups(context, range, height) {
       const milliRenderWidth = context.canvas.width / (range.toDt.getTime() - range.fromDt.getTime());
-      for (const grouping of dataSet.groupings) {
+      for (const grouping of this._dataSet.groupings) {
         const itemsInRange = grouping.getItemsInRange(range.fromDt, range.toDt);
         if (!itemsInRange.length) {
           continue;
@@ -213,7 +215,7 @@ var tempis_timeline = (() => {
           context.font = "14px Arial";
           context.fillStyle = "#595959";
           context.beginPath();
-          context.fillText(grouping.group, 4, scrollYOffset + 16);
+          context.fillText(grouping.group, 4, this._scrollYOffset + 16);
           context.stroke();
         }
         for (const item of itemsInRange) {
@@ -222,13 +224,13 @@ var tempis_timeline = (() => {
             const endPositionX = milliRenderWidth * (item.end.getTime() - range.fromDt.getTime());
             context.fillStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
             context.beginPath();
-            context.roundRect(startPositionX, scrollYOffset + 40, endPositionX - startPositionX, 30, 5);
+            context.roundRect(startPositionX, this._scrollYOffset + 40, endPositionX - startPositionX, 30, 5);
             context.fill();
             if (item.caption) {
               context.font = "14px Arial";
               context.fillStyle = "#FFFFFF";
               context.beginPath();
-              context.fillText(item.caption, startPositionX + 8, scrollYOffset + 60);
+              context.fillText(item.caption, startPositionX + 8, this._scrollYOffset + 60);
               context.stroke();
             }
           } else {
@@ -936,9 +938,9 @@ var tempis_timeline = (() => {
       this._canvasContainerResizeObserver = null;
       this._options = options;
       this._canvas = this._getCanvas(context);
-      this._dataView = new TimelineDataView();
       this._rangeView = new TimelineRangeView(this._canvas, this._options.range);
       this._dataSet = new TimelineDataSet(() => this._onDataSetChange());
+      this._dataView = new TimelineDataView(this._dataSet);
       this._dataSet.createGroupings(this._options.items);
       this._resizeCanvas();
       if (options.responsive !== false) {
@@ -1029,7 +1031,7 @@ var tempis_timeline = (() => {
       var context = this._canvas.getContext("2d");
       context.clearRect(0, 0, this._canvas.width, this._canvas.height);
       const maxDataViewHeight = this._canvas.height - this._rangeView.calculateRequiredHeight();
-      this._dataView.draw(context, this._dataSet, this._rangeView);
+      this._dataView.draw(context, this._rangeView);
       this._rangeView.draw(context);
     }
   };

@@ -26,9 +26,9 @@ export class TempisTimeline {
         this._options = options;
 
         this._canvas = this._getCanvas(context);
-        this._dataView = new TimelineDataView();
         this._rangeView = new TimelineRangeView(this._canvas, this._options.range);
         this._dataSet = new TimelineDataSet(() => this._onDataSetChange());
+        this._dataView = new TimelineDataView(this._dataSet);
 
         // Create our initial item groupings.
         this._dataSet.createGroupings(this._options.items);
@@ -198,7 +198,7 @@ export class TempisTimeline {
         const maxDataViewHeight = this._canvas.height - this._rangeView.calculateRequiredHeight();
 
         // Draw the data view.
-        this._dataView.draw(context, this._dataSet, this._rangeView);
+        this._dataView.draw(context, this._rangeView);
 
         // Draw the range.
         this._rangeView.draw(context);

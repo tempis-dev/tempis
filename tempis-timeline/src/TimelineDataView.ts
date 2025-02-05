@@ -1,5 +1,6 @@
 import { TimelineDataSet } from "./TimelineDataSet";
 import { RangeTick, TimelineRangeView } from "./TimelineRangeView";
+import { clamp } from "./Utilities";
 
 /** The default item background colour. */
 const DEFAULT_ITEM_BACKGROUND_COLOUR: string = "#2c318f";
@@ -7,11 +8,27 @@ const DEFAULT_ITEM_BACKGROUND_COLOUR: string = "#2c318f";
 export class TimelineDataView {
     /** The minimum height of the data view. */
     private static _minimumHeight: number = 50;
-    
-    public constructor() {}
 
+    /** The underlying dataset model. */
+    private readonly _dataSet: TimelineDataSet;
+
+    /** The current scroll Y offset. */
+    private _scrollYOffset: number = 0;
+    
+    /**
+     * Creates anew instance of the TimelineDataView class.
+     * @param dataSet The underlying dataset model.
+     */
+    public constructor(dataSet: TimelineDataSet) {
+        this._dataSet = dataSet;
+    }
+
+    /**
+     * Scroll the y offset of the view by the specified amount. 
+     * @param movementY The y offset amount.
+     */
     public scrollByYMovement(movementY: number): void {
-        // TODO Do the scrolling baby!
+        this._scrollYOffset = clamp(this._scrollYOffset + movementY, 0, 100 /** TODO This needs to be based on available height and height of all items. */);
     }
 
     /**
@@ -19,7 +36,7 @@ export class TimelineDataView {
      * @param context The canvas 2D context.
      * @param maxHeight The max height that we can draw the data view before it must start scrolling.
      */
-    public draw(context: CanvasRenderingContext2D, dataSet: TimelineDataSet, range: TimelineRangeView): void {
+    public draw(context: CanvasRenderingContext2D, range: TimelineRangeView): void {
         // TODO We shouldn't render a groups box to the left! We should split the view above the range bar and have the group label ON the group and have it sticky to the top.
 
         // TODO We need to calculate how much height this data view is ACTUALLY going to use before we use it
@@ -37,7 +54,7 @@ export class TimelineDataView {
         this._drawMinorUnitBars(context, range.minorTicks, height);
 
         // Draw our groups and items!
-        this._drawGroups(context, dataSet, range, height);
+        this._drawGroups(context, range, height);
     }
 
     /**
@@ -61,14 +78,11 @@ export class TimelineDataView {
         context.setLineDash([]);
     }
 
-    private _drawGroups(context: CanvasRenderingContext2D, dataSet: TimelineDataSet, range: TimelineRangeView, height: number): void {
-        // TODO Work this out sensibly!
-        const scrollYOffset = 0;
-
+    private _drawGroups(context: CanvasRenderingContext2D, range: TimelineRangeView, height: number): void {
         // Calculate the width of one millisecond as it would be rendered on the canvas.
         const milliRenderWidth = context.canvas.width / (range.toDt.getTime() - range.fromDt.getTime());
 
-        for (const grouping of dataSet.groupings) {
+        for (const grouping of this._dataSet.groupings) {
             // Get all items in the current visible range.
             const itemsInRange = grouping.getItemsInRange(range.fromDt, range.toDt);
 
@@ -82,7 +96,7 @@ export class TimelineDataView {
                 context.font = "14px Arial";
                 context.fillStyle = "#595959";
                 context.beginPath();
-                context.fillText(grouping.group, 4, scrollYOffset + 16);
+                context.fillText(grouping.group, 4, this._scrollYOffset + 16);
                 context.stroke();
             }
 
@@ -98,7 +112,7 @@ export class TimelineDataView {
                     // Draw the item range rectangle.
                     context.fillStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
                     context.beginPath();
-                    context.roundRect(startPositionX, scrollYOffset + 40, endPositionX - startPositionX, 30, 5);
+                    context.roundRect(startPositionX, this._scrollYOffset + 40, endPositionX - startPositionX, 30, 5);
                     context.fill();
 
                     // Draw the item label (if there is one)
@@ -106,7 +120,7 @@ export class TimelineDataView {
                         context.font = "14px Arial";
                         context.fillStyle = "#FFFFFF";
                         context.beginPath();
-                        context.fillText(item.caption, startPositionX + 8, scrollYOffset + 60);
+                        context.fillText(item.caption, startPositionX + 8, this._scrollYOffset + 60);
                         context.stroke();
                     }
                 } else {
