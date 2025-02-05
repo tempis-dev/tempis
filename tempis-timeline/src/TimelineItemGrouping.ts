@@ -50,6 +50,6 @@ export class TimelineItemGrouping {
      * Sort the group items by start date.
      */
     private _sortItemsByStartDate() : void {
-        this._items.sort((a, b) => b.start.getTime() - a.start.getTime());
+        this._items.sort((a, b) => a.start.getTime() - b.start.getTime());
     }
 }

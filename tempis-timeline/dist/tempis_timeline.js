@@ -111,7 +111,7 @@ var tempis_timeline = (() => {
       });
     }
     _sortItemsByStartDate() {
-      this._items.sort((a2, b) => b.start.getTime() - a2.start.getTime());
+      this._items.sort((a2, b) => a2.start.getTime() - b.start.getTime());
     }
   };
 
