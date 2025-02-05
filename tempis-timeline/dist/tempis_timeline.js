@@ -228,7 +228,7 @@ var tempis_timeline = (() => {
               context.font = "14px Arial";
               context.fillStyle = "#FFFFFF";
               context.beginPath();
-              context.fillText(item.caption, startPositionX + 4, scrollYOffset + 60);
+              context.fillText(item.caption, startPositionX + 8, scrollYOffset + 60);
               context.stroke();
             }
           } else {
