@@ -19,3 +19,4 @@ IDEAS
 ============================
 - For PIT points (Point In Time, no end date) we should show a vertical line with a default colour BUT this colour could be the colour group colour is using that, would look pretty.
 - PIT items should NOT influence the range, The label of a PIT item should just be drawn in the bounds of the current range. e.g. If our earliest item is a PIT then the line down should be drawn on the very left side of the item label.
+- On a canvas a font or font size can only be set via  the canvas.font property which is set as one big string. Make a FOnt objects which takes the timeline defaults can can be overridden with other properties and rebuild the string. Make this an npm package?

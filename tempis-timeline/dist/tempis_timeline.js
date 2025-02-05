@@ -238,6 +238,27 @@ var tempis_timeline = (() => {
         }
       }
     }
+    _createViewDrawPlan(context, rangeFromDt, rangeToDt) {
+      const groupDrawPlans = [];
+      for (const grouping of this._dataSet.groupings) {
+        const itemsInRange = grouping.getItemsInRange(rangeFromDt, rangeToDt);
+        if (!itemsInRange.length) {
+          continue;
+        }
+        const itemDrawPlanStacks = [];
+        for (const item of itemsInRange) {
+        }
+        groupDrawPlans.push({
+          label: grouping.group,
+          stacks: itemDrawPlanStacks
+        });
+      }
+      let viewContentHeight = 0;
+      return {
+        height: viewContentHeight,
+        groupDrawPlans
+      };
+    }
   };
   TimelineDataView._minimumHeight = 50;
 

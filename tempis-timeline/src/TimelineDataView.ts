@@ -1,9 +1,64 @@
 import { TimelineDataSet } from "./TimelineDataSet";
+import { TimelineItem } from "./TimelineItem";
 import { RangeTick, TimelineRangeView } from "./TimelineRangeView";
 import { clamp } from "./Utilities";
 
 /** The default item background colour. */
 const DEFAULT_ITEM_BACKGROUND_COLOUR: string = "#2c318f";
+
+export interface DataViewDrawPlan {
+    /** The height that is required to draw all groups and items within the specified date range. */
+    height: number;
+
+    /** The range from date used when making the plan. */
+    fromDt: Date;
+
+    /** The range to date used when making the plan. */
+    toDt: Date;
+
+    /** The group draw plans. */
+    groupDrawPlans: DataViewGroupDrawPlan[];
+}
+
+export interface DataViewGroupDrawPlan {
+    /** The group label. */
+    label: string;
+
+    /** The stacks of all visible items in this group that need to be rendered. */
+    stacks: DataViewItemDrawPlan[][];
+
+    // TODO Figure out of if need this.
+    yPositionStart: number;
+
+    // TODO Figure out of if need this.
+    yPositionEnd: number;
+}
+
+export interface DataViewItemDrawPlan {
+    /** The item. */
+    item: TimelineItem;
+
+    /** The height that is required to draw this item. */
+    height: number;
+
+    /** The item font. */
+    font: string;
+
+    /** The item foreground colour. */
+    colour: string;
+
+    backgroundColour: string;
+
+    xPositionStart: number;
+
+    xPositionEnd: number;
+
+    // TODO Figure out of if need this.
+    yPositionStart: number;
+
+    // TODO Figure out of if need this.
+    yPositionEnd: number;
+}
 
 export class TimelineDataView {
     /** The minimum height of the data view. */
@@ -128,5 +183,44 @@ export class TimelineDataView {
                 }
             }
         }
+    }
+
+    private _createViewDrawPlan(context: CanvasRenderingContext2D, rangeFromDt: Date, rangeToDt: Date): DataViewDrawPlan {
+        // Create an array to store all of our group draw plans.
+        const groupDrawPlans: DataViewGroupDrawPlan[] = [];
+
+        //  Work out all item stacks first. We aren't calculating any y positions of heights here we can do that after.
+        for (const grouping of this._dataSet.groupings) {
+            // Get all items in the current visible range.
+            const itemsInRange = grouping.getItemsInRange(rangeFromDt, rangeToDt);
+
+            // If there are no items in this group that are within the current range view then we should just skip this group.
+            if (!itemsInRange.length) {
+                continue;
+            }
+
+            const itemDrawPlanStacks: DataViewItemDrawPlan[][] = [];
+
+            // TODO Create our item draw plan stacks!
+            for (const item of itemsInRange) {
+               
+            }
+
+            // Add the group draw plan to the array.
+            groupDrawPlans.push({
+                label: grouping.group,
+                stacks: itemDrawPlanStacks
+            } as any);
+        }
+
+        // The view content height that will be updated as groups and item stacks are worked out.
+        let viewContentHeight = 0;
+
+        // TODO Now that we have all our groups and item stacks we can calculate the height that these things will take up and set the y positions on things.
+
+        return {
+            height: viewContentHeight,
+            groupDrawPlans
+        } as any;
     }
 }
