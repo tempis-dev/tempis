@@ -3,18 +3,12 @@ import { TimelineItem } from "./TimelineItem";
 import { RangeTick, TimelineRangeView } from "./TimelineRangeView";
 import { clamp } from "./Utilities";
 
-/** The default item background colour. */
-const DEFAULT_ITEM_BACKGROUND_COLOUR: string = "#2c318f";
-
 export interface DataViewDrawPlan {
     /** The height that is required to draw all groups and items within the specified date range. */
     height: number;
 
-    /** The range from date used when making the plan. */
-    fromDt: Date;
-
-    /** The range to date used when making the plan. */
-    toDt: Date;
+    /** The width of the drawn view. */
+    width: number;
 
     /** The group draw plans. */
     groupDrawPlans: DataViewGroupDrawPlan[];
@@ -24,8 +18,8 @@ export interface DataViewGroupDrawPlan {
     /** The group label. */
     label: string;
 
-    /** The stacks of all visible items in this group that need to be rendered. */
-    stacks: DataViewItemDrawPlan[][];
+    /** The row stacks of all visible items in this group that need to be rendered. */
+    rows: DataViewItemDrawPlan[][];
 
     // TODO Figure out of if need this.
     yPositionStart: number;
@@ -38,16 +32,17 @@ export interface DataViewItemDrawPlan {
     /** The item. */
     item: TimelineItem;
 
-    /** The height that is required to draw this item. */
-    height: number;
-
     /** The item font. */
-    font: string;
+    font?: string;
 
     /** The item foreground colour. */
-    colour: string;
+    colour?: string;
 
-    backgroundColour: string;
+    /** The item background colour. */
+    backgroundColour?: string;
+
+    /** The height that is required to draw this item. */
+    height: number;
 
     xPositionStart: number;
 
@@ -59,6 +54,18 @@ export interface DataViewItemDrawPlan {
     // TODO Figure out of if need this.
     yPositionEnd: number;
 }
+
+/** The default item background colour. */
+const DEFAULT_ITEM_BACKGROUND_COLOUR: string = "#2c318f";
+
+/** The default amount of vertical margin to use for group labels. */
+const DEFAULT_GROUP_VERTICAL_LABEL_MARGIN: number = 4;
+
+/** The default amount of vertical margin to use for items. */
+const DEFAULT_ITEM_VERTICAL_MARGIN: number = 20;
+
+/** The default amount of padding to use for items. */
+const DEFAULT_ITEM_PADDING: number = 5;
 
 export class TimelineDataView {
     /** The minimum height of the data view. */
@@ -219,7 +226,8 @@ export class TimelineDataView {
                     endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
                 } else {
                     // This is a PIT item, the start and end positions of our x axis will be derived from the width of the label and the start date.
-                    const itemLabelWidth = context.measureText(item.caption ?? "?" /* TODO Determine what to do when we have PIT item with no caption */).width;
+                    // TODO Determine what to do when we have PIT item with no caption .
+                    const itemLabelWidth = context.measureText(item.caption ?? "?").width + (DEFAULT_ITEM_PADDING * 2);
 
                     // Let's set the start and end x position to be equidistant from the actual point in time that this item is for.
                     startPositionX = (milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime())) - (itemLabelWidth / 2);
@@ -238,15 +246,18 @@ export class TimelineDataView {
                 // Create the draw plan for the current item.
                 const itemDrawPlan: DataViewItemDrawPlan = {
                     item,
+                    height: 0,
                     xPositionStart: startPositionX,
-                    xPositionEnd: endPositionX
-                } as any;
+                    xPositionEnd: endPositionX,
+                    yPositionStart: 0,
+                    yPositionEnd: 0
+                };
 
                 // Iterate over each row stack (starting from the first which will be at the top row in the view) and:
-                //      - If the xPositionStart of the item is >= the xPositionEnd of the last item in the current row stack then add the item to the end of the row stack.
-                //      - If the xPositionStart of the item is < the xPositionEnd of the last item in the current row stack then:
-                //          - Move on to the next row stack if there is one.
-                //          - Create a new empty row stack if there is no next row stack and add the item to it.
+                //  - If the xPositionStart of the item is >= the xPositionEnd of the last item in the current row stack then add the item to the end of the row stack.
+                //  - If the xPositionStart of the item is < the xPositionEnd of the last item in the current row stack then:
+                //    - Move on to the next row stack if there is one.
+                //    - Create a new empty row stack if there is no next row stack and add the item to it.
 
                 let wasItemAddedToExistingRowStack = false;
 
@@ -272,18 +283,63 @@ export class TimelineDataView {
             // Add the group draw plan to the array.
             groupDrawPlans.push({
                 label: grouping.group,
-                stacks: itemDrawPlanStacks
-            } as any);
+                rows: itemDrawPlanStacks,
+                yPositionStart: 0,
+                yPositionEnd: 0
+            });
         }
 
-        // The view content height that will be updated as groups and item stacks are worked out.
-        let viewContentHeight = 0;
+        let positionY = 0;
 
-        // TODO Now that we have all our groups and item stacks we can calculate the height that these things will take up and set the y positions on things.
+        // Now that we have all our groups and item stacks we can calculate the height that these things will take up and set the y positions on things.
+        for (const groupDrawPlan of groupDrawPlans) {
+            groupDrawPlan.yPositionStart = positionY;
+
+            // The height of any group labels will have to be taken into consideration.
+            if (groupDrawPlan.label) {
+                const groupLabelMetrics = context.measureText(groupDrawPlan.label);
+
+                // Add the vertical space required to draw the label.
+                positionY += (groupLabelMetrics.actualBoundingBoxAscent + groupLabelMetrics.actualBoundingBoxDescent);
+
+                // Add a smidge of vertical padding for below and above the label.
+                positionY += (2 * DEFAULT_GROUP_VERTICAL_LABEL_MARGIN);
+
+                // TODO We may want a gap between our group label and our first item.
+            }
+
+            // We should calculate the height of any items, this will be based on the height of an example label and any item padding.
+            const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Label");
+            const itemHeight = (actualBoundingBoxAscent + actualBoundingBoxDescent) + (DEFAULT_ITEM_PADDING * 2);
+
+            // Process each row of items for the group.
+            for (const itemRow of groupDrawPlan.rows) {
+                // Each row gets some top padding.
+                positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
+
+                // Process each item in this row.
+                for (const item of itemRow) {
+                    item.yPositionStart = positionY;
+                    item.yPositionEnd = positionY + itemHeight;
+                }
+
+                // Add the height of the items in this row to our current y position.
+                positionY += itemHeight;
+
+                // Each row gets some bottom padding.
+                positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
+            }
+
+            groupDrawPlan.yPositionEnd = positionY;
+
+            // Start the next group on the next pixel down.
+            positionY += 1;
+        }
 
         return {
-            height: viewContentHeight,
+            height: positionY,
+            width: context.canvas.width,
             groupDrawPlans
-        } as any;
+        };
     }
 }

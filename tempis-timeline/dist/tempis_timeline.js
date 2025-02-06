@@ -177,6 +177,9 @@ var tempis_timeline = (() => {
 
   // src/TimelineDataView.ts
   var DEFAULT_ITEM_BACKGROUND_COLOUR = "#2c318f";
+  var DEFAULT_GROUP_VERTICAL_LABEL_MARGIN = 4;
+  var DEFAULT_ITEM_VERTICAL_MARGIN = 20;
+  var DEFAULT_ITEM_PADDING = 5;
   var TimelineDataView = class {
     constructor(dataSet) {
       this._scrollYOffset = 0;
@@ -256,7 +259,7 @@ var tempis_timeline = (() => {
             startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
             endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
           } else {
-            const itemLabelWidth = context.measureText((_a = item.caption) != null ? _a : "?").width;
+            const itemLabelWidth = context.measureText((_a = item.caption) != null ? _a : "?").width + DEFAULT_ITEM_PADDING * 2;
             startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime()) - itemLabelWidth / 2;
             endPositionX = startPositionX + itemLabelWidth;
             if (startPositionX < 0) {
@@ -269,8 +272,11 @@ var tempis_timeline = (() => {
           }
           const itemDrawPlan = {
             item,
+            height: 0,
             xPositionStart: startPositionX,
-            xPositionEnd: endPositionX
+            xPositionEnd: endPositionX,
+            yPositionStart: 0,
+            yPositionEnd: 0
           };
           let wasItemAddedToExistingRowStack = false;
           for (const rowStack of itemDrawPlanStacks) {
@@ -286,12 +292,36 @@ var tempis_timeline = (() => {
         }
         groupDrawPlans.push({
           label: grouping.group,
-          stacks: itemDrawPlanStacks
+          rows: itemDrawPlanStacks,
+          yPositionStart: 0,
+          yPositionEnd: 0
         });
       }
-      let viewContentHeight = 0;
+      let positionY = 0;
+      for (const groupDrawPlan of groupDrawPlans) {
+        groupDrawPlan.yPositionStart = positionY;
+        if (groupDrawPlan.label) {
+          const groupLabelMetrics = context.measureText(groupDrawPlan.label);
+          positionY += groupLabelMetrics.actualBoundingBoxAscent + groupLabelMetrics.actualBoundingBoxDescent;
+          positionY += 2 * DEFAULT_GROUP_VERTICAL_LABEL_MARGIN;
+        }
+        const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Label");
+        const itemHeight = actualBoundingBoxAscent + actualBoundingBoxDescent + DEFAULT_ITEM_PADDING * 2;
+        for (const itemRow of groupDrawPlan.rows) {
+          positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
+          for (const item of itemRow) {
+            item.yPositionStart = positionY;
+            item.yPositionEnd = positionY + itemHeight;
+          }
+          positionY += itemHeight;
+          positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
+        }
+        groupDrawPlan.yPositionEnd = positionY;
+        positionY += 1;
+      }
       return {
-        height: viewContentHeight,
+        height: positionY,
+        width: context.canvas.width,
         groupDrawPlans
       };
     }
