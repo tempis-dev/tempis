@@ -169,11 +169,11 @@ export class TimelineDataView {
 
                     // Draw the item label (if there is one)
                     if (itemDrawPlan.item.caption) {
-                        context.textBaseline = "top";
+                        context.textBaseline = "middle";
                         context.font = "14px Arial";
                         context.fillStyle = DEFAULT_ITEM_FOREGROUND_COLOUR;
                         context.beginPath();
-                        context.fillText(itemDrawPlan.item.caption, itemDrawPlan.xPositionStart + DEFAULT_ITEM_PADDING, (itemDrawPlan.yPositionStart + DEFAULT_ITEM_PADDING) + this._scrollYOffset);
+                        context.fillText(itemDrawPlan.item.caption, itemDrawPlan.xPositionStart + DEFAULT_ITEM_PADDING, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2)) + this._scrollYOffset);
                         context.stroke();
                     }
                 }
