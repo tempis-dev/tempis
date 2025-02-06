@@ -180,7 +180,7 @@ var tempis_timeline = (() => {
   var DEFAULT_ITEM_FOREGROUND_COLOUR = "#ffffff";
   var DEFAULT_GROUP_VERTICAL_LABEL_MARGIN = 6;
   var DEFAULT_ITEM_VERTICAL_MARGIN = 8;
-  var DEFAULT_GROUP_BOTTOM_MARGIN = 12;
+  var DEFAULT_GROUP_MARGIN = 12;
   var DEFAULT_ITEM_PADDING = 12;
   var TimelineDataView = class {
     constructor(dataSet) {
@@ -217,11 +217,17 @@ var tempis_timeline = (() => {
           context.lineWidth = 1;
           context.strokeStyle = "#595959";
           context.beginPath();
-          context.moveTo(0, this._scrollYOffset + groupDrawPlan.yPositionStart);
-          context.lineTo(context.canvas.width, this._scrollYOffset + groupDrawPlan.yPositionStart);
+          context.moveTo(0, this._scrollYOffset + groupDrawPlan.yPositionStart - 1);
+          context.lineTo(context.canvas.width, this._scrollYOffset + groupDrawPlan.yPositionStart - 1);
           context.stroke();
         }
         if (groupDrawPlan.label) {
+          context.strokeStyle = "#595959";
+          context.fillStyle = "#FFFFFF";
+          context.beginPath();
+          context.roundRect(-1, this._scrollYOffset + groupDrawPlan.yPositionStart - 1, 80, 25, [0, 0, 10, 0]);
+          context.fill();
+          context.stroke();
           context.textBaseline = "top";
           context.font = "14px Arial";
           context.fillStyle = "#595959";
@@ -311,6 +317,7 @@ var tempis_timeline = (() => {
           positionY += groupLabelMetrics.actualBoundingBoxAscent + groupLabelMetrics.actualBoundingBoxDescent;
           positionY += 2 * DEFAULT_GROUP_VERTICAL_LABEL_MARGIN;
         }
+        positionY += DEFAULT_GROUP_MARGIN;
         context.font = "14px Arial";
         const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Label");
         const itemHeight = actualBoundingBoxAscent + actualBoundingBoxDescent + DEFAULT_ITEM_PADDING * 2;
@@ -323,7 +330,7 @@ var tempis_timeline = (() => {
           positionY += itemHeight;
           positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
         }
-        positionY += DEFAULT_GROUP_BOTTOM_MARGIN;
+        positionY += DEFAULT_GROUP_MARGIN;
         groupDrawPlan.yPositionEnd = positionY;
         positionY += 1;
       }

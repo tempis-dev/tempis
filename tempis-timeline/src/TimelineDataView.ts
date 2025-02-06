@@ -67,8 +67,8 @@ const DEFAULT_GROUP_VERTICAL_LABEL_MARGIN: number = 6;
 /** The default amount of vertical margin to use for items. */
 const DEFAULT_ITEM_VERTICAL_MARGIN: number = 8;
 
-/** The default amount of vertical margin to use for the bottom of each group. */
-const DEFAULT_GROUP_BOTTOM_MARGIN: number = 12;
+/** The default amount of vertical margin to use for each group. */
+const DEFAULT_GROUP_MARGIN: number = 12;
 
 /** The default amount of padding to use for items. */
 const DEFAULT_ITEM_PADDING: number = 12;
@@ -159,13 +159,20 @@ export class TimelineDataView {
                 context.lineWidth = 1;
                 context.strokeStyle = "#595959";
                 context.beginPath();
-                context.moveTo(0, this._scrollYOffset + groupDrawPlan.yPositionStart);
-                context.lineTo(context.canvas.width, this._scrollYOffset + groupDrawPlan.yPositionStart);
+                context.moveTo(0, this._scrollYOffset + groupDrawPlan.yPositionStart - 1);
+                context.lineTo(context.canvas.width, this._scrollYOffset + groupDrawPlan.yPositionStart - 1);
                 context.stroke();
             }
 
             // Draw the group label if we have one.
             if (groupDrawPlan.label) {
+                context.strokeStyle = "#595959";
+                context.fillStyle = "#FFFFFF";
+                context.beginPath();
+                context.roundRect(-1, this._scrollYOffset + groupDrawPlan.yPositionStart - 1, 80, 25, [0, 0, 10, 0]);
+                context.fill();
+                context.stroke();
+
                 context.textBaseline = "top";
                 context.font = "14px Arial";
                 context.fillStyle = "#595959";
@@ -306,9 +313,10 @@ export class TimelineDataView {
 
                 // Add a smidge of vertical padding for below and above the label.
                 positionY += (2 * DEFAULT_GROUP_VERTICAL_LABEL_MARGIN);
-
-                // TODO We may want a gap between our group label and our first item.
             }
+
+            // We want to stick a little bit of a margin at the top of the group, but below the label
+            positionY += DEFAULT_GROUP_MARGIN;
 
             // We should calculate the height of any items, this will be based on the height of an example label and any item padding.
             context.font = "14px Arial";
@@ -334,7 +342,7 @@ export class TimelineDataView {
             }
 
             // We want to stick a little bit of a margin at the bottom of the group.
-            positionY += DEFAULT_GROUP_BOTTOM_MARGIN;
+            positionY += DEFAULT_GROUP_MARGIN;
 
             groupDrawPlan.yPositionEnd = positionY;
 
