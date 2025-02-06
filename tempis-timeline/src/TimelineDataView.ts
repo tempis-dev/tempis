@@ -62,13 +62,16 @@ const DEFAULT_ITEM_BACKGROUND_COLOUR: string = "#2c318f";
 const DEFAULT_ITEM_FOREGROUND_COLOUR: string = "#ffffff";
 
 /** The default amount of vertical margin to use for group labels. */
-const DEFAULT_GROUP_VERTICAL_LABEL_MARGIN: number = 8;
+const DEFAULT_GROUP_VERTICAL_LABEL_MARGIN: number = 6;
 
 /** The default amount of vertical margin to use for items. */
-const DEFAULT_ITEM_VERTICAL_MARGIN: number = 20;
+const DEFAULT_ITEM_VERTICAL_MARGIN: number = 8;
+
+/** The default amount of vertical margin to use for the bottom of each group. */
+const DEFAULT_GROUP_BOTTOM_MARGIN: number = 12;
 
 /** The default amount of padding to use for items. */
-const DEFAULT_ITEM_PADDING: number = 10;
+const DEFAULT_ITEM_PADDING: number = 12;
 
 export class TimelineDataView {
     /** The minimum height of the data view. */
@@ -148,7 +151,19 @@ export class TimelineDataView {
 
     private _drawGroups(context: CanvasRenderingContext2D, drawPlan: DataViewDrawPlan): void {
         // Draw each group.
-        for (const groupDrawPlan of drawPlan.groupDrawPlans) {
+        for (let groupDrawPlanIndex = 0; groupDrawPlanIndex < drawPlan.groupDrawPlans.length; groupDrawPlanIndex++) {
+            const groupDrawPlan = drawPlan.groupDrawPlans[groupDrawPlanIndex];
+
+            // If this is not our first group then we should draw a group separator line.
+            if (groupDrawPlanIndex > 0) {
+                context.lineWidth = 1;
+                context.strokeStyle = "#595959";
+                context.beginPath();
+                context.moveTo(0, this._scrollYOffset + groupDrawPlan.yPositionStart);
+                context.lineTo(context.canvas.width, this._scrollYOffset + groupDrawPlan.yPositionStart);
+                context.stroke();
+            }
+
             // Draw the group label if we have one.
             if (groupDrawPlan.label) {
                 context.textBaseline = "top";
@@ -317,6 +332,9 @@ export class TimelineDataView {
                 // Each row gets some bottom padding.
                 positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
             }
+
+            // We want to stick a little bit of a margin at the bottom of the group.
+            positionY += DEFAULT_GROUP_BOTTOM_MARGIN;
 
             groupDrawPlan.yPositionEnd = positionY;
 

@@ -178,9 +178,10 @@ var tempis_timeline = (() => {
   // src/TimelineDataView.ts
   var DEFAULT_ITEM_BACKGROUND_COLOUR = "#2c318f";
   var DEFAULT_ITEM_FOREGROUND_COLOUR = "#ffffff";
-  var DEFAULT_GROUP_VERTICAL_LABEL_MARGIN = 8;
-  var DEFAULT_ITEM_VERTICAL_MARGIN = 20;
-  var DEFAULT_ITEM_PADDING = 10;
+  var DEFAULT_GROUP_VERTICAL_LABEL_MARGIN = 6;
+  var DEFAULT_ITEM_VERTICAL_MARGIN = 8;
+  var DEFAULT_GROUP_BOTTOM_MARGIN = 12;
+  var DEFAULT_ITEM_PADDING = 12;
   var TimelineDataView = class {
     constructor(dataSet) {
       this._scrollYOffset = 0;
@@ -210,7 +211,16 @@ var tempis_timeline = (() => {
       context.setLineDash([]);
     }
     _drawGroups(context, drawPlan) {
-      for (const groupDrawPlan of drawPlan.groupDrawPlans) {
+      for (let groupDrawPlanIndex = 0; groupDrawPlanIndex < drawPlan.groupDrawPlans.length; groupDrawPlanIndex++) {
+        const groupDrawPlan = drawPlan.groupDrawPlans[groupDrawPlanIndex];
+        if (groupDrawPlanIndex > 0) {
+          context.lineWidth = 1;
+          context.strokeStyle = "#595959";
+          context.beginPath();
+          context.moveTo(0, this._scrollYOffset + groupDrawPlan.yPositionStart);
+          context.lineTo(context.canvas.width, this._scrollYOffset + groupDrawPlan.yPositionStart);
+          context.stroke();
+        }
         if (groupDrawPlan.label) {
           context.textBaseline = "top";
           context.font = "14px Arial";
@@ -313,6 +323,7 @@ var tempis_timeline = (() => {
           positionY += itemHeight;
           positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
         }
+        positionY += DEFAULT_GROUP_BOTTOM_MARGIN;
         groupDrawPlan.yPositionEnd = positionY;
         positionY += 1;
       }
