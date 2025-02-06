@@ -177,9 +177,10 @@ var tempis_timeline = (() => {
 
   // src/TimelineDataView.ts
   var DEFAULT_ITEM_BACKGROUND_COLOUR = "#2c318f";
-  var DEFAULT_GROUP_VERTICAL_LABEL_MARGIN = 4;
+  var DEFAULT_ITEM_FOREGROUND_COLOUR = "#ffffff";
+  var DEFAULT_GROUP_VERTICAL_LABEL_MARGIN = 8;
   var DEFAULT_ITEM_VERTICAL_MARGIN = 20;
-  var DEFAULT_ITEM_PADDING = 5;
+  var DEFAULT_ITEM_PADDING = 10;
   var TimelineDataView = class {
     constructor(dataSet) {
       this._scrollYOffset = 0;
@@ -193,8 +194,8 @@ var tempis_timeline = (() => {
       context.fillStyle = "#f5f5f5";
       context.fillRect(0, 0, context.canvas.width, height);
       this._drawMinorUnitBars(context, range.minorTicks, height);
-      console.log(this._createViewDrawPlan(context, range.fromDt, range.toDt));
-      this._drawGroups(context, range, height);
+      const drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
+      this._drawGroups(context, drawPlan);
     }
     _drawMinorUnitBars(context, rangeMinorTicks, height) {
       context.lineWidth = 1;
@@ -208,36 +209,30 @@ var tempis_timeline = (() => {
       context.stroke();
       context.setLineDash([]);
     }
-    _drawGroups(context, range, height) {
-      const milliRenderWidth = context.canvas.width / (range.toDt.getTime() - range.fromDt.getTime());
-      for (const grouping of this._dataSet.groupings) {
-        const itemsInRange = grouping.getItemsInRange(range.fromDt, range.toDt);
-        if (!itemsInRange.length) {
-          continue;
-        }
-        if (grouping.group) {
+    _drawGroups(context, drawPlan) {
+      for (const groupDrawPlan of drawPlan.groupDrawPlans) {
+        if (groupDrawPlan.label) {
+          context.textBaseline = "top";
           context.font = "14px Arial";
           context.fillStyle = "#595959";
           context.beginPath();
-          context.fillText(grouping.group, 4, this._scrollYOffset + 16);
+          context.fillText(groupDrawPlan.label, 6, this._scrollYOffset + groupDrawPlan.yPositionStart + DEFAULT_GROUP_VERTICAL_LABEL_MARGIN);
           context.stroke();
         }
-        for (const item of itemsInRange) {
-          const startPositionX = milliRenderWidth * (item.start.getTime() - range.fromDt.getTime());
-          if (item.end) {
-            const endPositionX = milliRenderWidth * (item.end.getTime() - range.fromDt.getTime());
+        for (const row of groupDrawPlan.rows) {
+          for (const itemDrawPlan of row) {
             context.fillStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
             context.beginPath();
-            context.roundRect(startPositionX, this._scrollYOffset + 40, endPositionX - startPositionX, 30, 5);
+            context.roundRect(itemDrawPlan.xPositionStart, this._scrollYOffset + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, 5);
             context.fill();
-            if (item.caption) {
+            if (itemDrawPlan.item.caption) {
+              context.textBaseline = "top";
               context.font = "14px Arial";
-              context.fillStyle = "#FFFFFF";
+              context.fillStyle = DEFAULT_ITEM_FOREGROUND_COLOUR;
               context.beginPath();
-              context.fillText(item.caption, startPositionX + 8, this._scrollYOffset + 60);
+              context.fillText(itemDrawPlan.item.caption, itemDrawPlan.xPositionStart + DEFAULT_ITEM_PADDING, itemDrawPlan.yPositionStart + DEFAULT_ITEM_PADDING + this._scrollYOffset);
               context.stroke();
             }
-          } else {
           }
         }
       }
@@ -301,10 +296,12 @@ var tempis_timeline = (() => {
       for (const groupDrawPlan of groupDrawPlans) {
         groupDrawPlan.yPositionStart = positionY;
         if (groupDrawPlan.label) {
+          context.font = "14px Arial";
           const groupLabelMetrics = context.measureText(groupDrawPlan.label);
           positionY += groupLabelMetrics.actualBoundingBoxAscent + groupLabelMetrics.actualBoundingBoxDescent;
           positionY += 2 * DEFAULT_GROUP_VERTICAL_LABEL_MARGIN;
         }
+        context.font = "14px Arial";
         const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Label");
         const itemHeight = actualBoundingBoxAscent + actualBoundingBoxDescent + DEFAULT_ITEM_PADDING * 2;
         for (const itemRow of groupDrawPlan.rows) {
@@ -855,6 +852,7 @@ var tempis_timeline = (() => {
         context.moveTo(xPosition, tickY + 5);
         context.lineTo(xPosition, tickY + rangeContainerHeight / 2 - 2);
         context.stroke();
+        context.textBaseline = "alphabetic";
         context.font = "16px Arial";
         context.fillStyle = "#595959";
         context.beginPath();
@@ -881,6 +879,7 @@ var tempis_timeline = (() => {
             labelXPosition = nextTickXPosition > labelWidth ? 3 : nextTickXPosition - labelWidth;
           }
           context.lineWidth = 0.5;
+          context.textBaseline = "alphabetic";
           context.font = "16px Arial";
           context.fillStyle = "#595959";
           context.beginPath();

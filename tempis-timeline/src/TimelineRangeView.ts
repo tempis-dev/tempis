@@ -247,6 +247,7 @@ export class TimelineRangeView {
             context.stroke();
 
             // Draw the minor date/time label text.
+            context.textBaseline = "alphabetic";
             context.font = "16px Arial";
             context.fillStyle = "#595959";
             context.beginPath();
@@ -291,6 +292,7 @@ export class TimelineRangeView {
     
                 // Draw the major date/time label text.
                 context.lineWidth = 0.5;
+                context.textBaseline = "alphabetic";
                 context.font = "16px Arial";
                 context.fillStyle = "#595959";
                 context.beginPath();

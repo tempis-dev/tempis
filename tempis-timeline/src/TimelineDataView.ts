@@ -58,14 +58,17 @@ export interface DataViewItemDrawPlan {
 /** The default item background colour. */
 const DEFAULT_ITEM_BACKGROUND_COLOUR: string = "#2c318f";
 
+/** The default item foreground colour. */
+const DEFAULT_ITEM_FOREGROUND_COLOUR: string = "#ffffff";
+
 /** The default amount of vertical margin to use for group labels. */
-const DEFAULT_GROUP_VERTICAL_LABEL_MARGIN: number = 4;
+const DEFAULT_GROUP_VERTICAL_LABEL_MARGIN: number = 8;
 
 /** The default amount of vertical margin to use for items. */
 const DEFAULT_ITEM_VERTICAL_MARGIN: number = 20;
 
 /** The default amount of padding to use for items. */
-const DEFAULT_ITEM_PADDING: number = 5;
+const DEFAULT_ITEM_PADDING: number = 10;
 
 export class TimelineDataView {
     /** The minimum height of the data view. */
@@ -115,11 +118,11 @@ export class TimelineDataView {
         // TODO Draw minor unit tick bars IF configured.
         this._drawMinorUnitBars(context, range.minorTicks, height);
 
-        // TODO Remove this, just testing for now.
-        console.log(this._createViewDrawPlan(context, range.fromDt, range.toDt));
+        // We should create our plan for drawing the groups and items of the view. This will also give us exactly how much space would be required to do so.
+        const drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
 
         // Draw our groups and items!
-        this._drawGroups(context, range, height);
+        this._drawGroups(context, drawPlan);
     }
 
     /**
@@ -143,53 +146,36 @@ export class TimelineDataView {
         context.setLineDash([]);
     }
 
-    private _drawGroups(context: CanvasRenderingContext2D, range: TimelineRangeView, height: number): void {
-        // Calculate the width of one millisecond as it would be rendered on the canvas.
-        const milliRenderWidth = context.canvas.width / (range.toDt.getTime() - range.fromDt.getTime());
-
-        for (const grouping of this._dataSet.groupings) {
-            // Get all items in the current visible range.
-            const itemsInRange = grouping.getItemsInRange(range.fromDt, range.toDt);
-
-            // If there are no items in this group that are within the current range view then we should just skip this group.
-            if (!itemsInRange.length) {
-                continue;
-            }
-
+    private _drawGroups(context: CanvasRenderingContext2D, drawPlan: DataViewDrawPlan): void {
+        // Draw each group.
+        for (const groupDrawPlan of drawPlan.groupDrawPlans) {
             // Draw the group label if we have one.
-            if (grouping.group) {
+            if (groupDrawPlan.label) {
+                context.textBaseline = "top";
                 context.font = "14px Arial";
                 context.fillStyle = "#595959";
                 context.beginPath();
-                context.fillText(grouping.group, 4, this._scrollYOffset + 16);
+                context.fillText(groupDrawPlan.label, 6, this._scrollYOffset + groupDrawPlan.yPositionStart + DEFAULT_GROUP_VERTICAL_LABEL_MARGIN);
                 context.stroke();
             }
 
-            for (const item of itemsInRange) {
-                // Determine the x position of the start of this item.
-                const startPositionX = milliRenderWidth * (item.start.getTime() - range.fromDt.getTime());
-
-                // Is this a range item or a PIT item?
-                if (item.end) {
-                    // Determine the x position of the end of this item.
-                    const endPositionX = milliRenderWidth * (item.end.getTime() - range.fromDt.getTime());
-
+            for (const row of groupDrawPlan.rows) {
+                for (const itemDrawPlan of row) {
                     // Draw the item range rectangle.
                     context.fillStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
                     context.beginPath();
-                    context.roundRect(startPositionX, this._scrollYOffset + 40, endPositionX - startPositionX, 30, 5);
+                    context.roundRect(itemDrawPlan.xPositionStart, this._scrollYOffset + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, 5);
                     context.fill();
 
                     // Draw the item label (if there is one)
-                    if (item.caption) {
+                    if (itemDrawPlan.item.caption) {
+                        context.textBaseline = "top";
                         context.font = "14px Arial";
-                        context.fillStyle = "#FFFFFF";
+                        context.fillStyle = DEFAULT_ITEM_FOREGROUND_COLOUR;
                         context.beginPath();
-                        context.fillText(item.caption, startPositionX + 8, this._scrollYOffset + 60);
+                        context.fillText(itemDrawPlan.item.caption, itemDrawPlan.xPositionStart + DEFAULT_ITEM_PADDING, (itemDrawPlan.yPositionStart + DEFAULT_ITEM_PADDING) + this._scrollYOffset);
                         context.stroke();
                     }
-                } else {
-
                 }
             }
         }
@@ -297,6 +283,7 @@ export class TimelineDataView {
 
             // The height of any group labels will have to be taken into consideration.
             if (groupDrawPlan.label) {
+                context.font = "14px Arial";
                 const groupLabelMetrics = context.measureText(groupDrawPlan.label);
 
                 // Add the vertical space required to draw the label.
@@ -309,6 +296,7 @@ export class TimelineDataView {
             }
 
             // We should calculate the height of any items, this will be based on the height of an example label and any item padding.
+            context.font = "14px Arial";
             const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Label");
             const itemHeight = (actualBoundingBoxAscent + actualBoundingBoxDescent) + (DEFAULT_ITEM_PADDING * 2);
 
