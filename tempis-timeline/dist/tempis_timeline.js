@@ -192,7 +192,7 @@ var tempis_timeline = (() => {
     }
     draw(context, range) {
       const height = context.canvas.height - range.calculateRequiredHeight();
-      context.fillStyle = "#f5f5f5";
+      context.fillStyle = "#FFFFFF";
       context.fillRect(0, 0, context.canvas.width, height);
       this._drawMinorUnitBars(context, range.minorTicks, height);
       const drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
@@ -214,7 +214,7 @@ var tempis_timeline = (() => {
       for (let groupDrawPlanIndex = 0; groupDrawPlanIndex < drawPlan.groupDrawPlans.length; groupDrawPlanIndex++) {
         const groupDrawPlan = drawPlan.groupDrawPlans[groupDrawPlanIndex];
         if (groupDrawPlanIndex > 0) {
-          context.lineWidth = 1;
+          context.lineWidth = 0.5;
           context.strokeStyle = "#595959";
           context.beginPath();
           context.moveTo(0, this._scrollYOffset + groupDrawPlan.yPositionStart - 1);
@@ -222,10 +222,11 @@ var tempis_timeline = (() => {
           context.stroke();
         }
         if (groupDrawPlan.label) {
+          const groupLabelMetrics = context.measureText(groupDrawPlan.label);
           context.strokeStyle = "#595959";
           context.fillStyle = "#FFFFFF";
           context.beginPath();
-          context.roundRect(-1, this._scrollYOffset + groupDrawPlan.yPositionStart - 1, 80, 25, [0, 0, 10, 0]);
+          context.roundRect(-1, this._scrollYOffset + groupDrawPlan.yPositionStart - 1, groupLabelMetrics.width + 20, groupLabelMetrics.actualBoundingBoxAscent + groupLabelMetrics.actualBoundingBoxDescent + DEFAULT_GROUP_VERTICAL_LABEL_MARGIN * 2, [0, 0, 10, 0]);
           context.fill();
           context.stroke();
           context.textBaseline = "top";
@@ -237,6 +238,14 @@ var tempis_timeline = (() => {
         }
         for (const row of groupDrawPlan.rows) {
           for (const itemDrawPlan of row) {
+            if (itemDrawPlan.xPointInTimePosition !== null) {
+              context.lineWidth = 2;
+              context.strokeStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
+              context.beginPath();
+              context.moveTo(itemDrawPlan.xPointInTimePosition, this._scrollYOffset + groupDrawPlan.yPositionStart + (groupDrawPlan.yPositionEnd - groupDrawPlan.yPositionStart) / 2);
+              context.lineTo(itemDrawPlan.xPointInTimePosition, 1e3);
+              context.stroke();
+            }
             context.fillStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
             context.beginPath();
             context.roundRect(itemDrawPlan.xPositionStart, this._scrollYOffset + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, 5);
@@ -266,13 +275,16 @@ var tempis_timeline = (() => {
         for (const item of itemsInRange) {
           let startPositionX = 0;
           let endPositionX = 0;
+          let pointInTimePositionX = null;
           if (item.end) {
             startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
             endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
           } else {
+            context.font = "14px Arial";
             const itemLabelWidth = context.measureText((_a = item.caption) != null ? _a : "?").width + DEFAULT_ITEM_PADDING * 2;
             startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime()) - itemLabelWidth / 2;
             endPositionX = startPositionX + itemLabelWidth;
+            pointInTimePositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
             if (startPositionX < 0) {
               startPositionX = 0;
               endPositionX = itemLabelWidth;
@@ -287,7 +299,8 @@ var tempis_timeline = (() => {
             xPositionStart: startPositionX,
             xPositionEnd: endPositionX,
             yPositionStart: 0,
-            yPositionEnd: 0
+            yPositionEnd: 0,
+            xPointInTimePosition: pointInTimePositionX
           };
           let wasItemAddedToExistingRowStack = false;
           for (const rowStack of itemDrawPlanStacks) {
@@ -864,10 +877,11 @@ var tempis_timeline = (() => {
       const rangeContainerHeight = this.calculateRequiredHeight();
       const tickY = sizeHeight - rangeContainerHeight;
       for (const { date, xPosition } of this._minorUnitTicks) {
-        context.lineWidth = 3;
-        context.lineCap = "round";
+        context.lineWidth = 1;
+        context.strokeStyle = "#c2c2c2";
+        context.setLineDash([3, 3]);
         context.beginPath();
-        context.moveTo(xPosition, tickY + 5);
+        context.moveTo(xPosition, tickY);
         context.lineTo(xPosition, tickY + rangeContainerHeight / 2 - 2);
         context.stroke();
         context.textBaseline = "alphabetic";
@@ -882,8 +896,9 @@ var tempis_timeline = (() => {
           const { date, xPosition } = this._majorUnitTicks[tickIndex];
           const isStickyLabel = date.getTime() <= this._fromDt.getTime();
           if (!isStickyLabel) {
-            context.lineWidth = 3;
+            context.lineWidth = 2;
             context.lineCap = "round";
+            context.setLineDash([]);
             context.beginPath();
             context.moveTo(xPosition, tickY + rangeContainerHeight / 2 + 5);
             context.lineTo(xPosition, tickY + rangeContainerHeight - 4);
@@ -905,12 +920,6 @@ var tempis_timeline = (() => {
           context.stroke();
         }
       }
-      context.lineWidth = 0.5;
-      context.fillStyle = "#595959";
-      context.beginPath();
-      context.moveTo(0, tickY);
-      context.lineTo(this._canvas.width, tickY);
-      context.stroke();
     }
     _findSensibleUnitAndStep(targetTickCount, minorUnit) {
       const millisDiff = this._toDt.getTime() - this._fromDt.getTime();

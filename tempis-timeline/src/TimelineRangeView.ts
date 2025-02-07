@@ -239,10 +239,11 @@ export class TimelineRangeView {
         // Draw our minor unit ticks.
         for (const { date, xPosition } of this._minorUnitTicks) {
             // Draw the actual tick.
-            context.lineWidth = 3;
-            context.lineCap = "round";
+            context.lineWidth = 1;
+            context.strokeStyle = "#c2c2c2";
+            context.setLineDash([3, 3]); /* dashes are 5px and spaces are 3px */
             context.beginPath();
-            context.moveTo(xPosition, tickY + 5);
+            context.moveTo(xPosition, tickY);
             context.lineTo(xPosition, tickY + (rangeContainerHeight / 2) - 2);
             context.stroke();
 
@@ -265,8 +266,9 @@ export class TimelineRangeView {
 
                 // Draw the actual tick but only if this label isn't the sticky one.
                 if (!isStickyLabel) {
-                    context.lineWidth = 3;
+                    context.lineWidth = 2;
                     context.lineCap = "round";
+                    context.setLineDash([])
                     context.beginPath();
                     context.moveTo(xPosition, tickY + (rangeContainerHeight / 2) + 5);
                     context.lineTo(xPosition, tickY + rangeContainerHeight - 4);
@@ -301,13 +303,7 @@ export class TimelineRangeView {
             }
         }
 
-        // Draw the minor/major unit split.
-        context.lineWidth = 0.5;
-        context.fillStyle = "#595959";
-        context.beginPath();
-        context.moveTo(0, tickY);
-        context.lineTo(this._canvas.width, tickY);
-        context.stroke();
+      
     }
 
     /**

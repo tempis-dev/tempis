@@ -44,6 +44,8 @@ export interface DataViewItemDrawPlan {
     /** The height that is required to draw this item. */
     height: number;
 
+    xPointInTimePosition: number | null;
+
     xPositionStart: number;
 
     xPositionEnd: number;
@@ -115,7 +117,7 @@ export class TimelineDataView {
         const height = context.canvas.height - range.calculateRequiredHeight();
 
         // Draw a grey background for the entire dataview.
-        context.fillStyle = "#f5f5f5";
+        context.fillStyle = "#FFFFFF";
         context.fillRect(0, 0, context.canvas.width, height);
 
         // TODO Draw minor unit tick bars IF configured.
@@ -156,7 +158,7 @@ export class TimelineDataView {
 
             // If this is not our first group then we should draw a group separator line.
             if (groupDrawPlanIndex > 0) {
-                context.lineWidth = 1;
+                context.lineWidth = 0.5;
                 context.strokeStyle = "#595959";
                 context.beginPath();
                 context.moveTo(0, this._scrollYOffset + groupDrawPlan.yPositionStart - 1);
@@ -166,10 +168,11 @@ export class TimelineDataView {
 
             // Draw the group label if we have one.
             if (groupDrawPlan.label) {
+                const groupLabelMetrics = context.measureText(groupDrawPlan.label); 
                 context.strokeStyle = "#595959";
                 context.fillStyle = "#FFFFFF";
                 context.beginPath();
-                context.roundRect(-1, this._scrollYOffset + groupDrawPlan.yPositionStart - 1, 80, 25, [0, 0, 10, 0]);
+                context.roundRect(-1, this._scrollYOffset + groupDrawPlan.yPositionStart - 1, groupLabelMetrics.width + 20, groupLabelMetrics.actualBoundingBoxAscent + groupLabelMetrics.actualBoundingBoxDescent + (DEFAULT_GROUP_VERTICAL_LABEL_MARGIN * 2), [0, 0, 10, 0]);
                 context.fill();
                 context.stroke();
 
@@ -183,6 +186,16 @@ export class TimelineDataView {
 
             for (const row of groupDrawPlan.rows) {
                 for (const itemDrawPlan of row) {
+                    // If this is a PIT item we should draw the downward line.
+                    if (itemDrawPlan.xPointInTimePosition !== null) {
+                        context.lineWidth = 2;
+                        context.strokeStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
+                        context.beginPath();
+                        context.moveTo(itemDrawPlan.xPointInTimePosition, this._scrollYOffset + groupDrawPlan.yPositionStart + ((groupDrawPlan.yPositionEnd - groupDrawPlan.yPositionStart) / 2));
+                        context.lineTo(itemDrawPlan.xPointInTimePosition, 1000 /** TODO Work this out properly. */);
+                        context.stroke();
+                    } 
+
                     // Draw the item range rectangle.
                     context.fillStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
                     context.beginPath();
@@ -226,6 +239,7 @@ export class TimelineDataView {
             for (const item of itemsInRange) {
                 let startPositionX = 0;
                 let endPositionX = 0;
+                let pointInTimePositionX = null;
 
                 // Figure out the xPositionStart and xPositionEnd of the current item. Whether the item is a range or PIT will influence this.
                 if (item.end) {
@@ -234,12 +248,17 @@ export class TimelineDataView {
                     endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
                 } else {
                     // This is a PIT item, the start and end positions of our x axis will be derived from the width of the label and the start date.
-                    // TODO Determine what to do when we have PIT item with no caption .
+                    // TODO Determine what to do when we have PIT item with no caption.
+                    // TODO Set the context font to be whatever we will be using to render the actual item label.
+                    context.font = "14px Arial";
                     const itemLabelWidth = context.measureText(item.caption ?? "?").width + (DEFAULT_ITEM_PADDING * 2);
 
                     // Let's set the start and end x position to be equidistant from the actual point in time that this item is for.
                     startPositionX = (milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime())) - (itemLabelWidth / 2);
                     endPositionX = startPositionX + itemLabelWidth;
+
+                    // The point in time position should always be the start date regardless of the position or width of the PIT item box.
+                    pointInTimePositionX = (milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime()));
 
                     // We may have to shift this item so that it is actually in the bounds of the range view.
                     if (startPositionX < 0) {
@@ -258,7 +277,8 @@ export class TimelineDataView {
                     xPositionStart: startPositionX,
                     xPositionEnd: endPositionX,
                     yPositionStart: 0,
-                    yPositionEnd: 0
+                    yPositionEnd: 0,
+                    xPointInTimePosition: pointInTimePositionX
                 };
 
                 // Iterate over each row stack (starting from the first which will be at the top row in the view) and:
