@@ -64,6 +64,22 @@ var tempis_timeline = (() => {
       return true;
     return false;
   }
+  function fitCanvasText(context, value, maxWidth) {
+    let stringWidth = context.measureText(value).width;
+    if (!value || stringWidth <= maxWidth) {
+      return value;
+    }
+    const ellipsisWidth = context.measureText("...").width;
+    if (ellipsisWidth > maxWidth) {
+      return "";
+    }
+    let stringCharacterLength = value.length;
+    while (stringWidth >= maxWidth - ellipsisWidth && stringCharacterLength-- > 1) {
+      value = value.substring(0, stringCharacterLength);
+      stringWidth = context.measureText(value).width;
+    }
+    return `${value}...`;
+  }
 
   // src/TimelineItem.ts
   var TimelineItem = class {
@@ -204,8 +220,10 @@ var tempis_timeline = (() => {
       context.setLineDash([3, 3]);
       context.beginPath();
       for (const { xPosition } of rangeMinorTicks) {
-        context.moveTo(xPosition, 0);
-        context.lineTo(xPosition, height);
+        if (xPosition > 0 && xPosition < context.canvas.width) {
+          context.moveTo(xPosition, 0);
+          context.lineTo(xPosition, height);
+        }
       }
       context.stroke();
       context.setLineDash([]);
@@ -251,11 +269,12 @@ var tempis_timeline = (() => {
             context.roundRect(itemDrawPlan.xPositionStart, this._scrollYOffset + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, 5);
             context.fill();
             if (itemDrawPlan.item.caption) {
+              const maxLabelWidth = Math.max(0, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - DEFAULT_ITEM_PADDING * 2);
               context.textBaseline = "middle";
               context.font = "14px Arial";
               context.fillStyle = DEFAULT_ITEM_FOREGROUND_COLOUR;
               context.beginPath();
-              context.fillText(itemDrawPlan.item.caption, itemDrawPlan.xPositionStart + DEFAULT_ITEM_PADDING, itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + this._scrollYOffset);
+              context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), itemDrawPlan.xPositionStart + DEFAULT_ITEM_PADDING, itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + this._scrollYOffset);
               context.stroke();
             }
           }

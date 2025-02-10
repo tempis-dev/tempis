@@ -63,3 +63,30 @@ export function doDateRangesOverlap(aStart: Date, aEnd: Date, bStart: Date, bEnd
     if (bStart < aStart && aEnd < bEnd) return true; // The first range starts and ends in the second.
     return false;
 }
+
+export function fitCanvasText(context: CanvasRenderingContext2D, value: string, maxWidth: number): string {
+    // Get the width of the entire string.
+    let stringWidth = context.measureText(value).width;
+
+    // Is the string empty or the width of our string already less than the max width? If so just return it.
+    if (!value || stringWidth <= maxWidth) {
+        return value;
+    }
+
+    const ellipsisWidth = context.measureText("...").width;
+
+    // If our ellipses width is already greater than our max width then return an empty string.
+    if (ellipsisWidth > maxWidth) {
+        return "";
+    }
+
+    let stringCharacterLength = value.length;
+
+    // Find the longest possible length of our string that will give a width (including the ellipsis width) that is less than the max width.
+    while (stringWidth >= maxWidth - ellipsisWidth && stringCharacterLength-- > 1) {
+        value = value.substring(0, stringCharacterLength);
+        stringWidth = context.measureText(value).width;
+    }
+    
+    return `${value}...`;
+}

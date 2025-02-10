@@ -1,7 +1,7 @@
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineItem } from "./TimelineItem";
 import { RangeTick, TimelineRangeView } from "./TimelineRangeView";
-import { clamp } from "./Utilities";
+import { clamp, fitCanvasText } from "./Utilities";
 
 export interface DataViewDrawPlan {
     /** The height that is required to draw all groups and items within the specified date range. */
@@ -143,8 +143,11 @@ export class TimelineDataView {
         context.beginPath();
 
         for (const { xPosition } of rangeMinorTicks) {
-            context.moveTo(xPosition, 0);
-            context.lineTo(xPosition, height);
+            // We should only render a unit bar if its not right at the edge of the canvas as it looks a little weird.
+            if (xPosition > 0 && xPosition < context.canvas.width) {
+                context.moveTo(xPosition, 0);
+                context.lineTo(xPosition, height);
+            }
         }
 
         context.stroke();
@@ -204,11 +207,14 @@ export class TimelineDataView {
 
                     // Draw the item label (if there is one)
                     if (itemDrawPlan.item.caption) {
+                        // Calculate the max item label width.
+                        const maxLabelWidth = Math.max(0, (itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart) - (DEFAULT_ITEM_PADDING * 2));
+
                         context.textBaseline = "middle";
                         context.font = "14px Arial";
                         context.fillStyle = DEFAULT_ITEM_FOREGROUND_COLOUR;
                         context.beginPath();
-                        context.fillText(itemDrawPlan.item.caption, itemDrawPlan.xPositionStart + DEFAULT_ITEM_PADDING, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2)) + this._scrollYOffset);
+                        context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), itemDrawPlan.xPositionStart + DEFAULT_ITEM_PADDING, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2)) + this._scrollYOffset);
                         context.stroke();
                     }
                 }

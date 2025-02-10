@@ -1,3 +1,8 @@
-- Create TimelineItemGrouping and populate with user-defined items.
-- Create TimelineDateAxis based on min-max date range which works out sensible units and steps.
-- Add support for weeks, nothing fancy, just do the days logic * 7
+- X Create TimelineItemGrouping and populate with user-defined items.
+- X Create TimelineDateAxis based on min-max date range which works out sensible units and steps.
+- X Add support for weeks, nothing fancy, just do the days logic * 7
+- Update range item labels to be rendered in the visible range.
+- Pass in explicit height and y offset of grid data view when drawing based on number and position of range views and draw BEFORE range views.
+- Properly implement scrolling behaviour and add a passive scrollbar which is only visible while scrolling.
+- Add little marker between marker line and PIT items.
+- Give range items a minimum width, maybe, look into what other libraries do when zooming out very far.
