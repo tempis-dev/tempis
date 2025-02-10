@@ -171,14 +171,6 @@ export class TimelineDataView {
 
             // Draw the group label if we have one.
             if (groupDrawPlan.label) {
-                const groupLabelMetrics = context.measureText(groupDrawPlan.label); 
-                context.strokeStyle = "#595959";
-                context.fillStyle = "#FFFFFF";
-                context.beginPath();
-                context.roundRect(-1, this._scrollYOffset + groupDrawPlan.yPositionStart - 1, groupLabelMetrics.width + 20, groupLabelMetrics.actualBoundingBoxAscent + groupLabelMetrics.actualBoundingBoxDescent + (DEFAULT_GROUP_VERTICAL_LABEL_MARGIN * 2), [0, 0, 10, 0]);
-                context.fill();
-                context.stroke();
-
                 context.textBaseline = "top";
                 context.font = "14px Arial";
                 context.fillStyle = "#595959";
@@ -189,12 +181,22 @@ export class TimelineDataView {
 
             for (const row of groupDrawPlan.rows) {
                 for (const itemDrawPlan of row) {
-                    // If this is a PIT item we should draw the downward line.
+                    // If this is a PIT item we should draw the downward marker line.
                     if (itemDrawPlan.xPointInTimePosition !== null) {
                         context.lineWidth = 2;
                         context.strokeStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
+                        context.fillStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
+
+                        // We need to draw a little downward triangle to join the item and the marker line.
+                        const itemMarkerConnectorPath = new Path2D();
+                        itemMarkerConnectorPath.moveTo(Math.max(itemDrawPlan.xPositionStart, itemDrawPlan.xPointInTimePosition - 20), this._scrollYOffset + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
+                        itemMarkerConnectorPath.lineTo(itemDrawPlan.xPointInTimePosition, this._scrollYOffset + itemDrawPlan.yPositionEnd + 6);
+                        itemMarkerConnectorPath.lineTo(Math.min(itemDrawPlan.xPositionEnd, itemDrawPlan.xPointInTimePosition + 20), this._scrollYOffset + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
+                        context.fill(itemMarkerConnectorPath);
+
+                        // Draw the actual marker line.
                         context.beginPath();
-                        context.moveTo(itemDrawPlan.xPointInTimePosition, this._scrollYOffset + groupDrawPlan.yPositionStart + ((groupDrawPlan.yPositionEnd - groupDrawPlan.yPositionStart) / 2));
+                        context.moveTo(itemDrawPlan.xPointInTimePosition, this._scrollYOffset + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
                         context.lineTo(itemDrawPlan.xPointInTimePosition, 1000 /** TODO Work this out properly. */);
                         context.stroke();
                     } 
@@ -207,14 +209,17 @@ export class TimelineDataView {
 
                     // Draw the item label (if there is one)
                     if (itemDrawPlan.item.caption) {
-                        // Calculate the max item label width.
-                        const maxLabelWidth = Math.max(0, (itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart) - (DEFAULT_ITEM_PADDING * 2));
+                        // Calculate the actual x position of the label, we should attempt to keep this in the bounds of the view.
+                        const labelStartPositionX = Math.max(DEFAULT_ITEM_PADDING, itemDrawPlan.xPositionStart + DEFAULT_ITEM_PADDING);
+
+                        // Calculate the max item label width, we are adding 1 as sometime PIT label ends get cut off.
+                        const maxLabelWidth = Math.max(0, (itemDrawPlan.xPositionEnd - DEFAULT_ITEM_PADDING) - labelStartPositionX) + 1;
 
                         context.textBaseline = "middle";
                         context.font = "14px Arial";
                         context.fillStyle = DEFAULT_ITEM_FOREGROUND_COLOUR;
                         context.beginPath();
-                        context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), itemDrawPlan.xPositionStart + DEFAULT_ITEM_PADDING, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2)) + this._scrollYOffset);
+                        context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2)) + this._scrollYOffset);
                         context.stroke();
                     }
                 }
