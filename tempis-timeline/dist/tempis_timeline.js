@@ -797,6 +797,7 @@ var tempis_timeline = (() => {
     month: "MMMM YYYY",
     year: "YYYY"
   };
+  var DEFAULT_UNIT_LABEL_PADDING = 4;
   var TimelineRangeView = class {
     constructor(canvas, options = {}) {
       this._fromDt = new Date();
@@ -867,7 +868,10 @@ var tempis_timeline = (() => {
       this.setRange(new Date(0), new Date(41024448e5));
     }
     calculateRequiredHeight() {
-      return 50;
+      var context = this._canvas.getContext("2d");
+      context.font = "16px Arial";
+      const unitLabelTextMetrics = context.measureText("Fri 13 April 1990");
+      return DEFAULT_UNIT_LABEL_PADDING * 4 + (unitLabelTextMetrics.actualBoundingBoxAscent + unitLabelTextMetrics.actualBoundingBoxDescent) * 2;
     }
     calculateMinorAndMajorUnitTicks() {
       const minorTargetTickCount = Math.floor(this._canvas.width / 120);
@@ -900,44 +904,45 @@ var tempis_timeline = (() => {
         context.strokeStyle = "#c2c2c2";
         context.setLineDash([3, 3]);
         context.beginPath();
-        context.moveTo(xPosition, tickY);
-        context.lineTo(xPosition, tickY + rangeContainerHeight / 2 - 2);
+        context.moveTo(xPosition, tickY + 2);
+        context.lineTo(xPosition, tickY + rangeContainerHeight / 2);
         context.stroke();
         context.textBaseline = "alphabetic";
         context.font = "16px Arial";
         context.fillStyle = "#595959";
         context.beginPath();
-        context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + 4, tickY + 20);
+        context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, tickY + 20);
         context.stroke();
       }
-      if (this._minorTickUnitAndStep.unit !== "year") {
-        for (let tickIndex = 0; tickIndex < this._majorUnitTicks.length; tickIndex++) {
-          const { date, xPosition } = this._majorUnitTicks[tickIndex];
-          const isStickyLabel = date.getTime() <= this._fromDt.getTime();
-          if (!isStickyLabel) {
-            context.lineWidth = 2;
-            context.lineCap = "round";
-            context.setLineDash([]);
-            context.beginPath();
-            context.moveTo(xPosition, tickY + rangeContainerHeight / 2 + 5);
-            context.lineTo(xPosition, tickY + rangeContainerHeight - 4);
-            context.stroke();
-          }
-          const tickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
-          let labelXPosition = xPosition + 5;
-          if (isStickyLabel) {
-            const labelWidth = context.measureText(tickLabel).width + 5;
-            const nextTickXPosition = this._majorUnitTicks[tickIndex + 1].xPosition;
-            labelXPosition = nextTickXPosition > labelWidth ? 3 : nextTickXPosition - labelWidth;
-          }
-          context.lineWidth = 0.5;
-          context.textBaseline = "alphabetic";
-          context.font = "16px Arial";
-          context.fillStyle = "#595959";
+      if (this._minorTickUnitAndStep.unit === "year") {
+        return;
+      }
+      for (let tickIndex = 0; tickIndex < this._majorUnitTicks.length; tickIndex++) {
+        const { date, xPosition } = this._majorUnitTicks[tickIndex];
+        const isStickyLabel = date.getTime() <= this._fromDt.getTime();
+        if (!isStickyLabel) {
+          context.lineWidth = 2;
+          context.lineCap = "round";
+          context.setLineDash([]);
           context.beginPath();
-          context.fillText(tickLabel, labelXPosition, tickY + 44);
+          context.moveTo(xPosition, tickY + rangeContainerHeight / 2 + DEFAULT_UNIT_LABEL_PADDING);
+          context.lineTo(xPosition, tickY + rangeContainerHeight);
           context.stroke();
         }
+        const tickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
+        let labelXPosition = xPosition + 5;
+        if (isStickyLabel) {
+          const labelWidth = context.measureText(tickLabel).width + 5;
+          const nextTickXPosition = this._majorUnitTicks[tickIndex + 1].xPosition;
+          labelXPosition = nextTickXPosition > labelWidth ? DEFAULT_UNIT_LABEL_PADDING : nextTickXPosition - labelWidth;
+        }
+        context.lineWidth = 0.5;
+        context.textBaseline = "alphabetic";
+        context.font = "16px Arial";
+        context.fillStyle = "#595959";
+        context.beginPath();
+        context.fillText(tickLabel, labelXPosition, tickY + 44);
+        context.stroke();
       }
     }
     _findSensibleUnitAndStep(targetTickCount, minorUnit) {

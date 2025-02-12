@@ -28,6 +28,9 @@ const DEFAULT_MAJOR_UNIT_LABEL_FORMATS: TempisTimelineRangeUnitLabelFormats = {
     year: 'YYYY'
 }
 
+/** The default amount of padding to use for unit labels. */
+const DEFAULT_UNIT_LABEL_PADDING: number = 4;
+
 export class TimelineRangeView {
     /** The timeline canvas. */
     private readonly _canvas: HTMLCanvasElement;
@@ -180,11 +183,28 @@ export class TimelineRangeView {
         this.setRange(new Date(0), new Date(4102444800000));
     }
 
+    /**
+     * Calculate the height of this view when rendered.
+     * @returns The height of this view when rendered.
+     */
     public calculateRequiredHeight(): number {
-        // TODO Work this out properly by determining how much height the minor/major unit labels take up.
-        return 50;
+        // Grab the canvas context.
+        var context = this._canvas.getContext('2d')!;
+
+        // Apply the font that will be used to the render the labels.
+        // TODO This should be set from some default or the configured font.
+        context.font = "16px Arial";
+
+        // Get the text metrics for an example date value.
+        const unitLabelTextMetrics = context.measureText("Fri 13 April 1990");
+
+        // The height of this view will be the height of our minor and major unit labels as well as our unit labels vertical padding.
+        return (DEFAULT_UNIT_LABEL_PADDING * 4) + ((unitLabelTextMetrics.actualBoundingBoxAscent + unitLabelTextMetrics.actualBoundingBoxDescent) * 2);
     }
     
+    /**
+     * Calculate the major and minor unit ticks dates and x positions for the current date range and canvas width.
+     */
     public calculateMinorAndMajorUnitTicks(): void {
         // Find a sensible number of minor and major ticks to render, this will depend on the canvas width.
         const minorTargetTickCount = Math.floor(this._canvas.width / 120);
@@ -243,8 +263,8 @@ export class TimelineRangeView {
             context.strokeStyle = "#c2c2c2";
             context.setLineDash([3, 3]); /* dashes are 5px and spaces are 3px */
             context.beginPath();
-            context.moveTo(xPosition, tickY);
-            context.lineTo(xPosition, tickY + (rangeContainerHeight / 2) - 2);
+            context.moveTo(xPosition, tickY + 2);
+            context.lineTo(xPosition, tickY + (rangeContainerHeight / 2));
             context.stroke();
 
             // Draw the minor date/time label text.
@@ -252,58 +272,59 @@ export class TimelineRangeView {
             context.font = "16px Arial";
             context.fillStyle = "#595959";
             context.beginPath();
-            context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + 4, tickY + 20);
+            context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, tickY + 20);
             context.stroke();
         }
 
-        // Draw our major unit ticks, but only if our minor unit isn't 'year'.
-        if (this._minorTickUnitAndStep.unit !== "year") {
-            for (let tickIndex = 0; tickIndex < this._majorUnitTicks.length; tickIndex++) {
-                const { date, xPosition } = this._majorUnitTicks[tickIndex];
-
-                // Is this tick the for the first major tick? If so it will need to be sticky.
-                const isStickyLabel = date.getTime() <= this._fromDt.getTime();
-
-                // Draw the actual tick but only if this label isn't the sticky one.
-                if (!isStickyLabel) {
-                    context.lineWidth = 2;
-                    context.lineCap = "round";
-                    context.setLineDash([])
-                    context.beginPath();
-                    context.moveTo(xPosition, tickY + (rangeContainerHeight / 2) + 5);
-                    context.lineTo(xPosition, tickY + rangeContainerHeight - 4);
-                    context.stroke();
-                }
-
-                // Get the tick label.
-                const tickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
-
-                let labelXPosition = xPosition + 5;
-                
-                // If our label is sticky then it should always be drawn inside the visible as the earliest major tick.
-                // Our sticky label should also be pushed out of the way by the next major tick label as we don't want overlaps.
-                if (isStickyLabel) {
-                    // Calculate the width of the label, plus the smidge at the start.
-                    const labelWidth = context.measureText(tickLabel).width + 5;
-
-                    // Grab the position of the next tick label, we need this to work out how much to offset our sticky label by (if at all)
-                    const nextTickXPosition = this._majorUnitTicks[tickIndex + 1].xPosition;
-
-                    labelXPosition = nextTickXPosition > labelWidth ? 3 : nextTickXPosition - labelWidth;
-                }
-    
-                // Draw the major date/time label text.
-                context.lineWidth = 0.5;
-                context.textBaseline = "alphabetic";
-                context.font = "16px Arial";
-                context.fillStyle = "#595959";
-                context.beginPath();
-                context.fillText(tickLabel, labelXPosition, tickY + 44);
-                context.stroke();
-            }
+        // We won't be drawing our major units if our minor units are already years.
+        if (this._minorTickUnitAndStep.unit === "year") {
+            return;
         }
 
-      
+        // Draw our major unit ticks.
+        for (let tickIndex = 0; tickIndex < this._majorUnitTicks.length; tickIndex++) {
+            const { date, xPosition } = this._majorUnitTicks[tickIndex];
+
+            // Is this tick the for the first major tick? If so it will need to be sticky.
+            const isStickyLabel = date.getTime() <= this._fromDt.getTime();
+
+            // Draw the actual tick but only if this label isn't the sticky one.
+            if (!isStickyLabel) {
+                context.lineWidth = 2;
+                context.lineCap = "round";
+                context.setLineDash([])
+                context.beginPath();
+                context.moveTo(xPosition, tickY + (rangeContainerHeight / 2) + DEFAULT_UNIT_LABEL_PADDING);
+                context.lineTo(xPosition, tickY + rangeContainerHeight);
+                context.stroke();
+            }
+
+            // Get the tick label.
+            const tickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
+
+            let labelXPosition = xPosition + 5;
+            
+            // If our label is sticky then it should always be drawn inside the visible as the earliest major tick.
+            // Our sticky label should also be pushed out of the way by the next major tick label as we don't want overlaps.
+            if (isStickyLabel) {
+                // Calculate the width of the label, plus the smidge at the start.
+                const labelWidth = context.measureText(tickLabel).width + 5;
+
+                // Grab the position of the next tick label, we need this to work out how much to offset our sticky label by (if at all)
+                const nextTickXPosition = this._majorUnitTicks[tickIndex + 1].xPosition;
+
+                labelXPosition = nextTickXPosition > labelWidth ? DEFAULT_UNIT_LABEL_PADDING : nextTickXPosition - labelWidth;
+            }
+
+            // Draw the major date/time label text.
+            context.lineWidth = 0.5;
+            context.textBaseline = "alphabetic";
+            context.font = "16px Arial";
+            context.fillStyle = "#595959";
+            context.beginPath();
+            context.fillText(tickLabel, labelXPosition, tickY + 44);
+            context.stroke();
+        }
     }
 
     /**
