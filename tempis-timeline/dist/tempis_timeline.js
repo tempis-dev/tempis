@@ -206,29 +206,30 @@ var tempis_timeline = (() => {
     scrollByYMovement(movementY) {
       this._scrollYOffset = clamp(this._scrollYOffset + movementY, 0, 100);
     }
-    draw(context, range) {
-      const height = context.canvas.height - range.calculateRequiredHeight();
-      context.fillStyle = "#FFFFFF";
-      context.fillRect(0, 0, context.canvas.width, height);
-      this._drawMinorUnitBars(context, range.minorTicks, height);
+    draw(context, range, yPosition, maxHeight) {
       const drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
-      this._drawGroups(context, drawPlan);
+      const viewHeight = Math.min(drawPlan.height, maxHeight);
+      context.fillStyle = "#FFFFFF";
+      context.fillRect(0, yPosition, context.canvas.width, viewHeight);
+      this._drawMinorUnitBars(context, range.minorTicks, yPosition, viewHeight);
+      this._drawGroups(context, drawPlan, yPosition, maxHeight);
+      return viewHeight;
     }
-    _drawMinorUnitBars(context, rangeMinorTicks, height) {
+    _drawMinorUnitBars(context, rangeMinorTicks, yPosition, height) {
       context.lineWidth = 1;
       context.strokeStyle = "#c2c2c2";
       context.setLineDash([3, 3]);
       context.beginPath();
       for (const { xPosition } of rangeMinorTicks) {
         if (xPosition > 0 && xPosition < context.canvas.width) {
-          context.moveTo(xPosition, 0);
-          context.lineTo(xPosition, height);
+          context.moveTo(xPosition, yPosition);
+          context.lineTo(xPosition, yPosition + height);
         }
       }
       context.stroke();
       context.setLineDash([]);
     }
-    _drawGroups(context, drawPlan) {
+    _drawGroups(context, drawPlan, yPosition, maxHeight) {
       for (let groupDrawPlanIndex = 0; groupDrawPlanIndex < drawPlan.groupDrawPlans.length; groupDrawPlanIndex++) {
         const groupDrawPlan = drawPlan.groupDrawPlans[groupDrawPlanIndex];
         if (groupDrawPlanIndex > 0) {
@@ -809,6 +810,10 @@ var tempis_timeline = (() => {
       this._canvas = canvas;
       this._options = options;
     }
+    get position() {
+      var _a;
+      return (_a = this._options.position) != null ? _a : "bottom";
+    }
     get fromDt() {
       return this._fromDt;
     }
@@ -894,24 +899,23 @@ var tempis_timeline = (() => {
         };
       });
     }
-    draw(context) {
-      var sizeWidth = context.canvas.clientWidth;
-      var sizeHeight = context.canvas.clientHeight;
+    draw(context, yPosition, position) {
       const rangeContainerHeight = this.calculateRequiredHeight();
-      const tickY = sizeHeight - rangeContainerHeight;
+      context.fillStyle = "#FFFFFF";
+      context.fillRect(0, yPosition, context.canvas.width, rangeContainerHeight);
       for (const { date, xPosition } of this._minorUnitTicks) {
         context.lineWidth = 1;
         context.strokeStyle = "#c2c2c2";
         context.setLineDash([3, 3]);
         context.beginPath();
-        context.moveTo(xPosition, tickY + 2);
-        context.lineTo(xPosition, tickY + rangeContainerHeight / 2);
+        context.moveTo(xPosition, yPosition + 2);
+        context.lineTo(xPosition, yPosition + rangeContainerHeight / 2);
         context.stroke();
         context.textBaseline = "alphabetic";
         context.font = "16px Arial";
         context.fillStyle = "#595959";
         context.beginPath();
-        context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, tickY + 20);
+        context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, yPosition + 20);
         context.stroke();
       }
       if (this._minorTickUnitAndStep.unit === "year") {
@@ -925,8 +929,8 @@ var tempis_timeline = (() => {
           context.lineCap = "round";
           context.setLineDash([]);
           context.beginPath();
-          context.moveTo(xPosition, tickY + rangeContainerHeight / 2 + DEFAULT_UNIT_LABEL_PADDING);
-          context.lineTo(xPosition, tickY + rangeContainerHeight);
+          context.moveTo(xPosition, yPosition + rangeContainerHeight / 2 + DEFAULT_UNIT_LABEL_PADDING);
+          context.lineTo(xPosition, yPosition + rangeContainerHeight);
           context.stroke();
         }
         const tickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
@@ -941,7 +945,7 @@ var tempis_timeline = (() => {
         context.font = "16px Arial";
         context.fillStyle = "#595959";
         context.beginPath();
-        context.fillText(tickLabel, labelXPosition, tickY + 44);
+        context.fillText(tickLabel, labelXPosition, yPosition + 44);
         context.stroke();
       }
     }
@@ -1167,9 +1171,17 @@ var tempis_timeline = (() => {
     _draw() {
       var context = this._canvas.getContext("2d");
       context.clearRect(0, 0, this._canvas.width, this._canvas.height);
-      const maxDataViewHeight = this._canvas.height - this._rangeView.calculateRequiredHeight();
-      this._dataView.draw(context, this._rangeView);
-      this._rangeView.draw(context);
+      const rangeViewHeight = this._rangeView.calculateRequiredHeight();
+      const dataViewYPosition = ["top", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0;
+      const dataViewMaxHeight = this._canvas.height - dataViewYPosition - (["bottom", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0);
+      const dataViewHeight = this._dataView.draw(context, this._rangeView, dataViewYPosition, dataViewMaxHeight);
+      if (["top", "both"].includes(this._rangeView.position)) {
+        this._rangeView.draw(context, 0, "top");
+      }
+      if (["bottom", "both"].includes(this._rangeView.position)) {
+        this._rangeView.draw(context, dataViewYPosition + dataViewHeight, "bottom");
+      }
+      context.clearRect(0, 1e4, this._canvas.width, this._canvas.height);
     }
   };
   return __toCommonJS(src_exports);

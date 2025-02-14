@@ -1,6 +1,6 @@
 import { format } from 'date-format-parse';
 
-import { TempisTimelineRangeOptions, TempisTimelineRangeUnitLabelFormats } from "./TempisTimelineOptions";
+import { TempisTimelineRangeOptions, TempisTimelineRangePosition, TempisTimelineRangeUnitLabelFormats } from "./TempisTimelineOptions";
 import { clamp } from "./Utilities";
 
 export type Unit = 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'month' | 'year' | 'none';
@@ -70,6 +70,13 @@ export class TimelineRangeView {
     public constructor(canvas: HTMLCanvasElement, options: TempisTimelineRangeOptions = {}) {
         this._canvas = canvas;
         this._options = options;
+    }
+
+    /**
+     * Gets the position option value.
+     */
+    public get position(): TempisTimelineRangePosition {
+        return this._options.position ?? "bottom";
     }
 
     /**
@@ -246,15 +253,13 @@ export class TimelineRangeView {
      * Draw the timeline range onto the canvas.
      * @param context The canvas 2D context.
      */
-    public draw(context: CanvasRenderingContext2D): void {
-        // Get the dimensions of the canvas
-        var sizeWidth = context.canvas.clientWidth;
-        var sizeHeight = context.canvas.clientHeight;
-
+    public draw(context: CanvasRenderingContext2D, yPosition: number, position: "top" | "bottom"): void {
         // Figure out our range container dimensions.
         const rangeContainerHeight = this.calculateRequiredHeight();
 
-        const tickY = sizeHeight - rangeContainerHeight;
+        // Draw a white background for the entire range view.
+        context.fillStyle = "#FFFFFF";
+        context.fillRect(0, yPosition, context.canvas.width, rangeContainerHeight);
 
         // Draw our minor unit ticks.
         for (const { date, xPosition } of this._minorUnitTicks) {
@@ -263,8 +268,8 @@ export class TimelineRangeView {
             context.strokeStyle = "#c2c2c2";
             context.setLineDash([3, 3]); /* dashes are 5px and spaces are 3px */
             context.beginPath();
-            context.moveTo(xPosition, tickY + 2);
-            context.lineTo(xPosition, tickY + (rangeContainerHeight / 2));
+            context.moveTo(xPosition, yPosition + 2);
+            context.lineTo(xPosition, yPosition + (rangeContainerHeight / 2));
             context.stroke();
 
             // Draw the minor date/time label text.
@@ -272,7 +277,7 @@ export class TimelineRangeView {
             context.font = "16px Arial";
             context.fillStyle = "#595959";
             context.beginPath();
-            context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, tickY + 20);
+            context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, yPosition + 20);
             context.stroke();
         }
 
@@ -294,8 +299,8 @@ export class TimelineRangeView {
                 context.lineCap = "round";
                 context.setLineDash([])
                 context.beginPath();
-                context.moveTo(xPosition, tickY + (rangeContainerHeight / 2) + DEFAULT_UNIT_LABEL_PADDING);
-                context.lineTo(xPosition, tickY + rangeContainerHeight);
+                context.moveTo(xPosition, yPosition + (rangeContainerHeight / 2) + DEFAULT_UNIT_LABEL_PADDING);
+                context.lineTo(xPosition, yPosition + rangeContainerHeight);
                 context.stroke();
             }
 
@@ -322,7 +327,7 @@ export class TimelineRangeView {
             context.font = "16px Arial";
             context.fillStyle = "#595959";
             context.beginPath();
-            context.fillText(tickLabel, labelXPosition, tickY + 44);
+            context.fillText(tickLabel, labelXPosition, yPosition + 44);
             context.stroke();
         }
     }

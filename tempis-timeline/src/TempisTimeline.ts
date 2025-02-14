@@ -190,19 +190,31 @@ export class TempisTimeline {
         // Clear the canvas before doing a fresh draw.
         context.clearRect(0, 0, this._canvas.width, this._canvas.height);
 
-        // TODO If not responsive then the canvas MUST be already set to the expected width/height.
+        // Calculate how much height the range view will take up when drawn.
+        const rangeViewHeight = this._rangeView.calculateRequiredHeight();
 
         // Find the max height that we can render the data view before we need to have it scroll.
-        // This is determined by how much vertical space is taken up by the range bar.
-        // TODO This will eventually have to cope with the position of the range changing or the number of them (top and bottom range)
-        const maxDataViewHeight = this._canvas.height - this._rangeView.calculateRequiredHeight();
+        // This is determined by how much vertical space is taken up by the range bar(s).
+        // TODO This will eventually have to take the legend height into account.
+        const dataViewYPosition = ["top", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0;
+        const dataViewMaxHeight = this._canvas.height - dataViewYPosition - (["bottom", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0);
 
-        // Draw the data view.
-        this._dataView.draw(context, this._rangeView);
+        // Draw the data view and get the height of it.
+        const dataViewHeight = this._dataView.draw(context, this._rangeView, dataViewYPosition, dataViewMaxHeight);
 
-        // Draw the range.
-        this._rangeView.draw(context);
+        // Are we rendering a top range bar?
+        if (["top", "both"].includes(this._rangeView.position)) {
+            this._rangeView.draw(context, 0 , "top");            
+        }
+
+        // Are we rendering a bottom range bar?
+        if (["bottom", "both"].includes(this._rangeView.position)) {
+            this._rangeView.draw(context, dataViewYPosition + dataViewHeight, "bottom");
+        }
 
         // TODO Need to draw color grouping legend if using groups and colours.
+
+        // TODO Clear the canvas from below the bottom of the bottom range view or bottom of the timeline or the bottom of the legend. 
+        context.clearRect(0, 10000, this._canvas.width, this._canvas.height);
     }
 }

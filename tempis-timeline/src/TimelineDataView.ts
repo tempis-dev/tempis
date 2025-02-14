@@ -104,30 +104,29 @@ export class TimelineDataView {
     /**
      * Draw the timeline data view onto the canvas.
      * @param context The canvas 2D context.
+     * @param range The timeline range view.
+     * @param yPosition The y position from where to start drawing the view.
      * @param maxHeight The max height that we can draw the data view before it must start scrolling.
      */
-    public draw(context: CanvasRenderingContext2D, range: TimelineRangeView): void {
-        // TODO We shouldn't render a groups box to the left! We should split the view above the range bar and have the group label ON the group and have it sticky to the top.
-
-        // TODO We need to calculate how much height this data view is ACTUALLY going to use before we use it
-
-        // Find the max height that we can render the data view before we need to have it scroll.
-        // This is determined by how much vertical space is taken up by the range bar.
-        // TODO This will eventually have to cope with the position of the range changing or the number of them (top and bottom range)
-        const height = context.canvas.height - range.calculateRequiredHeight();
-
-        // Draw a grey background for the entire dataview.
-        context.fillStyle = "#FFFFFF";
-        context.fillRect(0, 0, context.canvas.width, height);
-
-        // TODO Draw minor unit tick bars IF configured.
-        this._drawMinorUnitBars(context, range.minorTicks, height);
-
+    public draw(context: CanvasRenderingContext2D, range: TimelineRangeView, yPosition: number, maxHeight: number): number {
         // We should create our plan for drawing the groups and items of the view. This will also give us exactly how much space would be required to do so.
         const drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
 
+        // Calculate the height of this rendered view, this may be less than the max height.
+        const viewHeight = Math.min(drawPlan.height, maxHeight);
+
+        // Draw a white background for the entire dataview.
+        context.fillStyle = "#FFFFFF";
+        context.fillRect(0, yPosition, context.canvas.width, viewHeight);
+
+        // TODO Draw minor unit tick bars IF configured.
+        this._drawMinorUnitBars(context, range.minorTicks, yPosition, viewHeight);
+
         // Draw our groups and items!
-        this._drawGroups(context, drawPlan);
+        this._drawGroups(context, drawPlan, yPosition, maxHeight);
+        
+        // Return the height of the rendered view.
+        return viewHeight;
     }
 
     /**
@@ -136,7 +135,7 @@ export class TimelineDataView {
      * @param rangeMinorTicks 
      * @param height 
      */
-    private _drawMinorUnitBars(context: CanvasRenderingContext2D, rangeMinorTicks: RangeTick[], height: number): void {
+    private _drawMinorUnitBars(context: CanvasRenderingContext2D, rangeMinorTicks: RangeTick[], yPosition: number, height: number): void {
         context.lineWidth = 1;
         context.strokeStyle = "#c2c2c2";
         context.setLineDash([3, 3]); /* dashes are 5px and spaces are 3px */
@@ -145,8 +144,8 @@ export class TimelineDataView {
         for (const { xPosition } of rangeMinorTicks) {
             // We should only render a unit bar if its not right at the edge of the canvas as it looks a little weird.
             if (xPosition > 0 && xPosition < context.canvas.width) {
-                context.moveTo(xPosition, 0);
-                context.lineTo(xPosition, height);
+                context.moveTo(xPosition, yPosition);
+                context.lineTo(xPosition, yPosition + height);
             }
         }
 
@@ -154,7 +153,7 @@ export class TimelineDataView {
         context.setLineDash([]);
     }
 
-    private _drawGroups(context: CanvasRenderingContext2D, drawPlan: DataViewDrawPlan): void {
+    private _drawGroups(context: CanvasRenderingContext2D, drawPlan: DataViewDrawPlan, yPosition: number, maxHeight: number): void {
         // Draw each group.
         for (let groupDrawPlanIndex = 0; groupDrawPlanIndex < drawPlan.groupDrawPlans.length; groupDrawPlanIndex++) {
             const groupDrawPlan = drawPlan.groupDrawPlans[groupDrawPlanIndex];

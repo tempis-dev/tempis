@@ -12,11 +12,14 @@ export interface TempisTimelineOptions {
 export interface TempisTimelineRangeOptions {
     minorUnit?: TempisTimelineRangeUnitOptions;
     majorUnit?: TempisTimelineRangeUnitOptions;
+    position?: TempisTimelineRangePosition;
 };
 
 export interface TempisTimelineRangeUnitOptions {
     labelFormats?: TempisTimelineRangeUnitLabelFormats;
 };
+
+export type TempisTimelineRangePosition = "top" | "bottom" | "both" | "none";
 
 export type TempisTimelineRangeUnitLabelFormats = {
     millisecond?: string,
