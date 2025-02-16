@@ -153,6 +153,13 @@ export class TimelineDataView {
         context.setLineDash([]);
     }
 
+    /**
+     * Draw the groups and items based on the view draw plan.
+     * @param context The canvas context.
+     * @param drawPlan The view draw plan.
+     * @param yPosition The y position of the top of the view.
+     * @param maxHeight The max height that this view can take on the canvas.
+     */
     private _drawGroups(context: CanvasRenderingContext2D, drawPlan: DataViewDrawPlan, yPosition: number, maxHeight: number): void {
         // Draw each group.
         for (let groupDrawPlanIndex = 0; groupDrawPlanIndex < drawPlan.groupDrawPlans.length; groupDrawPlanIndex++) {
@@ -226,6 +233,13 @@ export class TimelineDataView {
         }
     }
 
+    /**
+     * Create a draw plan for the view.
+     * @param context The canvas context
+     * @param rangeFromDt The range from date.
+     * @param rangeToDt The range to date.
+     * @returns A draw plan for the view.
+     */
     private _createViewDrawPlan(context: CanvasRenderingContext2D, rangeFromDt: Date, rangeToDt: Date): DataViewDrawPlan {
         // Create an array to store all of our group draw plans.
         const groupDrawPlans: DataViewGroupDrawPlan[] = [];

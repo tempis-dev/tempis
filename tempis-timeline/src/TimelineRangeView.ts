@@ -261,23 +261,30 @@ export class TimelineRangeView {
         context.fillStyle = "#FFFFFF";
         context.fillRect(0, yPosition, context.canvas.width, rangeContainerHeight);
 
+        // The vertical position of our minor and major ticks will depend on the position of the range bar.
+        const minorTicksYPosition = position === "top" ? yPosition + (rangeContainerHeight / 2) : yPosition;
+        const majorTicksYPosition = position === "top" ? yPosition : yPosition + (rangeContainerHeight / 2);
+
         // Draw our minor unit ticks.
         for (const { date, xPosition } of this._minorUnitTicks) {
-            // Draw the actual tick.
-            context.lineWidth = 1;
-            context.strokeStyle = "#c2c2c2";
-            context.setLineDash([3, 3]); /* dashes are 5px and spaces are 3px */
-            context.beginPath();
-            context.moveTo(xPosition, yPosition + 2);
-            context.lineTo(xPosition, yPosition + (rangeContainerHeight / 2));
-            context.stroke();
+            // We should only render a tick bar if its not right at the edge of the canvas as it looks a little weird.
+            if (xPosition > 0 && xPosition < context.canvas.width) {
+                // Draw the actual tick.
+                context.lineWidth = 1;
+                context.strokeStyle = "#c2c2c2";
+                context.setLineDash([3, 3]); /* dashes are 5px and spaces are 3px */
+                context.beginPath();
+                context.moveTo(xPosition, minorTicksYPosition);
+                context.lineTo(xPosition, minorTicksYPosition + (rangeContainerHeight / 2));
+                context.stroke();
+            }
 
             // Draw the minor date/time label text.
             context.textBaseline = "alphabetic";
             context.font = "16px Arial";
             context.fillStyle = "#595959";
             context.beginPath();
-            context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, yPosition + 20);
+            context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, minorTicksYPosition + 20);
             context.stroke();
         }
 
@@ -293,27 +300,27 @@ export class TimelineRangeView {
             // Is this tick the for the first major tick? If so it will need to be sticky.
             const isStickyLabel = date.getTime() <= this._fromDt.getTime();
 
-            // Draw the actual tick but only if this label isn't the sticky one.
-            if (!isStickyLabel) {
+            // Draw the actual tick but only if this label isn't the sticky one or if it is right at the edge of the canvas.
+            if (!isStickyLabel && xPosition > 0 && xPosition < context.canvas.width) {
                 context.lineWidth = 2;
                 context.lineCap = "round";
                 context.setLineDash([])
                 context.beginPath();
-                context.moveTo(xPosition, yPosition + (rangeContainerHeight / 2) + DEFAULT_UNIT_LABEL_PADDING);
-                context.lineTo(xPosition, yPosition + rangeContainerHeight);
+                context.moveTo(xPosition, majorTicksYPosition + 2);
+                context.lineTo(xPosition, majorTicksYPosition + (rangeContainerHeight / 2) - 2);
                 context.stroke();
             }
 
             // Get the tick label.
             const tickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
 
-            let labelXPosition = xPosition + 5;
+            let labelXPosition = xPosition + DEFAULT_UNIT_LABEL_PADDING;
             
             // If our label is sticky then it should always be drawn inside the visible as the earliest major tick.
             // Our sticky label should also be pushed out of the way by the next major tick label as we don't want overlaps.
             if (isStickyLabel) {
                 // Calculate the width of the label, plus the smidge at the start.
-                const labelWidth = context.measureText(tickLabel).width + 5;
+                const labelWidth = context.measureText(tickLabel).width + DEFAULT_UNIT_LABEL_PADDING;
 
                 // Grab the position of the next tick label, we need this to work out how much to offset our sticky label by (if at all)
                 const nextTickXPosition = this._majorUnitTicks[tickIndex + 1].xPosition;
@@ -327,7 +334,7 @@ export class TimelineRangeView {
             context.font = "16px Arial";
             context.fillStyle = "#595959";
             context.beginPath();
-            context.fillText(tickLabel, labelXPosition, yPosition + 44);
+            context.fillText(tickLabel, labelXPosition, majorTicksYPosition + (rangeContainerHeight / 4) + DEFAULT_UNIT_LABEL_PADDING);
             context.stroke();
         }
     }

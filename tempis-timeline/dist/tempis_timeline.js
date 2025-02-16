@@ -903,19 +903,23 @@ var tempis_timeline = (() => {
       const rangeContainerHeight = this.calculateRequiredHeight();
       context.fillStyle = "#FFFFFF";
       context.fillRect(0, yPosition, context.canvas.width, rangeContainerHeight);
+      const minorTicksYPosition = position === "top" ? yPosition + rangeContainerHeight / 2 : yPosition;
+      const majorTicksYPosition = position === "top" ? yPosition : yPosition + rangeContainerHeight / 2;
       for (const { date, xPosition } of this._minorUnitTicks) {
-        context.lineWidth = 1;
-        context.strokeStyle = "#c2c2c2";
-        context.setLineDash([3, 3]);
-        context.beginPath();
-        context.moveTo(xPosition, yPosition + 2);
-        context.lineTo(xPosition, yPosition + rangeContainerHeight / 2);
-        context.stroke();
+        if (xPosition > 0 && xPosition < context.canvas.width) {
+          context.lineWidth = 1;
+          context.strokeStyle = "#c2c2c2";
+          context.setLineDash([3, 3]);
+          context.beginPath();
+          context.moveTo(xPosition, minorTicksYPosition);
+          context.lineTo(xPosition, minorTicksYPosition + rangeContainerHeight / 2);
+          context.stroke();
+        }
         context.textBaseline = "alphabetic";
         context.font = "16px Arial";
         context.fillStyle = "#595959";
         context.beginPath();
-        context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, yPosition + 20);
+        context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, minorTicksYPosition + 20);
         context.stroke();
       }
       if (this._minorTickUnitAndStep.unit === "year") {
@@ -924,19 +928,19 @@ var tempis_timeline = (() => {
       for (let tickIndex = 0; tickIndex < this._majorUnitTicks.length; tickIndex++) {
         const { date, xPosition } = this._majorUnitTicks[tickIndex];
         const isStickyLabel = date.getTime() <= this._fromDt.getTime();
-        if (!isStickyLabel) {
+        if (!isStickyLabel && xPosition > 0 && xPosition < context.canvas.width) {
           context.lineWidth = 2;
           context.lineCap = "round";
           context.setLineDash([]);
           context.beginPath();
-          context.moveTo(xPosition, yPosition + rangeContainerHeight / 2 + DEFAULT_UNIT_LABEL_PADDING);
-          context.lineTo(xPosition, yPosition + rangeContainerHeight);
+          context.moveTo(xPosition, majorTicksYPosition + 2);
+          context.lineTo(xPosition, majorTicksYPosition + rangeContainerHeight / 2 - 2);
           context.stroke();
         }
         const tickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
-        let labelXPosition = xPosition + 5;
+        let labelXPosition = xPosition + DEFAULT_UNIT_LABEL_PADDING;
         if (isStickyLabel) {
-          const labelWidth = context.measureText(tickLabel).width + 5;
+          const labelWidth = context.measureText(tickLabel).width + DEFAULT_UNIT_LABEL_PADDING;
           const nextTickXPosition = this._majorUnitTicks[tickIndex + 1].xPosition;
           labelXPosition = nextTickXPosition > labelWidth ? DEFAULT_UNIT_LABEL_PADDING : nextTickXPosition - labelWidth;
         }
@@ -945,7 +949,7 @@ var tempis_timeline = (() => {
         context.font = "16px Arial";
         context.fillStyle = "#595959";
         context.beginPath();
-        context.fillText(tickLabel, labelXPosition, yPosition + 44);
+        context.fillText(tickLabel, labelXPosition, majorTicksYPosition + rangeContainerHeight / 4 + DEFAULT_UNIT_LABEL_PADDING);
         context.stroke();
       }
     }
