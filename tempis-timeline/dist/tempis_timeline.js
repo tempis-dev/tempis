@@ -1180,13 +1180,16 @@ var tempis_timeline = (() => {
       const dataViewYPosition = ["top", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0;
       const dataViewMaxHeight = this._canvas.height - dataViewYPosition - (["bottom", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0);
       const dataViewHeight = this._dataView.draw(context, this._rangeView, dataViewYPosition, dataViewMaxHeight);
+      let totalRenderHeight = dataViewHeight;
       if (["top", "both"].includes(this._rangeView.position)) {
         this._rangeView.draw(context, 0, "top");
+        totalRenderHeight += rangeViewHeight;
       }
       if (["bottom", "both"].includes(this._rangeView.position)) {
         this._rangeView.draw(context, dataViewYPosition + dataViewHeight, "bottom");
+        totalRenderHeight += rangeViewHeight;
       }
-      context.clearRect(0, 1e4, this._canvas.width, this._canvas.height);
+      context.clearRect(0, totalRenderHeight, this._canvas.width, this._canvas.height - totalRenderHeight);
     }
   };
   return __toCommonJS(src_exports);

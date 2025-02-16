@@ -202,19 +202,24 @@ export class TempisTimeline {
         // Draw the data view and get the height of it.
         const dataViewHeight = this._dataView.draw(context, this._rangeView, dataViewYPosition, dataViewMaxHeight);
 
+        // Keep track of how much height we have taken up when rendering all timeline elements.
+        let totalRenderHeight = dataViewHeight;
+
         // Are we rendering a top range bar?
         if (["top", "both"].includes(this._rangeView.position)) {
-            this._rangeView.draw(context, 0 , "top");            
+            this._rangeView.draw(context, 0 , "top");
+            totalRenderHeight += rangeViewHeight;
         }
 
         // Are we rendering a bottom range bar?
         if (["bottom", "both"].includes(this._rangeView.position)) {
             this._rangeView.draw(context, dataViewYPosition + dataViewHeight, "bottom");
+            totalRenderHeight += rangeViewHeight;
         }
 
         // TODO Need to draw color grouping legend if using groups and colours.
 
-        // TODO Clear the canvas from below the bottom of the bottom range view or bottom of the timeline or the bottom of the legend. 
-        context.clearRect(0, 10000, this._canvas.width, this._canvas.height);
+        // Clear the canvas from below the bottom of the bottom range view or bottom of the timeline or the bottom of the legend. 
+        context.clearRect(0, totalRenderHeight, this._canvas.width, this._canvas.height - totalRenderHeight);
     }
 }
