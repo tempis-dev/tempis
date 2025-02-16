@@ -98,7 +98,8 @@ export class TimelineDataView {
      * @param movementY The y offset amount.
      */
     public scrollByYMovement(movementY: number): void {
-        this._scrollYOffset = clamp(this._scrollYOffset + movementY, 0, 100 /** TODO This needs to be based on available height and height of all items. */);
+        // this._scrollYOffset = clamp(this._scrollYOffset + movementY, 0, 100 /** TODO This needs to be based on available height and height of all items. */);
+        this._scrollYOffset += movementY;
     }
 
     /**
@@ -111,6 +112,9 @@ export class TimelineDataView {
     public draw(context: CanvasRenderingContext2D, range: TimelineRangeView, yPosition: number, maxHeight: number): number {
         // We should create our plan for drawing the groups and items of the view. This will also give us exactly how much space would be required to do so.
         const drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
+
+        // We should clamp our scroll offset to the allowed values now that we know the height required to render all groups.
+        this._scrollYOffset = clamp(this._scrollYOffset, Math.min(0, maxHeight - drawPlan.height), 0);
 
         // Calculate the height of this rendered view, this may be less than the max height.
         const viewHeight = Math.min(drawPlan.height, maxHeight);

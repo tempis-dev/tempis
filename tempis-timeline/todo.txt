@@ -3,10 +3,12 @@
 - X Add support for weeks, nothing fancy, just do the days logic * 7
 - X Update range item labels to be rendered in the visible range.
 - X Add little marker between marker line and PIT items.
+- X Pass in explicit height and y offset of grid data view when drawing based on number and position of range views and draw BEFORE range views.
+- X Properly implement scrolling behaviour and add a passive scrollbar which is only visible while scrolling.
 - Draw range views based on calculated height and unit label font size.
-- Pass in explicit height and y offset of grid data view when drawing based on number and position of range views and draw BEFORE range views.
-- Properly implement scrolling behaviour and add a passive scrollbar which is only visible while scrolling.
 - Give range items a minimum width, maybe, look into what other libraries do when zooming out very far.
 - Add RTL support.
 - Add configurable range stripes.
 - Add item selection via click and programatically.
+- Add 'fitCanvasVertically' flag which actually resizes the canvas to match the height of the rendered timeline. This could be used in server-side render.
+- Figure out why removing explicit height for canvas parent causes infinite resize callbacks.

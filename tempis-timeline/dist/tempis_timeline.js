@@ -204,10 +204,11 @@ var tempis_timeline = (() => {
       this._dataSet = dataSet;
     }
     scrollByYMovement(movementY) {
-      this._scrollYOffset = clamp(this._scrollYOffset + movementY, 0, 100);
+      this._scrollYOffset += movementY;
     }
     draw(context, range, yPosition, maxHeight) {
       const drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
+      this._scrollYOffset = clamp(this._scrollYOffset, Math.min(0, maxHeight - drawPlan.height), 0);
       const viewHeight = Math.min(drawPlan.height, maxHeight);
       context.fillStyle = "#FFFFFF";
       context.fillRect(0, yPosition, context.canvas.width, viewHeight);
