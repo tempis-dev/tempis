@@ -161,6 +161,8 @@ export class TimelineDataView {
      * @param maxHeight The max height that this view can take on the canvas.
      */
     private _drawGroups(context: CanvasRenderingContext2D, drawPlan: DataViewDrawPlan, yPosition: number, maxHeight: number): void {
+        const scrolledYPosition = yPosition + this._scrollYOffset;
+
         // Draw each group.
         for (let groupDrawPlanIndex = 0; groupDrawPlanIndex < drawPlan.groupDrawPlans.length; groupDrawPlanIndex++) {
             const groupDrawPlan = drawPlan.groupDrawPlans[groupDrawPlanIndex];
@@ -170,8 +172,8 @@ export class TimelineDataView {
                 context.lineWidth = 0.5;
                 context.strokeStyle = "#595959";
                 context.beginPath();
-                context.moveTo(0, this._scrollYOffset + groupDrawPlan.yPositionStart - 1);
-                context.lineTo(context.canvas.width, this._scrollYOffset + groupDrawPlan.yPositionStart - 1);
+                context.moveTo(0, scrolledYPosition + groupDrawPlan.yPositionStart - 1);
+                context.lineTo(context.canvas.width, scrolledYPosition + groupDrawPlan.yPositionStart - 1);
                 context.stroke();
             }
 
@@ -181,7 +183,7 @@ export class TimelineDataView {
                 context.font = "14px Arial";
                 context.fillStyle = "#595959";
                 context.beginPath();
-                context.fillText(groupDrawPlan.label, 6, this._scrollYOffset + groupDrawPlan.yPositionStart + DEFAULT_GROUP_VERTICAL_LABEL_MARGIN);
+                context.fillText(groupDrawPlan.label, 6, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_VERTICAL_LABEL_MARGIN);
                 context.stroke();
             }
 
@@ -195,14 +197,14 @@ export class TimelineDataView {
 
                         // We need to draw a little downward triangle to join the item and the marker line.
                         const itemMarkerConnectorPath = new Path2D();
-                        itemMarkerConnectorPath.moveTo(Math.max(itemDrawPlan.xPositionStart, itemDrawPlan.xPointInTimePosition - 20), this._scrollYOffset + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
-                        itemMarkerConnectorPath.lineTo(itemDrawPlan.xPointInTimePosition, this._scrollYOffset + itemDrawPlan.yPositionEnd + 6);
-                        itemMarkerConnectorPath.lineTo(Math.min(itemDrawPlan.xPositionEnd, itemDrawPlan.xPointInTimePosition + 20), this._scrollYOffset + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
+                        itemMarkerConnectorPath.moveTo(Math.max(itemDrawPlan.xPositionStart, itemDrawPlan.xPointInTimePosition - 20), scrolledYPosition + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
+                        itemMarkerConnectorPath.lineTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionEnd + 6);
+                        itemMarkerConnectorPath.lineTo(Math.min(itemDrawPlan.xPositionEnd, itemDrawPlan.xPointInTimePosition + 20), scrolledYPosition + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
                         context.fill(itemMarkerConnectorPath);
 
                         // Draw the actual marker line.
                         context.beginPath();
-                        context.moveTo(itemDrawPlan.xPointInTimePosition, this._scrollYOffset + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
+                        context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
                         context.lineTo(itemDrawPlan.xPointInTimePosition, 1000 /** TODO Work this out properly. */);
                         context.stroke();
                     } 
@@ -210,7 +212,7 @@ export class TimelineDataView {
                     // Draw the item range rectangle.
                     context.fillStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
                     context.beginPath();
-                    context.roundRect(itemDrawPlan.xPositionStart, this._scrollYOffset + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, 5);
+                    context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, 5);
                     context.fill();
 
                     // Draw the item label (if there is one)
@@ -225,7 +227,7 @@ export class TimelineDataView {
                         context.font = "14px Arial";
                         context.fillStyle = DEFAULT_ITEM_FOREGROUND_COLOUR;
                         context.beginPath();
-                        context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2)) + this._scrollYOffset);
+                        context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2)) + scrolledYPosition);
                         context.stroke();
                     }
                 }

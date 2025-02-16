@@ -230,14 +230,15 @@ var tempis_timeline = (() => {
       context.setLineDash([]);
     }
     _drawGroups(context, drawPlan, yPosition, maxHeight) {
+      const scrolledYPosition = yPosition + this._scrollYOffset;
       for (let groupDrawPlanIndex = 0; groupDrawPlanIndex < drawPlan.groupDrawPlans.length; groupDrawPlanIndex++) {
         const groupDrawPlan = drawPlan.groupDrawPlans[groupDrawPlanIndex];
         if (groupDrawPlanIndex > 0) {
           context.lineWidth = 0.5;
           context.strokeStyle = "#595959";
           context.beginPath();
-          context.moveTo(0, this._scrollYOffset + groupDrawPlan.yPositionStart - 1);
-          context.lineTo(context.canvas.width, this._scrollYOffset + groupDrawPlan.yPositionStart - 1);
+          context.moveTo(0, scrolledYPosition + groupDrawPlan.yPositionStart - 1);
+          context.lineTo(context.canvas.width, scrolledYPosition + groupDrawPlan.yPositionStart - 1);
           context.stroke();
         }
         if (groupDrawPlan.label) {
@@ -245,7 +246,7 @@ var tempis_timeline = (() => {
           context.font = "14px Arial";
           context.fillStyle = "#595959";
           context.beginPath();
-          context.fillText(groupDrawPlan.label, 6, this._scrollYOffset + groupDrawPlan.yPositionStart + DEFAULT_GROUP_VERTICAL_LABEL_MARGIN);
+          context.fillText(groupDrawPlan.label, 6, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_VERTICAL_LABEL_MARGIN);
           context.stroke();
         }
         for (const row of groupDrawPlan.rows) {
@@ -255,18 +256,18 @@ var tempis_timeline = (() => {
               context.strokeStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
               context.fillStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
               const itemMarkerConnectorPath = new Path2D();
-              itemMarkerConnectorPath.moveTo(Math.max(itemDrawPlan.xPositionStart, itemDrawPlan.xPointInTimePosition - 20), this._scrollYOffset + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
-              itemMarkerConnectorPath.lineTo(itemDrawPlan.xPointInTimePosition, this._scrollYOffset + itemDrawPlan.yPositionEnd + 6);
-              itemMarkerConnectorPath.lineTo(Math.min(itemDrawPlan.xPositionEnd, itemDrawPlan.xPointInTimePosition + 20), this._scrollYOffset + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
+              itemMarkerConnectorPath.moveTo(Math.max(itemDrawPlan.xPositionStart, itemDrawPlan.xPointInTimePosition - 20), scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
+              itemMarkerConnectorPath.lineTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionEnd + 6);
+              itemMarkerConnectorPath.lineTo(Math.min(itemDrawPlan.xPositionEnd, itemDrawPlan.xPointInTimePosition + 20), scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
               context.fill(itemMarkerConnectorPath);
               context.beginPath();
-              context.moveTo(itemDrawPlan.xPointInTimePosition, this._scrollYOffset + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
+              context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
               context.lineTo(itemDrawPlan.xPointInTimePosition, 1e3);
               context.stroke();
             }
             context.fillStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
             context.beginPath();
-            context.roundRect(itemDrawPlan.xPositionStart, this._scrollYOffset + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, 5);
+            context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, 5);
             context.fill();
             if (itemDrawPlan.item.caption) {
               const labelStartPositionX = Math.max(DEFAULT_ITEM_PADDING, itemDrawPlan.xPositionStart + DEFAULT_ITEM_PADDING);
@@ -275,7 +276,7 @@ var tempis_timeline = (() => {
               context.font = "14px Arial";
               context.fillStyle = DEFAULT_ITEM_FOREGROUND_COLOUR;
               context.beginPath();
-              context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + this._scrollYOffset);
+              context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + scrolledYPosition);
               context.stroke();
             }
           }
