@@ -306,8 +306,8 @@ export class TimelineRangeView {
                 context.lineCap = "round";
                 context.setLineDash([])
                 context.beginPath();
-                context.moveTo(xPosition, majorTicksYPosition + 2);
-                context.lineTo(xPosition, majorTicksYPosition + (rangeContainerHeight / 2) - 2);
+                context.moveTo(xPosition, majorTicksYPosition + 3);
+                context.lineTo(xPosition, majorTicksYPosition + (rangeContainerHeight / 2) - 3);
                 context.stroke();
             }
 

@@ -934,8 +934,8 @@ var tempis_timeline = (() => {
           context.lineCap = "round";
           context.setLineDash([]);
           context.beginPath();
-          context.moveTo(xPosition, majorTicksYPosition + 2);
-          context.lineTo(xPosition, majorTicksYPosition + rangeContainerHeight / 2 - 2);
+          context.moveTo(xPosition, majorTicksYPosition + 3);
+          context.lineTo(xPosition, majorTicksYPosition + rangeContainerHeight / 2 - 3);
           context.stroke();
         }
         const tickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
