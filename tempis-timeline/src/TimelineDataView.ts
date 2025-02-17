@@ -177,7 +177,7 @@ export class TimelineDataView {
                 context.strokeStyle = "#595959";
                 context.beginPath();
                 context.moveTo(0, scrolledYPosition + groupDrawPlan.yPositionStart - 1);
-                context.lineTo(context.canvas.width, scrolledYPosition + groupDrawPlan.yPositionStart - 1);
+                context.lineTo(context.canvas.clientWidth, scrolledYPosition + groupDrawPlan.yPositionStart - 1);
                 context.stroke();
             }
 
@@ -251,7 +251,7 @@ export class TimelineDataView {
         const groupDrawPlans: DataViewGroupDrawPlan[] = [];
 
         // Calculate the width of one millisecond as it would be rendered on the canvas.
-        const milliRenderWidth = context.canvas.width / (rangeToDt.getTime() - rangeFromDt.getTime());
+        const milliRenderWidth = context.canvas.clientWidth / (rangeToDt.getTime() - rangeFromDt.getTime());
 
         // Work out all item stacks first. We aren't calculating any y positions or heights here we can do that after.
         for (const grouping of this._dataSet.groupings) {
@@ -294,9 +294,9 @@ export class TimelineDataView {
                     if (startPositionX < 0) {
                         startPositionX = 0;
                         endPositionX = itemLabelWidth;
-                    } else if (endPositionX > context.canvas.width) {
-                        startPositionX = context.canvas.width - itemLabelWidth;
-                        endPositionX = context.canvas.width;
+                    } else if (endPositionX > context.canvas.clientWidth) {
+                        startPositionX = context.canvas.clientWidth - itemLabelWidth;
+                        endPositionX = context.canvas.clientWidth;
                     }
                 }
 
@@ -402,7 +402,7 @@ export class TimelineDataView {
 
         return {
             height: positionY,
-            width: context.canvas.width,
+            width: context.canvas.clientWidth,
             groupDrawPlans
         };
     }

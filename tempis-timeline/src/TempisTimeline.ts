@@ -101,8 +101,8 @@ export class TempisTimeline {
         const getMousePos = (evt: MouseEvent) => {
             var rect = this._canvas.getBoundingClientRect();
             return {
-                x: (evt.clientX - rect.left) / (rect.right - rect.left) * this._canvas.width,
-                y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.height
+                x: (evt.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
+                y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
             };
         }
 
@@ -162,10 +162,22 @@ export class TempisTimeline {
         if (!canvasContainerElement) {
             throw new Error("Cannot resize canvas as it has no parent element, is it detached?");
         }
-        
-        // Update the size of the canvas to match the size of it's container.
-        this._canvas.width = canvasContainerElement.getBoundingClientRect().width;
-        this._canvas.height = canvasContainerElement.getBoundingClientRect().height;
+
+        // Get the canvas context.
+        const canvasContext = this._canvas.getContext("2d")!;
+
+        // Set actual display size of the canvas (css pixels).
+        this._canvas.style.width = canvasContainerElement.getBoundingClientRect().width + "px";
+        this._canvas.style.height = canvasContainerElement.getBoundingClientRect().height + "px";
+
+        const dpr = window.devicePixelRatio || 1; 
+
+        // Set the "physical" size of the canvas, this is the number of pixels that the canvas has.
+        this._canvas.width = this._canvas.offsetWidth * dpr;
+        this._canvas.height = this._canvas.offsetHeight * dpr;
+
+        // Scale the drawing context to account for the increased pixel density.
+        canvasContext.scale(dpr, dpr);
 
         // Now that the canvas has resized we will need to recalculate the ticks for our range.
         this._rangeView.calculateMinorAndMajorUnitTicks();
@@ -188,7 +200,7 @@ export class TempisTimeline {
         var context = this._canvas.getContext('2d')!;
 
         // Clear the canvas before doing a fresh draw.
-        context.clearRect(0, 0, this._canvas.width, this._canvas.height);
+        context.clearRect(0, 0, this._canvas.clientWidth, this._canvas.clientHeight);
 
         // Calculate how much height the range view will take up when drawn.
         const rangeViewHeight = this._rangeView.calculateRequiredHeight();
@@ -197,7 +209,7 @@ export class TempisTimeline {
         // This is determined by how much vertical space is taken up by the range bar(s).
         // TODO This will eventually have to take the legend height into account.
         const dataViewYPosition = ["top", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0;
-        const dataViewMaxHeight = this._canvas.height - dataViewYPosition - (["bottom", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0);
+        const dataViewMaxHeight = this._canvas.clientHeight - dataViewYPosition - (["bottom", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0);
 
         // Draw the data view and get the height of it.
         const dataViewHeight = this._dataView.draw(context, this._rangeView, dataViewYPosition, dataViewMaxHeight);
@@ -220,6 +232,6 @@ export class TempisTimeline {
         // TODO Need to draw color grouping legend if using groups and colours.
 
         // Clear the canvas from below the bottom of the bottom range view or bottom of the timeline or the bottom of the legend. 
-        context.clearRect(0, totalRenderHeight, this._canvas.width, this._canvas.height - totalRenderHeight);
+        context.clearRect(0, totalRenderHeight, this._canvas.clientWidth, this._canvas.clientHeight - totalRenderHeight);
     }
 }

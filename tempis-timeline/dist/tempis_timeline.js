@@ -239,7 +239,7 @@ var tempis_timeline = (() => {
           context.strokeStyle = "#595959";
           context.beginPath();
           context.moveTo(0, scrolledYPosition + groupDrawPlan.yPositionStart - 1);
-          context.lineTo(context.canvas.width, scrolledYPosition + groupDrawPlan.yPositionStart - 1);
+          context.lineTo(context.canvas.clientWidth, scrolledYPosition + groupDrawPlan.yPositionStart - 1);
           context.stroke();
         }
         if (groupDrawPlan.label) {
@@ -287,7 +287,7 @@ var tempis_timeline = (() => {
     _createViewDrawPlan(context, rangeFromDt, rangeToDt) {
       var _a;
       const groupDrawPlans = [];
-      const milliRenderWidth = context.canvas.width / (rangeToDt.getTime() - rangeFromDt.getTime());
+      const milliRenderWidth = context.canvas.clientWidth / (rangeToDt.getTime() - rangeFromDt.getTime());
       for (const grouping of this._dataSet.groupings) {
         const itemsInRange = grouping.getItemsInRange(rangeFromDt, rangeToDt);
         if (!itemsInRange.length) {
@@ -310,9 +310,9 @@ var tempis_timeline = (() => {
             if (startPositionX < 0) {
               startPositionX = 0;
               endPositionX = itemLabelWidth;
-            } else if (endPositionX > context.canvas.width) {
-              startPositionX = context.canvas.width - itemLabelWidth;
-              endPositionX = context.canvas.width;
+            } else if (endPositionX > context.canvas.clientWidth) {
+              startPositionX = context.canvas.clientWidth - itemLabelWidth;
+              endPositionX = context.canvas.clientWidth;
             }
           }
           const itemDrawPlan = {
@@ -371,7 +371,7 @@ var tempis_timeline = (() => {
       }
       return {
         height: positionY,
-        width: context.canvas.width,
+        width: context.canvas.clientWidth,
         groupDrawPlans
       };
     }
@@ -835,7 +835,7 @@ var tempis_timeline = (() => {
       this.calculateMinorAndMajorUnitTicks();
     }
     moveByXMovement(movementX) {
-      const rangeXMillisValue = (this._toDt.getTime() - this._fromDt.getTime()) / this._canvas.width;
+      const rangeXMillisValue = (this._toDt.getTime() - this._fromDt.getTime()) / this._canvas.clientWidth;
       this._fromDt.setTime(this._fromDt.getTime() + rangeXMillisValue * movementX);
       this._toDt.setTime(this._toDt.getTime() + rangeXMillisValue * movementX);
       this.calculateMinorAndMajorUnitTicks();
@@ -881,9 +881,9 @@ var tempis_timeline = (() => {
       return DEFAULT_UNIT_LABEL_PADDING * 4 + (unitLabelTextMetrics.actualBoundingBoxAscent + unitLabelTextMetrics.actualBoundingBoxDescent) * 2;
     }
     calculateMinorAndMajorUnitTicks() {
-      const minorTargetTickCount = Math.floor(this._canvas.width / 120);
-      const majorTargetTickCount = Math.floor(this._canvas.width / 320);
-      const milliRenderWidth = this._canvas.width / (this._toDt.getTime() - this._fromDt.getTime());
+      const minorTargetTickCount = Math.floor(this._canvas.clientWidth / 120);
+      const majorTargetTickCount = Math.floor(this._canvas.clientWidth / 320);
+      const milliRenderWidth = this._canvas.clientWidth / (this._toDt.getTime() - this._fromDt.getTime());
       this._minorTickUnitAndStep = this._findSensibleUnitAndStep(minorTargetTickCount);
       this._majorTickUnitAndStep = this._findSensibleUnitAndStep(majorTargetTickCount, this._minorTickUnitAndStep.unit);
       const minorTickDates = this._getTickDates(this._minorTickUnitAndStep);
@@ -904,11 +904,11 @@ var tempis_timeline = (() => {
     draw(context, yPosition, position) {
       const rangeContainerHeight = this.calculateRequiredHeight();
       context.fillStyle = "#FFFFFF";
-      context.fillRect(0, yPosition, context.canvas.width, rangeContainerHeight);
+      context.fillRect(0, yPosition, context.canvas.clientWidth, rangeContainerHeight);
       const minorTicksYPosition = position === "top" ? yPosition + rangeContainerHeight / 2 : yPosition;
       const majorTicksYPosition = position === "top" ? yPosition : yPosition + rangeContainerHeight / 2;
       for (const { date, xPosition } of this._minorUnitTicks) {
-        if (xPosition > 0 && xPosition < context.canvas.width) {
+        if (xPosition > 0 && xPosition < context.canvas.clientWidth) {
           context.lineWidth = 1;
           context.strokeStyle = "#c2c2c2";
           context.setLineDash([3, 3]);
@@ -930,7 +930,7 @@ var tempis_timeline = (() => {
       for (let tickIndex = 0; tickIndex < this._majorUnitTicks.length; tickIndex++) {
         const { date, xPosition } = this._majorUnitTicks[tickIndex];
         const isStickyLabel = date.getTime() <= this._fromDt.getTime();
-        if (!isStickyLabel && xPosition > 0 && xPosition < context.canvas.width) {
+        if (!isStickyLabel && xPosition > 0 && xPosition < context.canvas.clientWidth) {
           context.lineWidth = 2;
           context.lineCap = "round";
           context.setLineDash([]);
@@ -1125,8 +1125,8 @@ var tempis_timeline = (() => {
       const getMousePos = (evt) => {
         var rect = this._canvas.getBoundingClientRect();
         return {
-          x: (evt.clientX - rect.left) / (rect.right - rect.left) * this._canvas.width,
-          y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.height
+          x: (evt.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
+          y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
         };
       };
       this._canvas.addEventListener("wheel", (evt) => {
@@ -1163,8 +1163,13 @@ var tempis_timeline = (() => {
       if (!canvasContainerElement) {
         throw new Error("Cannot resize canvas as it has no parent element, is it detached?");
       }
-      this._canvas.width = canvasContainerElement.getBoundingClientRect().width;
-      this._canvas.height = canvasContainerElement.getBoundingClientRect().height;
+      const canvasContext = this._canvas.getContext("2d");
+      this._canvas.style.width = canvasContainerElement.getBoundingClientRect().width + "px";
+      this._canvas.style.height = canvasContainerElement.getBoundingClientRect().height + "px";
+      const dpr = window.devicePixelRatio || 1;
+      this._canvas.width = this._canvas.offsetWidth * dpr;
+      this._canvas.height = this._canvas.offsetHeight * dpr;
+      canvasContext.scale(dpr, dpr);
       this._rangeView.calculateMinorAndMajorUnitTicks();
     }
     _onDataSetChange() {
@@ -1176,10 +1181,10 @@ var tempis_timeline = (() => {
     }
     _draw() {
       var context = this._canvas.getContext("2d");
-      context.clearRect(0, 0, this._canvas.width, this._canvas.height);
+      context.clearRect(0, 0, this._canvas.clientWidth, this._canvas.clientHeight);
       const rangeViewHeight = this._rangeView.calculateRequiredHeight();
       const dataViewYPosition = ["top", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0;
-      const dataViewMaxHeight = this._canvas.height - dataViewYPosition - (["bottom", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0);
+      const dataViewMaxHeight = this._canvas.clientHeight - dataViewYPosition - (["bottom", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0);
       const dataViewHeight = this._dataView.draw(context, this._rangeView, dataViewYPosition, dataViewMaxHeight);
       let totalRenderHeight = dataViewHeight;
       if (["top", "both"].includes(this._rangeView.position)) {
@@ -1190,7 +1195,7 @@ var tempis_timeline = (() => {
         this._rangeView.draw(context, dataViewYPosition + dataViewHeight, "bottom");
         totalRenderHeight += rangeViewHeight;
       }
-      context.clearRect(0, totalRenderHeight, this._canvas.width, this._canvas.height - totalRenderHeight);
+      context.clearRect(0, totalRenderHeight, this._canvas.clientWidth, this._canvas.clientHeight - totalRenderHeight);
     }
   };
   return __toCommonJS(src_exports);

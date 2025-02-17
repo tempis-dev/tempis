@@ -127,7 +127,7 @@ export class TimelineRangeView {
      */
     public moveByXMovement(movementX: number): void {
         // Get the number of milliseconds shown in the current range.
-        const rangeXMillisValue = (this._toDt.getTime() - this._fromDt.getTime()) / this._canvas.width;
+        const rangeXMillisValue = (this._toDt.getTime() - this._fromDt.getTime()) / this._canvas.clientWidth;
 
         // Update the from and to date to account for the movement.
         this._fromDt.setTime(this._fromDt.getTime() + (rangeXMillisValue * movementX));
@@ -214,11 +214,11 @@ export class TimelineRangeView {
      */
     public calculateMinorAndMajorUnitTicks(): void {
         // Find a sensible number of minor and major ticks to render, this will depend on the canvas width.
-        const minorTargetTickCount = Math.floor(this._canvas.width / 120);
-        const majorTargetTickCount = Math.floor(this._canvas.width / 320);
+        const minorTargetTickCount = Math.floor(this._canvas.clientWidth / 120);
+        const majorTargetTickCount = Math.floor(this._canvas.clientWidth / 320);
 
         // Calculate the width of one millisecond as it would be rendered on the canvas.
-        const milliRenderWidth = this._canvas.width / (this._toDt.getTime() - this._fromDt.getTime());
+        const milliRenderWidth = this._canvas.clientWidth / (this._toDt.getTime() - this._fromDt.getTime());
 
         // Calculate a sensible minor unit and step for the range.
         this._minorTickUnitAndStep = this._findSensibleUnitAndStep(minorTargetTickCount);
@@ -259,7 +259,7 @@ export class TimelineRangeView {
 
         // Draw a white background for the entire range view.
         context.fillStyle = "#FFFFFF";
-        context.fillRect(0, yPosition, context.canvas.width, rangeContainerHeight);
+        context.fillRect(0, yPosition, context.canvas.clientWidth, rangeContainerHeight);
 
         // The vertical position of our minor and major ticks will depend on the position of the range bar.
         const minorTicksYPosition = position === "top" ? yPosition + (rangeContainerHeight / 2) : yPosition;
@@ -268,7 +268,7 @@ export class TimelineRangeView {
         // Draw our minor unit ticks.
         for (const { date, xPosition } of this._minorUnitTicks) {
             // We should only render a tick bar if its not right at the edge of the canvas as it looks a little weird.
-            if (xPosition > 0 && xPosition < context.canvas.width) {
+            if (xPosition > 0 && xPosition < context.canvas.clientWidth) {
                 // Draw the actual tick.
                 context.lineWidth = 1;
                 context.strokeStyle = "#c2c2c2";
@@ -301,7 +301,7 @@ export class TimelineRangeView {
             const isStickyLabel = date.getTime() <= this._fromDt.getTime();
 
             // Draw the actual tick but only if this label isn't the sticky one or if it is right at the edge of the canvas.
-            if (!isStickyLabel && xPosition > 0 && xPosition < context.canvas.width) {
+            if (!isStickyLabel && xPosition > 0 && xPosition < context.canvas.clientWidth) {
                 context.lineWidth = 2;
                 context.lineCap = "round";
                 context.setLineDash([])
