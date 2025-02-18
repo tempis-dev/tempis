@@ -200,7 +200,6 @@ export class TimelineRangeView {
 
         // Apply the font that will be used to the render the labels.
         // TODO This should be set from some default or the configured font.
-        context.font = "16px Arial";
 
         // Get the text metrics for an example date value.
         const unitLabelTextMetrics = context.measureText("Fri 13 April 1990");
@@ -281,7 +280,6 @@ export class TimelineRangeView {
 
             // Draw the minor date/time label text.
             context.textBaseline = "alphabetic";
-            context.font = "16px Arial";
             context.fillStyle = "#595959";
             context.beginPath();
             context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, minorTicksYPosition + 20);
@@ -331,7 +329,6 @@ export class TimelineRangeView {
             // Draw the major date/time label text.
             context.lineWidth = 0.5;
             context.textBaseline = "alphabetic";
-            context.font = "16px Arial";
             context.fillStyle = "#595959";
             context.beginPath();
             context.fillText(tickLabel, labelXPosition, majorTicksYPosition + (rangeContainerHeight / 4) + DEFAULT_UNIT_LABEL_PADDING);

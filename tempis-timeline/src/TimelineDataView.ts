@@ -184,7 +184,6 @@ export class TimelineDataView {
             // Draw the group label if we have one.
             if (groupDrawPlan.label) {
                 context.textBaseline = "top";
-                context.font = "14px Arial";
                 context.fillStyle = "#595959";
                 context.beginPath();
                 context.fillText(groupDrawPlan.label, 6, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_VERTICAL_LABEL_MARGIN);
@@ -228,7 +227,6 @@ export class TimelineDataView {
                         const maxLabelWidth = Math.max(0, (itemDrawPlan.xPositionEnd - DEFAULT_ITEM_PADDING) - labelStartPositionX) + 1;
 
                         context.textBaseline = "middle";
-                        context.font = "14px Arial";
                         context.fillStyle = DEFAULT_ITEM_FOREGROUND_COLOUR;
                         context.beginPath();
                         context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2)) + scrolledYPosition);
@@ -280,7 +278,6 @@ export class TimelineDataView {
                     // This is a PIT item, the start and end positions of our x axis will be derived from the width of the label and the start date.
                     // TODO Determine what to do when we have PIT item with no caption.
                     // TODO Set the context font to be whatever we will be using to render the actual item label.
-                    context.font = "14px Arial";
                     const itemLabelWidth = context.measureText(item.caption ?? "?").width + (DEFAULT_ITEM_PADDING * 2);
 
                     // Let's set the start and end x position to be equidistant from the actual point in time that this item is for.
@@ -355,7 +352,6 @@ export class TimelineDataView {
 
             // The height of any group labels will have to be taken into consideration.
             if (groupDrawPlan.label) {
-                context.font = "14px Arial";
                 const groupLabelMetrics = context.measureText(groupDrawPlan.label);
 
                 // Add the vertical space required to draw the label.
@@ -369,7 +365,6 @@ export class TimelineDataView {
             positionY += DEFAULT_GROUP_MARGIN;
 
             // We should calculate the height of any items, this will be based on the height of an example label and any item padding.
-            context.font = "14px Arial";
             const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Label");
             const itemHeight = (actualBoundingBoxAscent + actualBoundingBoxDescent) + (DEFAULT_ITEM_PADDING * 2);
 

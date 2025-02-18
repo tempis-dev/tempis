@@ -1,6 +1,7 @@
 import { TempisTimelineOptions } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineDataView } from "./TimelineDataView";
+import { TimelineFont } from "./TimelineFont";
 import { TimelineRangeView } from "./TimelineRangeView";
 
 export class TempisTimeline {
@@ -19,6 +20,9 @@ export class TempisTimeline {
     /** The timeline data view. */
     private readonly _dataView: TimelineDataView;
 
+    /** The default timeline font. */
+    private readonly _font: TimelineFont;
+
     /** The canvas container resize observer. */
     private _canvasContainerResizeObserver: ResizeObserver | null = null;
 
@@ -29,6 +33,7 @@ export class TempisTimeline {
         this._rangeView = new TimelineRangeView(this._canvas, this._options.range);
         this._dataSet = new TimelineDataSet(() => this._onDataSetChange());
         this._dataView = new TimelineDataView(this._dataSet);
+        this._font = new TimelineFont(this._options.font);
 
         // Create our initial item groupings.
         this._dataSet.createGroupings(this._options.items);
@@ -201,6 +206,9 @@ export class TempisTimeline {
 
         // Clear the canvas before doing a fresh draw.
         context.clearRect(0, 0, this._canvas.clientWidth, this._canvas.clientHeight);
+
+        // Apply the default font to the canvas context.
+        context.font = this._font.font;
 
         // Calculate how much height the range view will take up when drawn.
         const rangeViewHeight = this._rangeView.calculateRequiredHeight();

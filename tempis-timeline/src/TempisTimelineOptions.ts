@@ -5,9 +5,20 @@ export interface TempisTimelineOptions {
     /** The timeline range options. */
     range?: TempisTimelineRangeOptions;
 
+    /** The default font to use in rendering text. */
+    font?: TempisTimelineFont;
+
     /** The items to display on the timeline. */
     items: TempisTimelineItem[];
 };
+
+export interface TempisTimelineFont {
+    size?: number;
+    family?: string;
+    style?: string;
+    weight?: "normal" | "bold" | "lighter" | "bolder" | number
+    lineHeight?: number | string
+}
 
 export interface TempisTimelineRangeOptions {
     minorUnit?: TempisTimelineRangeUnitOptions;
@@ -16,7 +27,8 @@ export interface TempisTimelineRangeOptions {
 };
 
 export interface TempisTimelineRangeUnitOptions {
-    labelFormats?: TempisTimelineRangeUnitLabelFormats;
+    font?: TempisTimelineFont;
+    formats?: TempisTimelineRangeUnitLabelFormats;
 };
 
 export type TempisTimelineRangePosition = "top" | "bottom" | "both" | "none";

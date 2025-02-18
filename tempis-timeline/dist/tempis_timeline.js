@@ -244,7 +244,6 @@ var tempis_timeline = (() => {
         }
         if (groupDrawPlan.label) {
           context.textBaseline = "top";
-          context.font = "14px Arial";
           context.fillStyle = "#595959";
           context.beginPath();
           context.fillText(groupDrawPlan.label, 6, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_VERTICAL_LABEL_MARGIN);
@@ -274,7 +273,6 @@ var tempis_timeline = (() => {
               const labelStartPositionX = Math.max(DEFAULT_ITEM_PADDING, itemDrawPlan.xPositionStart + DEFAULT_ITEM_PADDING);
               const maxLabelWidth = Math.max(0, itemDrawPlan.xPositionEnd - DEFAULT_ITEM_PADDING - labelStartPositionX) + 1;
               context.textBaseline = "middle";
-              context.font = "14px Arial";
               context.fillStyle = DEFAULT_ITEM_FOREGROUND_COLOUR;
               context.beginPath();
               context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + scrolledYPosition);
@@ -302,7 +300,6 @@ var tempis_timeline = (() => {
             startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
             endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
           } else {
-            context.font = "14px Arial";
             const itemLabelWidth = context.measureText((_a = item.caption) != null ? _a : "?").width + DEFAULT_ITEM_PADDING * 2;
             startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime()) - itemLabelWidth / 2;
             endPositionX = startPositionX + itemLabelWidth;
@@ -347,13 +344,11 @@ var tempis_timeline = (() => {
       for (const groupDrawPlan of groupDrawPlans) {
         groupDrawPlan.yPositionStart = positionY;
         if (groupDrawPlan.label) {
-          context.font = "14px Arial";
           const groupLabelMetrics = context.measureText(groupDrawPlan.label);
           positionY += groupLabelMetrics.actualBoundingBoxAscent + groupLabelMetrics.actualBoundingBoxDescent;
           positionY += 2 * DEFAULT_GROUP_VERTICAL_LABEL_MARGIN;
         }
         positionY += DEFAULT_GROUP_MARGIN;
-        context.font = "14px Arial";
         const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Label");
         const itemHeight = actualBoundingBoxAscent + actualBoundingBoxDescent + DEFAULT_ITEM_PADDING * 2;
         for (const itemRow of groupDrawPlan.rows) {
@@ -377,6 +372,37 @@ var tempis_timeline = (() => {
     }
   };
   TimelineDataView._minimumHeight = 50;
+
+  // src/TimelineFont.ts
+  var TIMELINE_FONT_DEFAULT_SIZE = 14;
+  var TIMELINE_FONT_DEFAULT_FAMILY = "'Helvetica', 'Arial', sans-serif";
+  var TimelineFont = class {
+    constructor(options = {}) {
+      this._options = options;
+    }
+    get options() {
+      return this._options;
+    }
+    get font() {
+      var _a, _b, _c, _d, _e;
+      const style = (_a = this._options.style) != null ? _a : "";
+      const weight = (_b = this._options.weight) != null ? _b : "";
+      const size = (_c = this._options.size) != null ? _c : TIMELINE_FONT_DEFAULT_SIZE;
+      const lineHeight = (_d = this._options.lineHeight) != null ? _d : "";
+      const family = (_e = this._options.family) != null ? _e : TIMELINE_FONT_DEFAULT_FAMILY;
+      return `${style} ${weight} ${size}px ${lineHeight} ${family}`;
+    }
+    getTextMetrics(text, context) {
+      if (typeof text !== "string") {
+        throw new Error("expected text to be defined.");
+      }
+      const originalFont = context.font;
+      context.font = this.font;
+      const textMetrics = context.measureText(text);
+      context.font = originalFont;
+      return textMetrics;
+    }
+  };
 
   // node_modules/date-format-parse/es/util.js
   function isDate(value) {
@@ -876,7 +902,6 @@ var tempis_timeline = (() => {
     }
     calculateRequiredHeight() {
       var context = this._canvas.getContext("2d");
-      context.font = "16px Arial";
       const unitLabelTextMetrics = context.measureText("Fri 13 April 1990");
       return DEFAULT_UNIT_LABEL_PADDING * 4 + (unitLabelTextMetrics.actualBoundingBoxAscent + unitLabelTextMetrics.actualBoundingBoxDescent) * 2;
     }
@@ -918,7 +943,6 @@ var tempis_timeline = (() => {
           context.stroke();
         }
         context.textBaseline = "alphabetic";
-        context.font = "16px Arial";
         context.fillStyle = "#595959";
         context.beginPath();
         context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, minorTicksYPosition + 20);
@@ -948,7 +972,6 @@ var tempis_timeline = (() => {
         }
         context.lineWidth = 0.5;
         context.textBaseline = "alphabetic";
-        context.font = "16px Arial";
         context.fillStyle = "#595959";
         context.beginPath();
         context.fillText(tickLabel, labelXPosition, majorTicksYPosition + rangeContainerHeight / 4 + DEFAULT_UNIT_LABEL_PADDING);
@@ -1088,6 +1111,7 @@ var tempis_timeline = (() => {
       this._rangeView = new TimelineRangeView(this._canvas, this._options.range);
       this._dataSet = new TimelineDataSet(() => this._onDataSetChange());
       this._dataView = new TimelineDataView(this._dataSet);
+      this._font = new TimelineFont(this._options.font);
       this._dataSet.createGroupings(this._options.items);
       this._resizeCanvas();
       if (options.responsive !== false) {
@@ -1182,6 +1206,7 @@ var tempis_timeline = (() => {
     _draw() {
       var context = this._canvas.getContext("2d");
       context.clearRect(0, 0, this._canvas.clientWidth, this._canvas.clientHeight);
+      context.font = this._font.font;
       const rangeViewHeight = this._rangeView.calculateRequiredHeight();
       const dataViewYPosition = ["top", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0;
       const dataViewMaxHeight = this._canvas.clientHeight - dataViewYPosition - (["bottom", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0);
