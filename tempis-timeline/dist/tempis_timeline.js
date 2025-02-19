@@ -943,7 +943,7 @@ var tempis_timeline = (() => {
         context.textBaseline = "alphabetic";
         context.fillStyle = "#595959";
         context.beginPath();
-        context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, minorTicksYPosition + 20);
+        context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, minorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING);
         context.stroke();
       }
       if (this._minorTickUnitAndStep.unit === "year") {
@@ -972,7 +972,7 @@ var tempis_timeline = (() => {
         context.textBaseline = "alphabetic";
         context.fillStyle = "#595959";
         context.beginPath();
-        context.fillText(tickLabel, labelXPosition, majorTicksYPosition + rangeContainerHeight / 4 + DEFAULT_UNIT_LABEL_PADDING);
+        context.fillText(tickLabel, labelXPosition, majorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING);
         context.stroke();
       }
     }
