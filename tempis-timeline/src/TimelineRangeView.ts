@@ -256,9 +256,8 @@ export class TimelineRangeView {
         // Figure out our range container dimensions.
         const rangeContainerHeight = this.calculateRequiredHeight();
 
-        // Draw a white background for the entire range view.
-        context.fillStyle = "#FFFFFF";
-        context.fillRect(0, yPosition, context.canvas.clientWidth, rangeContainerHeight);
+        // Clear the range view area.
+        context.clearRect(0, yPosition, context.canvas.clientWidth, rangeContainerHeight);
 
         // The vertical position of our minor and major ticks will depend on the position of the range bar.
         const minorTicksYPosition = position === "top" ? yPosition + (rangeContainerHeight / 2) : yPosition;
@@ -344,6 +343,9 @@ export class TimelineRangeView {
     private _findSensibleUnitAndStep(targetTickCount: number, minorUnit?: Unit): UnitAndStep {
         // Get the millis difference between the two dates.
         const millisDiff = this._toDt.getTime() - this._fromDt.getTime();
+
+        // We should always aim to have at least one tick.
+        targetTickCount = Math.max(1, targetTickCount);
 
         // An array of potential units and their factors.
         const units: { unit: Unit, factor: number }[] = [];

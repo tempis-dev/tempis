@@ -119,9 +119,8 @@ export class TimelineDataView {
         // Calculate the height of this rendered view, this may be less than the max height.
         const viewHeight = Math.min(drawPlan.height, maxHeight);
 
-        // Draw a white background for the entire dataview.
-        context.fillStyle = "#FFFFFF";
-        context.fillRect(0, yPosition, context.canvas.width, viewHeight);
+        // Clear the data view area.
+        context.clearRect(0, yPosition, context.canvas.width, viewHeight);
 
         // TODO Draw minor unit tick bars IF configured.
         this._drawMinorUnitBars(context, range.minorTicks, yPosition, viewHeight);

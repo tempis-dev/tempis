@@ -210,8 +210,7 @@ var tempis_timeline = (() => {
       const drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
       this._scrollYOffset = clamp(this._scrollYOffset, Math.min(0, maxHeight - drawPlan.height), 0);
       const viewHeight = Math.min(drawPlan.height, maxHeight);
-      context.fillStyle = "#FFFFFF";
-      context.fillRect(0, yPosition, context.canvas.width, viewHeight);
+      context.clearRect(0, yPosition, context.canvas.width, viewHeight);
       this._drawMinorUnitBars(context, range.minorTicks, yPosition, viewHeight);
       this._drawGroups(context, drawPlan, yPosition, maxHeight);
       return viewHeight;
@@ -928,8 +927,7 @@ var tempis_timeline = (() => {
     }
     draw(context, yPosition, position) {
       const rangeContainerHeight = this.calculateRequiredHeight();
-      context.fillStyle = "#FFFFFF";
-      context.fillRect(0, yPosition, context.canvas.clientWidth, rangeContainerHeight);
+      context.clearRect(0, yPosition, context.canvas.clientWidth, rangeContainerHeight);
       const minorTicksYPosition = position === "top" ? yPosition + rangeContainerHeight / 2 : yPosition;
       const majorTicksYPosition = position === "top" ? yPosition : yPosition + rangeContainerHeight / 2;
       for (const { date, xPosition } of this._minorUnitTicks) {
@@ -980,6 +978,7 @@ var tempis_timeline = (() => {
     }
     _findSensibleUnitAndStep(targetTickCount, minorUnit) {
       const millisDiff = this._toDt.getTime() - this._fromDt.getTime();
+      targetTickCount = Math.max(1, targetTickCount);
       const units = [];
       if (minorUnit === "millisecond") {
         units.push({ unit: "second", factor: 1e3 });
