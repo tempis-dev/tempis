@@ -33,6 +33,7 @@ export class TempisTimeline {
         this._rangeView = new TimelineRangeView(this._canvas, this._options.range);
         this._dataSet = new TimelineDataSet(() => this._onDataSetChange());
         this._dataView = new TimelineDataView(this._dataSet);
+        // TODO Update to take this._options.style?.font.
         this._font = new TimelineFont(this._options.font);
 
         // Create our initial item groupings.
