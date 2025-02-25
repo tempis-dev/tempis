@@ -43,10 +43,31 @@ export type TempisTimelineRangeUnitLabelFormats = {
     year?: string
 };
 
+export interface TempisTimelineItemStyle {
+    /** The background color of the item. Will also be used to style the marker for point-in-time items unless a border is defined. */
+    backgroundColor?: string;
+
+    /** The font color of the item. */
+    fontColor?: string;
+
+    /** The amount of padding to apply to the item. */
+    padding?: number;
+
+    /** The border color. Will also be used to style the marker for point-in-time items. */
+    borderColor?: string;
+
+    /** The border thickness. */
+    borderThickness?: number;
+
+    /** The border radius. */
+    borderRadius?: number;
+};
+
 export interface TempisTimelineItem {
     id: string | number;
     start: string | number | Date;
     end?: string | number | Date;
     caption?: string;
     grouping?: string;
+    style?: TempisTimelineItemStyle;
 };

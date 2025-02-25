@@ -80,15 +80,30 @@ var tempis_timeline = (() => {
     }
     return `${value}...`;
   }
+  function defaults(destination, source) {
+    Object.keys(source).forEach((key) => {
+      if (destination[key] == null) {
+        destination[key] = source[key];
+      }
+    });
+    return destination;
+  }
 
   // src/TimelineItem.ts
+  var DEFAULT_ITEM_STYLE = {
+    backgroundColor: "#2C318F",
+    fontColor: "#FFFFFF",
+    padding: 12,
+    borderRadius: 5
+  };
   var TimelineItem = class {
     constructor(definition) {
-      var _a;
+      var _a, _b;
       this._id = definition.id;
       this._caption = (_a = definition.caption) != null ? _a : "";
       this._start = parseDate(definition.start);
       this._end = definition.end ? parseDate(definition.end) : null;
+      this._style = defaults((_b = definition.style) != null ? _b : {}, DEFAULT_ITEM_STYLE);
     }
     get id() {
       return this._id;
@@ -101,6 +116,9 @@ var tempis_timeline = (() => {
     }
     get end() {
       return this._end;
+    }
+    get style() {
+      return this._style;
     }
   };
 
@@ -192,12 +210,9 @@ var tempis_timeline = (() => {
   };
 
   // src/TimelineDataView.ts
-  var DEFAULT_ITEM_BACKGROUND_COLOUR = "#2c318f";
-  var DEFAULT_ITEM_FOREGROUND_COLOUR = "#ffffff";
   var DEFAULT_GROUP_VERTICAL_LABEL_MARGIN = 6;
   var DEFAULT_ITEM_VERTICAL_MARGIN = 8;
   var DEFAULT_GROUP_MARGIN = 12;
-  var DEFAULT_ITEM_PADDING = 12;
   var TimelineDataView = class {
     constructor(dataSet) {
       this._scrollYOffset = 0;
@@ -250,29 +265,33 @@ var tempis_timeline = (() => {
         }
         for (const row of groupDrawPlan.rows) {
           for (const itemDrawPlan of row) {
+            const itemFontColour = itemDrawPlan.item.style.fontColor;
+            const itemBackgroundColour = itemDrawPlan.item.style.backgroundColor;
+            const itemPadding = itemDrawPlan.item.style.padding;
             if (itemDrawPlan.xPointInTimePosition !== null) {
               context.lineWidth = 2;
-              context.strokeStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
-              context.fillStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
+              context.strokeStyle = itemFontColour;
+              context.fillStyle = itemBackgroundColour;
               const itemMarkerConnectorPath = new Path2D();
               itemMarkerConnectorPath.moveTo(Math.max(itemDrawPlan.xPositionStart, itemDrawPlan.xPointInTimePosition - 20), scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
               itemMarkerConnectorPath.lineTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionEnd + 6);
               itemMarkerConnectorPath.lineTo(Math.min(itemDrawPlan.xPositionEnd, itemDrawPlan.xPointInTimePosition + 20), scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
               context.fill(itemMarkerConnectorPath);
+              context.strokeStyle = itemBackgroundColour;
               context.beginPath();
               context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
               context.lineTo(itemDrawPlan.xPointInTimePosition, 1e3);
               context.stroke();
             }
-            context.fillStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
+            context.fillStyle = itemBackgroundColour;
             context.beginPath();
             context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, 5);
             context.fill();
             if (itemDrawPlan.item.caption) {
-              const labelStartPositionX = Math.max(DEFAULT_ITEM_PADDING, itemDrawPlan.xPositionStart + DEFAULT_ITEM_PADDING);
-              const maxLabelWidth = Math.max(0, itemDrawPlan.xPositionEnd - DEFAULT_ITEM_PADDING - labelStartPositionX) + 1;
+              const labelStartPositionX = Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding);
+              const maxLabelWidth = Math.max(0, itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX) + 1;
               context.textBaseline = "middle";
-              context.fillStyle = DEFAULT_ITEM_FOREGROUND_COLOUR;
+              context.fillStyle = itemFontColour;
               context.beginPath();
               context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + scrolledYPosition);
               context.stroke();
@@ -299,7 +318,7 @@ var tempis_timeline = (() => {
             startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
             endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
           } else {
-            const itemLabelWidth = context.measureText((_a = item.caption) != null ? _a : "?").width + DEFAULT_ITEM_PADDING * 2;
+            const itemLabelWidth = context.measureText((_a = item.caption) != null ? _a : "?").width + item.style.padding * 2;
             startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime()) - itemLabelWidth / 2;
             endPositionX = startPositionX + itemLabelWidth;
             pointInTimePositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
@@ -348,15 +367,15 @@ var tempis_timeline = (() => {
           positionY += 2 * DEFAULT_GROUP_VERTICAL_LABEL_MARGIN;
         }
         positionY += DEFAULT_GROUP_MARGIN;
-        const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Label");
-        const itemHeight = actualBoundingBoxAscent + actualBoundingBoxDescent + DEFAULT_ITEM_PADDING * 2;
         for (const itemRow of groupDrawPlan.rows) {
           positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
-          for (const item of itemRow) {
-            item.yPositionStart = positionY;
-            item.yPositionEnd = positionY + itemHeight;
+          for (const itemDrawPlan of itemRow) {
+            const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Label");
+            const itemHeight = actualBoundingBoxAscent + actualBoundingBoxDescent + itemDrawPlan.item.style.padding * 2;
+            itemDrawPlan.yPositionStart = positionY;
+            itemDrawPlan.yPositionEnd = positionY + itemHeight;
           }
-          positionY += itemHeight;
+          positionY = Math.max(...itemRow.map((itemDrawPlan) => itemDrawPlan.yPositionEnd));
           positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
         }
         positionY += DEFAULT_GROUP_MARGIN;

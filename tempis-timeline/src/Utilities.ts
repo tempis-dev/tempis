@@ -90,3 +90,13 @@ export function fitCanvasText(context: CanvasRenderingContext2D, value: string, 
     
     return `${value}...`;
 }
+
+export function defaults(destination: any, source: any): any {
+    Object.keys(source).forEach(key => {
+        if (destination[key] == null) {
+            destination[key] = source[key];
+        }
+    });
+    
+    return destination;
+} 

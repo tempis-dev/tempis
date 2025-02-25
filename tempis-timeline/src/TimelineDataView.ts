@@ -21,10 +21,8 @@ export interface DataViewGroupDrawPlan {
     /** The row stacks of all visible items in this group that need to be rendered. */
     rows: DataViewItemDrawPlan[][];
 
-    // TODO Figure out of if need this.
     yPositionStart: number;
 
-    // TODO Figure out of if need this.
     yPositionEnd: number;
 }
 
@@ -35,12 +33,6 @@ export interface DataViewItemDrawPlan {
     /** The item font. */
     font?: string;
 
-    /** The item foreground colour. */
-    colour?: string;
-
-    /** The item background colour. */
-    backgroundColour?: string;
-
     /** The height that is required to draw this item. */
     height: number;
 
@@ -50,18 +42,10 @@ export interface DataViewItemDrawPlan {
 
     xPositionEnd: number;
 
-    // TODO Figure out of if need this.
     yPositionStart: number;
 
-    // TODO Figure out of if need this.
     yPositionEnd: number;
 }
-
-/** The default item background colour. */
-const DEFAULT_ITEM_BACKGROUND_COLOUR: string = "#2c318f";
-
-/** The default item foreground colour. */
-const DEFAULT_ITEM_FOREGROUND_COLOUR: string = "#ffffff";
 
 /** The default amount of vertical margin to use for group labels. */
 const DEFAULT_GROUP_VERTICAL_LABEL_MARGIN: number = 6;
@@ -71,9 +55,6 @@ const DEFAULT_ITEM_VERTICAL_MARGIN: number = 8;
 
 /** The default amount of vertical margin to use for each group. */
 const DEFAULT_GROUP_MARGIN: number = 12;
-
-/** The default amount of padding to use for items. */
-const DEFAULT_ITEM_PADDING: number = 12;
 
 export class TimelineDataView {
     /** The minimum height of the data view. */
@@ -191,11 +172,15 @@ export class TimelineDataView {
 
             for (const row of groupDrawPlan.rows) {
                 for (const itemDrawPlan of row) {
+                    const itemFontColour = itemDrawPlan.item.style.fontColor!;
+                    const itemBackgroundColour = itemDrawPlan.item.style.backgroundColor!;
+                    const itemPadding = itemDrawPlan.item.style.padding!;
+
                     // If this is a PIT item we should draw the downward marker line.
                     if (itemDrawPlan.xPointInTimePosition !== null) {
                         context.lineWidth = 2;
-                        context.strokeStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
-                        context.fillStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
+                        context.strokeStyle = itemFontColour;
+                        context.fillStyle = itemBackgroundColour;
 
                         // We need to draw a little downward triangle to join the item and the marker line.
                         const itemMarkerConnectorPath = new Path2D();
@@ -205,6 +190,7 @@ export class TimelineDataView {
                         context.fill(itemMarkerConnectorPath);
 
                         // Draw the actual marker line.
+                        context.strokeStyle = itemBackgroundColour;
                         context.beginPath();
                         context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
                         context.lineTo(itemDrawPlan.xPointInTimePosition, 1000 /** TODO Work this out properly. */);
@@ -212,7 +198,7 @@ export class TimelineDataView {
                     } 
 
                     // Draw the item range rectangle.
-                    context.fillStyle = DEFAULT_ITEM_BACKGROUND_COLOUR;
+                    context.fillStyle = itemBackgroundColour;
                     context.beginPath();
                     context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, 5);
                     context.fill();
@@ -220,13 +206,13 @@ export class TimelineDataView {
                     // Draw the item label (if there is one)
                     if (itemDrawPlan.item.caption) {
                         // Calculate the actual x position of the label, we should attempt to keep this in the bounds of the view.
-                        const labelStartPositionX = Math.max(DEFAULT_ITEM_PADDING, itemDrawPlan.xPositionStart + DEFAULT_ITEM_PADDING);
+                        const labelStartPositionX = Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding);
 
                         // Calculate the max item label width, we are adding 1 as sometime PIT label ends get cut off.
-                        const maxLabelWidth = Math.max(0, (itemDrawPlan.xPositionEnd - DEFAULT_ITEM_PADDING) - labelStartPositionX) + 1;
+                        const maxLabelWidth = Math.max(0, (itemDrawPlan.xPositionEnd - itemPadding) - labelStartPositionX) + 1;
 
                         context.textBaseline = "middle";
-                        context.fillStyle = DEFAULT_ITEM_FOREGROUND_COLOUR;
+                        context.fillStyle = itemFontColour;
                         context.beginPath();
                         context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2)) + scrolledYPosition);
                         context.stroke();
@@ -277,7 +263,7 @@ export class TimelineDataView {
                     // This is a PIT item, the start and end positions of our x axis will be derived from the width of the label and the start date.
                     // TODO Determine what to do when we have PIT item with no caption.
                     // TODO Set the context font to be whatever we will be using to render the actual item label.
-                    const itemLabelWidth = context.measureText(item.caption ?? "?").width + (DEFAULT_ITEM_PADDING * 2);
+                    const itemLabelWidth = context.measureText(item.caption ?? "?").width + (item.style.padding! * 2);
 
                     // Let's set the start and end x position to be equidistant from the actual point in time that this item is for.
                     startPositionX = (milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime())) - (itemLabelWidth / 2);
@@ -363,23 +349,23 @@ export class TimelineDataView {
             // We want to stick a little bit of a margin at the top of the group, but below the label
             positionY += DEFAULT_GROUP_MARGIN;
 
-            // We should calculate the height of any items, this will be based on the height of an example label and any item padding.
-            const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Label");
-            const itemHeight = (actualBoundingBoxAscent + actualBoundingBoxDescent) + (DEFAULT_ITEM_PADDING * 2);
-
             // Process each row of items for the group.
             for (const itemRow of groupDrawPlan.rows) {
                 // Each row gets some top padding.
                 positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
 
-                // Process each item in this row.
-                for (const item of itemRow) {
-                    item.yPositionStart = positionY;
-                    item.yPositionEnd = positionY + itemHeight;
+                // Process each item draw plan in this row.
+                for (const itemDrawPlan of itemRow) {
+                    // We should calculate the height of the item, this will be based on the height of an example label and any item padding.
+                    const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Label");
+                    const itemHeight = (actualBoundingBoxAscent + actualBoundingBoxDescent) + (itemDrawPlan.item.style.padding! * 2);
+
+                    itemDrawPlan.yPositionStart = positionY;
+                    itemDrawPlan.yPositionEnd = positionY + itemHeight;
                 }
 
-                // Add the height of the items in this row to our current y position.
-                positionY += itemHeight;
+                // Add the max height of the items in this row to our current y position. Our items can have different heights, so we need to find the largest yPositionEnd.
+                positionY = Math.max(...itemRow.map((itemDrawPlan) => itemDrawPlan.yPositionEnd));
 
                 // Each row gets some bottom padding.
                 positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
