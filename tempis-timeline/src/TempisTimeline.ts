@@ -201,6 +201,9 @@ export class TempisTimeline {
         }
     }
 
+    /**
+     * Draw the timeline.
+     */
     private _draw(): void {
         // Grab the canvas context.
         var context = this._canvas.getContext('2d')!;

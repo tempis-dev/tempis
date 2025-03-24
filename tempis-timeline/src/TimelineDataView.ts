@@ -175,6 +175,7 @@ export class TimelineDataView {
                     const itemFontColour = itemDrawPlan.item.style.fontColor!;
                     const itemBackgroundColour = itemDrawPlan.item.style.backgroundColor!;
                     const itemPadding = itemDrawPlan.item.style.padding!;
+                    const itemBorderRadius = itemDrawPlan.item.style.borderRadius!;
 
                     // If this is a PIT item we should draw the downward marker line.
                     if (itemDrawPlan.xPointInTimePosition !== null) {
@@ -200,7 +201,7 @@ export class TimelineDataView {
                     // Draw the item range rectangle.
                     context.fillStyle = itemBackgroundColour;
                     context.beginPath();
-                    context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, 5);
+                    context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, itemBorderRadius);
                     context.fill();
 
                     // Draw the item label (if there is one)

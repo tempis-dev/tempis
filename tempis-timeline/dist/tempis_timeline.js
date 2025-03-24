@@ -268,6 +268,7 @@ var tempis_timeline = (() => {
             const itemFontColour = itemDrawPlan.item.style.fontColor;
             const itemBackgroundColour = itemDrawPlan.item.style.backgroundColor;
             const itemPadding = itemDrawPlan.item.style.padding;
+            const itemBorderRadius = itemDrawPlan.item.style.borderRadius;
             if (itemDrawPlan.xPointInTimePosition !== null) {
               context.lineWidth = 2;
               context.strokeStyle = itemFontColour;
@@ -285,7 +286,7 @@ var tempis_timeline = (() => {
             }
             context.fillStyle = itemBackgroundColour;
             context.beginPath();
-            context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, 5);
+            context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, itemBorderRadius);
             context.fill();
             if (itemDrawPlan.item.caption) {
               const labelStartPositionX = Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding);
