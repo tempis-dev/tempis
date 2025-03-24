@@ -4,20 +4,25 @@ export interface TempisTimelineOptions {
 
     /** The timeline range options. */
     range?: TempisTimelineRangeOptions;
-
-    /** The default font to use in rendering text. */
-    font?: TempisTimelineFont;
+    
+    /** The timeline style options. */
+    style?: TempisTimelineStyleOptions;
 
     /** The items to display on the timeline. */
     items: TempisTimelineItem[];
 };
 
+export interface TempisTimelineStyleOptions {
+    /** The default font to use in rendering text. */
+    font?: TempisTimelineFont;
+}
+
 export interface TempisTimelineFont {
     size?: number;
     family?: string;
     style?: string;
-    weight?: "normal" | "bold" | "lighter" | "bolder" | number
-    lineHeight?: number | string
+    weight?: "normal" | "bold" | "lighter" | "bolder" | number;
+    lineHeight?: number | string;
 }
 
 export interface TempisTimelineRangeOptions {

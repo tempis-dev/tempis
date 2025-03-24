@@ -1125,12 +1125,13 @@ var tempis_timeline = (() => {
   var TempisTimeline = class {
     constructor(context, options) {
       this._canvasContainerResizeObserver = null;
+      var _a, _b;
       this._options = options;
       this._canvas = this._getCanvas(context);
       this._rangeView = new TimelineRangeView(this._canvas, this._options.range);
       this._dataSet = new TimelineDataSet(() => this._onDataSetChange());
       this._dataView = new TimelineDataView(this._dataSet);
-      this._font = new TimelineFont(this._options.font);
+      this._font = new TimelineFont((_b = (_a = this._options.style) == null ? void 0 : _a.font) != null ? _b : {});
       this._dataSet.createGroupings(this._options.items);
       this._resizeCanvas();
       if (options.responsive !== false) {
