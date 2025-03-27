@@ -65,6 +65,9 @@ export class TimelineDataView {
 
     /** The current scroll Y offset. */
     private _scrollYOffset: number = 0;
+
+    /** The current draw plan. */
+    private _drawPlan: DataViewDrawPlan | null = null;
     
     /**
      * Creates anew instance of the TimelineDataView class.
@@ -92,13 +95,13 @@ export class TimelineDataView {
      */
     public draw(context: CanvasRenderingContext2D, range: TimelineRangeView, yPosition: number, maxHeight: number): number {
         // We should create our plan for drawing the groups and items of the view. This will also give us exactly how much space would be required to do so.
-        const drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
+        this._drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
 
         // We should clamp our scroll offset to the allowed values now that we know the height required to render all groups.
-        this._scrollYOffset = clamp(this._scrollYOffset, Math.min(0, maxHeight - drawPlan.height), 0);
+        this._scrollYOffset = clamp(this._scrollYOffset, Math.min(0, maxHeight - this._drawPlan.height), 0);
 
         // Calculate the height of this rendered view, this may be less than the max height.
-        const viewHeight = Math.min(drawPlan.height, maxHeight);
+        const viewHeight = Math.min(this._drawPlan.height, maxHeight);
 
         // Clear the data view area.
         context.clearRect(0, yPosition, context.canvas.width, viewHeight);
@@ -107,10 +110,31 @@ export class TimelineDataView {
         this._drawMinorUnitBars(context, range.minorTicks, yPosition, viewHeight);
 
         // Draw our groups and items!
-        this._drawGroups(context, drawPlan, yPosition, maxHeight);
+        this._drawGroups(context, yPosition, maxHeight);
         
         // Return the height of the rendered view.
         return viewHeight;
+    }
+
+    /**
+     * Handle mouseover event.
+     * TODO Remove!
+     * @param point 
+     * @returns 
+     */
+    public findItemByPoint(point: { x: number; y: number; }) {
+        // There is nothing to do if we have no draw plan.
+        if (!this._drawPlan) {
+            return;
+        }
+
+        for (const groupDrawPlan of this._drawPlan.groupDrawPlans) {
+            for (const itemDrawPlan of groupDrawPlan.rows.flat()) {
+                if (point.x >= itemDrawPlan.xPositionStart && point.x <= itemDrawPlan.xPositionEnd && point.y >= itemDrawPlan.yPositionStart && point.y <= itemDrawPlan.yPositionEnd) {
+                    console.log(`over item ${itemDrawPlan.item.caption}`);
+                }
+            }
+        }
     }
 
     /**
@@ -140,16 +164,19 @@ export class TimelineDataView {
     /**
      * Draw the groups and items based on the view draw plan.
      * @param context The canvas context.
-     * @param drawPlan The view draw plan.
      * @param yPosition The y position of the top of the view.
      * @param maxHeight The max height that this view can take on the canvas.
      */
-    private _drawGroups(context: CanvasRenderingContext2D, drawPlan: DataViewDrawPlan, yPosition: number, maxHeight: number): void {
+    private _drawGroups(context: CanvasRenderingContext2D, yPosition: number, maxHeight: number): void {
+        if (!this._drawPlan) {
+            return;
+        }
+
         const scrolledYPosition = yPosition + this._scrollYOffset;
 
         // Draw each group.
-        for (let groupDrawPlanIndex = 0; groupDrawPlanIndex < drawPlan.groupDrawPlans.length; groupDrawPlanIndex++) {
-            const groupDrawPlan = drawPlan.groupDrawPlans[groupDrawPlanIndex];
+        for (let groupDrawPlanIndex = 0; groupDrawPlanIndex < this._drawPlan.groupDrawPlans.length; groupDrawPlanIndex++) {
+            const groupDrawPlan = this._drawPlan.groupDrawPlans[groupDrawPlanIndex];
 
             // If this is not our first group then we should draw a group separator line.
             if (groupDrawPlanIndex > 0) {

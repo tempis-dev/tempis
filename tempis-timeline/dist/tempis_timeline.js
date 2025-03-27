@@ -216,19 +216,32 @@ var tempis_timeline = (() => {
   var TimelineDataView = class {
     constructor(dataSet) {
       this._scrollYOffset = 0;
+      this._drawPlan = null;
       this._dataSet = dataSet;
     }
     scrollByYMovement(movementY) {
       this._scrollYOffset += movementY;
     }
     draw(context, range, yPosition, maxHeight) {
-      const drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
-      this._scrollYOffset = clamp(this._scrollYOffset, Math.min(0, maxHeight - drawPlan.height), 0);
-      const viewHeight = Math.min(drawPlan.height, maxHeight);
+      this._drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
+      this._scrollYOffset = clamp(this._scrollYOffset, Math.min(0, maxHeight - this._drawPlan.height), 0);
+      const viewHeight = Math.min(this._drawPlan.height, maxHeight);
       context.clearRect(0, yPosition, context.canvas.width, viewHeight);
       this._drawMinorUnitBars(context, range.minorTicks, yPosition, viewHeight);
-      this._drawGroups(context, drawPlan, yPosition, maxHeight);
+      this._drawGroups(context, yPosition, maxHeight);
       return viewHeight;
+    }
+    findItemByPoint(point) {
+      if (!this._drawPlan) {
+        return;
+      }
+      for (const groupDrawPlan of this._drawPlan.groupDrawPlans) {
+        for (const itemDrawPlan of groupDrawPlan.rows.flat()) {
+          if (point.x >= itemDrawPlan.xPositionStart && point.x <= itemDrawPlan.xPositionEnd && point.y >= itemDrawPlan.yPositionStart && point.y <= itemDrawPlan.yPositionEnd) {
+            console.log(`over item ${itemDrawPlan.item.caption}`);
+          }
+        }
+      }
     }
     _drawMinorUnitBars(context, rangeMinorTicks, yPosition, height) {
       context.lineWidth = 1;
@@ -244,10 +257,13 @@ var tempis_timeline = (() => {
       context.stroke();
       context.setLineDash([]);
     }
-    _drawGroups(context, drawPlan, yPosition, maxHeight) {
+    _drawGroups(context, yPosition, maxHeight) {
+      if (!this._drawPlan) {
+        return;
+      }
       const scrolledYPosition = yPosition + this._scrollYOffset;
-      for (let groupDrawPlanIndex = 0; groupDrawPlanIndex < drawPlan.groupDrawPlans.length; groupDrawPlanIndex++) {
-        const groupDrawPlan = drawPlan.groupDrawPlans[groupDrawPlanIndex];
+      for (let groupDrawPlanIndex = 0; groupDrawPlanIndex < this._drawPlan.groupDrawPlans.length; groupDrawPlanIndex++) {
+        const groupDrawPlan = this._drawPlan.groupDrawPlans[groupDrawPlanIndex];
         if (groupDrawPlanIndex > 0) {
           context.lineWidth = 0.5;
           context.strokeStyle = "#595959";
@@ -1125,13 +1141,13 @@ var tempis_timeline = (() => {
   var TempisTimeline = class {
     constructor(context, options) {
       this._canvasContainerResizeObserver = null;
-      var _a, _b;
+      var _a;
       this._options = options;
       this._canvas = this._getCanvas(context);
       this._rangeView = new TimelineRangeView(this._canvas, this._options.range);
       this._dataSet = new TimelineDataSet(() => this._onDataSetChange());
       this._dataView = new TimelineDataView(this._dataSet);
-      this._font = new TimelineFont((_b = (_a = this._options.style) == null ? void 0 : _a.font) != null ? _b : {});
+      this._font = new TimelineFont((_a = this._options.style) == null ? void 0 : _a.font);
       this._dataSet.createGroupings(this._options.items);
       this._resizeCanvas();
       if (options.responsive !== false) {
@@ -1197,6 +1213,7 @@ var tempis_timeline = (() => {
           }
           this._draw();
         }
+        this._dataView.findItemByPoint(getMousePos(evt));
       }, false);
     }
     _resizeCanvas() {
