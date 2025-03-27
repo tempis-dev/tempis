@@ -231,17 +231,18 @@ var tempis_timeline = (() => {
       this._drawGroups(context, yPosition, maxHeight);
       return viewHeight;
     }
-    findItemByPoint(point) {
+    getItemAtPoint(point) {
       if (!this._drawPlan) {
-        return;
+        return null;
       }
       for (const groupDrawPlan of this._drawPlan.groupDrawPlans) {
         for (const itemDrawPlan of groupDrawPlan.rows.flat()) {
-          if (point.x >= itemDrawPlan.xPositionStart && point.x <= itemDrawPlan.xPositionEnd && point.y >= itemDrawPlan.yPositionStart && point.y <= itemDrawPlan.yPositionEnd) {
-            console.log(`over item ${itemDrawPlan.item.caption}`);
+          if (point.x >= itemDrawPlan.xPositionStart && point.x <= itemDrawPlan.xPositionEnd && point.y >= itemDrawPlan.yPositionStart + this._scrollYOffset && point.y <= itemDrawPlan.yPositionEnd + this._scrollYOffset) {
+            return itemDrawPlan.item;
           }
         }
       }
+      return null;
     }
     _drawMinorUnitBars(context, rangeMinorTicks, yPosition, height) {
       context.lineWidth = 1;
@@ -1213,7 +1214,12 @@ var tempis_timeline = (() => {
           }
           this._draw();
         }
-        this._dataView.findItemByPoint(getMousePos(evt));
+      }, false);
+      this._canvas.addEventListener("click", (evt) => {
+        const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
+        if (clickedItem) {
+          console.log(`clicked item ${clickedItem.caption}`);
+        }
       }, false);
     }
     _resizeCanvas() {

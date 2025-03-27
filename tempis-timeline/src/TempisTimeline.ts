@@ -147,9 +147,13 @@ export class TempisTimeline {
                 // Our view may have changed, let's redraw.
                 this._draw();
             }
+        }, false);
 
-            // TODO Remove this!
-            this._dataView.findItemByPoint(getMousePos(evt));
+        this._canvas.addEventListener('click', (evt) => {
+            const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
+            if (clickedItem) {
+                console.log(`clicked item ${clickedItem.caption}`);
+            }
         }, false);
     }
 

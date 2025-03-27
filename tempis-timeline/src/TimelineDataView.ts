@@ -116,25 +116,22 @@ export class TimelineDataView {
         return viewHeight;
     }
 
-    /**
-     * Handle mouseover event.
-     * TODO Remove!
-     * @param point 
-     * @returns 
-     */
-    public findItemByPoint(point: { x: number; y: number; }) {
+    public getItemAtPoint(point: { x: number; y: number; }): TimelineItem | null {
         // There is nothing to do if we have no draw plan.
         if (!this._drawPlan) {
-            return;
+            return null;
         }
 
         for (const groupDrawPlan of this._drawPlan.groupDrawPlans) {
             for (const itemDrawPlan of groupDrawPlan.rows.flat()) {
-                if (point.x >= itemDrawPlan.xPositionStart && point.x <= itemDrawPlan.xPositionEnd && point.y >= itemDrawPlan.yPositionStart && point.y <= itemDrawPlan.yPositionEnd) {
-                    console.log(`over item ${itemDrawPlan.item.caption}`);
+                if (point.x >= itemDrawPlan.xPositionStart && point.x <= itemDrawPlan.xPositionEnd 
+                    && point.y >= (itemDrawPlan.yPositionStart + this._scrollYOffset) && point.y <= (itemDrawPlan.yPositionEnd + this._scrollYOffset)) {
+                    return itemDrawPlan.item;
                 }
             }
         }
+
+        return null;
     }
 
     /**
