@@ -31,10 +31,10 @@ export class TimelineItemGrouping {
     }
 
     /**
-     * Gats all items in this group that have a start or end date that lies within the specified range inclusively.
+     * Gets all items in this group that have a start or end date that lie within the specified range inclusively.
      * @param fromDt The range from date.
      * @param toDt The range to date.
-     * @returns All items in this group that have a start or end date that lies within the specified range inclusively.
+     * @returns All items in this group that have a start or end date that lie within the specified range inclusively.
      */
     public getItemsInRange(fromDt: Date, toDt: Date): TimelineItem[] {
         return this._items.filter((item) => {

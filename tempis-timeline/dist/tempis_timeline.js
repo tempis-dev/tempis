@@ -91,7 +91,7 @@ var tempis_timeline = (() => {
 
   // src/TimelineItem.ts
   var DEFAULT_ITEM_STYLE = {
-    backgroundColor: "#2C318F",
+    backgroundColor: "#1a006eff",
     fontColor: "#FFFFFF",
     padding: 12,
     borderRadius: 5
@@ -1219,6 +1219,12 @@ var tempis_timeline = (() => {
         const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
         if (clickedItem) {
           console.log(`clicked item ${clickedItem.caption}`);
+        }
+      }, false);
+      this._canvas.addEventListener("dblclick", (evt) => {
+        const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
+        if (clickedItem) {
+          console.log(`double clicked item ${clickedItem.caption}`);
         }
       }, false);
     }

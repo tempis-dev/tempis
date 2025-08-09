@@ -32,8 +32,8 @@ export class TimelineFont {
 
     /**
      * Gets the text metrics for the given string and context based on the font.
-     * @param text 
-     * @param context 
+     * @param text The string to get the text metrics for.
+     * @param context The canvas context.
      * @returns The text metrics for the given string and context based on the font.
      */
     public getTextMetrics(text: string, context: CanvasRenderingContext2D): TextMetrics {
@@ -48,7 +48,7 @@ export class TimelineFont {
         // Apply the font string to the canvas so that any metrics we get will be accurate.
         context.font = this.font;
 
-        const textMetrics =  context.measureText(text);
+        const textMetrics = context.measureText(text);
 
         // Reapply the original font string.
         context.font = originalFont;

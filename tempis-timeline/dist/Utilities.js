@@ -1,6 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseDate = parseDate;
+exports.clamp = clamp;
+exports.doDateRangesOverlap = doDateRangesOverlap;
+exports.fitCanvasText = fitCanvasText;
+exports.defaults = defaults;
 /**
  * Parse the given input as a Date object.
  * @param input The input to parse as a Date object.
@@ -30,4 +34,65 @@ function parseDate(input) {
         return new Date(`${input}`);
     }
     throw new Error(`Cannot parse input '${input}' as date`);
+}
+/**
+ * Clamps the value to the min and max range.
+ * @param value
+ * @param min
+ * @param max
+ * @returns
+ */
+function clamp(value, min, max) {
+    if (value < min) {
+        return min;
+    }
+    else if (value > max) {
+        return max;
+    }
+    return value;
+}
+/**
+ * Gets whether the two specified two date ranges overlap.
+ * @param aStart The start date of the first range.
+ * @param aEnd The end date of the first range.
+ * @param bStart The start date of the second range.
+ * @param bEnd The end date of the second range.
+ * @returns Whether the two specified two date ranges overlap.
+ */
+function doDateRangesOverlap(aStart, aEnd, bStart, bEnd) {
+    if (aStart <= bStart && bStart <= aEnd)
+        return true; // The second range starts in the first.
+    if (aStart <= bEnd && bEnd <= aEnd)
+        return true; // The second range ends in the first.
+    if (bStart < aStart && aEnd < bEnd)
+        return true; // The first range starts and ends in the second.
+    return false;
+}
+function fitCanvasText(context, value, maxWidth) {
+    // Get the width of the entire string.
+    let stringWidth = context.measureText(value).width;
+    // Is the string empty or the width of our string already less than the max width? If so just return it.
+    if (!value || stringWidth <= maxWidth) {
+        return value;
+    }
+    const ellipsisWidth = context.measureText("...").width;
+    // If our ellipses width is already greater than our max width then return an empty string.
+    if (ellipsisWidth > maxWidth) {
+        return "";
+    }
+    let stringCharacterLength = value.length;
+    // Find the longest possible length of our string that will give a width (including the ellipsis width) that is less than the max width.
+    while (stringWidth >= maxWidth - ellipsisWidth && stringCharacterLength-- > 1) {
+        value = value.substring(0, stringCharacterLength);
+        stringWidth = context.measureText(value).width;
+    }
+    return `${value}...`;
+}
+function defaults(destination, source) {
+    Object.keys(source).forEach(key => {
+        if (destination[key] == null) {
+            destination[key] = source[key];
+        }
+    });
+    return destination;
 }

@@ -26,6 +26,11 @@ export class TempisTimeline {
     /** The canvas container resize observer. */
     private _canvasContainerResizeObserver: ResizeObserver | null = null;
 
+    /**
+     * Creates a new instance of the TempisTimeline class.
+     * @param context The canvas context.
+     * @param options The timeline options.
+     */
     public constructor(context: string | HTMLCanvasElement, options: TempisTimelineOptions) {
         this._options = options;
 
@@ -149,17 +154,25 @@ export class TempisTimeline {
             }
         }, false);
 
+        // Handle any click events for data view items.
         this._canvas.addEventListener('click', (evt) => {
             const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
             if (clickedItem) {
                 console.log(`clicked item ${clickedItem.caption}`);
             }
         }, false);
+
+        // Handle any double click events for data view items.
+        this._canvas.addEventListener('dblclick', (evt) => {
+            const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
+            if (clickedItem) {
+                console.log(`double clicked item ${clickedItem.caption}`);
+            }
+        }, false);
     }
 
     /**
      * Resize the canvas to match the size of its parent element if the timeline is configured to be responsive.
-     * @returns 
      */
     private _resizeCanvas(): void {
         // We should not resize the canvas if the timeline has not been configured to be responsive. 
