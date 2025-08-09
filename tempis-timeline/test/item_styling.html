@@ -38,10 +38,13 @@
         size: 14
       },
       item: {
-        // TODO This is overridden by style on items.
-      },
-      group: {
-        // TODO Styles for each group.
+        // TODO These should override the library item style defaults.
+        backgroundColor: "#FF0000",
+        fontColor: "#00FF00",
+        padding: undefined,
+        borderColor: undefined,
+        borderThickness: undefined,
+        borderRadius: undefined
       },
       legend: {
 
@@ -50,7 +53,11 @@
     categories: [
       {
         name: "Lazy Activity",
-        colour: "#2ecc71" 
+        style: {
+          // This background colour is the source of truth for which colour to use in the corresponding legend key.
+          backgroundColor: "#2ecc71",
+          fontColor: "#000000",
+        }
       }
     ],
     items: [
@@ -69,9 +76,13 @@
         end: new Date("Thu Jan 23 2025 17:00:00 GMT+0000"),
         grouping: "Nik's Day",
         style: {
-          // TODO This overrides item styles.
-          // TODO Should this override category item styles?
-          backgroundColor: "#A91D3A"
+          // TODO These are the highest-priority styles and should override any options.style.item styles and any category styles (including backgroundColour)
+          backgroundColor: "#A91D3A",
+          fontColor: undefined,
+          padding: undefined,
+          borderColor: undefined,
+          borderThickness: undefined,
+          borderRadius: undefined
         },
         category: "Office"
       },
