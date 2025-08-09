@@ -91,12 +91,22 @@ export function fitCanvasText(context: CanvasRenderingContext2D, value: string, 
     return `${value}...`;
 }
 
-export function defaults(destination: any, source: any): any {
+export function defaults<T extends object>(...sources: Partial<T>[]): Partial<T> | undefined {
+  if (sources.length === 0) return undefined;
+
+  const target = sources[0] as Partial<T>;
+
+  for (let i = 1; i < sources.length; i++) {
+    const source = sources[i];
+    if (!source) continue;
+
     Object.keys(source).forEach(key => {
-        if (destination[key] == null) {
-            destination[key] = source[key];
-        }
+      const typedKey = key as keyof T;
+      if (target[typedKey] == null) {
+        target[typedKey] = source[typedKey]!;
+      }
     });
-    
-    return destination;
-} 
+  }
+
+  return target;
+}

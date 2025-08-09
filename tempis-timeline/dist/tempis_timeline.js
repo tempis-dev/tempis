@@ -80,13 +80,22 @@ var tempis_timeline = (() => {
     }
     return `${value}...`;
   }
-  function defaults(destination, source) {
-    Object.keys(source).forEach((key) => {
-      if (destination[key] == null) {
-        destination[key] = source[key];
-      }
-    });
-    return destination;
+  function defaults(...sources) {
+    if (sources.length === 0)
+      return void 0;
+    const target = sources[0];
+    for (let i = 1; i < sources.length; i++) {
+      const source = sources[i];
+      if (!source)
+        continue;
+      Object.keys(source).forEach((key) => {
+        const typedKey = key;
+        if (target[typedKey] == null) {
+          target[typedKey] = source[typedKey];
+        }
+      });
+    }
+    return target;
   }
 
   // src/TimelineItem.ts
@@ -103,7 +112,7 @@ var tempis_timeline = (() => {
       this._caption = (_a = definition.caption) != null ? _a : "";
       this._start = parseDate(definition.start);
       this._end = definition.end ? parseDate(definition.end) : null;
-      this._style = defaults((_b = definition.style) != null ? _b : {}, DEFAULT_ITEM_STYLE);
+      this._style = defaults(DEFAULT_ITEM_STYLE, (_b = definition.style) != null ? _b : {});
     }
     get id() {
       return this._id;

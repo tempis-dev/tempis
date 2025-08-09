@@ -2,7 +2,7 @@ import { TempisTimelineItemStyle, TempisTimelineItem as TimelineItemDefinition }
 import { defaults, parseDate } from "./Utilities";
 
 /** The default item style. */
-const DEFAULT_ITEM_STYLE: TempisTimelineItemStyle = {
+export const DEFAULT_ITEM_STYLE: TempisTimelineItemStyle = {
     backgroundColor: "#1a006eff",
     fontColor: "#FFFFFF",
     padding: 12,
@@ -21,7 +21,7 @@ export class TimelineItem {
         this._caption = definition.caption ?? "";
         this._start = parseDate(definition.start);
         this._end = definition.end ? parseDate(definition.end) : null;
-        this._style = defaults(definition.style ?? {}, DEFAULT_ITEM_STYLE);
+        this._style = defaults(DEFAULT_ITEM_STYLE, definition.style ?? {})!;
     }
 
     public get id(): string | number {
