@@ -40,8 +40,8 @@ export class TempisTimeline {
         this._dataView = new TimelineDataView(this._dataSet);
         this._font = new TimelineFont(this._options.style?.font);
 
-        // Create our initial item groupings.
-        this._dataSet.createGroupings(this._options.items);
+        // Populate our dataset with the initial item configuration.
+        this._dataSet.update(this._options);
 
         // Do our initial canvas resize.
         this._resizeCanvas();

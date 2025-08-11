@@ -158,16 +158,55 @@ var tempis_timeline = (() => {
     }
   };
 
+  // src/TimelineItemCategory.ts
+  var TimelineItemCategory = class {
+    constructor(name, style) {
+      this._name = name;
+      this._style = style;
+    }
+    get name() {
+      return this._name;
+    }
+    get style() {
+      return this._style;
+    }
+  };
+
+  // src/ColorPalette.ts
+  var defaultGlobalPalette = [
+    "#7cb620",
+    "#1982C4",
+    "#6A4C93",
+    "#FF595E",
+    "#e2b436",
+    "#BDBF09",
+    "#2292A4",
+    "#79B791",
+    "#87255B",
+    "#B370B0",
+    "#646536",
+    "#254441",
+    "#EC4E20",
+    "#429EA6"
+  ];
+  function getGlobalPalette() {
+    return defaultGlobalPalette;
+  }
+
   // src/TimelineDataSet.ts
   var TimelineDataSet = class {
     constructor(onChange) {
-      this._itemGroupings = [];
+      this._groupings = [];
+      this._categories = [];
       this._minDate = null;
       this._maxDate = null;
       this._onChange = onChange != null ? onChange : null;
     }
     get groupings() {
-      return [...this._itemGroupings];
+      return [...this._groupings];
+    }
+    get categories() {
+      return [...this._categories];
     }
     get minDate() {
       return this._minDate;
@@ -175,12 +214,42 @@ var tempis_timeline = (() => {
     get maxDate() {
       return this._maxDate;
     }
-    createGroupings(itemDefinitions) {
-      var _a, _b;
-      this._itemGroupings = [];
+    update(options) {
+      this._createCategories(options);
+      this._createGroupings(options);
+    }
+    _createCategories(options) {
+      var _a, _b, _c;
+      this._categories = [];
+      const categoryNames = [];
+      function* paletteCycle() {
+        let paletteIndex = 0;
+        const palette = getGlobalPalette();
+        while (true) {
+          yield palette[paletteIndex];
+          paletteIndex = (paletteIndex + 1) % palette.length;
+        }
+      }
+      const getNextPaletteColor = paletteCycle();
+      for (const categoryDefinition of (_a = options.categories) != null ? _a : []) {
+        if (!categoryDefinition.name) {
+          continue;
+        }
+        if (categoryNames.includes(categoryDefinition.name)) {
+          throw new Error("Duplicate category name");
+        }
+        const categoryStyle = (_b = categoryDefinition.style) != null ? _b : {};
+        categoryStyle.backgroundColor = (_c = categoryStyle.backgroundColor) != null ? _c : getNextPaletteColor.next().value;
+        this._categories.push(new TimelineItemCategory(categoryDefinition.name, categoryStyle));
+        categoryNames.push(categoryDefinition.name);
+      }
+    }
+    _createGroupings(options) {
+      var _a, _b, _c;
+      this._groupings = [];
       const itemGroupingMap = {};
-      for (const itemDefinition of itemDefinitions != null ? itemDefinitions : []) {
-        const groupingKey = (_a = itemDefinition.grouping) != null ? _a : "";
+      for (const itemDefinition of (_a = options.items) != null ? _a : []) {
+        const groupingKey = (_b = itemDefinition.grouping) != null ? _b : "";
         let group = itemGroupingMap[groupingKey];
         if (!group) {
           group = [];
@@ -189,21 +258,21 @@ var tempis_timeline = (() => {
         group.push(itemDefinition);
       }
       for (const [key, value] of Object.entries(itemGroupingMap)) {
-        this._itemGroupings.push(new TimelineItemGrouping(key, value));
+        this._groupings.push(new TimelineItemGrouping(key, value));
       }
       this._findMinAndMaxDates();
-      (_b = this._onChange) == null ? void 0 : _b.call(this);
+      (_c = this._onChange) == null ? void 0 : _c.call(this);
     }
     _findMinAndMaxDates() {
       var _a, _b;
-      if (this._itemGroupings.length === 0 || this._itemGroupings[0].items.length === 0) {
+      if (this._groupings.length === 0 || this._groupings[0].items.length === 0) {
         this._minDate = null;
         this._maxDate = null;
         return;
       }
       let minDate = null;
       let maxDate = null;
-      for (const grouping of this._itemGroupings) {
+      for (const grouping of this._groupings) {
         for (const item of grouping.items) {
           if (minDate === null || item.start.getTime() < minDate.getTime()) {
             minDate = item.start;
@@ -1158,7 +1227,7 @@ var tempis_timeline = (() => {
       this._dataSet = new TimelineDataSet(() => this._onDataSetChange());
       this._dataView = new TimelineDataView(this._dataSet);
       this._font = new TimelineFont((_a = this._options.style) == null ? void 0 : _a.font);
-      this._dataSet.createGroupings(this._options.items);
+      this._dataSet.update(this._options);
       this._resizeCanvas();
       if (options.responsive !== false) {
         this._createCanvasContainerResizeObserver();
