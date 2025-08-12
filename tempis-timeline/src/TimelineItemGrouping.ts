@@ -1,7 +1,9 @@
-import { TempisTimelineItem as TimelineItemDefinition } from "./TempisTimelineOptions";
 import { TimelineItem } from "./TimelineItem";
 import { doDateRangesOverlap } from "./Utilities";
 
+/**
+ * A named grouping of timeline items.
+ */
 export class TimelineItemGrouping {
     /** The group name. */
     private readonly _group: string;
@@ -9,12 +11,15 @@ export class TimelineItemGrouping {
     /** The group items. */
     private readonly _items: TimelineItem[];
 
-    /** Creates a new instance of the TimelineItemGrouping class. */
-    public constructor(group: string, items: TimelineItemDefinition[]) {
+    /**
+     * Creates a new instance of the TimelineItemGrouping class.
+     * @param group The group name.
+     * @param items The groupe item models.
+     */
+    public constructor(group: string, items: TimelineItem[]) {
         this._group = group;
 
-        // Create the group items. 
-        this._items = items.map((itemDefinition) => new TimelineItem(itemDefinition));
+        this._items = items;
 
         // Our items should always be sorted by start date.
         this._sortItemsByStartDate();

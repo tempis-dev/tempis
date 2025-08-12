@@ -38,9 +38,9 @@
         size: 14
       },
       item: {
-        // TODO These should override the library item style defaults.
-        backgroundColor: "#FF0000",
-        fontColor: "#00FF00",
+        // These custom item styles override the application item style defaults and apply to all items.
+        backgroundColor: "#522694",
+        fontColor: "#a9f70c",
         padding: undefined,
         borderColor: undefined,
         borderThickness: undefined,
@@ -54,9 +54,10 @@
       {
         name: "Lazy Activity",
         style: {
+          // These item styles override the custom item styles defined at 'options.style.item' for any items linked to this category via 'item.category'.
           // This background colour is the source of truth for which colour to use in the corresponding legend key.
           backgroundColor: "#2ecc71",
-          fontColor: "#000000",
+          fontColor: "#FFFFFF",
         }
       }
     ],
@@ -76,9 +77,9 @@
         end: new Date("Thu Jan 23 2025 17:00:00 GMT+0000"),
         grouping: "Nik's Day",
         style: {
-          // TODO These are the highest-priority styles and should override any options.style.item styles and any category styles (including backgroundColour)
+          // These are the highest-priority item styles and override any custom item styles and any category styles (including backgroundColour)
           backgroundColor: "#A91D3A",
-          fontColor: undefined,
+          fontColor: "#8dbde0",
           padding: undefined,
           borderColor: undefined,
           borderThickness: undefined,

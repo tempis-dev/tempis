@@ -16,12 +16,16 @@ export class TimelineItem {
     private readonly _end: Date | null;
     private readonly _style: TempisTimelineItemStyle;
 
-    public constructor(definition: TimelineItemDefinition) {
+    /**
+     * Creates a new instance of the TimelineItem class.
+     * @param definition The item definition.
+     */
+    public constructor(definition: Omit<TimelineItemDefinition, "style">, style: TempisTimelineItemStyle) {
         this._id = definition.id;
         this._caption = definition.caption ?? "";
         this._start = parseDate(definition.start);
         this._end = definition.end ? parseDate(definition.end) : null;
-        this._style = defaults(DEFAULT_ITEM_STYLE, definition.style ?? {})!;
+        this._style = style;
     }
 
     public get id(): string | number {

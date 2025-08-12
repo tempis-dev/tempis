@@ -98,44 +98,11 @@ var tempis_timeline = (() => {
     return target;
   }
 
-  // src/TimelineItem.ts
-  var DEFAULT_ITEM_STYLE = {
-    backgroundColor: "#1a006eff",
-    fontColor: "#FFFFFF",
-    padding: 12,
-    borderRadius: 5
-  };
-  var TimelineItem = class {
-    constructor(definition) {
-      var _a, _b;
-      this._id = definition.id;
-      this._caption = (_a = definition.caption) != null ? _a : "";
-      this._start = parseDate(definition.start);
-      this._end = definition.end ? parseDate(definition.end) : null;
-      this._style = defaults(DEFAULT_ITEM_STYLE, (_b = definition.style) != null ? _b : {});
-    }
-    get id() {
-      return this._id;
-    }
-    get caption() {
-      return this._caption;
-    }
-    get start() {
-      return this._start;
-    }
-    get end() {
-      return this._end;
-    }
-    get style() {
-      return this._style;
-    }
-  };
-
   // src/TimelineItemGrouping.ts
   var TimelineItemGrouping = class {
     constructor(group, items) {
       this._group = group;
-      this._items = items.map((itemDefinition) => new TimelineItem(itemDefinition));
+      this._items = items;
       this._sortItemsByStartDate();
     }
     get group() {
@@ -193,6 +160,39 @@ var tempis_timeline = (() => {
     return defaultGlobalPalette;
   }
 
+  // src/TimelineItem.ts
+  var DEFAULT_ITEM_STYLE = {
+    backgroundColor: "#1a006eff",
+    fontColor: "#FFFFFF",
+    padding: 12,
+    borderRadius: 5
+  };
+  var TimelineItem = class {
+    constructor(definition, style) {
+      var _a;
+      this._id = definition.id;
+      this._caption = (_a = definition.caption) != null ? _a : "";
+      this._start = parseDate(definition.start);
+      this._end = definition.end ? parseDate(definition.end) : null;
+      this._style = style;
+    }
+    get id() {
+      return this._id;
+    }
+    get caption() {
+      return this._caption;
+    }
+    get start() {
+      return this._start;
+    }
+    get end() {
+      return this._end;
+    }
+    get style() {
+      return this._style;
+    }
+  };
+
   // src/TimelineDataSet.ts
   var TimelineDataSet = class {
     constructor(onChange) {
@@ -213,6 +213,10 @@ var tempis_timeline = (() => {
     }
     get maxDate() {
       return this._maxDate;
+    }
+    getCategory(name) {
+      var _a;
+      return (_a = this._categories.find((category) => category.name === name)) != null ? _a : null;
     }
     update(options) {
       this._createCategories(options);
@@ -236,7 +240,7 @@ var tempis_timeline = (() => {
           continue;
         }
         if (categoryNames.includes(categoryDefinition.name)) {
-          throw new Error("Duplicate category name");
+          throw new Error(`Duplicate category name '${categoryDefinition.name}'`);
         }
         const categoryStyle = (_b = categoryDefinition.style) != null ? _b : {};
         categoryStyle.backgroundColor = (_c = categoryStyle.backgroundColor) != null ? _c : getNextPaletteColor.next().value;
@@ -257,11 +261,19 @@ var tempis_timeline = (() => {
         }
         group.push(itemDefinition);
       }
-      for (const [key, value] of Object.entries(itemGroupingMap)) {
-        this._groupings.push(new TimelineItemGrouping(key, value));
+      for (const [group, groupItemDefinitions] of Object.entries(itemGroupingMap)) {
+        this._groupings.push(new TimelineItemGrouping(group, this._createGroupingItems(options, groupItemDefinitions)));
       }
       this._findMinAndMaxDates();
       (_c = this._onChange) == null ? void 0 : _c.call(this);
+    }
+    _createGroupingItems(options, itemDefinitions) {
+      return itemDefinitions.map((itemDefinition) => {
+        var _a, _b, _c, _d;
+        const category = itemDefinition.category ? this.getCategory(itemDefinition.category) : null;
+        const resolvedItemStyle = defaults((_a = itemDefinition.style) != null ? _a : {}, (_b = category == null ? void 0 : category.style) != null ? _b : {}, (_d = (_c = options.style) == null ? void 0 : _c.item) != null ? _d : {}, DEFAULT_ITEM_STYLE);
+        return new TimelineItem(itemDefinition, resolvedItemStyle);
+      });
     }
     _findMinAndMaxDates() {
       var _a, _b;

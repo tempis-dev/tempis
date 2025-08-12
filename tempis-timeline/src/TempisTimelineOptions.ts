@@ -98,6 +98,7 @@ export interface TempisTimelineItem {
     end?: string | number | Date;
     caption?: string;
     grouping?: string;
+    category?: string;
     style?: TempisTimelineItemStyle;
 };
 
