@@ -196,16 +196,22 @@ export class TimelineDataView {
 
             for (const row of groupDrawPlan.rows) {
                 for (const itemDrawPlan of row) {
-                    const itemFontColour = itemDrawPlan.item.style.fontColor!;
-                    const itemBackgroundColour = itemDrawPlan.item.style.backgroundColor!;
+                    const itemFontColor = itemDrawPlan.item.style.fontColor!;
+                    const itemBackgroundColor = itemDrawPlan.item.style.backgroundColor!;
                     const itemPadding = itemDrawPlan.item.style.padding!;
                     const itemBorderRadius = itemDrawPlan.item.style.borderRadius!;
+                    const itemBorderThickness = itemDrawPlan.item.style.borderThickness;
+                    const itemBorderColor = itemDrawPlan.item.style.borderColor;
 
                     // If this is a PIT item we should draw the downward marker line.
                     if (itemDrawPlan.xPointInTimePosition !== null) {
                         context.lineWidth = 2;
-                        context.strokeStyle = itemFontColour;
-                        context.fillStyle = itemBackgroundColour;
+
+                        // The color we use to draw the downward marker line and the little downward triangle should be:
+                        // - The item background color if no border is being drawn.
+                        // - The item border color if an item border is being drawn. 
+                        context.fillStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
+                        context.strokeStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
 
                         // We need to draw a little downward triangle to join the item and the marker line.
                         const itemMarkerConnectorPath = new Path2D();
@@ -215,7 +221,6 @@ export class TimelineDataView {
                         context.fill(itemMarkerConnectorPath);
 
                         // Draw the actual marker line.
-                        context.strokeStyle = itemBackgroundColour;
                         context.beginPath();
                         context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
                         context.lineTo(itemDrawPlan.xPointInTimePosition, 1000 /** TODO Work this out properly. */);
@@ -223,12 +228,21 @@ export class TimelineDataView {
                     } 
 
                     // Draw the item range rectangle.
-                    context.fillStyle = itemBackgroundColour;
+                    context.fillStyle = itemBackgroundColor;
                     context.beginPath();
                     context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, itemBorderRadius);
                     context.fill();
 
-                    // Draw the item label (if there is one)
+                    // Draw the item border if a border thickness and border color are configured.
+                    if (itemBorderThickness && itemBorderColor) {
+                        context.strokeStyle = itemBorderColor;
+                        context.lineWidth = itemBorderThickness;
+                        context.beginPath();
+                        context.roundRect(itemDrawPlan.xPositionStart + (context.lineWidth / 2), scrolledYPosition + itemDrawPlan.yPositionStart + (context.lineWidth / 2), itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - context.lineWidth, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - + context.lineWidth, itemBorderRadius);
+                        context.stroke();
+                    }
+
+                    // Draw the item label (if there is one).
                     if (itemDrawPlan.item.caption) {
                         // Calculate the actual x position of the label, we should attempt to keep this in the bounds of the view.
                         const labelStartPositionX = Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding);
@@ -237,9 +251,9 @@ export class TimelineDataView {
                         const maxLabelWidth = Math.max(0, (itemDrawPlan.xPositionEnd - itemPadding) - labelStartPositionX) + 1;
 
                         context.textBaseline = "middle";
-                        context.fillStyle = itemFontColour;
+                        context.fillStyle = itemFontColor;
                         context.beginPath();
-                        context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2)) + scrolledYPosition);
+                        context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2) + 1) + scrolledYPosition);
                         context.stroke();
                     }
                 }

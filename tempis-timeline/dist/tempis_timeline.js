@@ -372,36 +372,44 @@ var tempis_timeline = (() => {
         }
         for (const row of groupDrawPlan.rows) {
           for (const itemDrawPlan of row) {
-            const itemFontColour = itemDrawPlan.item.style.fontColor;
-            const itemBackgroundColour = itemDrawPlan.item.style.backgroundColor;
+            const itemFontColor = itemDrawPlan.item.style.fontColor;
+            const itemBackgroundColor = itemDrawPlan.item.style.backgroundColor;
             const itemPadding = itemDrawPlan.item.style.padding;
             const itemBorderRadius = itemDrawPlan.item.style.borderRadius;
+            const itemBorderThickness = itemDrawPlan.item.style.borderThickness;
+            const itemBorderColor = itemDrawPlan.item.style.borderColor;
             if (itemDrawPlan.xPointInTimePosition !== null) {
               context.lineWidth = 2;
-              context.strokeStyle = itemFontColour;
-              context.fillStyle = itemBackgroundColour;
+              context.fillStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
+              context.strokeStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
               const itemMarkerConnectorPath = new Path2D();
               itemMarkerConnectorPath.moveTo(Math.max(itemDrawPlan.xPositionStart, itemDrawPlan.xPointInTimePosition - 20), scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
               itemMarkerConnectorPath.lineTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionEnd + 6);
               itemMarkerConnectorPath.lineTo(Math.min(itemDrawPlan.xPositionEnd, itemDrawPlan.xPointInTimePosition + 20), scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
               context.fill(itemMarkerConnectorPath);
-              context.strokeStyle = itemBackgroundColour;
               context.beginPath();
               context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
               context.lineTo(itemDrawPlan.xPointInTimePosition, 1e3);
               context.stroke();
             }
-            context.fillStyle = itemBackgroundColour;
+            context.fillStyle = itemBackgroundColor;
             context.beginPath();
             context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, itemBorderRadius);
             context.fill();
+            if (itemBorderThickness && itemBorderColor) {
+              context.strokeStyle = itemBorderColor;
+              context.lineWidth = itemBorderThickness;
+              context.beginPath();
+              context.roundRect(itemDrawPlan.xPositionStart + context.lineWidth / 2, scrolledYPosition + itemDrawPlan.yPositionStart + context.lineWidth / 2, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - context.lineWidth, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - +context.lineWidth, itemBorderRadius);
+              context.stroke();
+            }
             if (itemDrawPlan.item.caption) {
               const labelStartPositionX = Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding);
               const maxLabelWidth = Math.max(0, itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX) + 1;
               context.textBaseline = "middle";
-              context.fillStyle = itemFontColour;
+              context.fillStyle = itemFontColor;
               context.beginPath();
-              context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + scrolledYPosition);
+              context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + 1 + scrolledYPosition);
               context.stroke();
             }
           }

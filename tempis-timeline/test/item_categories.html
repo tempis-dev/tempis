@@ -36,29 +36,14 @@
     style: {
       font: {
         size: 14
-      },
-      item: {
-        // These custom item styles override the application item style defaults and apply to all items.
-        backgroundColor: "#522694",
-        fontColor: "#a9f70c",
-        padding: undefined,
-        borderColor: undefined,
-        borderThickness: undefined,
-        borderRadius: undefined
-      },
-      legend: {
-
       }
     },
     categories: [
       {
-        name: "Lazy Activity",
-        style: {
-          // These item styles override the custom item styles defined at 'options.style.item' for any items linked to this category via 'item.category'.
-          // This background colour is the source of truth for which colour to use in the corresponding legend key.
-          backgroundColor: "#2ecc71",
-          fontColor: "#FFFFFF",
-        }
+        name: "work",
+      },
+      {
+        name: "play",
       }
     ],
     items: [
@@ -67,111 +52,76 @@
         caption: "Sleeping",
         start: new Date("Thu Jan 23 2025 00:00:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 08:30:00 GMT+0000"),
-        grouping: "Nik's Day",
-        category: "Lazy Activity"
+        category: "play"
       },
       { 
         id: 1,
         caption: "Working",
         start: new Date("Thu Jan 23 2025 09:00:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 17:00:00 GMT+0000"),
-        grouping: "Nik's Day",
-        style: {
-          // These are the highest-priority item styles and override any custom item styles and any category styles (including backgroundColour)
-          backgroundColor: "#A91D3A",
-          fontColor: "#8dbde0",
-          padding: undefined,
-          borderColor: undefined,
-          borderThickness: undefined,
-          borderRadius: undefined
-        },
-        category: "Office"
+        category: "work"
       },
       { 
         id: 2,
         caption: "Eating",
         start: new Date("Thu Jan 23 2025 17:15:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 18:00:00 GMT+0000"),
-        grouping: "Nik's Day"
+        category: "work"
       },
       { 
         id: 3,
         caption: "Playing",
         start: new Date("Thu Jan 23 2025 18:30:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 21:00:00 GMT+0000"),
-        grouping: "Nik's Day"
+        category: "play"
       },
       { 
         id: 4,
         caption: "Sleeping",
         start: new Date("Thu Jan 23 2025 21:10:00 GMT+0000"),
         end: new Date("Thu Jan 24 2025 00:00:00 GMT+0000"),
-        grouping: "Nik's Day",
-        category: "Lazy Activity"
+        category: "play"
       },
       { 
         id: 5,
         caption: "Snoring",
         start: new Date("Thu Jan 23 2025 02:30:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 07:30:00 GMT+0000"),
-        grouping: "Nik's Day",
-        category: "Lazy Activity",
-        style: {
-          borderColor: "#FF00aa",
-          backgroundColor: "#FFFFFF",
-          fontColor: "#FF00aa",
-          borderThickness: 2,
-          borderRadius: 50
-        },
+        category: "play"
       },
       { 
         id: 6,
         caption: "Stubbed Toe, like, really bad",
         start: new Date("Thu Jan 23 2025 11:32:30 GMT+0000"),
-        grouping: "Becky's Day"
-      },
-      { 
-        id: 6,
-        caption: "Made Sandwich",
-        start: new Date("Thu Jan 23 2025 15:12:30 GMT+0000"),
-        grouping: "Becky's Day",
-        style: {
-          borderColor: "#FF00aa",
-          backgroundColor: "#FFFFFF",
-          fontColor: "#FF00aa",
-          borderThickness: 2,
-          borderRadius: 50
-        }
+        category: "work"
       },
       { 
         id: 7,
         caption: "Sleeping",
         start: new Date("Thu Jan 23 2025 00:00:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 11:30:00 GMT+0000"),
-        grouping: "Tilly's Day",
-        category: "Lazy Activity"
+        category: "play"
       },
       { 
         id: 8,
         caption: "Sniffing",
         start: new Date("Thu Jan 23 2025 11:35:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 13:45:00 GMT+0000"),
-        grouping: "Tilly's Day"
+        category: "play"
       },
       { 
         id: 9,
         caption: "Eating",
         start: new Date("Thu Jan 23 2025 13:05:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 13:45:00 GMT+0000"),
-        grouping: "Tilly's Day"
+        category: "play"
       },
       { 
         id: 10,
         caption: "Sleeping",
         start: new Date("Thu Jan 23 2025 14:00:00 GMT+0000"),
         end: new Date("Thu Jan 24 2025 00:00:00 GMT+0000"),
-        grouping: "Tilly's Day",
-        category: "Lazy Activity"
+        category: "play"
       },
     ]
   };
