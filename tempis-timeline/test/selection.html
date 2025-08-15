@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Categories</title>
+  <title>Selection</title>
   <script src="../dist/tempis_timeline.js"></script>
 </head>
 <style>
@@ -25,103 +25,84 @@
   // Create our timeline options.
   const timelineOptions = {
     responsive: true,
-    range: {
-      position: "bottom",
-      minimum: null,
-      maximum: null,
-    },
-    zoom: {
-      enabled: true
-    },
-    style: {
-      font: {
-        size: 14
-      }
-    },
-    categories: [
-      {
-        name: "work",
-      },
-      {
-        name: "play",
-      }
-    ],
+    selection: "single",
     items: [
       { 
         id: 0,
-        caption: "Sleeping",
+        caption: "sleeping",
         start: new Date("Thu Jan 23 2025 00:00:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 08:30:00 GMT+0000"),
-        category: "play"
+        grouping: "Nik's Day"
       },
       { 
         id: 1,
-        caption: "Working",
+        caption: "working",
         start: new Date("Thu Jan 23 2025 09:00:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 17:00:00 GMT+0000"),
-        category: "work"
+        grouping: "Nik's Day"
       },
       { 
         id: 2,
-        caption: "Eating",
+        caption: "eating",
         start: new Date("Thu Jan 23 2025 17:15:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 18:00:00 GMT+0000"),
-        category: "work"
+        grouping: "Nik's Day"
       },
       { 
         id: 3,
-        caption: "Playing",
+        caption: "playing",
         start: new Date("Thu Jan 23 2025 18:30:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 21:00:00 GMT+0000"),
-        category: "play"
+        grouping: "Nik's Day",
+        selected: true
       },
       { 
         id: 4,
-        caption: "Sleeping",
+        caption: "sleeping",
         start: new Date("Thu Jan 23 2025 21:10:00 GMT+0000"),
         end: new Date("Thu Jan 24 2025 00:00:00 GMT+0000"),
-        category: "play"
+        grouping: "Nik's Day"
       },
       { 
         id: 5,
-        caption: "Snoring",
+        caption: "snoring",
         start: new Date("Thu Jan 23 2025 02:30:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 07:30:00 GMT+0000"),
-        category: "play"
+        grouping: "Nik's Day"
       },
       { 
         id: 6,
         caption: "Stubbed Toe, like, really bad",
         start: new Date("Thu Jan 23 2025 11:32:30 GMT+0000"),
-        category: "work"
+        grouping: "Becky's Day"
       },
       { 
         id: 7,
-        caption: "Sleeping",
+        caption: "sleeping",
         start: new Date("Thu Jan 23 2025 00:00:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 11:30:00 GMT+0000"),
-        category: "play"
+        grouping: "Tilly's Day"
       },
       { 
         id: 8,
-        caption: "Sniffing",
+        caption: "sniffing",
         start: new Date("Thu Jan 23 2025 11:35:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 13:45:00 GMT+0000"),
-        category: "play"
+        grouping: "Tilly's Day"
       },
       { 
         id: 9,
-        caption: "Eating",
+        caption: "eating",
         start: new Date("Thu Jan 23 2025 13:05:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 13:45:00 GMT+0000"),
-        category: "play"
+        grouping: "Tilly's Day"
       },
       { 
         id: 10,
-        caption: "Sleeping",
+        caption: "sleeping",
         start: new Date("Thu Jan 23 2025 14:00:00 GMT+0000"),
         end: new Date("Thu Jan 24 2025 00:00:00 GMT+0000"),
-        category: "play"
+        grouping: "Tilly's Day"
       },
     ]
   };
