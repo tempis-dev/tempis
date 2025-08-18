@@ -1,7 +1,8 @@
-import { TempisTimelineOptions } from "./TempisTimelineOptions";
+import { TempisTimelineItemSelectionMode, TempisTimelineOptions } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineDataView } from "./TimelineDataView";
 import { TimelineFont } from "./TimelineFont";
+import { TimelineItem } from "./TimelineItem";
 import { TimelineRangeView } from "./TimelineRangeView";
 
 export class TempisTimeline {
@@ -56,6 +57,19 @@ export class TempisTimeline {
 
         // Do our initial draw.
         this._draw();
+    }
+
+    /** Gets the item selection mode. */
+    private get _selectionMode(): TempisTimelineItemSelectionMode {
+        return this._options.selection ?? "none";
+    }
+
+    /**
+     * Gets the identifiers of the currently selected items.
+     * @returns The identifiers of the currently selected items.
+     */
+    public getSelection(): (string | number)[] {
+        return this._dataSet.getSelectedItems().map((item) => item.id);
     }
 
     /**
@@ -158,7 +172,7 @@ export class TempisTimeline {
         this._canvas.addEventListener('click', (evt) => {
             const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
             if (clickedItem) {
-                console.log(`clicked item ${clickedItem.caption}`);
+                this._onItemClicked(clickedItem);
             }
         }, false);
 
@@ -166,7 +180,7 @@ export class TempisTimeline {
         this._canvas.addEventListener('dblclick', (evt) => {
             const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
             if (clickedItem) {
-                console.log(`double clicked item ${clickedItem.caption}`);
+                this._onItemDoubleClicked(clickedItem);
             }
         }, false);
     }
@@ -264,5 +278,39 @@ export class TempisTimeline {
 
         // Clear the canvas from below the bottom of the bottom range view or bottom of the timeline or the bottom of the legend. 
         context.clearRect(0, totalRenderHeight, this._canvas.clientWidth, this._canvas.clientHeight - totalRenderHeight);
+    }
+
+    /**
+     * Called when an item is clicked.
+     * @param item The clicked item.
+     */
+    private _onItemClicked(item: TimelineItem): void {
+        // Invoke the 'onItemClick' callback if defined, passing the identifier of the clicked item.
+        this._options.onItemClick && this._options.onItemClick(item.id);
+
+        const isItemInitiallySelected = item.isSelected;
+        
+        // Update item selection if we need to.
+        if (this._selectionMode === "single") {
+            // Get all items that are currently selected (we would only expect one at the most in this mode).
+            const selectedItems = this._dataSet.getSelectedItems();
+
+            // Deselect all selected items....if its not the one just clicked?
+            selectedItems.forEach((selectedItem) => selectedItem.isSelected = false);
+
+            // TODO Clicking away should deselect, no re-clicking!
+
+        } else if (this._selectionMode === "multi") {
+
+        }
+    }
+
+    /**
+     * Called when an item is double-clicked.
+     * @param item The double-clicked item.
+     */
+    private _onItemDoubleClicked(item: TimelineItem): void {
+        // Invoke the 'onItemDoubleClick' callback if defined, passing the identifier of the double-clicked item.
+        this._options.onItemDoubleClick && this._options.onItemDoubleClick(item.id);
     }
 }

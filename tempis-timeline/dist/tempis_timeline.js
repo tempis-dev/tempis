@@ -111,6 +111,9 @@ var tempis_timeline = (() => {
     get items() {
       return this._items;
     }
+    get selectedItems() {
+      return this.items.filter((item) => item.isSelected);
+    }
     getItemsInRange(fromDt, toDt) {
       return this._items.filter((item) => {
         if (item.end) {
@@ -170,11 +173,16 @@ var tempis_timeline = (() => {
   var TimelineItem = class {
     constructor(definition, style) {
       var _a;
+      this._definition = definition;
       this._id = definition.id;
       this._caption = (_a = definition.caption) != null ? _a : "";
       this._start = parseDate(definition.start);
       this._end = definition.end ? parseDate(definition.end) : null;
       this._style = style;
+      this._isSelected = !!definition.selected;
+    }
+    get definition() {
+      return this._definition;
     }
     get id() {
       return this._id;
@@ -190,6 +198,12 @@ var tempis_timeline = (() => {
     }
     get style() {
       return this._style;
+    }
+    get isSelected() {
+      return this._isSelected;
+    }
+    set isSelected(value) {
+      this._isSelected = value;
     }
   };
 
@@ -217,6 +231,13 @@ var tempis_timeline = (() => {
     getCategory(name) {
       var _a;
       return (_a = this._categories.find((category) => category.name === name)) != null ? _a : null;
+    }
+    getSelectedItems() {
+      const selectedItems = [];
+      for (const group of this._groupings) {
+        selectedItems.push(...group.selectedItems);
+      }
+      return selectedItems;
     }
     update(options) {
       this._createCategories(options);
@@ -1255,6 +1276,13 @@ var tempis_timeline = (() => {
       this._createCanvasEventHandlers();
       this._draw();
     }
+    get _selectionMode() {
+      var _a;
+      return (_a = this._options.selection) != null ? _a : "none";
+    }
+    getSelection() {
+      return this._dataSet.getSelectedItems().map((item) => item.id);
+    }
     _getCanvas(context) {
       if (!context) {
         throw new Error(`no canvas defined`);
@@ -1316,13 +1344,13 @@ var tempis_timeline = (() => {
       this._canvas.addEventListener("click", (evt) => {
         const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
         if (clickedItem) {
-          console.log(`clicked item ${clickedItem.caption}`);
+          this._onItemClicked(clickedItem);
         }
       }, false);
       this._canvas.addEventListener("dblclick", (evt) => {
         const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
         if (clickedItem) {
-          console.log(`double clicked item ${clickedItem.caption}`);
+          this._onItemDoubleClicked(clickedItem);
         }
       }, false);
     }
@@ -1368,6 +1396,18 @@ var tempis_timeline = (() => {
         totalRenderHeight += rangeViewHeight;
       }
       context.clearRect(0, totalRenderHeight, this._canvas.clientWidth, this._canvas.clientHeight - totalRenderHeight);
+    }
+    _onItemClicked(item) {
+      this._options.onItemClick && this._options.onItemClick(item.id);
+      const isItemInitiallySelected = item.isSelected;
+      if (this._selectionMode === "single") {
+        const selectedItems = this._dataSet.getSelectedItems();
+        selectedItems.forEach((selectedItem) => selectedItem.isSelected = false);
+      } else if (this._selectionMode === "multi") {
+      }
+    }
+    _onItemDoubleClicked(item) {
+      this._options.onItemDoubleClick && this._options.onItemDoubleClick(item.id);
     }
   };
   return __toCommonJS(src_exports);

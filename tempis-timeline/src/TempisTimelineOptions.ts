@@ -1,3 +1,5 @@
+import { SelectionChangeEvent } from "./Event";
+
 export interface TempisTimelineOptions {
     /** Whether the canvas should resize to match the dimensions of its parent container. */
     responsive?: boolean;
@@ -9,11 +11,33 @@ export interface TempisTimelineOptions {
     style?: TempisTimelineStyleOptions;
 
     /** The timeline item categories. */
-    categories: TempisTimelineCategory[];
+    categories?: TempisTimelineCategory[];
 
     /** The items to display on the timeline. */
     items: TempisTimelineItem[];
+
+    /**
+     * Defines how items in a timeline can be selected.
+     * - `"none"` – No items can be selected (view-only mode). This is the default value.
+     * - `"single"` – Only one item can be selected at a time. Selecting a new item clears the previous selection.
+     * - `"multi"`– Multiple items can be selected at once. Each item can be toggled independently.
+     */
+    selection?: TempisTimelineItemSelectionMode;
+
+    onItemClick?(id: string | number): void;
+
+    onItemDoubleClick?(id: string | number): void;
+
+    onSelectionChange?(changes: SelectionChangeEvent[]): void; 
 };
+
+/**
+ * Defines how items in a timeline can be selected.
+ * - `"none"` – No items can be selected (view-only mode). This is the default value.
+ * - `"single"` – Only one item can be selected at a time. Selecting a new item clears the previous selection.
+ * - `"multi"`– Multiple items can be selected at once. Each item can be toggled independently.
+ */
+export type TempisTimelineItemSelectionMode = "none" | "single" | "multi";
 
 export interface TempisTimelineStyleOptions {
     /** The default font options to use in rendering text. */
@@ -100,6 +124,7 @@ export interface TempisTimelineItem {
     grouping?: string;
     category?: string;
     style?: TempisTimelineItemStyle;
+    selected?: boolean;
 };
 
 export interface TempisTimelineCategory {

@@ -59,6 +59,20 @@ export class TimelineDataSet {
     }
 
     /**
+     * Gets all selected timeline items.
+     * @returns All selected timeline items.
+     */
+    public getSelectedItems(): TimelineItem[] {
+        const selectedItems = [];
+
+        for (const group of this._groupings) {
+            selectedItems.push(...group.selectedItems);
+        }
+
+        return selectedItems;
+    }
+
+    /**
      * Updates the dataset.
      */
     public update(options: TempisTimelineOptions) {

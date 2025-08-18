@@ -35,6 +35,11 @@ export class TimelineItemGrouping {
         return this._items;
     }
 
+    /** Gets the selected group items. */
+    public get selectedItems(): TimelineItem[] {
+        return this.items.filter((item) => item.isSelected);
+    }
+
     /**
      * Gets all items in this group that have a start or end date that lie within the specified range inclusively.
      * @param fromDt The range from date.
