@@ -1359,6 +1359,8 @@ var tempis_timeline = (() => {
         const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
         if (clickedItem) {
           this._onItemClicked(clickedItem);
+        } else {
+          this._onCanvasClicked();
         }
       }, false);
       this._canvas.addEventListener("dblclick", (evt) => {
@@ -1411,14 +1413,45 @@ var tempis_timeline = (() => {
       }
       context.clearRect(0, totalRenderHeight, this._canvas.clientWidth, this._canvas.clientHeight - totalRenderHeight);
     }
+    _onCanvasClicked() {
+      if (this._selectionMode === "none") {
+        return;
+      }
+      const selectedItems = this._dataSet.getSelectedItems();
+      if (this._options.onSelectionChange) {
+        this._options.onSelectionChange(selectedItems.map((item) => ({ id: item.id, selected: false })));
+      } else {
+        selectedItems.forEach((item) => item.isSelected = false);
+        this._draw();
+      }
+    }
     _onItemClicked(item) {
-      this._options.onItemClick && this._options.onItemClick(item.id);
       const isItemInitiallySelected = item.isSelected;
       if (this._selectionMode === "single") {
         const selectedItems = this._dataSet.getSelectedItems();
-        selectedItems.forEach((selectedItem) => selectedItem.isSelected = false);
+        const itemsToDeselect = selectedItems.filter((selectedItem) => selectedItem.id !== item.id);
+        if (this._options.onSelectionChange) {
+          const selectionChangeEvents = itemsToDeselect.map((item2) => ({ id: item2.id, selected: false }));
+          if (!isItemInitiallySelected) {
+            selectionChangeEvents.push({ id: item.id, selected: true });
+          }
+          this._options.onSelectionChange(selectionChangeEvents);
+        } else {
+          itemsToDeselect.forEach((selectedItem) => selectedItem.isSelected = false);
+          item.isSelected = true;
+          this._draw();
+        }
       } else if (this._selectionMode === "multi") {
+        if (this._options.onSelectionChange) {
+          if (!isItemInitiallySelected) {
+            this._options.onSelectionChange([{ id: item.id, selected: true }]);
+          }
+        } else {
+          item.isSelected = true;
+          this._draw();
+        }
       }
+      this._options.onItemClick && this._options.onItemClick(item.id);
     }
     _onItemDoubleClicked(item) {
       this._options.onItemDoubleClick && this._options.onItemDoubleClick(item.id);

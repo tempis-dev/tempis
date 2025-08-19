@@ -4,6 +4,7 @@ import { TimelineDataView } from "./TimelineDataView";
 import { TimelineFont } from "./TimelineFont";
 import { TimelineItem } from "./TimelineItem";
 import { TimelineRangeView } from "./TimelineRangeView";
+import { SelectionChangeEvent } from "./Event";
 
 export class TempisTimeline {
     /** The timeline canvas. */
@@ -170,9 +171,16 @@ export class TempisTimeline {
 
         // Handle any click events for data view items.
         this._canvas.addEventListener('click', (evt) => {
+            // Try to get the item that was clicked on.
             const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
+
+            // Did we actually click on an item?
             if (clickedItem) {
+                // Handle the item being clicked.
                 this._onItemClicked(clickedItem);
+            } else {
+                // If no item was clicked, we can assume the canvas was clicked.
+                this._onCanvasClicked();
             }
         }, false);
 
@@ -281,13 +289,35 @@ export class TempisTimeline {
     }
 
     /**
+     * Called when the canvas is clicked.
+     * This is used to handle clicks on the canvas when no items are clicked.
+     */
+    private _onCanvasClicked(): void {
+        // If we are not allowing selection, we do nothing.
+        if (this._selectionMode === "none") {
+            return;
+        }
+
+        const selectedItems = this._dataSet.getSelectedItems();
+
+        // Is selection controlled or uncontrolled?
+        if (this._options.onSelectionChange) {
+            // This is controlled selection so the user has to handle selection state on their own.
+            this._options.onSelectionChange(selectedItems.map((item) => ({ id: item.id, selected: false })));
+        } else {
+            // This is uncontrolled selection, so we will deselect all items.
+            selectedItems.forEach((item) => item.isSelected = false);
+
+            // We manually update the selection state of the items so we need to redraw.
+            this._draw();
+        }
+    }
+
+    /**
      * Called when an item is clicked.
      * @param item The clicked item.
      */
     private _onItemClicked(item: TimelineItem): void {
-        // Invoke the 'onItemClick' callback if defined, passing the identifier of the clicked item.
-        this._options.onItemClick && this._options.onItemClick(item.id);
-
         const isItemInitiallySelected = item.isSelected;
         
         // Update item selection if we need to.
@@ -295,14 +325,52 @@ export class TempisTimeline {
             // Get all items that are currently selected (we would only expect one at the most in this mode).
             const selectedItems = this._dataSet.getSelectedItems();
 
-            // Deselect all selected items....if its not the one just clicked?
-            selectedItems.forEach((selectedItem) => selectedItem.isSelected = false);
+            // Get all the items that we are going to deselect, this will be all selected items except the one we just clicked.
+            const itemsToDeselect = selectedItems.filter((selectedItem) => selectedItem.id !== item.id);
 
-            // TODO Clicking away should deselect, no re-clicking!
+            // Is selection controlled or uncontrolled?
+            if (this._options.onSelectionChange) {
+                const selectionChangeEvents: SelectionChangeEvent[] = itemsToDeselect.map((item) => ({ id: item.id, selected: false }));
 
+                // If the item was not initially selected, we need to add it to the list of selection change events.
+                if (!isItemInitiallySelected) {
+                    // If the item was not initially selected, we need to add it to the selection change
+                    selectionChangeEvents.push({ id: item.id, selected: true });
+                }
+
+                // This is controlled selection so the user has to handle selection state on their own.
+                this._options.onSelectionChange(selectionChangeEvents);
+            } else {
+                // Deselect all selected items that are not the clicked item.
+                // We will not deselect the clicked item if it was already selected.
+                itemsToDeselect.forEach((selectedItem) => selectedItem.isSelected = false);
+
+                // Ensure that the clicked item is selected.
+                item.isSelected = true;
+
+                // We manually updated the selection state of the items so we need to redraw.
+                this._draw();
+            }
         } else if (this._selectionMode === "multi") {
+            // Is selection controlled or uncontrolled?
+            if (this._options.onSelectionChange) {
+                // If the item was not initially selected then clicking on it should prompt a selection change event.
+                if (!isItemInitiallySelected) {
+                    // This is controlled selection so the user has to handle selection state on their own.
+                    this._options.onSelectionChange([{ id: item.id, selected: true }]);
+                }
+            } else {
+                // Ensure that the clicked item is selected.
+                item.isSelected = true;
+
+                // We manually updated the selection state of the items so we need to redraw.
+                this._draw();
+            }
 
         }
+
+        // Invoke the 'onItemClick' callback if defined, passing the identifier of the clicked item.
+        this._options.onItemClick && this._options.onItemClick(item.id);
     }
 
     /**
