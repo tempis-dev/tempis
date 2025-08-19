@@ -1060,10 +1060,11 @@ var tempis_timeline = (() => {
       }
       this.calculateMinorAndMajorUnitTicks();
     }
-    zoomRange(amount) {
-      const zoomValue = (this._toDt.getTime() - this._fromDt.getTime()) * (clamp(amount, -1, 1) * 0.1);
-      this._fromDt.setMilliseconds(this._fromDt.getMilliseconds() - zoomValue);
-      this._toDt.setMilliseconds(this._toDt.getMilliseconds() + zoomValue);
+    zoomRange(amount, targetPositionX) {
+      const targetPositionMillis = this._fromDt.getTime() + targetPositionX / this._canvas.clientWidth * (this._toDt.getTime() - this._fromDt.getTime());
+      const zoomFactor = 1 - clamp(amount, -1, 1) * -0.1;
+      this._fromDt.setTime(targetPositionMillis - (targetPositionMillis - this._fromDt.getTime()) * zoomFactor);
+      this._toDt.setTime(targetPositionMillis + (this._toDt.getTime() - targetPositionMillis) * zoomFactor);
       this.calculateMinorAndMajorUnitTicks();
     }
     clearRange() {
@@ -1375,7 +1376,7 @@ var tempis_timeline = (() => {
       });
       this._canvas.addEventListener("wheel", (event) => {
         event.preventDefault();
-        this._rangeView.zoomRange(event.deltaY);
+        this._rangeView.zoomRange(event.deltaY, getMouseOrPointerPosition(event).x);
         this._draw();
       });
       this._canvas.addEventListener("dblclick", (evt) => {

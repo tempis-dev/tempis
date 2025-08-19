@@ -102,8 +102,8 @@ export class TimelineRangeView {
 
     /**
      * Sets the from and to date value of the range.
-     * @param from 
-     * @param to 
+     * @param from The range from date.
+     * @param to The range to date.
      */
     public setRange(from: Date, to: Date): void {
         this._fromDt = new Date(from);
@@ -172,16 +172,21 @@ export class TimelineRangeView {
 
     /**
      * Zooms the from and to date value of the range.
-     * @param unit amount
+     * @param amount The amount to zoom by as a ratio of the current range between -1 and 1.
+     * @param targetPositionX The x position of the zoom, this is where the zoom will be centered.
      */
-    public zoomRange(amount: number): void {
-        // Get the millis difference between the two dates.
-        const zoomValue = (this._toDt.getTime() - this._fromDt.getTime()) * (clamp(amount, -1, 1) * 0.1);
+    public zoomRange(amount: number, targetPositionX: number): void {
+        // Work out the target position in milliseconds.
+        // This is the position on the canvas that we want to zoom around.
+        const targetPositionMillis = this._fromDt.getTime() + (targetPositionX / this._canvas.clientWidth) * (this._toDt.getTime() - this._fromDt.getTime());
 
-        this._fromDt.setMilliseconds(this._fromDt.getMilliseconds() - zoomValue);
-        this._toDt.setMilliseconds(this._toDt.getMilliseconds() + zoomValue);
+        // Calculate the zoom factor based on the amount.
+        const zoomFactor = 1 - clamp(amount, -1, 1) * -0.1;
 
-        // Our range has changed so we will need to recalculate our minor unit ticks.
+        // Scale distances from the anchor so it stays fixed.
+        this._fromDt.setTime(targetPositionMillis - (targetPositionMillis - this._fromDt.getTime()) * zoomFactor);
+        this._toDt.setTime(targetPositionMillis + (this._toDt.getTime() - targetPositionMillis) * zoomFactor);
+
         this.calculateMinorAndMajorUnitTicks();
     }
 
