@@ -1419,7 +1419,9 @@ var tempis_timeline = (() => {
       }
       const selectedItems = this._dataSet.getSelectedItems();
       if (this._options.onSelectionChange) {
-        this._options.onSelectionChange(selectedItems.map((item) => ({ id: item.id, selected: false })));
+        if (selectedItems.length) {
+          this._options.onSelectionChange(selectedItems.map((item) => ({ id: item.id, selected: false })));
+        }
       } else {
         selectedItems.forEach((item) => item.isSelected = false);
         this._draw();
@@ -1435,7 +1437,9 @@ var tempis_timeline = (() => {
           if (!isItemInitiallySelected) {
             selectionChangeEvents.push({ id: item.id, selected: true });
           }
-          this._options.onSelectionChange(selectionChangeEvents);
+          if (selectionChangeEvents.length) {
+            this._options.onSelectionChange(selectionChangeEvents);
+          }
         } else {
           itemsToDeselect.forEach((selectedItem) => selectedItem.isSelected = false);
           item.isSelected = true;

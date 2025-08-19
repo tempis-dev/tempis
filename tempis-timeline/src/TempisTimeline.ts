@@ -303,7 +303,9 @@ export class TempisTimeline {
         // Is selection controlled or uncontrolled?
         if (this._options.onSelectionChange) {
             // This is controlled selection so the user has to handle selection state on their own.
-            this._options.onSelectionChange(selectedItems.map((item) => ({ id: item.id, selected: false })));
+            if (selectedItems.length) {
+                this._options.onSelectionChange(selectedItems.map((item) => ({ id: item.id, selected: false })));
+            }
         } else {
             // This is uncontrolled selection, so we will deselect all items.
             selectedItems.forEach((item) => item.isSelected = false);
@@ -339,7 +341,9 @@ export class TempisTimeline {
                 }
 
                 // This is controlled selection so the user has to handle selection state on their own.
-                this._options.onSelectionChange(selectionChangeEvents);
+                if (selectionChangeEvents.length) {
+                    this._options.onSelectionChange(selectionChangeEvents);
+                }
             } else {
                 // Deselect all selected items that are not the clicked item.
                 // We will not deselect the clicked item if it was already selected.
