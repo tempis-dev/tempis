@@ -219,8 +219,26 @@ export class TimelineDataView {
         const itemBorderThickness = itemDrawPlan.item.style.borderThickness;
         const itemBorderColor = itemDrawPlan.item.style.borderColor;
 
+        // If the item is selected then we should rendering an underlying selection indicator rectangle.
+        // TODO Improve the way we render the selected item, this is a bit hacky.
+        if (itemDrawPlan.item.isSelected) {
+            context.shadowColor = "rgba(0, 0, 0, 1)";
+            context.shadowBlur = 15;
+            context.shadowOffsetX = 0;
+            context.shadowOffsetY = 0;
+
+            context.fillStyle = "rgba(0, 0, 0, 1)";
+            context.beginPath();
+            context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, itemBorderRadius);
+            context.fill();
+
+            context.shadowColor = "transparent";
+        }
+
         // If this is a PIT item we should draw the downward marker line.
         if (itemDrawPlan.xPointInTimePosition !== null) {
+            // Set the width of the PIT marker line.
+            // TODO Make this configurable.
             context.lineWidth = 2;
 
             // The color we use to draw the downward marker line and the little downward triangle should be:
@@ -239,7 +257,8 @@ export class TimelineDataView {
             // Draw the actual marker line.
             context.beginPath();
             context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
-            context.lineTo(itemDrawPlan.xPointInTimePosition, 1000 /** TODO Work this out properly. */);
+            // TODO Work out the height of the view and use that to draw the line to the bottom of the view instead of using a dumb value of 1000.
+            context.lineTo(itemDrawPlan.xPointInTimePosition, 1000);
             context.stroke();
         }
 

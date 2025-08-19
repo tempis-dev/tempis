@@ -405,6 +405,17 @@ var tempis_timeline = (() => {
       const itemBorderRadius = itemDrawPlan.item.style.borderRadius;
       const itemBorderThickness = itemDrawPlan.item.style.borderThickness;
       const itemBorderColor = itemDrawPlan.item.style.borderColor;
+      if (itemDrawPlan.item.isSelected) {
+        context.shadowColor = "rgba(0, 0, 0, 1)";
+        context.shadowBlur = 15;
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 0;
+        context.fillStyle = "rgba(0, 0, 0, 1)";
+        context.beginPath();
+        context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, itemBorderRadius);
+        context.fill();
+        context.shadowColor = "transparent";
+      }
       if (itemDrawPlan.xPointInTimePosition !== null) {
         context.lineWidth = 2;
         context.fillStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
