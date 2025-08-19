@@ -194,70 +194,102 @@ export class TimelineDataView {
                 context.stroke();
             }
 
-            for (const row of groupDrawPlan.rows) {
-                for (const itemDrawPlan of row) {
-                    const itemFontColor = itemDrawPlan.item.style.fontColor!;
-                    const itemBackgroundColor = itemDrawPlan.item.style.backgroundColor!;
-                    const itemPadding = itemDrawPlan.item.style.padding!;
-                    const itemBorderRadius = itemDrawPlan.item.style.borderRadius!;
-                    const itemBorderThickness = itemDrawPlan.item.style.borderThickness;
-                    const itemBorderColor = itemDrawPlan.item.style.borderColor;
-
-                    // If this is a PIT item we should draw the downward marker line.
-                    if (itemDrawPlan.xPointInTimePosition !== null) {
-                        context.lineWidth = 2;
-
-                        // The color we use to draw the downward marker line and the little downward triangle should be:
-                        // - The item background color if no border is being drawn.
-                        // - The item border color if an item border is being drawn. 
-                        context.fillStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
-                        context.strokeStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
-
-                        // We need to draw a little downward triangle to join the item and the marker line.
-                        const itemMarkerConnectorPath = new Path2D();
-                        itemMarkerConnectorPath.moveTo(Math.max(itemDrawPlan.xPositionStart, itemDrawPlan.xPointInTimePosition - 20), scrolledYPosition + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
-                        itemMarkerConnectorPath.lineTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionEnd + 6);
-                        itemMarkerConnectorPath.lineTo(Math.min(itemDrawPlan.xPositionEnd, itemDrawPlan.xPointInTimePosition + 20), scrolledYPosition + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
-                        context.fill(itemMarkerConnectorPath);
-
-                        // Draw the actual marker line.
-                        context.beginPath();
-                        context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
-                        context.lineTo(itemDrawPlan.xPointInTimePosition, 1000 /** TODO Work this out properly. */);
-                        context.stroke();
-                    } 
-
-                    // Draw the item range rectangle.
-                    context.fillStyle = itemBackgroundColor;
-                    context.beginPath();
-                    context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, itemBorderRadius);
-                    context.fill();
-
-                    // Draw the item border if a border thickness and border color are configured.
-                    if (itemBorderThickness && itemBorderColor) {
-                        context.strokeStyle = itemBorderColor;
-                        context.lineWidth = itemBorderThickness;
-                        context.beginPath();
-                        context.roundRect(itemDrawPlan.xPositionStart + (context.lineWidth / 2), scrolledYPosition + itemDrawPlan.yPositionStart + (context.lineWidth / 2), itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - context.lineWidth, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - + context.lineWidth, itemBorderRadius);
-                        context.stroke();
-                    }
-
-                    // Draw the item label (if there is one).
-                    if (itemDrawPlan.item.caption) {
-                        // Calculate the actual x position of the label, we should attempt to keep this in the bounds of the view.
-                        const labelStartPositionX = Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding);
-
-                        // Calculate the max item label width, we are adding 1 as sometime PIT label ends get cut off.
-                        const maxLabelWidth = Math.max(0, (itemDrawPlan.xPositionEnd - itemPadding) - labelStartPositionX) + 1;
-
-                        context.textBaseline = "middle";
-                        context.fillStyle = itemFontColor;
-                        context.beginPath();
-                        context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2) + 1) + scrolledYPosition);
-                        context.stroke();
-                    }
+            // For each row in the group draw plan ...
+            for (const groupDrawPlanRow of groupDrawPlan.rows) {
+                // ... and each item in that group draw plan row ...
+                for (const itemDrawPlan of groupDrawPlanRow) {
+                    // ... draw the item.
+                    this._drawGroupItem(itemDrawPlan, context, scrolledYPosition);
                 }
             }
+        }
+    }
+
+    /**
+     * Draw a single group item.
+     * @param itemDrawPlan The item draw plan.
+     * @param context The canvas context.
+     * @param scrolledYPosition The y position of the top of the view, taking into account the current scroll offset.
+     */
+    private _drawGroupItem(itemDrawPlan: DataViewItemDrawPlan, context: CanvasRenderingContext2D, scrolledYPosition: number) {
+        const itemFontColor = itemDrawPlan.item.style.fontColor!;
+        const itemBackgroundColor = itemDrawPlan.item.style.backgroundColor!;
+        const itemPadding = itemDrawPlan.item.style.padding!;
+        const itemBorderRadius = itemDrawPlan.item.style.borderRadius!;
+        const itemBorderThickness = itemDrawPlan.item.style.borderThickness;
+        const itemBorderColor = itemDrawPlan.item.style.borderColor;
+
+        // If the item is selected then we should rendering an underlying selection indicator rectangle.
+        // TODO Improve the way we render the selected item, this is a bit hacky.
+        if (itemDrawPlan.item.isSelected) {
+            context.shadowColor = "rgba(0, 0, 0, 1)";
+            context.shadowBlur = 15;
+            context.shadowOffsetX = 0;
+            context.shadowOffsetY = 0;
+
+            context.fillStyle = "rgba(0, 0, 0, 1)";
+            context.beginPath();
+            context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, itemBorderRadius);
+            context.fill();
+
+            context.shadowColor = "transparent";
+        }
+
+        // If this is a PIT item we should draw the downward marker line.
+        if (itemDrawPlan.xPointInTimePosition !== null) {
+            // Set the width of the PIT marker line.
+            // TODO Make this configurable.
+            context.lineWidth = 2;
+
+            // The color we use to draw the downward marker line and the little downward triangle should be:
+            // - The item background color if no border is being drawn.
+            // - The item border color if an item border is being drawn. 
+            context.fillStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
+            context.strokeStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
+
+            // We need to draw a little downward triangle to join the item and the marker line.
+            const itemMarkerConnectorPath = new Path2D();
+            itemMarkerConnectorPath.moveTo(Math.max(itemDrawPlan.xPositionStart, itemDrawPlan.xPointInTimePosition - 20), scrolledYPosition + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
+            itemMarkerConnectorPath.lineTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionEnd + 6);
+            itemMarkerConnectorPath.lineTo(Math.min(itemDrawPlan.xPositionEnd, itemDrawPlan.xPointInTimePosition + 20), scrolledYPosition + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
+            context.fill(itemMarkerConnectorPath);
+
+            // Draw the actual marker line.
+            context.beginPath();
+            context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
+            // TODO Work out the height of the view and use that to draw the line to the bottom of the view instead of using a dumb value of 1000.
+            context.lineTo(itemDrawPlan.xPointInTimePosition, 1000);
+            context.stroke();
+        }
+
+        // Draw the item range rectangle.
+        context.fillStyle = itemBackgroundColor;
+        context.beginPath();
+        context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, itemBorderRadius);
+        context.fill();
+
+        // Draw the item border if a border thickness and border color are configured.
+        if (itemBorderThickness && itemBorderColor) {
+            context.strokeStyle = itemBorderColor;
+            context.lineWidth = itemBorderThickness;
+            context.beginPath();
+            context.roundRect(itemDrawPlan.xPositionStart + (context.lineWidth / 2), scrolledYPosition + itemDrawPlan.yPositionStart + (context.lineWidth / 2), itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - context.lineWidth, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - +context.lineWidth, itemBorderRadius);
+            context.stroke();
+        }
+
+        // Draw the item label (if there is one).
+        if (itemDrawPlan.item.caption) {
+            // Calculate the actual x position of the label, we should attempt to keep this in the bounds of the view.
+            const labelStartPositionX = Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding);
+
+            // Calculate the max item label width, we are adding 1 as sometime PIT label ends get cut off.
+            const maxLabelWidth = Math.max(0, (itemDrawPlan.xPositionEnd - itemPadding) - labelStartPositionX) + 1;
+
+            context.textBaseline = "middle";
+            context.fillStyle = itemFontColor;
+            context.beginPath();
+            context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2) + 1) + scrolledYPosition);
+            context.stroke();
         }
     }
 

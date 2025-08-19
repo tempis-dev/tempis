@@ -1,8 +1,10 @@
-import { TempisTimelineOptions } from "./TempisTimelineOptions";
+import { TempisTimelineItemSelectionMode, TempisTimelineOptions } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineDataView } from "./TimelineDataView";
 import { TimelineFont } from "./TimelineFont";
+import { TimelineItem } from "./TimelineItem";
 import { TimelineRangeView } from "./TimelineRangeView";
+import { SelectionChangeEvent } from "./Event";
 
 export class TempisTimeline {
     /** The timeline canvas. */
@@ -58,6 +60,19 @@ export class TempisTimeline {
         this._draw();
     }
 
+    /** Gets the item selection mode. */
+    private get _selectionMode(): TempisTimelineItemSelectionMode {
+        return this._options.selection ?? "none";
+    }
+
+    /**
+     * Gets the identifiers of the currently selected items.
+     * @returns The identifiers of the currently selected items.
+     */
+    public getSelection(): (string | number)[] {
+        return this._dataSet.getSelectedItems().map((item) => item.id);
+    }
+
     /**
      * Gets a reference to the canvas based on the specified context.
      * @param context The context.
@@ -104,69 +119,131 @@ export class TempisTimeline {
     }
 
     /**
-     * Creates the canvas event handlers.
+     * Creates the canvas event handlers for timeline user interface interactions.
      */
     private _createCanvasEventHandlers() {
-        // Gets the position on the canvas for the mouse event.
-        const getMousePos = (evt: MouseEvent) => {
+        // Prevent default touch gestures like scroll/pinch.
+        // TODO This will prevent pinch zooming on touch devices, we may want to allow this in the future.
+        this._canvas.style.touchAction = "none";
+
+        // The drag threshold is the minimum distance that the pointer must move before we consider it a drag.
+        const dragPixelThreshold = 10;
+
+        // A flag defining whether the pointer is currently down.
+        // This is used to determine if we are currently dragging the timeline.
+        let isPointerDown = false;
+
+        // Variables to keep track of the starting position of the pointer when dragging.
+        // This is used to calculate the movement of the pointer when dragging.
+        let startX = 0;
+        let startY = 0;
+
+        // A function that gets the position on the canvas for the mouse event or pointer event.
+        const getMouseOrPointerPosition = (event: PointerEvent | MouseEvent) => {
             var rect = this._canvas.getBoundingClientRect();
             return {
-                x: (evt.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
-                y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
+                x: (event.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
+                y: (event.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
             };
         }
 
-        // The mouse wheel should zoom the data range (for now)
-        this._canvas.addEventListener("wheel", (evt) => {
-            this._rangeView.zoomRange(evt.deltaY);
+        // Handle the pointer down event to start dragging.
+        // We will use pointer events to handle both mouse and touch events.
+        this._canvas.addEventListener('pointerdown', (event) => {
+            isPointerDown = true;
+
+            // Get the mouse position on the canvas so that we can calculate the movement later.
+            startX = event.clientX;
+            startY = event.clientY;
+
+            // Capture pointer to ensure we get pointerup even if moved outside canvas
+            this._canvas.setPointerCapture(event.pointerId);
+        });
+
+        // Handle pointer move events to drag the timeline.
+        // We will use pointer events to handle both mouse and touch events.
+        this._canvas.addEventListener('pointermove', (event) => {
+            // There is nothing to do if the pointer is not currently down.
+            if (!isPointerDown) {
+                return;
+            }
+
+            // Use movementX for range scrolling.
+            if (Math.abs(event.movementX) >= 1) {
+                this._rangeView.moveByXMovement(-event.movementX);
+            }
+
+            // Use movementY for data view scrolling.
+            if (Math.abs(event.movementY) >= 1) {
+                this._dataView.scrollByYMovement(event.movementY);
+            }
+
             this._draw();
         });
 
-        let isMouseDown = false;
-
-        this._canvas.addEventListener('mousedown', (evt) => {
-            isMouseDown = true;
-        }, false);
-
-        this._canvas.addEventListener('mouseup', (evt) => {
-            isMouseDown = false;
-        }, false);
-
-        this._canvas.addEventListener('mouseleave', (evt) => {
-            isMouseDown = false;
-        }, false);
-
-        this._canvas.addEventListener('mousemove', (evt) => {
-            // We only care about this event if the user is holding the mouse button down.
-            if (isMouseDown) {
-                // Use movementX for range scrolling.
-                if (Math.abs(evt.movementX) >= 1) {
-                    this._rangeView.moveByXMovement(-evt.movementX);
-                }
-
-                // Use movementY for data view scrolling.
-                if (Math.abs(evt.movementY) >= 1) {
-                    this._dataView.scrollByYMovement(evt.movementY);
-                }
-
-                // Our view may have changed, let's redraw.
-                this._draw();
+        // Handle pointer up events to stop dragging.
+        // We will use pointer events to handle both mouse and touch events.
+        this._canvas.addEventListener('pointerup', (event) => {
+            // There is nothing to do if the pointer is not currently down.
+            if (!isPointerDown) {
+                return
             }
-        }, false);
 
-        // Handle any click events for data view items.
-        this._canvas.addEventListener('click', (evt) => {
-            const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
-            if (clickedItem) {
-                console.log(`clicked item ${clickedItem.caption}`);
+            isPointerDown = false;
+
+            // Work out the distance that the pointer has moved since it was pressed down.
+            // We will use this to determine if the pointer has moved significantly or not.
+            const dx = event.clientX - startX;
+            const dy = event.clientY - startY;
+
+            // If the pointer has not moved significantly, we consider it a click.
+            // We will check if the pointer has moved less than the drag pixel threshold.
+            if (Math.sqrt(dx * dx + dy * dy) < dragPixelThreshold) {
+                // Try to find the item at the clicked position.
+                const clickedItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
+
+                // Did we actually click on an item?
+                if (clickedItem) {
+                    // Handle the item click.
+                    this._onItemClicked(clickedItem);
+                } else {
+                    // If we did not click on an item, we will invoke the canvas click handler.
+                    // This is used to handle clicks on the canvas when no items are clicked.
+                    this._onCanvasClicked();
+                }
             }
-        }, false);
 
-        // Handle any double click events for data view items.
+            // Release pointer capture
+            this._canvas.releasePointerCapture(event.pointerId);
+        });
+
+        // Handle pointer cancel events to stop dragging.
+        // This is used to handle cases where the pointer is cancelled (e.g. touch events
+        this._canvas.addEventListener('pointercancel', () => {
+            // TODO Work out why this is being called just after the use starts dragging on touch devices.
+            isPointerDown = false;
+        });
+
+        // Handle mouse wheel events for zooming the range view.
+        this._canvas.addEventListener('wheel', (event) => {
+            // Prevent default scrolling behavior, we want the timeline to handle it instead.
+            event.preventDefault();
+
+            // Zoom the range view based on the wheel delta.
+            this._rangeView.zoomRange(event.deltaY);
+
+            // We will want to redraw the timeline after zooming.
+            this._draw();
+        });
+
+        // Handle any double mouse click events for data view items.
         this._canvas.addEventListener('dblclick', (evt) => {
-            const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
+            // Try to get the item at the double-clicked position.
+            const clickedItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(evt));
+
+            // If we have a clicked item, we will invoke the double-click handler.
             if (clickedItem) {
-                console.log(`double clicked item ${clickedItem.caption}`);
+                this._onItemDoubleClicked(clickedItem);
             }
         }, false);
     }
@@ -264,5 +341,103 @@ export class TempisTimeline {
 
         // Clear the canvas from below the bottom of the bottom range view or bottom of the timeline or the bottom of the legend. 
         context.clearRect(0, totalRenderHeight, this._canvas.clientWidth, this._canvas.clientHeight - totalRenderHeight);
+    }
+
+    /**
+     * Called when the canvas is clicked.
+     * This is used to handle clicks on the canvas when no items are clicked.
+     */
+    private _onCanvasClicked(): void {
+        // If we are not allowing selection, we do nothing.
+        if (this._selectionMode === "none") {
+            return;
+        }
+
+        const selectedItems = this._dataSet.getSelectedItems();
+
+        // Is selection controlled or uncontrolled?
+        if (this._options.onSelectionChange) {
+            // This is controlled selection so the user has to handle selection state on their own.
+            if (selectedItems.length) {
+                this._options.onSelectionChange(selectedItems.map((item) => ({ id: item.id, selected: false })));
+            }
+        } else {
+            // This is uncontrolled selection, so we will deselect all items.
+            selectedItems.forEach((item) => item.isSelected = false);
+
+            // We manually update the selection state of the items so we need to redraw.
+            this._draw();
+        }
+    }
+
+    /**
+     * Called when an item is clicked.
+     * @param item The clicked item.
+     */
+    private _onItemClicked(item: TimelineItem): void {
+        const isItemInitiallySelected = item.isSelected;
+        
+        // Update item selection if we need to.
+        if (this._selectionMode === "single") {
+            // Get all items that are currently selected (we would only expect one at the most in this mode).
+            const selectedItems = this._dataSet.getSelectedItems();
+
+            // Get all the items that we are going to deselect, this will be all selected items except the one we just clicked.
+            const itemsToDeselect = selectedItems.filter((selectedItem) => selectedItem.id !== item.id);
+
+            // Is selection controlled or uncontrolled?
+            if (this._options.onSelectionChange) {
+                const selectionChangeEvents: SelectionChangeEvent[] = itemsToDeselect.map((item) => ({ id: item.id, selected: false }));
+
+                // If the item was not initially selected, we need to add it to the list of selection change events.
+                if (!isItemInitiallySelected) {
+                    // If the item was not initially selected, we need to add it to the selection change
+                    selectionChangeEvents.push({ id: item.id, selected: true });
+                }
+
+                // This is controlled selection so the user has to handle selection state on their own.
+                if (selectionChangeEvents.length) {
+                    this._options.onSelectionChange(selectionChangeEvents);
+                }
+            } else {
+                // Deselect all selected items that are not the clicked item.
+                // We will not deselect the clicked item if it was already selected.
+                itemsToDeselect.forEach((selectedItem) => selectedItem.isSelected = false);
+
+                // Ensure that the clicked item is selected.
+                item.isSelected = true;
+
+                // We manually updated the selection state of the items so we need to redraw.
+                this._draw();
+            }
+        } else if (this._selectionMode === "multi") {
+            // Is selection controlled or uncontrolled?
+            if (this._options.onSelectionChange) {
+                // If the item was not initially selected then clicking on it should prompt a selection change event.
+                if (!isItemInitiallySelected) {
+                    // This is controlled selection so the user has to handle selection state on their own.
+                    this._options.onSelectionChange([{ id: item.id, selected: true }]);
+                }
+            } else {
+                // Ensure that the clicked item is selected.
+                item.isSelected = true;
+
+                // We manually updated the selection state of the items so we need to redraw.
+                this._draw();
+            }
+
+        }
+
+        // Invoke the 'onItemClick' callback if defined, passing the identifier of the clicked item.
+        this._options.onItemClick && this._options.onItemClick(item.id);
+    }
+
+    /**
+     * Called when an item is double-clicked.
+     * @param item The double-clicked item.
+     */
+    private _onItemDoubleClicked(item: TimelineItem): void {
+        // Invoke the 'onItemDoubleClick' callback if defined, passing the identifier of the double-clicked item.
+        this._options.onItemDoubleClick && this._options.onItemDoubleClick(item.id);
     }
 }

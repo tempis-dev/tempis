@@ -111,6 +111,9 @@ var tempis_timeline = (() => {
     get items() {
       return this._items;
     }
+    get selectedItems() {
+      return this.items.filter((item) => item.isSelected);
+    }
     getItemsInRange(fromDt, toDt) {
       return this._items.filter((item) => {
         if (item.end) {
@@ -170,11 +173,16 @@ var tempis_timeline = (() => {
   var TimelineItem = class {
     constructor(definition, style) {
       var _a;
+      this._definition = definition;
       this._id = definition.id;
       this._caption = (_a = definition.caption) != null ? _a : "";
       this._start = parseDate(definition.start);
       this._end = definition.end ? parseDate(definition.end) : null;
       this._style = style;
+      this._isSelected = !!definition.selected;
+    }
+    get definition() {
+      return this._definition;
     }
     get id() {
       return this._id;
@@ -190,6 +198,12 @@ var tempis_timeline = (() => {
     }
     get style() {
       return this._style;
+    }
+    get isSelected() {
+      return this._isSelected;
+    }
+    set isSelected(value) {
+      this._isSelected = value;
     }
   };
 
@@ -217,6 +231,13 @@ var tempis_timeline = (() => {
     getCategory(name) {
       var _a;
       return (_a = this._categories.find((category) => category.name === name)) != null ? _a : null;
+    }
+    getSelectedItems() {
+      const selectedItems = [];
+      for (const group of this._groupings) {
+        selectedItems.push(...group.selectedItems);
+      }
+      return selectedItems;
     }
     update(options) {
       this._createCategories(options);
@@ -370,50 +391,64 @@ var tempis_timeline = (() => {
           context.fillText(groupDrawPlan.label, 6, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_VERTICAL_LABEL_MARGIN);
           context.stroke();
         }
-        for (const row of groupDrawPlan.rows) {
-          for (const itemDrawPlan of row) {
-            const itemFontColor = itemDrawPlan.item.style.fontColor;
-            const itemBackgroundColor = itemDrawPlan.item.style.backgroundColor;
-            const itemPadding = itemDrawPlan.item.style.padding;
-            const itemBorderRadius = itemDrawPlan.item.style.borderRadius;
-            const itemBorderThickness = itemDrawPlan.item.style.borderThickness;
-            const itemBorderColor = itemDrawPlan.item.style.borderColor;
-            if (itemDrawPlan.xPointInTimePosition !== null) {
-              context.lineWidth = 2;
-              context.fillStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
-              context.strokeStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
-              const itemMarkerConnectorPath = new Path2D();
-              itemMarkerConnectorPath.moveTo(Math.max(itemDrawPlan.xPositionStart, itemDrawPlan.xPointInTimePosition - 20), scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
-              itemMarkerConnectorPath.lineTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionEnd + 6);
-              itemMarkerConnectorPath.lineTo(Math.min(itemDrawPlan.xPositionEnd, itemDrawPlan.xPointInTimePosition + 20), scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
-              context.fill(itemMarkerConnectorPath);
-              context.beginPath();
-              context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
-              context.lineTo(itemDrawPlan.xPointInTimePosition, 1e3);
-              context.stroke();
-            }
-            context.fillStyle = itemBackgroundColor;
-            context.beginPath();
-            context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, itemBorderRadius);
-            context.fill();
-            if (itemBorderThickness && itemBorderColor) {
-              context.strokeStyle = itemBorderColor;
-              context.lineWidth = itemBorderThickness;
-              context.beginPath();
-              context.roundRect(itemDrawPlan.xPositionStart + context.lineWidth / 2, scrolledYPosition + itemDrawPlan.yPositionStart + context.lineWidth / 2, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - context.lineWidth, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - +context.lineWidth, itemBorderRadius);
-              context.stroke();
-            }
-            if (itemDrawPlan.item.caption) {
-              const labelStartPositionX = Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding);
-              const maxLabelWidth = Math.max(0, itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX) + 1;
-              context.textBaseline = "middle";
-              context.fillStyle = itemFontColor;
-              context.beginPath();
-              context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + 1 + scrolledYPosition);
-              context.stroke();
-            }
+        for (const groupDrawPlanRow of groupDrawPlan.rows) {
+          for (const itemDrawPlan of groupDrawPlanRow) {
+            this._drawGroupItem(itemDrawPlan, context, scrolledYPosition);
           }
         }
+      }
+    }
+    _drawGroupItem(itemDrawPlan, context, scrolledYPosition) {
+      const itemFontColor = itemDrawPlan.item.style.fontColor;
+      const itemBackgroundColor = itemDrawPlan.item.style.backgroundColor;
+      const itemPadding = itemDrawPlan.item.style.padding;
+      const itemBorderRadius = itemDrawPlan.item.style.borderRadius;
+      const itemBorderThickness = itemDrawPlan.item.style.borderThickness;
+      const itemBorderColor = itemDrawPlan.item.style.borderColor;
+      if (itemDrawPlan.item.isSelected) {
+        context.shadowColor = "rgba(0, 0, 0, 1)";
+        context.shadowBlur = 15;
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 0;
+        context.fillStyle = "rgba(0, 0, 0, 1)";
+        context.beginPath();
+        context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, itemBorderRadius);
+        context.fill();
+        context.shadowColor = "transparent";
+      }
+      if (itemDrawPlan.xPointInTimePosition !== null) {
+        context.lineWidth = 2;
+        context.fillStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
+        context.strokeStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
+        const itemMarkerConnectorPath = new Path2D();
+        itemMarkerConnectorPath.moveTo(Math.max(itemDrawPlan.xPositionStart, itemDrawPlan.xPointInTimePosition - 20), scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
+        itemMarkerConnectorPath.lineTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionEnd + 6);
+        itemMarkerConnectorPath.lineTo(Math.min(itemDrawPlan.xPositionEnd, itemDrawPlan.xPointInTimePosition + 20), scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
+        context.fill(itemMarkerConnectorPath);
+        context.beginPath();
+        context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
+        context.lineTo(itemDrawPlan.xPointInTimePosition, 1e3);
+        context.stroke();
+      }
+      context.fillStyle = itemBackgroundColor;
+      context.beginPath();
+      context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, itemBorderRadius);
+      context.fill();
+      if (itemBorderThickness && itemBorderColor) {
+        context.strokeStyle = itemBorderColor;
+        context.lineWidth = itemBorderThickness;
+        context.beginPath();
+        context.roundRect(itemDrawPlan.xPositionStart + context.lineWidth / 2, scrolledYPosition + itemDrawPlan.yPositionStart + context.lineWidth / 2, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - context.lineWidth, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - +context.lineWidth, itemBorderRadius);
+        context.stroke();
+      }
+      if (itemDrawPlan.item.caption) {
+        const labelStartPositionX = Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding);
+        const maxLabelWidth = Math.max(0, itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX) + 1;
+        context.textBaseline = "middle";
+        context.fillStyle = itemFontColor;
+        context.beginPath();
+        context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + 1 + scrolledYPosition);
+        context.stroke();
       }
     }
     _createViewDrawPlan(context, rangeFromDt, rangeToDt) {
@@ -1255,6 +1290,13 @@ var tempis_timeline = (() => {
       this._createCanvasEventHandlers();
       this._draw();
     }
+    get _selectionMode() {
+      var _a;
+      return (_a = this._options.selection) != null ? _a : "none";
+    }
+    getSelection() {
+      return this._dataSet.getSelectedItems().map((item) => item.id);
+    }
     _getCanvas(context) {
       if (!context) {
         throw new Error(`no canvas defined`);
@@ -1281,48 +1323,65 @@ var tempis_timeline = (() => {
       this._canvasContainerResizeObserver.observe(canvasContainerElement);
     }
     _createCanvasEventHandlers() {
-      const getMousePos = (evt) => {
+      this._canvas.style.touchAction = "none";
+      const dragPixelThreshold = 10;
+      let isPointerDown = false;
+      let startX = 0;
+      let startY = 0;
+      const getMouseOrPointerPosition = (event) => {
         var rect = this._canvas.getBoundingClientRect();
         return {
-          x: (evt.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
-          y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
+          x: (event.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
+          y: (event.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
         };
       };
-      this._canvas.addEventListener("wheel", (evt) => {
-        this._rangeView.zoomRange(evt.deltaY);
+      this._canvas.addEventListener("pointerdown", (event) => {
+        isPointerDown = true;
+        startX = event.clientX;
+        startY = event.clientY;
+        this._canvas.setPointerCapture(event.pointerId);
+      });
+      this._canvas.addEventListener("pointermove", (event) => {
+        if (!isPointerDown) {
+          return;
+        }
+        if (Math.abs(event.movementX) >= 1) {
+          this._rangeView.moveByXMovement(-event.movementX);
+        }
+        if (Math.abs(event.movementY) >= 1) {
+          this._dataView.scrollByYMovement(event.movementY);
+        }
         this._draw();
       });
-      let isMouseDown = false;
-      this._canvas.addEventListener("mousedown", (evt) => {
-        isMouseDown = true;
-      }, false);
-      this._canvas.addEventListener("mouseup", (evt) => {
-        isMouseDown = false;
-      }, false);
-      this._canvas.addEventListener("mouseleave", (evt) => {
-        isMouseDown = false;
-      }, false);
-      this._canvas.addEventListener("mousemove", (evt) => {
-        if (isMouseDown) {
-          if (Math.abs(evt.movementX) >= 1) {
-            this._rangeView.moveByXMovement(-evt.movementX);
-          }
-          if (Math.abs(evt.movementY) >= 1) {
-            this._dataView.scrollByYMovement(evt.movementY);
-          }
-          this._draw();
+      this._canvas.addEventListener("pointerup", (event) => {
+        if (!isPointerDown) {
+          return;
         }
-      }, false);
-      this._canvas.addEventListener("click", (evt) => {
-        const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
-        if (clickedItem) {
-          console.log(`clicked item ${clickedItem.caption}`);
+        isPointerDown = false;
+        const dx = event.clientX - startX;
+        const dy = event.clientY - startY;
+        if (Math.sqrt(dx * dx + dy * dy) < dragPixelThreshold) {
+          const clickedItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
+          if (clickedItem) {
+            this._onItemClicked(clickedItem);
+          } else {
+            this._onCanvasClicked();
+          }
         }
-      }, false);
+        this._canvas.releasePointerCapture(event.pointerId);
+      });
+      this._canvas.addEventListener("pointercancel", () => {
+        isPointerDown = false;
+      });
+      this._canvas.addEventListener("wheel", (event) => {
+        event.preventDefault();
+        this._rangeView.zoomRange(event.deltaY);
+        this._draw();
+      });
       this._canvas.addEventListener("dblclick", (evt) => {
-        const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
+        const clickedItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(evt));
         if (clickedItem) {
-          console.log(`double clicked item ${clickedItem.caption}`);
+          this._onItemDoubleClicked(clickedItem);
         }
       }, false);
     }
@@ -1368,6 +1427,53 @@ var tempis_timeline = (() => {
         totalRenderHeight += rangeViewHeight;
       }
       context.clearRect(0, totalRenderHeight, this._canvas.clientWidth, this._canvas.clientHeight - totalRenderHeight);
+    }
+    _onCanvasClicked() {
+      if (this._selectionMode === "none") {
+        return;
+      }
+      const selectedItems = this._dataSet.getSelectedItems();
+      if (this._options.onSelectionChange) {
+        if (selectedItems.length) {
+          this._options.onSelectionChange(selectedItems.map((item) => ({ id: item.id, selected: false })));
+        }
+      } else {
+        selectedItems.forEach((item) => item.isSelected = false);
+        this._draw();
+      }
+    }
+    _onItemClicked(item) {
+      const isItemInitiallySelected = item.isSelected;
+      if (this._selectionMode === "single") {
+        const selectedItems = this._dataSet.getSelectedItems();
+        const itemsToDeselect = selectedItems.filter((selectedItem) => selectedItem.id !== item.id);
+        if (this._options.onSelectionChange) {
+          const selectionChangeEvents = itemsToDeselect.map((item2) => ({ id: item2.id, selected: false }));
+          if (!isItemInitiallySelected) {
+            selectionChangeEvents.push({ id: item.id, selected: true });
+          }
+          if (selectionChangeEvents.length) {
+            this._options.onSelectionChange(selectionChangeEvents);
+          }
+        } else {
+          itemsToDeselect.forEach((selectedItem) => selectedItem.isSelected = false);
+          item.isSelected = true;
+          this._draw();
+        }
+      } else if (this._selectionMode === "multi") {
+        if (this._options.onSelectionChange) {
+          if (!isItemInitiallySelected) {
+            this._options.onSelectionChange([{ id: item.id, selected: true }]);
+          }
+        } else {
+          item.isSelected = true;
+          this._draw();
+        }
+      }
+      this._options.onItemClick && this._options.onItemClick(item.id);
+    }
+    _onItemDoubleClicked(item) {
+      this._options.onItemDoubleClick && this._options.onItemDoubleClick(item.id);
     }
   };
   return __toCommonJS(src_exports);
