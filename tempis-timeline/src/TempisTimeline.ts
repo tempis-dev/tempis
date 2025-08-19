@@ -218,9 +218,8 @@ export class TempisTimeline {
         });
 
         // Handle pointer cancel events to stop dragging.
-        // This is used to handle cases where the pointer is cancelled (e.g. touch events
+        // This is used to handle cases where the pointer is cancelled (e.g. touch events)
         this._canvas.addEventListener('pointercancel', () => {
-            // TODO Work out why this is being called just after the use starts dragging on touch devices.
             isPointerDown = false;
         });
 
@@ -229,8 +228,8 @@ export class TempisTimeline {
             // Prevent default scrolling behavior, we want the timeline to handle it instead.
             event.preventDefault();
 
-            // Zoom the range view based on the wheel delta.
-            this._rangeView.zoomRange(event.deltaY);
+            // Zoom the range view based on the wheel delta and the mouse position.
+            this._rangeView.zoomRange(event.deltaY, getMouseOrPointerPosition(event).x);
 
             // We will want to redraw the timeline after zooming.
             this._draw();
