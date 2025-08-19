@@ -1323,46 +1323,60 @@ var tempis_timeline = (() => {
       this._canvasContainerResizeObserver.observe(canvasContainerElement);
     }
     _createCanvasEventHandlers() {
-      const getMousePos = (evt) => {
+      const dragPixelThreshold = 10;
+      let isPointerDown = false;
+      let startX = 0;
+      let startY = 0;
+      const getMousePos = (event) => {
         var rect = this._canvas.getBoundingClientRect();
         return {
-          x: (evt.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
-          y: (evt.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
+          x: (event.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
+          y: (event.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
         };
       };
-      this._canvas.addEventListener("wheel", (evt) => {
-        this._rangeView.zoomRange(evt.deltaY);
+      this._canvas.addEventListener("pointerdown", (event) => {
+        isPointerDown = true;
+        startX = event.clientX;
+        startY = event.clientY;
+        this._canvas.setPointerCapture(event.pointerId);
+      });
+      this._canvas.addEventListener("pointermove", (event) => {
+        if (!isPointerDown) {
+          return;
+        }
+        if (Math.abs(event.movementX) >= 1) {
+          this._rangeView.moveByXMovement(-event.movementX);
+        }
+        if (Math.abs(event.movementY) >= 1) {
+          this._dataView.scrollByYMovement(event.movementY);
+        }
         this._draw();
       });
-      let isMouseDown = false;
-      this._canvas.addEventListener("mousedown", (evt) => {
-        isMouseDown = true;
-      }, false);
-      this._canvas.addEventListener("mouseup", (evt) => {
-        isMouseDown = false;
-      }, false);
-      this._canvas.addEventListener("mouseleave", (evt) => {
-        isMouseDown = false;
-      }, false);
-      this._canvas.addEventListener("mousemove", (evt) => {
-        if (isMouseDown) {
-          if (Math.abs(evt.movementX) >= 1) {
-            this._rangeView.moveByXMovement(-evt.movementX);
-          }
-          if (Math.abs(evt.movementY) >= 1) {
-            this._dataView.scrollByYMovement(evt.movementY);
-          }
-          this._draw();
+      this._canvas.addEventListener("pointerup", (event) => {
+        if (!isPointerDown) {
+          return;
         }
-      }, false);
-      this._canvas.addEventListener("click", (evt) => {
-        const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
-        if (clickedItem) {
-          this._onItemClicked(clickedItem);
-        } else {
-          this._onCanvasClicked();
+        isPointerDown = false;
+        const dx = event.clientX - startX;
+        const dy = event.clientY - startY;
+        if (Math.sqrt(dx * dx + dy * dy) < dragPixelThreshold) {
+          const clickedItem = this._dataView.getItemAtPoint(getMousePos(event));
+          if (clickedItem) {
+            this._onItemClicked(clickedItem);
+          } else {
+            this._onCanvasClicked();
+          }
         }
-      }, false);
+        this._canvas.releasePointerCapture(event.pointerId);
+      });
+      this._canvas.addEventListener("pointercancel", () => {
+        isPointerDown = false;
+      });
+      this._canvas.addEventListener("wheel", (event) => {
+        event.preventDefault();
+        this._rangeView.zoomRange(event.deltaY);
+        this._draw();
+      });
       this._canvas.addEventListener("dblclick", (evt) => {
         const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
         if (clickedItem) {
