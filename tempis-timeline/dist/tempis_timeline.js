@@ -1323,11 +1323,12 @@ var tempis_timeline = (() => {
       this._canvasContainerResizeObserver.observe(canvasContainerElement);
     }
     _createCanvasEventHandlers() {
+      this._canvas.style.touchAction = "none";
       const dragPixelThreshold = 10;
       let isPointerDown = false;
       let startX = 0;
       let startY = 0;
-      const getMousePos = (event) => {
+      const getMouseOrPointerPosition = (event) => {
         var rect = this._canvas.getBoundingClientRect();
         return {
           x: (event.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
@@ -1360,7 +1361,7 @@ var tempis_timeline = (() => {
         const dx = event.clientX - startX;
         const dy = event.clientY - startY;
         if (Math.sqrt(dx * dx + dy * dy) < dragPixelThreshold) {
-          const clickedItem = this._dataView.getItemAtPoint(getMousePos(event));
+          const clickedItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
           if (clickedItem) {
             this._onItemClicked(clickedItem);
           } else {
@@ -1378,7 +1379,7 @@ var tempis_timeline = (() => {
         this._draw();
       });
       this._canvas.addEventListener("dblclick", (evt) => {
-        const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
+        const clickedItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(evt));
         if (clickedItem) {
           this._onItemDoubleClicked(clickedItem);
         }

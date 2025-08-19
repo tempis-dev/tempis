@@ -122,6 +122,10 @@ export class TempisTimeline {
      * Creates the canvas event handlers for timeline user interface interactions.
      */
     private _createCanvasEventHandlers() {
+        // Prevent default touch gestures like scroll/pinch.
+        // TODO This will prevent pinch zooming on touch devices, we may want to allow this in the future.
+        this._canvas.style.touchAction = "none";
+
         // The drag threshold is the minimum distance that the pointer must move before we consider it a drag.
         const dragPixelThreshold = 10;
 
@@ -134,8 +138,8 @@ export class TempisTimeline {
         let startX = 0;
         let startY = 0;
 
-        // A function that gets the position on the canvas for the mouse event.
-        const getMousePos = (event: PointerEvent | MouseEvent) => {
+        // A function that gets the position on the canvas for the mouse event or pointer event.
+        const getMouseOrPointerPosition = (event: PointerEvent | MouseEvent) => {
             var rect = this._canvas.getBoundingClientRect();
             return {
                 x: (event.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
@@ -196,7 +200,7 @@ export class TempisTimeline {
             // We will check if the pointer has moved less than the drag pixel threshold.
             if (Math.sqrt(dx * dx + dy * dy) < dragPixelThreshold) {
                 // Try to find the item at the clicked position.
-                const clickedItem = this._dataView.getItemAtPoint(getMousePos(event));
+                const clickedItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
 
                 // Did we actually click on an item?
                 if (clickedItem) {
@@ -235,7 +239,7 @@ export class TempisTimeline {
         // Handle any double mouse click events for data view items.
         this._canvas.addEventListener('dblclick', (evt) => {
             // Try to get the item at the double-clicked position.
-            const clickedItem = this._dataView.getItemAtPoint(getMousePos(evt));
+            const clickedItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(evt));
 
             // If we have a clicked item, we will invoke the double-click handler.
             if (clickedItem) {
