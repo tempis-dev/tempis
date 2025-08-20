@@ -18,17 +18,6 @@ export class TimelineDataSet {
     /** The maximum date of any item. */
     private _maxDate: Date | null = null;
 
-    /** The callback to invoke whenever the dataset changes. */
-    private readonly _onChange: (() => void) | null;
-
-    /**
-     * Creates a new instance of the TimelineDataSet class.
-     * @param onChange A callback to invoke whenever the dataset changes.
-     */
-    public constructor(onChange?: () => void) {
-        this._onChange = onChange ?? null;
-    }
-
     /** Gets the item groupings. */
     public get groupings(): TimelineItemGrouping[] {
         return [...this._groupings];
@@ -169,10 +158,6 @@ export class TimelineDataSet {
 
         // Find the min and max dates of any start/end item dates.
         this._findMinAndMaxDates();
-
-        // Invoke the onChange callback.
-        // TODO We should eventually try to only call this IF the state of our dataset has changed.
-        this._onChange?.();
     }
 
     /**

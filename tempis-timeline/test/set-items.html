@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Set Items</title>
+  <script src="../dist/tempis_timeline.js"></script>
+</head>
+<style>
+  html {
+    background-color: #ebebeb;
+  }
+  .canvas-container {
+    width: 100%;
+    height: 600px;
+    resize: both;
+    overflow: hidden;
+  }
+</style>
+<body>
+  <div class="canvas-container">
+    <canvas id="canvas">
+  </div>
+  <br>
+  <button id="set-items-button">Set Items</button>
+  <br>
+  <textarea id="items-json-input" rows="30" cols="100"></textarea>
+</body>
+<script>
+  // Create our timeline options.
+  const timelineOptions = {
+    responsive: true,
+    range: {
+      position: "bottom"
+    },
+    font: {
+      size: 14
+    },
+    items: [
+      { 
+        id: 0,
+        caption: "sleeping",
+        start: new Date("Thu Jan 23 2025 00:00:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 08:30:00 GMT+0000"),
+        grouping: "Nik's Day"
+      },
+      { 
+        id: 1,
+        caption: "working",
+        start: new Date("Thu Jan 23 2025 09:00:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 17:00:00 GMT+0000"),
+        grouping: "Nik's Day"
+      },
+      { 
+        id: 2,
+        caption: "eating",
+        start: new Date("Thu Jan 23 2025 17:15:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 18:00:00 GMT+0000"),
+        grouping: "Nik's Day"
+      },
+      { 
+        id: 3,
+        caption: "playing",
+        start: new Date("Thu Jan 23 2025 18:30:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 21:00:00 GMT+0000"),
+        grouping: "Nik's Day"
+      },
+      { 
+        id: 4,
+        caption: "sleeping",
+        start: new Date("Thu Jan 23 2025 21:10:00 GMT+0000"),
+        end: new Date("Thu Jan 24 2025 00:00:00 GMT+0000"),
+        grouping: "Nik's Day"
+      },
+      { 
+        id: 5,
+        caption: "snoring",
+        start: new Date("Thu Jan 23 2025 02:30:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 07:30:00 GMT+0000"),
+        grouping: "Nik's Day"
+      },
+      { 
+        id: 6,
+        caption: "Stubbed Toe, like, really bad",
+        start: new Date("Thu Jan 23 2025 11:32:30 GMT+0000"),
+        grouping: "Becky's Day"
+      },
+      { 
+        id: 7,
+        caption: "sleeping",
+        start: new Date("Thu Jan 23 2025 00:00:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 11:30:00 GMT+0000"),
+        grouping: "Tilly's Day"
+      },
+      { 
+        id: 8,
+        caption: "sniffing",
+        start: new Date("Thu Jan 23 2025 11:35:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 13:45:00 GMT+0000"),
+        grouping: "Tilly's Day"
+      },
+      { 
+        id: 9,
+        caption: "eating",
+        start: new Date("Thu Jan 23 2025 13:05:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 13:45:00 GMT+0000"),
+        grouping: "Tilly's Day"
+      },
+      { 
+        id: 10,
+        caption: "sleeping",
+        start: new Date("Thu Jan 23 2025 14:00:00 GMT+0000"),
+        end: new Date("Thu Jan 24 2025 00:00:00 GMT+0000"),
+        grouping: "Tilly's Day"
+      },
+    ]
+  };
+
+  // Create our timeline and stick a reference to it on the window for easy access.
+  window["timeline"] = new tempis_timeline.TempisTimeline("#canvas", timelineOptions);
+
+  document.getElementById("items-json-input").value = JSON.stringify(timelineOptions.items, null, 2);
+  document.getElementById("set-items-button").addEventListener("click", () => {
+    // Get the items from the textarea.
+    const itemsJson = document.getElementById("items-json-input").value;
+
+    // Parse the JSON and set the items on the timeline.
+    try {
+      const items = JSON.parse(itemsJson);
+      window["timeline"].setItems(items);
+    } catch (error) {
+      console.error("Invalid JSON format:", error);
+      alert("Please enter valid JSON for the items.");
+    }
+  });
+</script>
+</html>
