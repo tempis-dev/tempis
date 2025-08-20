@@ -209,12 +209,11 @@ var tempis_timeline = (() => {
 
   // src/TimelineDataSet.ts
   var TimelineDataSet = class {
-    constructor(onChange) {
+    constructor() {
       this._groupings = [];
       this._categories = [];
       this._minDate = null;
       this._maxDate = null;
-      this._onChange = onChange != null ? onChange : null;
     }
     get groupings() {
       return [...this._groupings];
@@ -270,7 +269,7 @@ var tempis_timeline = (() => {
       }
     }
     _createGroupings(options) {
-      var _a, _b, _c;
+      var _a, _b;
       this._groupings = [];
       const itemGroupingMap = {};
       for (const itemDefinition of (_a = options.items) != null ? _a : []) {
@@ -286,7 +285,6 @@ var tempis_timeline = (() => {
         this._groupings.push(new TimelineItemGrouping(group, this._createGroupingItems(options, groupItemDefinitions)));
       }
       this._findMinAndMaxDates();
-      (_c = this._onChange) == null ? void 0 : _c.call(this);
     }
     _createGroupingItems(options, itemDefinitions) {
       return itemDefinitions.map((itemDefinition) => {
@@ -1280,10 +1278,11 @@ var tempis_timeline = (() => {
       this._options = options;
       this._canvas = this._getCanvas(context);
       this._rangeView = new TimelineRangeView(this._canvas, this._options.range);
-      this._dataSet = new TimelineDataSet(() => this._onDataSetChange());
+      this._dataSet = new TimelineDataSet();
       this._dataView = new TimelineDataView(this._dataSet);
       this._font = new TimelineFont((_a = this._options.style) == null ? void 0 : _a.font);
       this._dataSet.update(this._options);
+      this._onInitialDataSetChange();
       this._resizeCanvas();
       if (options.responsive !== false) {
         this._createCanvasContainerResizeObserver();
@@ -1297,6 +1296,11 @@ var tempis_timeline = (() => {
     }
     getSelection() {
       return this._dataSet.getSelectedItems().map((item) => item.id);
+    }
+    setItems(items) {
+      this._options.items = items;
+      this._dataSet.update(this._options);
+      this._draw();
     }
     _getCanvas(context) {
       if (!context) {
@@ -1403,13 +1407,6 @@ var tempis_timeline = (() => {
       canvasContext.scale(dpr, dpr);
       this._rangeView.calculateMinorAndMajorUnitTicks();
     }
-    _onDataSetChange() {
-      if (this._dataSet.minDate && this._dataSet.maxDate) {
-        this._rangeView.setRange(this._dataSet.minDate, this._dataSet.maxDate);
-      } else {
-        this._rangeView.clearRange();
-      }
-    }
     _draw() {
       var context = this._canvas.getContext("2d");
       context.clearRect(0, 0, this._canvas.clientWidth, this._canvas.clientHeight);
@@ -1475,6 +1472,13 @@ var tempis_timeline = (() => {
     }
     _onItemDoubleClicked(item) {
       this._options.onItemDoubleClick && this._options.onItemDoubleClick(item.id);
+    }
+    _onInitialDataSetChange() {
+      if (this._dataSet.minDate && this._dataSet.maxDate) {
+        this._rangeView.setRange(this._dataSet.minDate, this._dataSet.maxDate);
+      } else {
+        this._rangeView.clearRange();
+      }
     }
   };
   return __toCommonJS(src_exports);
