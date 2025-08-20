@@ -425,7 +425,7 @@ var tempis_timeline = (() => {
         context.fill(itemMarkerConnectorPath);
         context.beginPath();
         context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
-        context.lineTo(itemDrawPlan.xPointInTimePosition, 1e3);
+        context.lineTo(itemDrawPlan.xPointInTimePosition, 1e4);
         context.stroke();
       }
       context.fillStyle = itemBackgroundColor;

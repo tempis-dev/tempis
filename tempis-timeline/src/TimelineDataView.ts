@@ -257,8 +257,8 @@ export class TimelineDataView {
             // Draw the actual marker line.
             context.beginPath();
             context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
-            // TODO Work out the height of the view and use that to draw the line to the bottom of the view instead of using a dumb value of 1000.
-            context.lineTo(itemDrawPlan.xPointInTimePosition, 1000);
+            // TODO Work out the height of the view and use that to draw the line to the bottom of the view instead of using a dumb value of 10000.
+            context.lineTo(itemDrawPlan.xPointInTimePosition, 10000);
             context.stroke();
         }
 
