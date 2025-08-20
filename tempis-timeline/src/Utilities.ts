@@ -1,4 +1,22 @@
 /**
+ * Gets whether the given value is null or undefined.
+ * @param value The value to check.
+ * @returns Whether the given value is null or undefined.
+ */
+export function isNullOrUndefined(value: any): boolean {
+    return value === null || value === undefined;  
+}
+
+/**
+ * Checks whether a value is a valid JavaScript Date object.
+ * @param value The value to test.
+ * @returns Whether a value is a valid JavaScript Date object.
+ */
+export function isValidDate(value: unknown): value is Date {
+  return value instanceof Date && !isNaN(value.getTime());
+}
+
+/**
  * Parse the given input as a Date object.
  * @param input The input to parse as a Date object.
  */

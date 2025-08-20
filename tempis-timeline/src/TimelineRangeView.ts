@@ -122,6 +122,19 @@ export class TimelineRangeView {
     }
 
     /**
+     * Centers the timeline range on the specified date without changing the length of the range.
+     * @param date The date to center the range on.
+     */
+    public centerOnDate(date: Date): void {
+        // Get the current range length in milliseconds.
+        const currentRangeLength = this._toDt.getTime() - this._fromDt.getTime();
+
+        // Calculate the new from and to dates based on the specified date.
+        this._fromDt.setTime(date.getTime() - (currentRangeLength / 2));
+        this._toDt.setTime(date.getTime() + (currentRangeLength / 2));
+    }
+
+    /**
      * Moves the from and to date value of the range uniformly.
      * @param movementX The x movement value.
      */
@@ -190,6 +203,9 @@ export class TimelineRangeView {
         this.calculateMinorAndMajorUnitTicks();
     }
 
+    /**
+     * Clear the current range and reset it to the default values.
+     */
     public clearRange(): void {
         // Clearing the range is just a matter of putting the default from/to back.
         this.setRange(new Date(0), new Date(4102444800000));

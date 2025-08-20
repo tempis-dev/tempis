@@ -41,6 +41,15 @@ export class TimelineItemGrouping {
     }
 
     /**
+     * Gets the item with the specified identifier, or null if it does not exist.
+     * @param id The item identifier to search for.
+     * @return The item with the specified identifier, or null if it does not exist.
+     */
+    public getItemById(id: number | string): TimelineItem | null {
+        return this._items.find((item) => item.id === id) ?? null;
+    }
+
+    /**
      * Gets all items in this group that have a start or end date that lie within the specified range inclusively.
      * @param fromDt The range from date.
      * @param toDt The range to date.
