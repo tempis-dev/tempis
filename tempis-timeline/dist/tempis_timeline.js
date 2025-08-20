@@ -1047,6 +1047,7 @@ var tempis_timeline = (() => {
       const currentRangeLength = this._toDt.getTime() - this._fromDt.getTime();
       this._fromDt.setTime(date.getTime() - currentRangeLength / 2);
       this._toDt.setTime(date.getTime() + currentRangeLength / 2);
+      this.calculateMinorAndMajorUnitTicks();
     }
     moveByXMovement(movementX) {
       const rangeXMillisValue = (this._toDt.getTime() - this._fromDt.getTime()) / this._canvas.clientWidth;
@@ -1345,6 +1346,7 @@ var tempis_timeline = (() => {
         const end = parseDate(options.range[1]);
         this._rangeView.setRange(start, end);
       }
+      this._draw();
     }
     _getCanvas(context) {
       if (!context) {

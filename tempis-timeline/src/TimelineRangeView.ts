@@ -132,6 +132,9 @@ export class TimelineRangeView {
         // Calculate the new from and to dates based on the specified date.
         this._fromDt.setTime(date.getTime() - (currentRangeLength / 2));
         this._toDt.setTime(date.getTime() + (currentRangeLength / 2));
+
+        // Our range has changed so we will need to recalculate our minor unit ticks.
+        this.calculateMinorAndMajorUnitTicks();
     }
 
     /**

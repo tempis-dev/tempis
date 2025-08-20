@@ -118,18 +118,18 @@
   // Create our timeline and stick a reference to it on the window for easy access.
   window["timeline"] = new tempis_timeline.TempisTimeline("#canvas", timelineOptions);
 
-  document.getElementById("items-json-input").value = JSON.stringify(timelineOptions.items, null, 2);
-  document.getElementById("set-items-button").addEventListener("click", () => {
-    // Get the items from the textarea.
-    const itemsJson = document.getElementById("items-json-input").value;
+  document.getElementById("focus-json-input").value = JSON.stringify({ id: 2 }, null, 2);
+  document.getElementById("focus-button").addEventListener("click", () => {
+    // Get the options from the input.
+    const optionsJson = document.getElementById("focus-json-input").value;
 
-    // Parse the JSON and set the items on the timeline.
     try {
-      const items = JSON.parse(itemsJson);
-      window["timeline"].setItems(items);
+      const options = optionsJson ? JSON.parse(optionsJson) : undefined;
+      
+      window["timeline"].focus(options);
     } catch (error) {
       console.error("Invalid JSON format:", error);
-      alert("Please enter valid JSON for the items.");
+      alert("Please enter valid JSON for the focus options.");
     }
   });
 </script>

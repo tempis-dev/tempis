@@ -138,6 +138,9 @@ export class TempisTimeline {
 
             this._rangeView.setRange(start, end);
         }
+
+        // We may have updated the range so we need to redraw the timeline.
+        this._draw();
     }
 
     /**
