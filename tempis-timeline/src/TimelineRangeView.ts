@@ -7,6 +7,8 @@ export type Unit = 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'month
 
 export type UnitAndStep = { unit: Unit, step: number };
 
+export type UnitAndFactor = { unit: Unit, factor: number };
+
 export type RangeTick = { xPosition: number, date: Date };
 
 const DEFAULT_MINOR_UNIT_LABEL_FORMATS: TempisTimelineRangeUnitLabelFormats = {
@@ -240,20 +242,20 @@ export class TimelineRangeView {
         const minorTargetTickCount = Math.floor(this._canvas.clientWidth / 120);
         const majorTargetTickCount = Math.floor(this._canvas.clientWidth / 320);
 
-        // Calculate the width of one millisecond as it would be rendered on the canvas.
-        const milliRenderWidth = this._canvas.clientWidth / (this._toDt.getTime() - this._fromDt.getTime());
+        // Find a sensible minor and major unit and step based on the target tick counts.
+        const { minor: minorUnitAndStep, major: majorUnitAndStep } = this._findSensibleUnitsAndSteps(minorTargetTickCount, majorTargetTickCount);
 
-        // Calculate a sensible minor unit and step for the range.
-        this._minorTickUnitAndStep = this._findSensibleUnitAndStep(minorTargetTickCount);
-
-        // We need to determine the major tick unit now, this will be based on the minor unit.
-        this._majorTickUnitAndStep = this._findSensibleUnitAndStep(majorTargetTickCount, this._minorTickUnitAndStep.unit);
+        this._minorTickUnitAndStep = minorUnitAndStep;
+        this._majorTickUnitAndStep = majorUnitAndStep;
 
         // Get our minor unit tick dates.
         const minorTickDates = this._getTickDates(this._minorTickUnitAndStep);
 
         // Get our major unit tick dates.
         const majorTickDates = this._getTickDates(this._majorTickUnitAndStep);
+
+        // Calculate the width of one millisecond as it would be rendered on the canvas.
+        const milliRenderWidth = this._canvas.clientWidth / (this._toDt.getTime() - this._fromDt.getTime());
 
         // Convert our minor unit tick dates into tick objects representing the date and the x position of that date on the canvas.
         this._minorUnitTicks = minorTickDates.map((tickDate) => {
@@ -360,124 +362,132 @@ export class TimelineRangeView {
     }
 
     /**
-     * https://jsfiddle.net/h2drotkz/6/
-     * @param targetTickCount 
-     * @returns 
+     * Finds a sensible minor and major unit and step based on the target tick count.
+     * @param minorTargetTickCount The number of minor ticks to aim for
+     * @returns An object containing the minor and major unit and step.
      */
-    private _findSensibleUnitAndStep(targetTickCount: number, minorUnit?: Unit): UnitAndStep {
-        // Get the millis difference between the two dates.
-        const millisDiff = this._toDt.getTime() - this._fromDt.getTime();
+    private _findSensibleUnitsAndSteps(minorTargetTickCount: number, majorTargetTickCount: number): { minor: UnitAndStep, major: UnitAndStep } {
+        // A function to get the best unit and step based on the target tick count based on the provided units and their factors.
+        const getBestUnitAndStep = (units: UnitAndFactor[], targetTickCount: number): UnitAndStep => {
+            // Get the millis difference between the two dates.
+            const millisDiff = this._toDt.getTime() - this._fromDt.getTime();
 
-        // We should always aim to have at least one tick.
-        targetTickCount = Math.max(1, targetTickCount);
+            const unitTickCounts: { unit: Unit, ticks: number, step: number }[] = [];
 
-        // An array of potential units and their factors.
-        const units: { unit: Unit, factor: number }[] = [];
+            units.forEach(({ unit, factor }) => {
+                const viableStepValues: number[] = [];
 
-        // If we already have a minor unit then we must exclude it as an option for the major unit.
-        if (minorUnit === "millisecond") {
-            units.push({ unit: 'second', factor: 1000 });
-            units.push({ unit: 'minute', factor: 60 * 1000 });
-            units.push({ unit: 'hour', factor: 60 * 60 * 1000 });
-            units.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
-            units.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
-            units.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
-        } else if (minorUnit === "second") {
-            units.push({ unit: 'minute', factor: 60 * 1000 });
-            units.push({ unit: 'hour', factor: 60 * 60 * 1000 });
-            units.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
-            units.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
-            units.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
-        } else if (minorUnit === "minute") {
-            units.push({ unit: 'hour', factor: 60 * 60 * 1000 });
-            units.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
-            units.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
-            units.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
-        } else if (minorUnit === "hour") {
-            units.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
-            units.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
-            units.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
-        } else if (minorUnit === "day") {
-            units.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
-            units.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
-        } else if (minorUnit === "month") {
-            units.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
-        } else if (minorUnit === "year") {
-            units.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+                // The step values we use should really depend on the unit type. (50 or 100 minutes is silly, but 20 makes sense...maybe)
+                if (unit === "millisecond") {
+                    viableStepValues.push(1, 10, 50, 100, 500);
+                } else if (unit === "second") {
+                    viableStepValues.push(1, 10, 15, 30);
+                } else if (unit === "minute") {
+                    viableStepValues.push(1, 10, 15, 30);
+                } else if (unit === "hour") {
+                    viableStepValues.push(1, 2, 6, 12);
+                } else if (unit === "day") {
+                    viableStepValues.push(1, 2, 5, 10);
+                } else if (unit === "month") {
+                    viableStepValues.push(1, 3, 6);
+                } else if (unit === "year") {
+                    viableStepValues.push(1, 2, 5, 10, 20, 50, 100, 500);
+                }
+
+                viableStepValues.forEach((step) => {
+                    unitTickCounts.push({ unit, ticks: (millisDiff / factor) / step, step })
+                });
+            });
+
+            // Sort the unit tick counts by how close they are to the target tick count.
+            unitTickCounts.sort((a, b) => {
+                return Math.abs(a.ticks - Math.max(1, targetTickCount)) - Math.abs(b.ticks - Math.max(1, targetTickCount));
+            });
+
+            return { unit: unitTickCounts[0].unit, step: unitTickCounts[0].step };
+        };
+
+        // We will always start by working out the minor unit first and the major unit will be based on that.
+        // We also want a minimum of 1 for the minor target tick count, so we will clamp it to 1.
+        const minorUnitAndStep = getBestUnitAndStep([
+            { unit: 'millisecond', factor: 1 },
+            { unit: 'second', factor: 1000 },
+            { unit: 'minute', factor: 60 * 1000 },
+            { unit: 'hour', factor: 60 * 60 * 1000 },
+            { unit: 'day', factor: 24 * 60 * 60 * 1000 },
+            { unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 },
+            { unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 }
+        ], minorTargetTickCount);
+
+        const majorUnitsAndFactors: UnitAndFactor[] = [];
+
+        // The units available for the major unit will depend on the minor unit.
+        if (minorUnitAndStep.unit === "millisecond") {
+            majorUnitsAndFactors.push({ unit: 'second', factor: 1000 });
+            majorUnitsAndFactors.push({ unit: 'minute', factor: 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: 'hour', factor: 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+        } else if (minorUnitAndStep.unit === "second") {
+            majorUnitsAndFactors.push({ unit: 'minute', factor: 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: 'hour', factor: 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+        } else if (minorUnitAndStep.unit === "minute") {
+            majorUnitsAndFactors.push({ unit: 'hour', factor: 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+        } else if (minorUnitAndStep.unit === "hour") {
+            majorUnitsAndFactors.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+        } else if (minorUnitAndStep.unit === "day") {
+            majorUnitsAndFactors.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+        } else if (minorUnitAndStep.unit === "month") {
+            majorUnitsAndFactors.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+        } else if (minorUnitAndStep.unit === "year") {
+            majorUnitsAndFactors.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
         } else {
-            // We have no minor unit, so we much be trying to find our minor unit.
-            units.push({ unit: 'millisecond', factor: 1 });
-            units.push({ unit: 'second', factor: 1000 });
-            units.push({ unit: 'minute', factor: 60 * 1000 });
-            units.push({ unit: 'hour', factor: 60 * 60 * 1000 });
-            units.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
-            units.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
-            units.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+            throw new Error(`unknown minor unit: ${minorUnitAndStep.unit}`);
         }
 
-        const unitTickCounts: { unit: Unit, ticks: number, step: number }[] = [];
-
-        units.forEach(({ unit, factor }) => {
-            const viableStepValues: number[] = [];
-
-            // The step values we use should really depend on the unit type. (50 or 100 minutes is silly, but 20 makes sense...maybe)
-            if (unit === "millisecond") {
-                viableStepValues.push(1, 10, 50, 100, 500);
-            } else if (unit === "second") {
-                viableStepValues.push(1, 10, 15, 30);
-            } else if (unit === "minute") {
-                viableStepValues.push(1, 10, 15, 30);
-            } else if (unit === "hour") {
-                viableStepValues.push(1, 2, 6, 12);
-            } else if (unit === "day") {
-                viableStepValues.push(1, 2, 5, 10);
-            } else if (unit === "month") {
-                viableStepValues.push(1, 3, 6);
-            } else if (unit === "year") {
-                viableStepValues.push(1, 2, 5, 10, 20, 50, 100, 500);
-            }
-
-            viableStepValues.forEach((step) => {
-                unitTickCounts.push({ unit, ticks: (millisDiff / factor) / step, step })
-            });
-        });
-
-        unitTickCounts.sort((a, b) => {
-            return Math.abs(a.ticks - targetTickCount) - Math.abs(b.ticks - targetTickCount);
-        });
-
-        return { unit: unitTickCounts[0].unit, step: unitTickCounts[0].step };
+        return {
+            minor: minorUnitAndStep,
+            major: getBestUnitAndStep(majorUnitsAndFactors, majorTargetTickCount)
+        }
     }
 
     /**
-     * https://jsfiddle.net/mxh08wLd/1/
-     * @param unitAndStep 
-     * @returns 
+     * Gets the tick dates for the specified unit and step.
+     * @param unitAndStep The unit and step to get the tick dates for.
+     * @returns An array of dates representing the tick dates.
      */
-    private _getTickDates(unitAndStep: { unit: Unit, step: number }): Date[] {
+    private _getTickDates(unitAndStep: UnitAndStep): Date[] {
         let currentDate;
 
-        // We need to strip unit values below the tick unit
-        if (unitAndStep.unit === "year") {
+        // We need to strip unit values from the from date so that we can start at the beginning of the unit.
+        // We want to strip the date from the next unit up so that the ticks always start from the next unit up.
+        if (unitAndStep.unit === "year" || unitAndStep.unit === "month") {
             currentDate = new Date(this._fromDt.getFullYear(), 0);
         }
-        else if (unitAndStep.unit === "month") {
+        else if (unitAndStep.unit === "day") {
             currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth());
         }
-        else if (unitAndStep.unit === "day") {
+        else if (unitAndStep.unit === "hour") {
             currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate());
         }
-        else if (unitAndStep.unit === "hour") {
+        else if (unitAndStep.unit === "minute") {
             currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours());
         }
-        else if (unitAndStep.unit === "minute") {
+        else if (unitAndStep.unit === "second") {
             currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes());
         }
-        else if (unitAndStep.unit === "second") {
-            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds());
-        }
         else if (unitAndStep.unit === "millisecond") {
-            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds(), this._fromDt.getMilliseconds());
+            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds());
         } else {
             throw new Error(`unknown unit: ${unitAndStep.unit}`);
         }
