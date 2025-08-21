@@ -56,6 +56,9 @@ const DEFAULT_ITEM_VERTICAL_MARGIN: number = 8;
 /** The default amount of vertical margin to use for each group. */
 const DEFAULT_GROUP_MARGIN: number = 12;
 
+/** The minimum amount of available horizontal space required to render a label. */
+const MINIMUM_RENDERED_LABEL_WIDTH: number = 5;
+
 export class TimelineDataView {
     /** The minimum height of the data view. */
     private static _minimumHeight: number = 50;
@@ -219,6 +222,11 @@ export class TimelineDataView {
         const itemBorderThickness = itemDrawPlan.item.style.borderThickness;
         const itemBorderColor = itemDrawPlan.item.style.borderColor;
 
+        // If the item is too small to be rendered then we should just skip it to improve performance.
+        if ((itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart) < 1) {
+            return;
+        }
+
         // If the item is selected then we should rendering an underlying selection indicator rectangle.
         // TODO Improve the way we render the selected item, this is a bit hacky.
         if (itemDrawPlan.item.isSelected) {
@@ -280,16 +288,19 @@ export class TimelineDataView {
         // Draw the item label (if there is one).
         if (itemDrawPlan.item.caption) {
             // Calculate the actual x position of the label, we should attempt to keep this in the bounds of the view.
-            const labelStartPositionX = Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding);
+            const labelStartPositionX = Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
 
-            // Calculate the max item label width, we are adding 1 as sometime PIT label ends get cut off.
-            const maxLabelWidth = Math.max(0, (itemDrawPlan.xPositionEnd - itemPadding) - labelStartPositionX) + 1;
+            // Calculate the max item label width.
+            const maxLabelWidth = Math.max(0, Math.ceil((itemDrawPlan.xPositionEnd - itemPadding) - labelStartPositionX));
 
-            context.textBaseline = "middle";
-            context.fillStyle = itemFontColor;
-            context.beginPath();
-            context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2) + 1) + scrolledYPosition);
-            context.stroke();
+            // Render the text label, but only if we have enough space to do so.
+            if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
+                context.textBaseline = "middle";
+                context.fillStyle = itemFontColor;
+                context.beginPath();
+                context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2) + 1) + scrolledYPosition);
+                context.stroke();
+            }
         }
     }
 

@@ -338,6 +338,7 @@ var tempis_timeline = (() => {
   var DEFAULT_GROUP_VERTICAL_LABEL_MARGIN = 6;
   var DEFAULT_ITEM_VERTICAL_MARGIN = 8;
   var DEFAULT_GROUP_MARGIN = 12;
+  var MINIMUM_RENDERED_LABEL_WIDTH = 5;
   var TimelineDataView = class {
     constructor(dataSet) {
       this._scrollYOffset = 0;
@@ -419,6 +420,9 @@ var tempis_timeline = (() => {
       const itemBorderRadius = itemDrawPlan.item.style.borderRadius;
       const itemBorderThickness = itemDrawPlan.item.style.borderThickness;
       const itemBorderColor = itemDrawPlan.item.style.borderColor;
+      if (itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart < 1) {
+        return;
+      }
       if (itemDrawPlan.item.isSelected) {
         context.shadowColor = "rgba(0, 0, 0, 1)";
         context.shadowBlur = 15;
@@ -456,13 +460,15 @@ var tempis_timeline = (() => {
         context.stroke();
       }
       if (itemDrawPlan.item.caption) {
-        const labelStartPositionX = Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding);
-        const maxLabelWidth = Math.max(0, itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX) + 1;
-        context.textBaseline = "middle";
-        context.fillStyle = itemFontColor;
-        context.beginPath();
-        context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + 1 + scrolledYPosition);
-        context.stroke();
+        const labelStartPositionX = Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
+        const maxLabelWidth = Math.max(0, Math.ceil(itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX));
+        if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
+          context.textBaseline = "middle";
+          context.fillStyle = itemFontColor;
+          context.beginPath();
+          context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + 1 + scrolledYPosition);
+          context.stroke();
+        }
       }
     }
     _createViewDrawPlan(context, rangeFromDt, rangeToDt) {
