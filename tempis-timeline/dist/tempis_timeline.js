@@ -1253,20 +1253,18 @@ var tempis_timeline = (() => {
     }
     _getTickDates(unitAndStep) {
       let currentDate;
-      if (unitAndStep.unit === "year") {
+      if (unitAndStep.unit === "year" || unitAndStep.unit === "month") {
         currentDate = new Date(this._fromDt.getFullYear(), 0);
-      } else if (unitAndStep.unit === "month") {
-        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth());
       } else if (unitAndStep.unit === "day") {
-        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate());
+        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth());
       } else if (unitAndStep.unit === "hour") {
-        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours());
+        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate());
       } else if (unitAndStep.unit === "minute") {
-        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes());
+        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours());
       } else if (unitAndStep.unit === "second") {
-        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds());
+        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes());
       } else if (unitAndStep.unit === "millisecond") {
-        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds(), this._fromDt.getMilliseconds());
+        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds());
       } else {
         throw new Error(`unknown unit: ${unitAndStep.unit}`);
       }

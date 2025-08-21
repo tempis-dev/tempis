@@ -245,10 +245,7 @@ export class TimelineRangeView {
         // Find a sensible minor and major unit and step based on the target tick counts.
         const { minor: minorUnitAndStep, major: majorUnitAndStep } = this._findSensibleUnitsAndSteps(minorTargetTickCount, majorTargetTickCount);
 
-        // Calculate a sensible minor unit and step for the range.
         this._minorTickUnitAndStep = minorUnitAndStep;
-
-        // We need to determine the major tick unit now, this will be based on the minor unit.
         this._majorTickUnitAndStep = majorUnitAndStep;
 
         // Get our minor unit tick dates.
@@ -465,34 +462,32 @@ export class TimelineRangeView {
     }
 
     /**
-     * https://jsfiddle.net/mxh08wLd/1/
-     * @param unitAndStep 
-     * @returns 
+     * Gets the tick dates for the specified unit and step.
+     * @param unitAndStep The unit and step to get the tick dates for.
+     * @returns An array of dates representing the tick dates.
      */
-    private _getTickDates(unitAndStep: { unit: Unit, step: number }): Date[] {
+    private _getTickDates(unitAndStep: UnitAndStep): Date[] {
         let currentDate;
 
-        // We need to strip unit values below the tick unit
-        if (unitAndStep.unit === "year") {
+        // We need to strip unit values from the from date so that we can start at the beginning of the unit.
+        // We want to strip the date from the next unit up so that the ticks always start from the next unit up.
+        if (unitAndStep.unit === "year" || unitAndStep.unit === "month") {
             currentDate = new Date(this._fromDt.getFullYear(), 0);
         }
-        else if (unitAndStep.unit === "month") {
+        else if (unitAndStep.unit === "day") {
             currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth());
         }
-        else if (unitAndStep.unit === "day") {
+        else if (unitAndStep.unit === "hour") {
             currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate());
         }
-        else if (unitAndStep.unit === "hour") {
+        else if (unitAndStep.unit === "minute") {
             currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours());
         }
-        else if (unitAndStep.unit === "minute") {
+        else if (unitAndStep.unit === "second") {
             currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes());
         }
-        else if (unitAndStep.unit === "second") {
-            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds());
-        }
         else if (unitAndStep.unit === "millisecond") {
-            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds(), this._fromDt.getMilliseconds());
+            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds());
         } else {
             throw new Error(`unknown unit: ${unitAndStep.unit}`);
         }
