@@ -1104,11 +1104,12 @@ var tempis_timeline = (() => {
     calculateMinorAndMajorUnitTicks() {
       const minorTargetTickCount = Math.floor(this._canvas.clientWidth / 120);
       const majorTargetTickCount = Math.floor(this._canvas.clientWidth / 320);
-      const milliRenderWidth = this._canvas.clientWidth / (this._toDt.getTime() - this._fromDt.getTime());
-      this._minorTickUnitAndStep = this._findSensibleUnitAndStep(minorTargetTickCount);
-      this._majorTickUnitAndStep = this._findSensibleUnitAndStep(majorTargetTickCount, this._minorTickUnitAndStep.unit);
+      const { minor: minorUnitAndStep, major: majorUnitAndStep } = this._findSensibleUnitsAndSteps(minorTargetTickCount, majorTargetTickCount);
+      this._minorTickUnitAndStep = minorUnitAndStep;
+      this._majorTickUnitAndStep = majorUnitAndStep;
       const minorTickDates = this._getTickDates(this._minorTickUnitAndStep);
       const majorTickDates = this._getTickDates(this._majorTickUnitAndStep);
+      const milliRenderWidth = this._canvas.clientWidth / (this._toDt.getTime() - this._fromDt.getTime());
       this._minorUnitTicks = minorTickDates.map((tickDate) => {
         return {
           date: tickDate,
@@ -1173,74 +1174,82 @@ var tempis_timeline = (() => {
         context.stroke();
       }
     }
-    _findSensibleUnitAndStep(targetTickCount, minorUnit) {
-      const millisDiff = this._toDt.getTime() - this._fromDt.getTime();
-      targetTickCount = Math.max(1, targetTickCount);
-      const units = [];
-      if (minorUnit === "millisecond") {
-        units.push({ unit: "second", factor: 1e3 });
-        units.push({ unit: "minute", factor: 60 * 1e3 });
-        units.push({ unit: "hour", factor: 60 * 60 * 1e3 });
-        units.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
-        units.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
-        units.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
-      } else if (minorUnit === "second") {
-        units.push({ unit: "minute", factor: 60 * 1e3 });
-        units.push({ unit: "hour", factor: 60 * 60 * 1e3 });
-        units.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
-        units.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
-        units.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
-      } else if (minorUnit === "minute") {
-        units.push({ unit: "hour", factor: 60 * 60 * 1e3 });
-        units.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
-        units.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
-        units.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
-      } else if (minorUnit === "hour") {
-        units.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
-        units.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
-        units.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
-      } else if (minorUnit === "day") {
-        units.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
-        units.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
-      } else if (minorUnit === "month") {
-        units.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
-      } else if (minorUnit === "year") {
-        units.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
-      } else {
-        units.push({ unit: "millisecond", factor: 1 });
-        units.push({ unit: "second", factor: 1e3 });
-        units.push({ unit: "minute", factor: 60 * 1e3 });
-        units.push({ unit: "hour", factor: 60 * 60 * 1e3 });
-        units.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
-        units.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
-        units.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
-      }
-      const unitTickCounts = [];
-      units.forEach(({ unit, factor }) => {
-        const viableStepValues = [];
-        if (unit === "millisecond") {
-          viableStepValues.push(1, 10, 50, 100, 500);
-        } else if (unit === "second") {
-          viableStepValues.push(1, 10, 15, 30);
-        } else if (unit === "minute") {
-          viableStepValues.push(1, 10, 15, 30);
-        } else if (unit === "hour") {
-          viableStepValues.push(1, 2, 6, 12);
-        } else if (unit === "day") {
-          viableStepValues.push(1, 2, 5, 10);
-        } else if (unit === "month") {
-          viableStepValues.push(1, 3, 6);
-        } else if (unit === "year") {
-          viableStepValues.push(1, 2, 5, 10, 20, 50, 100, 500);
-        }
-        viableStepValues.forEach((step) => {
-          unitTickCounts.push({ unit, ticks: millisDiff / factor / step, step });
+    _findSensibleUnitsAndSteps(minorTargetTickCount, majorTargetTickCount) {
+      const getBestUnitAndStep = (units, targetTickCount) => {
+        const millisDiff = this._toDt.getTime() - this._fromDt.getTime();
+        const unitTickCounts = [];
+        units.forEach(({ unit, factor }) => {
+          const viableStepValues = [];
+          if (unit === "millisecond") {
+            viableStepValues.push(1, 10, 50, 100, 500);
+          } else if (unit === "second") {
+            viableStepValues.push(1, 10, 15, 30);
+          } else if (unit === "minute") {
+            viableStepValues.push(1, 10, 15, 30);
+          } else if (unit === "hour") {
+            viableStepValues.push(1, 2, 6, 12);
+          } else if (unit === "day") {
+            viableStepValues.push(1, 2, 5, 10);
+          } else if (unit === "month") {
+            viableStepValues.push(1, 3, 6);
+          } else if (unit === "year") {
+            viableStepValues.push(1, 2, 5, 10, 20, 50, 100, 500);
+          }
+          viableStepValues.forEach((step) => {
+            unitTickCounts.push({ unit, ticks: millisDiff / factor / step, step });
+          });
         });
-      });
-      unitTickCounts.sort((a2, b) => {
-        return Math.abs(a2.ticks - targetTickCount) - Math.abs(b.ticks - targetTickCount);
-      });
-      return { unit: unitTickCounts[0].unit, step: unitTickCounts[0].step };
+        unitTickCounts.sort((a2, b) => {
+          return Math.abs(a2.ticks - targetTickCount) - Math.abs(b.ticks - targetTickCount);
+        });
+        return { unit: unitTickCounts[0].unit, step: unitTickCounts[0].step };
+      };
+      const minorUnitAndStep = getBestUnitAndStep([
+        { unit: "millisecond", factor: 1 },
+        { unit: "second", factor: 1e3 },
+        { unit: "minute", factor: 60 * 1e3 },
+        { unit: "hour", factor: 60 * 60 * 1e3 },
+        { unit: "day", factor: 24 * 60 * 60 * 1e3 },
+        { unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 },
+        { unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 }
+      ], Math.max(1, minorTargetTickCount));
+      const majorUnitsAndFactors = [];
+      if (minorUnitAndStep.unit === "millisecond") {
+        majorUnitsAndFactors.push({ unit: "second", factor: 1e3 });
+        majorUnitsAndFactors.push({ unit: "minute", factor: 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "hour", factor: 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnitAndStep.unit === "second") {
+        majorUnitsAndFactors.push({ unit: "minute", factor: 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "hour", factor: 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnitAndStep.unit === "minute") {
+        majorUnitsAndFactors.push({ unit: "hour", factor: 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnitAndStep.unit === "hour") {
+        majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnitAndStep.unit === "day") {
+        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnitAndStep.unit === "month") {
+        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnitAndStep.unit === "year") {
+        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else {
+        throw new Error(`unknown minor unit: ${minorUnitAndStep.unit}`);
+      }
+      return {
+        minor: minorUnitAndStep,
+        major: getBestUnitAndStep(majorUnitsAndFactors, majorTargetTickCount)
+      };
     }
     _getTickDates(unitAndStep) {
       let currentDate;
