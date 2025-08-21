@@ -25,6 +25,9 @@ var tempis_timeline = (() => {
   });
 
   // src/Utilities.ts
+  function isNullOrUndefined(value) {
+    return value === null || value === void 0;
+  }
   function parseDate(input) {
     if (!input) {
       throw new Error("Cannot parse input as date as it is not defined");
@@ -113,6 +116,10 @@ var tempis_timeline = (() => {
     }
     get selectedItems() {
       return this.items.filter((item) => item.isSelected);
+    }
+    getItemById(id) {
+      var _a;
+      return (_a = this._items.find((item) => item.id === id)) != null ? _a : null;
     }
     getItemsInRange(fromDt, toDt) {
       return this._items.filter((item) => {
@@ -226,6 +233,15 @@ var tempis_timeline = (() => {
     }
     get maxDate() {
       return this._maxDate;
+    }
+    getItemById(id) {
+      for (const group of this._groupings) {
+        const item = group.getItemById(id);
+        if (item) {
+          return item;
+        }
+      }
+      return null;
     }
     getCategory(name) {
       var _a;
@@ -1027,6 +1043,12 @@ var tempis_timeline = (() => {
       }
       this.calculateMinorAndMajorUnitTicks();
     }
+    centerOnDate(date) {
+      const currentRangeLength = this._toDt.getTime() - this._fromDt.getTime();
+      this._fromDt.setTime(date.getTime() - currentRangeLength / 2);
+      this._toDt.setTime(date.getTime() + currentRangeLength / 2);
+      this.calculateMinorAndMajorUnitTicks();
+    }
     moveByXMovement(movementX) {
       const rangeXMillisValue = (this._toDt.getTime() - this._fromDt.getTime()) / this._canvas.clientWidth;
       this._fromDt.setTime(this._fromDt.getTime() + rangeXMillisValue * movementX);
@@ -1300,6 +1322,30 @@ var tempis_timeline = (() => {
     setItems(items) {
       this._options.items = items;
       this._dataSet.update(this._options);
+      this._draw();
+    }
+    focus(options) {
+      if (!options) {
+        if (this._dataSet.minDate && this._dataSet.maxDate) {
+          this._rangeView.setRange(this._dataSet.minDate, this._dataSet.maxDate);
+        }
+      } else if (!isNullOrUndefined(options.id)) {
+        const item = this._dataSet.getItemById(options.id);
+        if (!item) {
+          throw new Error(`No item found with ID ${options.id}`);
+        } else if (item.end) {
+          this._rangeView.setRange(item.start, item.end);
+        } else {
+          this._rangeView.centerOnDate(item.start);
+        }
+      } else if (!isNullOrUndefined(options.date)) {
+        const date = parseDate(options.date);
+        this._rangeView.centerOnDate(date);
+      } else if (options.range && options.range.length === 2) {
+        const start = parseDate(options.range[0]);
+        const end = parseDate(options.range[1]);
+        this._rangeView.setRange(start, end);
+      }
       this._draw();
     }
     _getCanvas(context) {

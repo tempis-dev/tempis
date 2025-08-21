@@ -39,6 +39,26 @@ export class TimelineDataSet {
     }
 
     /**
+     * Gets the item with the specified identifier, or null if it does not exist.
+     * @param id The item identifier to search for.
+     * @return The item with the specified identifier, or null if it does not exist.
+     */
+    public getItemById(id: number | string): TimelineItem | null {
+        // We need to check each group for the item with the specified identifier.
+        for (const group of this._groupings) {
+            // Try to get the item from the current group with the specified identifier.
+            const item = group.getItemById(id);
+
+            if (item) {
+                return item;
+            }
+        }
+        
+        // We were unable to find the item with the specified identifier in any group.
+        return null;
+    }
+
+    /**
      * Gets the category with the specified name.
      * @param name The category name.
      * @returns The category with the specified name, or null if one does not exist.
