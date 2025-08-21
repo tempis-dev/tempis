@@ -1200,7 +1200,7 @@ var tempis_timeline = (() => {
           });
         });
         unitTickCounts.sort((a2, b) => {
-          return Math.abs(a2.ticks - targetTickCount) - Math.abs(b.ticks - targetTickCount);
+          return Math.abs(a2.ticks - Math.max(1, targetTickCount)) - Math.abs(b.ticks - Math.max(1, targetTickCount));
         });
         return { unit: unitTickCounts[0].unit, step: unitTickCounts[0].step };
       };
@@ -1212,7 +1212,7 @@ var tempis_timeline = (() => {
         { unit: "day", factor: 24 * 60 * 60 * 1e3 },
         { unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 },
         { unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 }
-      ], Math.max(1, minorTargetTickCount));
+      ], minorTargetTickCount);
       const majorUnitsAndFactors = [];
       if (minorUnitAndStep.unit === "millisecond") {
         majorUnitsAndFactors.push({ unit: "second", factor: 1e3 });

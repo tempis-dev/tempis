@@ -404,7 +404,7 @@ export class TimelineRangeView {
 
             // Sort the unit tick counts by how close they are to the target tick count.
             unitTickCounts.sort((a, b) => {
-                return Math.abs(a.ticks - targetTickCount) - Math.abs(b.ticks - targetTickCount);
+                return Math.abs(a.ticks - Math.max(1, targetTickCount)) - Math.abs(b.ticks - Math.max(1, targetTickCount));
             });
 
             return { unit: unitTickCounts[0].unit, step: unitTickCounts[0].step };
@@ -420,7 +420,7 @@ export class TimelineRangeView {
             { unit: 'day', factor: 24 * 60 * 60 * 1000 },
             { unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 },
             { unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 }
-        ], Math.max(1, minorTargetTickCount));
+        ], minorTargetTickCount);
 
         const majorUnitsAndFactors: UnitAndFactor[] = [];
 
