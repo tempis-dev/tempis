@@ -51,9 +51,10 @@ var tempis_timeline = (() => {
     throw new Error(`Cannot parse input '${input}' as date`);
   }
   function clamp(value, min, max) {
-    if (value < min) {
+    if (min !== void 0 && value < min) {
       return min;
-    } else if (value > max) {
+    }
+    if (max !== void 0 && value > max) {
       return max;
     }
     return value;
@@ -1020,32 +1021,35 @@ var tempis_timeline = (() => {
     constructor(canvas, options = {}) {
       this._fromDt = new Date();
       this._toDt = new Date(this._fromDt.getTime() + 31556952e4);
+      this._minDate = new Date(-864e13);
+      this._maxDate = new Date(864e13);
       this._minorTickUnitAndStep = { unit: "year", step: 2 };
       this._majorTickUnitAndStep = { unit: "year", step: 10 };
       this._minorUnitTicks = [];
       this._majorUnitTicks = [];
       this._canvas = canvas;
       this._options = options;
+      this._parseOptions();
     }
     get position() {
       var _a;
       return (_a = this._options.position) != null ? _a : "bottom";
     }
     get fromDt() {
-      return this._fromDt;
+      return new Date(this._fromDt.getTime());
     }
     get toDt() {
-      return this._toDt;
+      return new Date(this._toDt.getTime());
     }
     get minorTicks() {
       return this._minorUnitTicks;
     }
     setRange(from, to) {
-      this._fromDt = new Date(from);
-      this._toDt = new Date(to);
+      this._setFromTime(from.getTime());
+      this._setToTime(to.getTime());
       if (this._fromDt.getTime() === this._toDt.getTime()) {
-        this._fromDt.setTime(this._fromDt.getTime() - 60 * 1e3);
-        this._toDt.setTime(this._toDt.getTime() + 60 * 1e3);
+        this._setFromTime(this._fromDt.getTime() - 60 * 1e3);
+        this._setToTime(this._toDt.getTime() + 60 * 1e3);
       }
       this.calculateMinorAndMajorUnitTicks();
     }
@@ -1302,6 +1306,16 @@ var tempis_timeline = (() => {
     }
     _formatDate(date, unit, labelFormats) {
       return format(date, labelFormats[unit]);
+    }
+    _parseOptions() {
+      this._minDate = isNullOrUndefined(this._options.min) ? new Date(-864e13) : parseDate(this._options.min);
+      this._maxDate = isNullOrUndefined(this._options.max) ? new Date(864e13) : parseDate(this._options.max);
+    }
+    _setFromTime(time) {
+      this._fromDt.setTime(clamp(time, this._minDate.getTime(), this._maxDate.getTime()));
+    }
+    _setToTime(time) {
+      this._toDt.setTime(clamp(time, this._minDate.getTime(), this._maxDate.getTime()));
     }
   };
 

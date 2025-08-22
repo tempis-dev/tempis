@@ -1,7 +1,7 @@
 import { format } from 'date-format-parse';
 
 import { TempisTimelineRangeOptions, TempisTimelineRangePosition, TempisTimelineRangeUnitLabelFormats } from "./TempisTimelineOptions";
-import { clamp } from "./Utilities";
+import { clamp, isNullOrUndefined, parseDate } from "./Utilities";
 
 export type Unit = 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'month' | 'year' | 'none';
 
@@ -52,6 +52,12 @@ export class TimelineRangeView {
      */
     private _toDt: Date = new Date(this._fromDt.getTime() + 315569520000);
 
+    /** The minimum date that can be displayed on the timeline, which is set to the earliest possible date. */
+    private _minDate: Date = new Date(-8640000000000000);
+
+    /** The maximum date that can be displayed on the timeline, which is set to the latest possible date. */
+    private _maxDate: Date = new Date(8640000000000000);
+
     /** The current minor tick unit and step. */
     private _minorTickUnitAndStep: UnitAndStep = { unit: 'year', step: 2 };
 
@@ -72,6 +78,9 @@ export class TimelineRangeView {
     public constructor(canvas: HTMLCanvasElement, options: TempisTimelineRangeOptions = {}) {
         this._canvas = canvas;
         this._options = options;
+
+        // Parse the range options.
+        this._parseOptions();
     }
 
     /**
@@ -82,17 +91,19 @@ export class TimelineRangeView {
     }
 
     /**
-     * Gets the fromDt of the range. DO NOT MODIFY!
+     * Gets the fromDt of the range.
+     * This is a copy of the internal from date to avoid external modification.
      */
     public get fromDt(): Date {
-        return this._fromDt;
+        return new Date(this._fromDt.getTime());
     }
 
     /**
-     * Gets the toDt of the range. DO NOT MODIFY!
+     * Gets the toDt of the range.
+     * This is a copy of the internal to date to avoid external modification.
      */
     public get toDt(): Date {
-        return this._toDt;
+        return new Date(this._toDt.getTime());
     }
 
     /**
@@ -108,15 +119,15 @@ export class TimelineRangeView {
      * @param to The range to date.
      */
     public setRange(from: Date, to: Date): void {
-        this._fromDt = new Date(from);
-        this._toDt = new Date(to);
+        this._setFromTime(from.getTime());
+        this._setToTime(to.getTime());
 
         // If our from and to date are the same then we cannot represent this single point in time on the timeline.
         // To get around this we should pad the time out by some arbitrary amount either side of the date.
         // TODO For now we can just add a minute either side, but we should probably make this configurable.
         if (this._fromDt.getTime() === this._toDt.getTime()) {
-            this._fromDt.setTime(this._fromDt.getTime() - (60 * 1000));
-            this._toDt.setTime(this._toDt.getTime() + (60 * 1000));
+            this._setFromTime(this._fromDt.getTime() - (60 * 1000));
+            this._setToTime(this._toDt.getTime() + (60 * 1000));
         }
 
         // Our range has changed so we will need to recalculate our minor unit ticks.
@@ -150,6 +161,9 @@ export class TimelineRangeView {
         // Update the from and to date to account for the movement.
         this._fromDt.setTime(this._fromDt.getTime() + (rangeXMillisValue * movementX));
         this._toDt.setTime(this._toDt.getTime() + (rangeXMillisValue * movementX));
+
+        // TODO This should call _setFromTime and _setToTime to ensure the dates are clamped to the min and max values.
+        // BUT! ... we want to make sure that the range does not shrink to zero if we move against the min or max values.
 
         // Our range has changed so we will need to recalculate our minor unit ticks.
         this.calculateMinorAndMajorUnitTicks();
@@ -277,6 +291,8 @@ export class TimelineRangeView {
     /**
      * Draw the timeline range onto the canvas.
      * @param context The canvas 2D context.
+     * @param yPosition The y position to draw the range at.
+     * @param position The position of the range, either "top" or "bottom".
      */
     public draw(context: CanvasRenderingContext2D, yPosition: number, position: "top" | "bottom"): void {
         // Figure out our range container dimensions.
@@ -548,5 +564,34 @@ export class TimelineRangeView {
         // TODO We should be checking the range options for a non-default label format for this unit.
         // TODO We should be using a date adapter to get this label.
         return format(date, (labelFormats as any)[unit]);
+    }
+
+    /**
+     * Parse the options for the timeline range.
+     */
+    private _parseOptions(): void {
+        // TODO Validate that the options are valid, e.g. min is before max, etc.
+
+        // Set the minimum and maximum range dates based on the options provided.
+        this._minDate = isNullOrUndefined(this._options.min) ? new Date(-8640000000000000) : parseDate(this._options.min!);
+        this._maxDate = isNullOrUndefined(this._options.max) ? new Date(8640000000000000) : parseDate(this._options.max!);
+    }
+
+    /**
+     * Set the from time of the range, clamping it to the min and max range value if they are set.
+     * @param time The from time in milliseconds since the epoch.
+     */
+    private _setFromTime(time: number): void {
+        // Set the from time, clamping it to the min and max if they are set.
+        this._fromDt.setTime(clamp(time, this._minDate.getTime(), this._maxDate.getTime()));
+    }
+
+    /**
+     * Set the to time of the range, clamping it to the min and max range value if they are set.
+     * @param time The to time in milliseconds since the epoch.
+     */
+    private _setToTime(time: number): void {
+        // Set the to time, clamping it to the min and max if they are set.
+        this._toDt.setTime(clamp(time, this._minDate.getTime(), this._maxDate.getTime()));
     }
 }

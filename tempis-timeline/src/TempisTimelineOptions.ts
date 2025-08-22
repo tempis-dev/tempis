@@ -116,6 +116,12 @@ export interface TempisTimelineRangeOptions {
 
     /** The range position. */
     position?: TempisTimelineRangePosition;
+
+    /** The minimum date that can be displayed. */
+    min?: string | number | Date;
+
+    /** The maximum date that can be displayed. */
+    max?: string | number | Date;
 };
 
 export interface TempisTimelineItem {
