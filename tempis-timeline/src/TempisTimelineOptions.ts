@@ -4,6 +4,9 @@ export interface TempisTimelineOptions {
     /** Whether the canvas should resize to match the dimensions of its parent container. */
     responsive?: boolean;
 
+    /** Whether the timeline should fill the vertical space of the canvas. */
+    fillVertically?: boolean;
+
     /** The timeline range options. */
     range?: TempisTimelineRangeOptions;
     

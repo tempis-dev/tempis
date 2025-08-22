@@ -377,7 +377,7 @@ export class TempisTimeline {
         const dataViewMaxHeight = this._canvas.clientHeight - dataViewYPosition - (["bottom", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0);
 
         // Draw the data view and get the height of it.
-        const dataViewHeight = this._dataView.draw(context, this._rangeView, dataViewYPosition, dataViewMaxHeight);
+        const dataViewHeight = this._dataView.draw(context, this._rangeView, dataViewYPosition, dataViewMaxHeight, !!this._options.fillVertically);
 
         // Keep track of how much height we have taken up when rendering all timeline elements.
         let totalRenderHeight = dataViewHeight;

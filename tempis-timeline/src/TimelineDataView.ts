@@ -95,8 +95,9 @@ export class TimelineDataView {
      * @param range The timeline range view.
      * @param yPosition The y position from where to start drawing the view.
      * @param maxHeight The max height that we can draw the data view before it must start scrolling.
+     * @param fillVertically Whether the timeline data view should fill the vertical space available to it.
      */
-    public draw(context: CanvasRenderingContext2D, range: TimelineRangeView, yPosition: number, maxHeight: number): number {
+    public draw(context: CanvasRenderingContext2D, range: TimelineRangeView, yPosition: number, maxHeight: number, fillVertically: boolean): number {
         // We should create our plan for drawing the groups and items of the view. This will also give us exactly how much space would be required to do so.
         this._drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
 
@@ -104,7 +105,8 @@ export class TimelineDataView {
         this._scrollYOffset = clamp(this._scrollYOffset, Math.min(0, maxHeight - this._drawPlan.height), 0);
 
         // Calculate the height of this rendered view, this may be less than the max height.
-        const viewHeight = Math.min(this._drawPlan.height, maxHeight);
+        // If fillVertically is true then we should always use the max height.
+        const viewHeight = fillVertically ? maxHeight : Math.min(this._drawPlan.height, maxHeight);
 
         // Clear the data view area.
         context.clearRect(0, yPosition, context.canvas.width, viewHeight);

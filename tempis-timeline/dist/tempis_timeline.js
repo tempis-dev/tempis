@@ -348,10 +348,10 @@ var tempis_timeline = (() => {
     scrollByYMovement(movementY) {
       this._scrollYOffset += movementY;
     }
-    draw(context, range, yPosition, maxHeight) {
+    draw(context, range, yPosition, maxHeight, fillVertically) {
       this._drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
       this._scrollYOffset = clamp(this._scrollYOffset, Math.min(0, maxHeight - this._drawPlan.height), 0);
-      const viewHeight = Math.min(this._drawPlan.height, maxHeight);
+      const viewHeight = fillVertically ? maxHeight : Math.min(this._drawPlan.height, maxHeight);
       context.clearRect(0, yPosition, context.canvas.width, viewHeight);
       this._drawMinorUnitBars(context, range.minorTicks, yPosition, viewHeight);
       this._drawGroups(context, yPosition, maxHeight);
@@ -1473,7 +1473,7 @@ var tempis_timeline = (() => {
       const rangeViewHeight = this._rangeView.calculateRequiredHeight();
       const dataViewYPosition = ["top", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0;
       const dataViewMaxHeight = this._canvas.clientHeight - dataViewYPosition - (["bottom", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0);
-      const dataViewHeight = this._dataView.draw(context, this._rangeView, dataViewYPosition, dataViewMaxHeight);
+      const dataViewHeight = this._dataView.draw(context, this._rangeView, dataViewYPosition, dataViewMaxHeight, !!this._options.fillVertically);
       let totalRenderHeight = dataViewHeight;
       if (["top", "both"].includes(this._rangeView.position)) {
         this._rangeView.draw(context, 0, "top");
