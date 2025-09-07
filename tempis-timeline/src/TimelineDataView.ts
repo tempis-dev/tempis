@@ -69,12 +69,12 @@ export class TimelineDataView {
     /** The current scroll Y offset. */
     private _scrollYOffset: number = 0;
 
-    /** The current draw plan. */
+    /** The current data view draw plan. */
     private _drawPlan: DataViewDrawPlan | null = null;
     
     /**
-     * Creates anew instance of the TimelineDataView class.
-     * @param dataSet The underlying dataset model.
+     * Creates a new instance of the TimelineDataView class.
+     * @param dataSet The timeline dataset model.
      */
     public constructor(dataSet: TimelineDataSet) {
         this._dataSet = dataSet;
@@ -121,12 +121,18 @@ export class TimelineDataView {
         return viewHeight;
     }
 
+    /**
+     * Gets the item at the specified point in the view, or null if there is no item at that point.
+     * @param point The point at which to get the item.
+     * @returns The item at the specified point, or null if there is no item at that point.
+     */
     public getItemAtPoint(point: { x: number; y: number; }): TimelineItem | null {
         // There is nothing to do if we have no draw plan.
         if (!this._drawPlan) {
             return null;
         }
 
+        // Iterate over each group and each item in the group to see if the point is within the bounds of the item.
         for (const groupDrawPlan of this._drawPlan.groupDrawPlans) {
             for (const itemDrawPlan of groupDrawPlan.rows.flat()) {
                 if (point.x >= itemDrawPlan.xPositionStart && point.x <= itemDrawPlan.xPositionEnd 
@@ -136,6 +142,7 @@ export class TimelineDataView {
             }
         }
 
+        // We did not find an item at the specified point.
         return null;
     }
 
@@ -159,6 +166,7 @@ export class TimelineDataView {
             }
         }
 
+        // Reset the line dash to be solid.
         context.stroke();
         context.setLineDash([]);
     }
