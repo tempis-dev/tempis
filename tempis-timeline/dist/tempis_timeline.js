@@ -1060,33 +1060,22 @@ var tempis_timeline = (() => {
       this.calculateMinorAndMajorUnitTicks();
     }
     moveByXMovement(movementX) {
-      const rangeXMillisValue = (this._toDt.getTime() - this._fromDt.getTime()) / this._canvas.clientWidth;
-      this._fromDt.setTime(this._fromDt.getTime() + rangeXMillisValue * movementX);
-      this._toDt.setTime(this._toDt.getTime() + rangeXMillisValue * movementX);
-      this.calculateMinorAndMajorUnitTicks();
-    }
-    moveByStep(unit, step) {
-      if (unit === "millisecond") {
-        this._fromDt.setMilliseconds(this._fromDt.getMilliseconds() + step);
-        this._toDt.setMilliseconds(this._toDt.getMilliseconds() + step);
-      } else if (unit === "second") {
-        this._fromDt.setSeconds(this._fromDt.getSeconds() + step);
-        this._toDt.setSeconds(this._toDt.getSeconds() + step);
-      } else if (unit === "minute") {
-        this._fromDt.setMinutes(this._fromDt.getMinutes() + step);
-        this._toDt.setMinutes(this._toDt.getMinutes() + step);
-      } else if (unit === "hour") {
-        this._fromDt.setHours(this._fromDt.getHours() + step);
-        this._toDt.setHours(this._toDt.getHours() + step);
-      } else if (unit === "day") {
-        this._fromDt.setDate(this._fromDt.getDate() + step);
-        this._toDt.setDate(this._toDt.getDate() + step);
-      } else if (unit === "month") {
-        this._fromDt.setMonth(this._fromDt.getMonth() + step);
-        this._toDt.setMonth(this._toDt.getMonth() + step);
-      } else if (unit === "year") {
-        this._fromDt.setFullYear(this._fromDt.getFullYear() + step);
-        this._toDt.setFullYear(this._toDt.getFullYear() + step);
+      const currentRange = this._toDt.getTime() - this._fromDt.getTime();
+      const rangeXMillisValue = currentRange / this._canvas.clientWidth;
+      const targetFrom = this._fromDt.getTime() + rangeXMillisValue * movementX;
+      const targetTo = this._toDt.getTime() + rangeXMillisValue * movementX;
+      if (targetFrom < this._minDate.getTime() && targetTo > this._maxDate.getTime()) {
+        this._setFromTime(targetFrom);
+        this._setToTime(targetTo);
+      } else if (targetFrom < this._minDate.getTime()) {
+        this._setFromTime(targetFrom);
+        this._setToTime(this._fromDt.getTime() + currentRange);
+      } else if (targetTo > this._maxDate.getTime()) {
+        this._setToTime(targetTo);
+        this._setFromTime(this._toDt.getTime() - currentRange);
+      } else {
+        this._setFromTime(targetFrom);
+        this._setToTime(targetTo);
       }
       this.calculateMinorAndMajorUnitTicks();
     }

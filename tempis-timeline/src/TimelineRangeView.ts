@@ -156,46 +156,37 @@ export class TimelineRangeView {
      */
     public moveByXMovement(movementX: number): void {
         // Get the number of milliseconds shown in the current range.
-        const rangeXMillisValue = (this._toDt.getTime() - this._fromDt.getTime()) / this._canvas.clientWidth;
+        const currentRange = this._toDt.getTime() - this._fromDt.getTime();
 
-        // Update the from and to date to account for the movement.
-        this._fromDt.setTime(this._fromDt.getTime() + (rangeXMillisValue * movementX));
-        this._toDt.setTime(this._toDt.getTime() + (rangeXMillisValue * movementX));
+        // Get the range milli value of one unit of canvas client width.
+        const rangeXMillisValue = currentRange / this._canvas.clientWidth;
 
-        // TODO This should call _setFromTime and _setToTime to ensure the dates are clamped to the min and max values.
-        // BUT! ... we want to make sure that the range does not shrink to zero if we move against the min or max values.
+        // Calculate the new from and to times based on the current range and the movement value.
+        const targetFrom = this._fromDt.getTime() + (rangeXMillisValue * movementX);
+        const targetTo = this._toDt.getTime() + (rangeXMillisValue * movementX);
 
-        // Our range has changed so we will need to recalculate our minor unit ticks.
-        this.calculateMinorAndMajorUnitTicks();
-    }
+        // TODO The below should handle cases when shifting the range would CAUSE the range to exceed the min/max.
 
-    /**
-     * Moves the from and to date value of the range uniformly.
-     * @param unit The unit of the step.
-     * @param step The step value.
-     */
-    public moveByStep(unit: Unit, step: number): void {
-        if (unit === "millisecond") {
-            this._fromDt.setMilliseconds(this._fromDt.getMilliseconds() + step);
-            this._toDt.setMilliseconds(this._toDt.getMilliseconds() + step);
-        } else if (unit === "second") {
-            this._fromDt.setSeconds(this._fromDt.getSeconds() + step);
-            this._toDt.setSeconds(this._toDt.getSeconds() + step);
-        } else if (unit === "minute") {
-            this._fromDt.setMinutes(this._fromDt.getMinutes() + step);
-            this._toDt.setMinutes(this._toDt.getMinutes() + step);
-        } else if (unit === "hour") {
-            this._fromDt.setHours(this._fromDt.getHours() + step);
-            this._toDt.setHours(this._toDt.getHours() + step);
-        } else if (unit === "day") {
-            this._fromDt.setDate(this._fromDt.getDate() + step);
-            this._toDt.setDate(this._toDt.getDate() + step);
-        } else if (unit === "month") {
-            this._fromDt.setMonth(this._fromDt.getMonth() + step);
-            this._toDt.setMonth(this._toDt.getMonth() + step);
-        } else if (unit === "year") {
-            this._fromDt.setFullYear(this._fromDt.getFullYear() + step);
-            this._toDt.setFullYear(this._toDt.getFullYear() + step);
+        // We need to maintain the current milli range if we hit the min and/or max range values.
+        if (targetFrom < this._minDate.getTime() && targetTo > this._maxDate.getTime()) {
+            // Our new range exceeds both the min and max range values, we should just set the from and to to match the bounds.
+            // The _setFromTime and _setToTime functions will do the min/max clamping for us, no need to pass them.
+            this._setFromTime(targetFrom);
+            this._setToTime(targetTo);
+        } else if (targetFrom < this._minDate.getTime()) {
+            // Our range has moved too far below the min range value, we should clamp the full range value to the minimum.
+            // The _setFromTime function will do the min clamping for us, no need to pass it.
+            this._setFromTime(targetFrom);
+            this._setToTime(this._fromDt.getTime() + currentRange);
+        } else if (targetTo > this._maxDate.getTime()) {
+            // Our range has moved too far above the max range value, we should clamp the full range value to the maximum.
+            // The _setToTime function will do the max clamping for us, no need to pass it.
+            this._setToTime(targetTo);
+            this._setFromTime(this._toDt.getTime() - currentRange);
+        } else {
+            // We can just move the range manually without having to worry about min-max range values.
+            this._setFromTime(targetFrom);
+            this._setToTime(targetTo);
         }
 
         // Our range has changed so we will need to recalculate our minor unit ticks.
