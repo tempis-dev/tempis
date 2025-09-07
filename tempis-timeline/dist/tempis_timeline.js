@@ -1060,17 +1060,17 @@ var tempis_timeline = (() => {
       this.calculateMinorAndMajorUnitTicks();
     }
     moveByXMovement(movementX) {
-      const currentRange = this._toDt.getTime() - this._fromDt.getTime();
-      const rangeXMillisValue = currentRange / this._canvas.clientWidth;
+      const currentRangeLength = this._toDt.getTime() - this._fromDt.getTime();
+      const rangeXMillisValue = currentRangeLength / this._canvas.clientWidth;
       const targetFrom = this._fromDt.getTime() + rangeXMillisValue * movementX;
       const targetTo = this._toDt.getTime() + rangeXMillisValue * movementX;
       const minMaxRange = this._maxDate.getTime() - this._minDate.getTime();
-      if (targetFrom < this._minDate.getTime() && currentRange < minMaxRange) {
+      if (targetFrom < this._minDate.getTime() && currentRangeLength < minMaxRange) {
         this._setFromTime(targetFrom);
-        this._setToTime(this._fromDt.getTime() + currentRange);
-      } else if (targetTo > this._maxDate.getTime() && currentRange < minMaxRange) {
+        this._setToTime(this._fromDt.getTime() + currentRangeLength);
+      } else if (targetTo > this._maxDate.getTime() && currentRangeLength < minMaxRange) {
         this._setToTime(targetTo);
-        this._setFromTime(this._toDt.getTime() - currentRange);
+        this._setFromTime(this._toDt.getTime() - currentRangeLength);
       } else {
         this._setFromTime(targetFrom);
         this._setToTime(targetTo);
@@ -1080,8 +1080,20 @@ var tempis_timeline = (() => {
     zoomRange(amount, targetPositionX) {
       const targetPositionMillis = this._fromDt.getTime() + targetPositionX / this._canvas.clientWidth * (this._toDt.getTime() - this._fromDt.getTime());
       const zoomFactor = 1 - clamp(amount, -1, 1) * -0.1;
-      this._fromDt.setTime(targetPositionMillis - (targetPositionMillis - this._fromDt.getTime()) * zoomFactor);
-      this._toDt.setTime(targetPositionMillis + (this._toDt.getTime() - targetPositionMillis) * zoomFactor);
+      const targetFrom = targetPositionMillis - (targetPositionMillis - this._fromDt.getTime()) * zoomFactor;
+      const targetTo = targetPositionMillis + (this._toDt.getTime() - targetPositionMillis) * zoomFactor;
+      const targetRange = targetTo - targetFrom;
+      const minMaxRange = this._maxDate.getTime() - this._minDate.getTime();
+      if (targetFrom < this._minDate.getTime() && targetRange < minMaxRange) {
+        this._setFromTime(targetFrom);
+        this._setToTime(this._fromDt.getTime() + targetRange);
+      } else if (targetTo > this._maxDate.getTime() && targetRange < minMaxRange) {
+        this._setToTime(targetTo);
+        this._setFromTime(this._toDt.getTime() - targetRange);
+      } else {
+        this._setFromTime(targetFrom);
+        this._setToTime(targetTo);
+      }
       this.calculateMinorAndMajorUnitTicks();
     }
     clearRange() {
