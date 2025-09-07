@@ -1064,13 +1064,11 @@ var tempis_timeline = (() => {
       const rangeXMillisValue = currentRange / this._canvas.clientWidth;
       const targetFrom = this._fromDt.getTime() + rangeXMillisValue * movementX;
       const targetTo = this._toDt.getTime() + rangeXMillisValue * movementX;
-      if (targetFrom < this._minDate.getTime() && targetTo > this._maxDate.getTime()) {
-        this._setFromTime(targetFrom);
-        this._setToTime(targetTo);
-      } else if (targetFrom < this._minDate.getTime()) {
+      const minMaxRange = this._maxDate.getTime() - this._minDate.getTime();
+      if (targetFrom < this._minDate.getTime() && currentRange < minMaxRange) {
         this._setFromTime(targetFrom);
         this._setToTime(this._fromDt.getTime() + currentRange);
-      } else if (targetTo > this._maxDate.getTime()) {
+      } else if (targetTo > this._maxDate.getTime() && currentRange < minMaxRange) {
         this._setToTime(targetTo);
         this._setFromTime(this._toDt.getTime() - currentRange);
       } else {

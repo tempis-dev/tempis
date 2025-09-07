@@ -165,26 +165,22 @@ export class TimelineRangeView {
         const targetFrom = this._fromDt.getTime() + (rangeXMillisValue * movementX);
         const targetTo = this._toDt.getTime() + (rangeXMillisValue * movementX);
 
-        // TODO The below should handle cases when shifting the range would CAUSE the range to exceed the min/max.
+        // Get the millis range between the min and max range values.
+        const minMaxRange = this._maxDate.getTime() - this._minDate.getTime();
 
         // We need to maintain the current milli range if we hit the min and/or max range values.
-        if (targetFrom < this._minDate.getTime() && targetTo > this._maxDate.getTime()) {
-            // Our new range exceeds both the min and max range values, we should just set the from and to to match the bounds.
-            // The _setFromTime and _setToTime functions will do the min/max clamping for us, no need to pass them.
-            this._setFromTime(targetFrom);
-            this._setToTime(targetTo);
-        } else if (targetFrom < this._minDate.getTime()) {
+        if (targetFrom < this._minDate.getTime() && currentRange < minMaxRange) {
             // Our range has moved too far below the min range value, we should clamp the full range value to the minimum.
             // The _setFromTime function will do the min clamping for us, no need to pass it.
             this._setFromTime(targetFrom);
             this._setToTime(this._fromDt.getTime() + currentRange);
-        } else if (targetTo > this._maxDate.getTime()) {
+        } else if (targetTo > this._maxDate.getTime() && currentRange < minMaxRange) {
             // Our range has moved too far above the max range value, we should clamp the full range value to the maximum.
             // The _setToTime function will do the max clamping for us, no need to pass it.
             this._setToTime(targetTo);
             this._setFromTime(this._toDt.getTime() - currentRange);
         } else {
-            // We can just move the range manually without having to worry about min-max range values.
+            // We can just move the range manually without having to worry about min-max range values, any min/max clamping will be handled for us.
             this._setFromTime(targetFrom);
             this._setToTime(targetTo);
         }
