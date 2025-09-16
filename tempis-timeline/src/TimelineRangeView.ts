@@ -1,6 +1,7 @@
 import { format } from 'date-format-parse';
 
 import { TempisTimelineRangeOptions, TempisTimelineRangePosition, TempisTimelineRangeUnitLabelFormats } from "./TempisTimelineOptions";
+import { TimelineDataSet } from './TimelineDataSet';
 import { clamp, isNullOrUndefined, parseDate } from "./Utilities";
 
 export type Unit = 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'month' | 'year' | 'none';
@@ -36,6 +37,9 @@ const DEFAULT_UNIT_LABEL_PADDING: number = 4;
 export class TimelineRangeView {
     /** The timeline canvas. */
     private readonly _canvas: HTMLCanvasElement;
+
+    /** The underlying dataset model. */
+    private readonly _dataSet: TimelineDataSet;
 
     /** The timeline range options. */
     private readonly _options: TempisTimelineRangeOptions;
@@ -73,10 +77,12 @@ export class TimelineRangeView {
     /**
      * Creates a new instance of the TimelineRange class.
      * @param canvas The canvas.
+     * @param dataSet The timeline dataset model.
      * @param options The timeline range options.
      */
-    public constructor(canvas: HTMLCanvasElement, options: TempisTimelineRangeOptions = {}) {
+    public constructor(canvas: HTMLCanvasElement, dataSet: TimelineDataSet, options: TempisTimelineRangeOptions = {}) {
         this._canvas = canvas;
+        this._dataSet = dataSet
         this._options = options;
 
         // Parse the range options.
@@ -587,6 +593,24 @@ export class TimelineRangeView {
         // Set the minimum and maximum range dates based on the options provided.
         this._minDate = isNullOrUndefined(this._options.min) ? new Date(-8640000000000000) : parseDate(this._options.min!);
         this._maxDate = isNullOrUndefined(this._options.max) ? new Date(8640000000000000) : parseDate(this._options.max!);
+
+        // We should attempt to reapply the current range now that we have updated the range min/max.
+        this.setRange(this.fromDt, this.toDt);
+
+        // Update the timeline range to reflect the min and max date of the dataset if they are defined (as in we have at least one item).
+        if (this._dataSet.minDate && this._dataSet.maxDate) {
+            this.setRange(this._dataSet.minDate, this._dataSet.maxDate);
+        }
+
+        // Set the initial start date if one has been defined.
+        if (!isNullOrUndefined(this._options.start)) {
+            this._setFromTime(parseDate(this._options.start!).getTime());
+        }
+
+        // Set the initial end date if one has been defined.
+        if (!isNullOrUndefined(this._options.end)) {
+            this._setToTime(parseDate(this._options.end!).getTime());
+        }
     }
 
     /**

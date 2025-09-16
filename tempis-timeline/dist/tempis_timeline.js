@@ -217,11 +217,12 @@ var tempis_timeline = (() => {
 
   // src/TimelineDataSet.ts
   var TimelineDataSet = class {
-    constructor() {
+    constructor(options) {
       this._groupings = [];
       this._categories = [];
       this._minDate = null;
       this._maxDate = null;
+      this.update(options);
     }
     get groupings() {
       return [...this._groupings];
@@ -1018,7 +1019,7 @@ var tempis_timeline = (() => {
   };
   var DEFAULT_UNIT_LABEL_PADDING = 4;
   var TimelineRangeView = class {
-    constructor(canvas, options = {}) {
+    constructor(canvas, dataSet, options = {}) {
       this._fromDt = new Date();
       this._toDt = new Date(this._fromDt.getTime() + 31556952e4);
       this._minDate = new Date(-864e13);
@@ -1028,6 +1029,7 @@ var tempis_timeline = (() => {
       this._minorUnitTicks = [];
       this._majorUnitTicks = [];
       this._canvas = canvas;
+      this._dataSet = dataSet;
       this._options = options;
       this._parseOptions();
     }
@@ -1309,6 +1311,16 @@ var tempis_timeline = (() => {
     _parseOptions() {
       this._minDate = isNullOrUndefined(this._options.min) ? new Date(-864e13) : parseDate(this._options.min);
       this._maxDate = isNullOrUndefined(this._options.max) ? new Date(864e13) : parseDate(this._options.max);
+      this.setRange(this.fromDt, this.toDt);
+      if (this._dataSet.minDate && this._dataSet.maxDate) {
+        this.setRange(this._dataSet.minDate, this._dataSet.maxDate);
+      }
+      if (!isNullOrUndefined(this._options.start)) {
+        this._setFromTime(parseDate(this._options.start).getTime());
+      }
+      if (!isNullOrUndefined(this._options.end)) {
+        this._setToTime(parseDate(this._options.end).getTime());
+      }
     }
     _setFromTime(time) {
       this._fromDt.setTime(clamp(time, this._minDate.getTime(), this._maxDate.getTime()));
@@ -1325,12 +1337,10 @@ var tempis_timeline = (() => {
       var _a;
       this._options = options;
       this._canvas = this._getCanvas(context);
-      this._rangeView = new TimelineRangeView(this._canvas, this._options.range);
-      this._dataSet = new TimelineDataSet();
-      this._dataView = new TimelineDataView(this._dataSet);
       this._font = new TimelineFont((_a = this._options.style) == null ? void 0 : _a.font);
-      this._dataSet.update(this._options);
-      this._onInitialDataSetChange();
+      this._dataSet = new TimelineDataSet(this._options);
+      this._dataView = new TimelineDataView(this._dataSet);
+      this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._options.range);
       this._resizeCanvas();
       if (options.responsive !== false) {
         this._createCanvasContainerResizeObserver();
@@ -1544,13 +1554,6 @@ var tempis_timeline = (() => {
     }
     _onItemDoubleClicked(item) {
       this._options.onItemDoubleClick && this._options.onItemDoubleClick(item.id);
-    }
-    _onInitialDataSetChange() {
-      if (this._dataSet.minDate && this._dataSet.maxDate) {
-        this._rangeView.setRange(this._dataSet.minDate, this._dataSet.maxDate);
-      } else {
-        this._rangeView.clearRange();
-      }
     }
   };
   return __toCommonJS(src_exports);

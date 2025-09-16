@@ -38,17 +38,10 @@ export class TempisTimeline {
         this._options = options;
 
         this._canvas = this._getCanvas(context);
-        this._rangeView = new TimelineRangeView(this._canvas, this._options.range);
-        this._dataSet = new TimelineDataSet();
-        this._dataView = new TimelineDataView(this._dataSet);
         this._font = new TimelineFont(this._options.style?.font);
-
-        // Populate our dataset with the initial item configuration.
-        this._dataSet.update(this._options);
-
-        // Handle the initial dataset change.
-        // This will set the range view to the min and max dates of the dataset.
-        this._onInitialDataSetChange();
+        this._dataSet = new TimelineDataSet(this._options);
+        this._dataView = new TimelineDataView(this._dataSet);
+        this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._options.range);
 
         // Do our initial canvas resize.
         this._resizeCanvas();
@@ -496,18 +489,5 @@ export class TempisTimeline {
     private _onItemDoubleClicked(item: TimelineItem): void {
         // Invoke the 'onItemDoubleClick' callback if defined, passing the identifier of the double-clicked item.
         this._options.onItemDoubleClick && this._options.onItemDoubleClick(item.id);
-    }
-
-    /**
-     * Handle the initial dataset change.
-     * This will set the range view to the min and max dates of the dataset.
-     */
-    private _onInitialDataSetChange(): void {
-        // Update the timeline range to reflect the min and max date of the dataset (if they are defined)
-        if (this._dataSet.minDate && this._dataSet.maxDate) {
-            this._rangeView.setRange(this._dataSet.minDate, this._dataSet.maxDate);
-        } else {
-            this._rangeView.clearRange();
-        }
     }
 }
