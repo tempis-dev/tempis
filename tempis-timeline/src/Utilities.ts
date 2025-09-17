@@ -51,16 +51,18 @@ export function parseDate(input: string | number | Date): Date {
 }
 
 /**
- * Clamps the value to the min and max range.
- * @param value 
- * @param min 
- * @param max 
- * @returns 
+ * Clamps the value to the optional min and max values.
+ * @param value The value to clamp
+ * @param min The minimum value to clamp to.
+ * @param max The maximum value to clamp to.
+ * @returns The clamped value.
  */
-export function clamp(value: number, min: number, max: number): number {
-    if (value < min) {
+export function clamp(value: number, min?: number, max?: number): number {
+    if (min !== undefined && value < min) {
         return min;
-    } else if (value > max) {
+    }
+
+    if (max !== undefined && value > max) {
         return max;
     }
 

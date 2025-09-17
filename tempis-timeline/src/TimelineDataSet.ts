@@ -18,6 +18,15 @@ export class TimelineDataSet {
     /** The maximum date of any item. */
     private _maxDate: Date | null = null;
 
+    /**
+     * Create a new instance of the TimelineDataSet class.
+     * @param options The timeline options.
+     */
+    public constructor(options: TempisTimelineOptions) {
+        // Populate our dataset with the initial item configuration.
+        this.update(options);
+    }
+
     /** Gets the item groupings. */
     public get groupings(): TimelineItemGrouping[] {
         return [...this._groupings];

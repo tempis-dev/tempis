@@ -108,6 +108,9 @@ export interface TempisTimelineRangeUnitOptions {
 };
 
 export interface TempisTimelineRangeOptions {
+    /** Whether the timeline range is fixed and cannot be modified via user interaction. */
+    fixed?: boolean;
+
     /** The minor range unit options. */
     minorUnit?: TempisTimelineRangeUnitOptions;
 
@@ -116,6 +119,32 @@ export interface TempisTimelineRangeOptions {
 
     /** The range position. */
     position?: TempisTimelineRangePosition;
+
+    /** The minimum date that can be displayed. */
+    min?: string | number | Date;
+
+    /** The maximum date that can be displayed. */
+    max?: string | number | Date;
+
+    /** The initial start range value. */
+    start?: string | number | Date;
+
+    /** The initial end range value. */
+    end?: string | number | Date;
+
+    /** The timeline range zoom options. */
+    zoom?: TempisTimelineRangeZoomOptions;
+};
+
+export interface TempisTimelineRangeZoomOptions {
+    /** Whether zooming is enabled. */
+    enabled?: boolean;
+
+    /** The minimum range that can be zoomed to in milliseconds. */
+    min?: number;
+
+    /** The maximum range that can be zoomed to in milliseconds. */
+    max?: number;
 };
 
 export interface TempisTimelineItem {

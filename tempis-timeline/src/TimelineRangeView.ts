@@ -1,7 +1,8 @@
 import { format } from 'date-format-parse';
 
 import { TempisTimelineRangeOptions, TempisTimelineRangePosition, TempisTimelineRangeUnitLabelFormats } from "./TempisTimelineOptions";
-import { clamp } from "./Utilities";
+import { TimelineDataSet } from './TimelineDataSet';
+import { clamp, isNullOrUndefined, parseDate } from "./Utilities";
 
 export type Unit = 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'month' | 'year' | 'none';
 
@@ -37,6 +38,9 @@ export class TimelineRangeView {
     /** The timeline canvas. */
     private readonly _canvas: HTMLCanvasElement;
 
+    /** The underlying dataset model. */
+    private readonly _dataSet: TimelineDataSet;
+
     /** The timeline range options. */
     private readonly _options: TempisTimelineRangeOptions;
 
@@ -51,6 +55,12 @@ export class TimelineRangeView {
      * Defaults to 10 years from now.
      */
     private _toDt: Date = new Date(this._fromDt.getTime() + 315569520000);
+
+    /** The minimum date that can be displayed on the timeline, which is set to the earliest possible date. */
+    private _minDate: Date = new Date(-8640000000000000);
+
+    /** The maximum date that can be displayed on the timeline, which is set to the latest possible date. */
+    private _maxDate: Date = new Date(8640000000000000);
 
     /** The current minor tick unit and step. */
     private _minorTickUnitAndStep: UnitAndStep = { unit: 'year', step: 2 };
@@ -67,11 +77,16 @@ export class TimelineRangeView {
     /**
      * Creates a new instance of the TimelineRange class.
      * @param canvas The canvas.
+     * @param dataSet The timeline dataset model.
      * @param options The timeline range options.
      */
-    public constructor(canvas: HTMLCanvasElement, options: TempisTimelineRangeOptions = {}) {
+    public constructor(canvas: HTMLCanvasElement, dataSet: TimelineDataSet, options: TempisTimelineRangeOptions = {}) {
         this._canvas = canvas;
+        this._dataSet = dataSet
         this._options = options;
+
+        // Parse the range options.
+        this._parseOptions();
     }
 
     /**
@@ -82,17 +97,19 @@ export class TimelineRangeView {
     }
 
     /**
-     * Gets the fromDt of the range. DO NOT MODIFY!
+     * Gets the fromDt of the range.
+     * This is a copy of the internal from date to avoid external modification.
      */
     public get fromDt(): Date {
-        return this._fromDt;
+        return new Date(this._fromDt.getTime());
     }
 
     /**
-     * Gets the toDt of the range. DO NOT MODIFY!
+     * Gets the toDt of the range.
+     * This is a copy of the internal to date to avoid external modification.
      */
     public get toDt(): Date {
-        return this._toDt;
+        return new Date(this._toDt.getTime());
     }
 
     /**
@@ -108,15 +125,15 @@ export class TimelineRangeView {
      * @param to The range to date.
      */
     public setRange(from: Date, to: Date): void {
-        this._fromDt = new Date(from);
-        this._toDt = new Date(to);
+        this._setFromTime(from.getTime());
+        this._setToTime(to.getTime());
 
         // If our from and to date are the same then we cannot represent this single point in time on the timeline.
         // To get around this we should pad the time out by some arbitrary amount either side of the date.
         // TODO For now we can just add a minute either side, but we should probably make this configurable.
         if (this._fromDt.getTime() === this._toDt.getTime()) {
-            this._fromDt.setTime(this._fromDt.getTime() - (60 * 1000));
-            this._toDt.setTime(this._toDt.getTime() + (60 * 1000));
+            this._setFromTime(this._fromDt.getTime() - (60 * 1000));
+            this._setToTime(this._toDt.getTime() + (60 * 1000));
         }
 
         // Our range has changed so we will need to recalculate our minor unit ticks.
@@ -131,6 +148,8 @@ export class TimelineRangeView {
         // Get the current range length in milliseconds.
         const currentRangeLength = this._toDt.getTime() - this._fromDt.getTime();
 
+        // TODO This needs to handle cases where the date exceeds the min/max.
+
         // Calculate the new from and to dates based on the specified date.
         this._fromDt.setTime(date.getTime() - (currentRangeLength / 2));
         this._toDt.setTime(date.getTime() + (currentRangeLength / 2));
@@ -143,45 +162,40 @@ export class TimelineRangeView {
      * Moves the from and to date value of the range uniformly.
      * @param movementX The x movement value.
      */
-    public moveByXMovement(movementX: number): void {
-        // Get the number of milliseconds shown in the current range.
-        const rangeXMillisValue = (this._toDt.getTime() - this._fromDt.getTime()) / this._canvas.clientWidth;
+    public moveRange(movementX: number): void {
+        // We should not move the range if the range is fixed.
+        if (this._options.fixed) {
+            return;
+        }
 
-        // Update the from and to date to account for the movement.
-        this._fromDt.setTime(this._fromDt.getTime() + (rangeXMillisValue * movementX));
-        this._toDt.setTime(this._toDt.getTime() + (rangeXMillisValue * movementX));
+        // Get the current range length in milliseconds.
+        const currentRangeLength = this._toDt.getTime() - this._fromDt.getTime();
 
-        // Our range has changed so we will need to recalculate our minor unit ticks.
-        this.calculateMinorAndMajorUnitTicks();
-    }
+        // Get the range milli value of one unit of canvas client width.
+        const rangeXMillisValue = currentRangeLength / this._canvas.clientWidth;
 
-    /**
-     * Moves the from and to date value of the range uniformly.
-     * @param unit The unit of the step.
-     * @param step The step value.
-     */
-    public moveByStep(unit: Unit, step: number): void {
-        if (unit === "millisecond") {
-            this._fromDt.setMilliseconds(this._fromDt.getMilliseconds() + step);
-            this._toDt.setMilliseconds(this._toDt.getMilliseconds() + step);
-        } else if (unit === "second") {
-            this._fromDt.setSeconds(this._fromDt.getSeconds() + step);
-            this._toDt.setSeconds(this._toDt.getSeconds() + step);
-        } else if (unit === "minute") {
-            this._fromDt.setMinutes(this._fromDt.getMinutes() + step);
-            this._toDt.setMinutes(this._toDt.getMinutes() + step);
-        } else if (unit === "hour") {
-            this._fromDt.setHours(this._fromDt.getHours() + step);
-            this._toDt.setHours(this._toDt.getHours() + step);
-        } else if (unit === "day") {
-            this._fromDt.setDate(this._fromDt.getDate() + step);
-            this._toDt.setDate(this._toDt.getDate() + step);
-        } else if (unit === "month") {
-            this._fromDt.setMonth(this._fromDt.getMonth() + step);
-            this._toDt.setMonth(this._toDt.getMonth() + step);
-        } else if (unit === "year") {
-            this._fromDt.setFullYear(this._fromDt.getFullYear() + step);
-            this._toDt.setFullYear(this._toDt.getFullYear() + step);
+        // Calculate the new from and to times based on the current range and the movement value.
+        const targetFrom = this._fromDt.getTime() + (rangeXMillisValue * movementX);
+        const targetTo = this._toDt.getTime() + (rangeXMillisValue * movementX);
+
+        // Get the millis range between the min and max range values.
+        const minMaxRange = this._maxDate.getTime() - this._minDate.getTime();
+
+        // We need to maintain the current milli range if we hit the min and/or max range values.
+        if (targetFrom < this._minDate.getTime() && currentRangeLength < minMaxRange) {
+            // Our range has moved too far below the min range value, we should clamp the full range value to the minimum.
+            // The _setFromTime function will do the min clamping for us, no need to pass it.
+            this._setFromTime(targetFrom);
+            this._setToTime(this._fromDt.getTime() + currentRangeLength);
+        } else if (targetTo > this._maxDate.getTime() && currentRangeLength < minMaxRange) {
+            // Our range has moved too far above the max range value, we should clamp the full range value to the maximum.
+            // The _setToTime function will do the max clamping for us, no need to pass it.
+            this._setToTime(targetTo);
+            this._setFromTime(this._toDt.getTime() - currentRangeLength);
+        } else {
+            // We can just move the range manually without having to worry about min-max range values, any min/max clamping will be handled for us.
+            this._setFromTime(targetFrom);
+            this._setToTime(targetTo);
         }
 
         // Our range has changed so we will need to recalculate our minor unit ticks.
@@ -194,6 +208,11 @@ export class TimelineRangeView {
      * @param targetPositionX The x position of the zoom, this is where the zoom will be centered.
      */
     public zoomRange(amount: number, targetPositionX: number): void {
+        // We should not zoom if the range is fixed or zooming is explicitly disabled.
+        if (this._options.fixed || (!isNullOrUndefined(this._options.zoom?.enabled) && this._options.zoom?.enabled === false)) {
+            return;
+        }
+
         // Work out the target position in milliseconds.
         // This is the position on the canvas that we want to zoom around.
         const targetPositionMillis = this._fromDt.getTime() + (targetPositionX / this._canvas.clientWidth) * (this._toDt.getTime() - this._fromDt.getTime());
@@ -201,9 +220,42 @@ export class TimelineRangeView {
         // Calculate the zoom factor based on the amount.
         const zoomFactor = 1 - clamp(amount, -1, 1) * -0.1;
 
-        // Scale distances from the anchor so it stays fixed.
-        this._fromDt.setTime(targetPositionMillis - (targetPositionMillis - this._fromDt.getTime()) * zoomFactor);
-        this._toDt.setTime(targetPositionMillis + (this._toDt.getTime() - targetPositionMillis) * zoomFactor);
+        // Calculate the new from and to times based on the current range and zoom factor.
+        let targetFrom = targetPositionMillis - (targetPositionMillis - this._fromDt.getTime()) * zoomFactor;
+        let targetTo = targetPositionMillis + (this._toDt.getTime() - targetPositionMillis) * zoomFactor;
+
+        // Get the new millis range based on the new from and to times.
+        let targetRange = targetTo - targetFrom;
+
+        // Clamp the new zoom range to the zoom min and max if they are defined.
+        const clampedRange = clamp(targetRange, this._options.zoom?.min, this._options.zoom?.max);
+
+        // If the clamped range is different to the calculated one (the range is outside the zoom min/max bounds) then we need to calculate the new clamped from/to dates. 
+        if (targetRange != clampedRange) {
+            targetFrom = targetPositionMillis - (targetPositionMillis - targetFrom) * (clampedRange / targetRange);
+            targetTo = targetPositionMillis + (targetTo - targetPositionMillis) * (clampedRange / targetRange);
+            targetRange = clampedRange;
+        }
+
+        // Get the millis range between the min and max range values.
+        const minMaxRange = this._maxDate.getTime() - this._minDate.getTime();
+
+        // We need to maintain the current milli range if we hit the min and/or max range values.
+        if (targetFrom < this._minDate.getTime() && targetRange < minMaxRange) {
+            // Our range has moved too far below the min range value, we should clamp the full range value to the minimum.
+            // The _setFromTime function will do the min clamping for us, no need to pass it.
+            this._setFromTime(targetFrom);
+            this._setToTime(this._fromDt.getTime() + targetRange);
+        } else if (targetTo > this._maxDate.getTime() && targetRange < minMaxRange) {
+            // Our range has moved too far above the max range value, we should clamp the full range value to the maximum.
+            // The _setToTime function will do the max clamping for us, no need to pass it.
+            this._setToTime(targetTo);
+            this._setFromTime(this._toDt.getTime() - targetRange);
+        } else {
+            // We can just update the range manually without having to worry about min-max range values, any min/max clamping will be handled for us.
+            this._setFromTime(targetFrom);
+            this._setToTime(targetTo);
+        }
 
         this.calculateMinorAndMajorUnitTicks();
     }
@@ -277,6 +329,8 @@ export class TimelineRangeView {
     /**
      * Draw the timeline range onto the canvas.
      * @param context The canvas 2D context.
+     * @param yPosition The y position to draw the range at.
+     * @param position The position of the range, either "top" or "bottom".
      */
     public draw(context: CanvasRenderingContext2D, yPosition: number, position: "top" | "bottom"): void {
         // Figure out our range container dimensions.
@@ -548,5 +602,52 @@ export class TimelineRangeView {
         // TODO We should be checking the range options for a non-default label format for this unit.
         // TODO We should be using a date adapter to get this label.
         return format(date, (labelFormats as any)[unit]);
+    }
+
+    /**
+     * Parse the options for the timeline range.
+     */
+    private _parseOptions(): void {
+        // TODO Validate that the options are valid, e.g. min is before max, etc.
+
+        // Set the minimum and maximum range dates based on the options provided.
+        this._minDate = isNullOrUndefined(this._options.min) ? new Date(-8640000000000000) : parseDate(this._options.min!);
+        this._maxDate = isNullOrUndefined(this._options.max) ? new Date(8640000000000000) : parseDate(this._options.max!);
+
+        // We should attempt to reapply the current range now that we have updated the range min/max.
+        this.setRange(this.fromDt, this.toDt);
+
+        // Update the timeline range to reflect the min and max date of the dataset if they are defined (as in we have at least one item).
+        if (this._dataSet.minDate && this._dataSet.maxDate) {
+            this.setRange(this._dataSet.minDate, this._dataSet.maxDate);
+        }
+
+        // Set the initial start date if one has been defined.
+        if (!isNullOrUndefined(this._options.start)) {
+            this._setFromTime(parseDate(this._options.start!).getTime());
+        }
+
+        // Set the initial end date if one has been defined.
+        if (!isNullOrUndefined(this._options.end)) {
+            this._setToTime(parseDate(this._options.end!).getTime());
+        }
+    }
+
+    /**
+     * Set the from time of the range, clamping it to the min and max range value if they are set.
+     * @param time The from time in milliseconds since the epoch.
+     */
+    private _setFromTime(time: number): void {
+        // Set the from time, clamping it to the min and max if they are set.
+        this._fromDt.setTime(clamp(time, this._minDate.getTime(), this._maxDate.getTime()));
+    }
+
+    /**
+     * Set the to time of the range, clamping it to the min and max range value if they are set.
+     * @param time The to time in milliseconds since the epoch.
+     */
+    private _setToTime(time: number): void {
+        // Set the to time, clamping it to the min and max if they are set.
+        this._toDt.setTime(clamp(time, this._minDate.getTime(), this._maxDate.getTime()));
     }
 }

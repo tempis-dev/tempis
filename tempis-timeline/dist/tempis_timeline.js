@@ -51,9 +51,10 @@ var tempis_timeline = (() => {
     throw new Error(`Cannot parse input '${input}' as date`);
   }
   function clamp(value, min, max) {
-    if (value < min) {
+    if (min !== void 0 && value < min) {
       return min;
-    } else if (value > max) {
+    }
+    if (max !== void 0 && value > max) {
       return max;
     }
     return value;
@@ -216,11 +217,12 @@ var tempis_timeline = (() => {
 
   // src/TimelineDataSet.ts
   var TimelineDataSet = class {
-    constructor() {
+    constructor(options) {
       this._groupings = [];
       this._categories = [];
       this._minDate = null;
       this._maxDate = null;
+      this.update(options);
     }
     get groupings() {
       return [...this._groupings];
@@ -1017,35 +1019,39 @@ var tempis_timeline = (() => {
   };
   var DEFAULT_UNIT_LABEL_PADDING = 4;
   var TimelineRangeView = class {
-    constructor(canvas, options = {}) {
+    constructor(canvas, dataSet, options = {}) {
       this._fromDt = new Date();
       this._toDt = new Date(this._fromDt.getTime() + 31556952e4);
+      this._minDate = new Date(-864e13);
+      this._maxDate = new Date(864e13);
       this._minorTickUnitAndStep = { unit: "year", step: 2 };
       this._majorTickUnitAndStep = { unit: "year", step: 10 };
       this._minorUnitTicks = [];
       this._majorUnitTicks = [];
       this._canvas = canvas;
+      this._dataSet = dataSet;
       this._options = options;
+      this._parseOptions();
     }
     get position() {
       var _a;
       return (_a = this._options.position) != null ? _a : "bottom";
     }
     get fromDt() {
-      return this._fromDt;
+      return new Date(this._fromDt.getTime());
     }
     get toDt() {
-      return this._toDt;
+      return new Date(this._toDt.getTime());
     }
     get minorTicks() {
       return this._minorUnitTicks;
     }
     setRange(from, to) {
-      this._fromDt = new Date(from);
-      this._toDt = new Date(to);
+      this._setFromTime(from.getTime());
+      this._setToTime(to.getTime());
       if (this._fromDt.getTime() === this._toDt.getTime()) {
-        this._fromDt.setTime(this._fromDt.getTime() - 60 * 1e3);
-        this._toDt.setTime(this._toDt.getTime() + 60 * 1e3);
+        this._setFromTime(this._fromDt.getTime() - 60 * 1e3);
+        this._setToTime(this._toDt.getTime() + 60 * 1e3);
       }
       this.calculateMinorAndMajorUnitTicks();
     }
@@ -1055,42 +1061,54 @@ var tempis_timeline = (() => {
       this._toDt.setTime(date.getTime() + currentRangeLength / 2);
       this.calculateMinorAndMajorUnitTicks();
     }
-    moveByXMovement(movementX) {
-      const rangeXMillisValue = (this._toDt.getTime() - this._fromDt.getTime()) / this._canvas.clientWidth;
-      this._fromDt.setTime(this._fromDt.getTime() + rangeXMillisValue * movementX);
-      this._toDt.setTime(this._toDt.getTime() + rangeXMillisValue * movementX);
-      this.calculateMinorAndMajorUnitTicks();
-    }
-    moveByStep(unit, step) {
-      if (unit === "millisecond") {
-        this._fromDt.setMilliseconds(this._fromDt.getMilliseconds() + step);
-        this._toDt.setMilliseconds(this._toDt.getMilliseconds() + step);
-      } else if (unit === "second") {
-        this._fromDt.setSeconds(this._fromDt.getSeconds() + step);
-        this._toDt.setSeconds(this._toDt.getSeconds() + step);
-      } else if (unit === "minute") {
-        this._fromDt.setMinutes(this._fromDt.getMinutes() + step);
-        this._toDt.setMinutes(this._toDt.getMinutes() + step);
-      } else if (unit === "hour") {
-        this._fromDt.setHours(this._fromDt.getHours() + step);
-        this._toDt.setHours(this._toDt.getHours() + step);
-      } else if (unit === "day") {
-        this._fromDt.setDate(this._fromDt.getDate() + step);
-        this._toDt.setDate(this._toDt.getDate() + step);
-      } else if (unit === "month") {
-        this._fromDt.setMonth(this._fromDt.getMonth() + step);
-        this._toDt.setMonth(this._toDt.getMonth() + step);
-      } else if (unit === "year") {
-        this._fromDt.setFullYear(this._fromDt.getFullYear() + step);
-        this._toDt.setFullYear(this._toDt.getFullYear() + step);
+    moveRange(movementX) {
+      if (this._options.fixed) {
+        return;
+      }
+      const currentRangeLength = this._toDt.getTime() - this._fromDt.getTime();
+      const rangeXMillisValue = currentRangeLength / this._canvas.clientWidth;
+      const targetFrom = this._fromDt.getTime() + rangeXMillisValue * movementX;
+      const targetTo = this._toDt.getTime() + rangeXMillisValue * movementX;
+      const minMaxRange = this._maxDate.getTime() - this._minDate.getTime();
+      if (targetFrom < this._minDate.getTime() && currentRangeLength < minMaxRange) {
+        this._setFromTime(targetFrom);
+        this._setToTime(this._fromDt.getTime() + currentRangeLength);
+      } else if (targetTo > this._maxDate.getTime() && currentRangeLength < minMaxRange) {
+        this._setToTime(targetTo);
+        this._setFromTime(this._toDt.getTime() - currentRangeLength);
+      } else {
+        this._setFromTime(targetFrom);
+        this._setToTime(targetTo);
       }
       this.calculateMinorAndMajorUnitTicks();
     }
     zoomRange(amount, targetPositionX) {
+      var _a, _b, _c, _d;
+      if (this._options.fixed || !isNullOrUndefined((_a = this._options.zoom) == null ? void 0 : _a.enabled) && ((_b = this._options.zoom) == null ? void 0 : _b.enabled) === false) {
+        return;
+      }
       const targetPositionMillis = this._fromDt.getTime() + targetPositionX / this._canvas.clientWidth * (this._toDt.getTime() - this._fromDt.getTime());
       const zoomFactor = 1 - clamp(amount, -1, 1) * -0.1;
-      this._fromDt.setTime(targetPositionMillis - (targetPositionMillis - this._fromDt.getTime()) * zoomFactor);
-      this._toDt.setTime(targetPositionMillis + (this._toDt.getTime() - targetPositionMillis) * zoomFactor);
+      let targetFrom = targetPositionMillis - (targetPositionMillis - this._fromDt.getTime()) * zoomFactor;
+      let targetTo = targetPositionMillis + (this._toDt.getTime() - targetPositionMillis) * zoomFactor;
+      let targetRange = targetTo - targetFrom;
+      const clampedRange = clamp(targetRange, (_c = this._options.zoom) == null ? void 0 : _c.min, (_d = this._options.zoom) == null ? void 0 : _d.max);
+      if (targetRange != clampedRange) {
+        targetFrom = targetPositionMillis - (targetPositionMillis - targetFrom) * (clampedRange / targetRange);
+        targetTo = targetPositionMillis + (targetTo - targetPositionMillis) * (clampedRange / targetRange);
+        targetRange = clampedRange;
+      }
+      const minMaxRange = this._maxDate.getTime() - this._minDate.getTime();
+      if (targetFrom < this._minDate.getTime() && targetRange < minMaxRange) {
+        this._setFromTime(targetFrom);
+        this._setToTime(this._fromDt.getTime() + targetRange);
+      } else if (targetTo > this._maxDate.getTime() && targetRange < minMaxRange) {
+        this._setToTime(targetTo);
+        this._setFromTime(this._toDt.getTime() - targetRange);
+      } else {
+        this._setFromTime(targetFrom);
+        this._setToTime(targetTo);
+      }
       this.calculateMinorAndMajorUnitTicks();
     }
     clearRange() {
@@ -1303,6 +1321,26 @@ var tempis_timeline = (() => {
     _formatDate(date, unit, labelFormats) {
       return format(date, labelFormats[unit]);
     }
+    _parseOptions() {
+      this._minDate = isNullOrUndefined(this._options.min) ? new Date(-864e13) : parseDate(this._options.min);
+      this._maxDate = isNullOrUndefined(this._options.max) ? new Date(864e13) : parseDate(this._options.max);
+      this.setRange(this.fromDt, this.toDt);
+      if (this._dataSet.minDate && this._dataSet.maxDate) {
+        this.setRange(this._dataSet.minDate, this._dataSet.maxDate);
+      }
+      if (!isNullOrUndefined(this._options.start)) {
+        this._setFromTime(parseDate(this._options.start).getTime());
+      }
+      if (!isNullOrUndefined(this._options.end)) {
+        this._setToTime(parseDate(this._options.end).getTime());
+      }
+    }
+    _setFromTime(time) {
+      this._fromDt.setTime(clamp(time, this._minDate.getTime(), this._maxDate.getTime()));
+    }
+    _setToTime(time) {
+      this._toDt.setTime(clamp(time, this._minDate.getTime(), this._maxDate.getTime()));
+    }
   };
 
   // src/TempisTimeline.ts
@@ -1312,12 +1350,10 @@ var tempis_timeline = (() => {
       var _a;
       this._options = options;
       this._canvas = this._getCanvas(context);
-      this._rangeView = new TimelineRangeView(this._canvas, this._options.range);
-      this._dataSet = new TimelineDataSet();
-      this._dataView = new TimelineDataView(this._dataSet);
       this._font = new TimelineFont((_a = this._options.style) == null ? void 0 : _a.font);
-      this._dataSet.update(this._options);
-      this._onInitialDataSetChange();
+      this._dataSet = new TimelineDataSet(this._options);
+      this._dataView = new TimelineDataView(this._dataSet);
+      this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._options.range);
       this._resizeCanvas();
       if (options.responsive !== false) {
         this._createCanvasContainerResizeObserver();
@@ -1410,7 +1446,7 @@ var tempis_timeline = (() => {
           return;
         }
         if (Math.abs(event.movementX) >= 1) {
-          this._rangeView.moveByXMovement(-event.movementX);
+          this._rangeView.moveRange(-event.movementX);
         }
         if (Math.abs(event.movementY) >= 1) {
           this._dataView.scrollByYMovement(event.movementY);
@@ -1531,13 +1567,6 @@ var tempis_timeline = (() => {
     }
     _onItemDoubleClicked(item) {
       this._options.onItemDoubleClick && this._options.onItemDoubleClick(item.id);
-    }
-    _onInitialDataSetChange() {
-      if (this._dataSet.minDate && this._dataSet.maxDate) {
-        this._rangeView.setRange(this._dataSet.minDate, this._dataSet.maxDate);
-      } else {
-        this._rangeView.clearRange();
-      }
     }
   };
   return __toCommonJS(src_exports);
