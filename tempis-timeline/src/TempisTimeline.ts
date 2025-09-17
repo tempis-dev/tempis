@@ -233,7 +233,7 @@ export class TempisTimeline {
 
             // Use movementX for range scrolling.
             if (Math.abs(event.movementX) >= 1) {
-                this._rangeView.moveByXMovement(-event.movementX);
+                this._rangeView.moveRange(-event.movementX);
             }
 
             // Use movementY for data view scrolling.

@@ -162,7 +162,12 @@ export class TimelineRangeView {
      * Moves the from and to date value of the range uniformly.
      * @param movementX The x movement value.
      */
-    public moveByXMovement(movementX: number): void {
+    public moveRange(movementX: number): void {
+        // We should not move the range if the range is fixed.
+        if (this._options.fixed) {
+            return;
+        }
+
         // Get the current range length in milliseconds.
         const currentRangeLength = this._toDt.getTime() - this._fromDt.getTime();
 
@@ -203,6 +208,11 @@ export class TimelineRangeView {
      * @param targetPositionX The x position of the zoom, this is where the zoom will be centered.
      */
     public zoomRange(amount: number, targetPositionX: number): void {
+        // We should not zoom if the range is fixed or zooming is explicitly disabled.
+        if (this._options.fixed || (!isNullOrUndefined(this._options.zoom?.enabled) && this._options.zoom?.enabled === false)) {
+            return;
+        }
+
         // Work out the target position in milliseconds.
         // This is the position on the canvas that we want to zoom around.
         const targetPositionMillis = this._fromDt.getTime() + (targetPositionX / this._canvas.clientWidth) * (this._toDt.getTime() - this._fromDt.getTime());
@@ -211,11 +221,21 @@ export class TimelineRangeView {
         const zoomFactor = 1 - clamp(amount, -1, 1) * -0.1;
 
         // Calculate the new from and to times based on the current range and zoom factor.
-        const targetFrom = targetPositionMillis - (targetPositionMillis - this._fromDt.getTime()) * zoomFactor;
-        const targetTo = targetPositionMillis + (this._toDt.getTime() - targetPositionMillis) * zoomFactor;
+        let targetFrom = targetPositionMillis - (targetPositionMillis - this._fromDt.getTime()) * zoomFactor;
+        let targetTo = targetPositionMillis + (this._toDt.getTime() - targetPositionMillis) * zoomFactor;
 
         // Get the new millis range based on the new from and to times.
-        const targetRange = targetTo - targetFrom;
+        let targetRange = targetTo - targetFrom;
+
+        // Clamp the new zoom range to the zoom min and max if they are defined.
+        const clampedRange = clamp(targetRange, this._options.zoom?.min, this._options.zoom?.max);
+
+        // If the clamped range is different to the calculated one (the range is outside the zoom min/max bounds) then we need to calculate the new clamped from/to dates. 
+        if (targetRange != clampedRange) {
+            targetFrom = targetPositionMillis - (targetPositionMillis - targetFrom) * (clampedRange / targetRange);
+            targetTo = targetPositionMillis + (targetTo - targetPositionMillis) * (clampedRange / targetRange);
+            targetRange = clampedRange;
+        }
 
         // Get the millis range between the min and max range values.
         const minMaxRange = this._maxDate.getTime() - this._minDate.getTime();

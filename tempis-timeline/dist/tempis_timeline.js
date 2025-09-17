@@ -1061,7 +1061,10 @@ var tempis_timeline = (() => {
       this._toDt.setTime(date.getTime() + currentRangeLength / 2);
       this.calculateMinorAndMajorUnitTicks();
     }
-    moveByXMovement(movementX) {
+    moveRange(movementX) {
+      if (this._options.fixed) {
+        return;
+      }
       const currentRangeLength = this._toDt.getTime() - this._fromDt.getTime();
       const rangeXMillisValue = currentRangeLength / this._canvas.clientWidth;
       const targetFrom = this._fromDt.getTime() + rangeXMillisValue * movementX;
@@ -1080,11 +1083,21 @@ var tempis_timeline = (() => {
       this.calculateMinorAndMajorUnitTicks();
     }
     zoomRange(amount, targetPositionX) {
+      var _a, _b, _c, _d;
+      if (this._options.fixed || !isNullOrUndefined((_a = this._options.zoom) == null ? void 0 : _a.enabled) && ((_b = this._options.zoom) == null ? void 0 : _b.enabled) === false) {
+        return;
+      }
       const targetPositionMillis = this._fromDt.getTime() + targetPositionX / this._canvas.clientWidth * (this._toDt.getTime() - this._fromDt.getTime());
       const zoomFactor = 1 - clamp(amount, -1, 1) * -0.1;
-      const targetFrom = targetPositionMillis - (targetPositionMillis - this._fromDt.getTime()) * zoomFactor;
-      const targetTo = targetPositionMillis + (this._toDt.getTime() - targetPositionMillis) * zoomFactor;
-      const targetRange = targetTo - targetFrom;
+      let targetFrom = targetPositionMillis - (targetPositionMillis - this._fromDt.getTime()) * zoomFactor;
+      let targetTo = targetPositionMillis + (this._toDt.getTime() - targetPositionMillis) * zoomFactor;
+      let targetRange = targetTo - targetFrom;
+      const clampedRange = clamp(targetRange, (_c = this._options.zoom) == null ? void 0 : _c.min, (_d = this._options.zoom) == null ? void 0 : _d.max);
+      if (targetRange != clampedRange) {
+        targetFrom = targetPositionMillis - (targetPositionMillis - targetFrom) * (clampedRange / targetRange);
+        targetTo = targetPositionMillis + (targetTo - targetPositionMillis) * (clampedRange / targetRange);
+        targetRange = clampedRange;
+      }
       const minMaxRange = this._maxDate.getTime() - this._minDate.getTime();
       if (targetFrom < this._minDate.getTime() && targetRange < minMaxRange) {
         this._setFromTime(targetFrom);
@@ -1433,7 +1446,7 @@ var tempis_timeline = (() => {
           return;
         }
         if (Math.abs(event.movementX) >= 1) {
-          this._rangeView.moveByXMovement(-event.movementX);
+          this._rangeView.moveRange(-event.movementX);
         }
         if (Math.abs(event.movementY) >= 1) {
           this._dataView.scrollByYMovement(event.movementY);
