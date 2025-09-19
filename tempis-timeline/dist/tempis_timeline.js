@@ -595,6 +595,429 @@ var tempis_timeline = (() => {
     }
   };
 
+  // src/TimelineRangeView.ts
+  var DEFAULT_MINOR_UNIT_LABEL_FORMATS = {
+    millisecond: "SSS",
+    second: "HH:mm:ss",
+    minute: "HH:mm",
+    hour: "HH:mm",
+    day: "D",
+    month: "MMM",
+    year: "YYYY"
+  };
+  var DEFAULT_MAJOR_UNIT_LABEL_FORMATS = {
+    second: "D MMMM HH:mm:ss",
+    minute: "D MMMM HH:mm",
+    hour: "ddd D MMMM HH:mm",
+    day: "ddd D MMMM",
+    month: "MMMM YYYY",
+    year: "YYYY"
+  };
+  var DEFAULT_UNIT_LABEL_PADDING = 4;
+  var TimelineRangeView = class {
+    constructor(canvas, dataSet, dateFormatter, options = {}) {
+      this._fromDt = new Date();
+      this._toDt = new Date(this._fromDt.getTime() + 31556952e4);
+      this._minDate = new Date(-864e13);
+      this._maxDate = new Date(864e13);
+      this._minorTickUnitAndStep = { unit: "year", step: 2 };
+      this._majorTickUnitAndStep = { unit: "year", step: 10 };
+      this._minorUnitTicks = [];
+      this._majorUnitTicks = [];
+      this._canvas = canvas;
+      this._dataSet = dataSet;
+      this._dateFormatter = dateFormatter;
+      this._options = options;
+      this._parseOptions();
+    }
+    get position() {
+      var _a;
+      return (_a = this._options.position) != null ? _a : "bottom";
+    }
+    get fromDt() {
+      return new Date(this._fromDt.getTime());
+    }
+    get toDt() {
+      return new Date(this._toDt.getTime());
+    }
+    get minorTicks() {
+      return this._minorUnitTicks;
+    }
+    setRange(from, to) {
+      this._setFromTime(from.getTime());
+      this._setToTime(to.getTime());
+      if (this._fromDt.getTime() === this._toDt.getTime()) {
+        this._setFromTime(this._fromDt.getTime() - 60 * 1e3);
+        this._setToTime(this._toDt.getTime() + 60 * 1e3);
+      }
+      this.calculateMinorAndMajorUnitTicks();
+    }
+    centerOnDate(date) {
+      const currentRangeLength = this._toDt.getTime() - this._fromDt.getTime();
+      this._fromDt.setTime(date.getTime() - currentRangeLength / 2);
+      this._toDt.setTime(date.getTime() + currentRangeLength / 2);
+      this.calculateMinorAndMajorUnitTicks();
+    }
+    moveRange(movementX) {
+      if (this._options.fixed) {
+        return;
+      }
+      const currentRangeLength = this._toDt.getTime() - this._fromDt.getTime();
+      const rangeXMillisValue = currentRangeLength / this._canvas.clientWidth;
+      const targetFrom = this._fromDt.getTime() + rangeXMillisValue * movementX;
+      const targetTo = this._toDt.getTime() + rangeXMillisValue * movementX;
+      const minMaxRange = this._maxDate.getTime() - this._minDate.getTime();
+      if (targetFrom < this._minDate.getTime() && currentRangeLength < minMaxRange) {
+        this._setFromTime(targetFrom);
+        this._setToTime(this._fromDt.getTime() + currentRangeLength);
+      } else if (targetTo > this._maxDate.getTime() && currentRangeLength < minMaxRange) {
+        this._setToTime(targetTo);
+        this._setFromTime(this._toDt.getTime() - currentRangeLength);
+      } else {
+        this._setFromTime(targetFrom);
+        this._setToTime(targetTo);
+      }
+      this.calculateMinorAndMajorUnitTicks();
+    }
+    zoomRange(amount, targetPositionX) {
+      var _a, _b, _c, _d;
+      if (this._options.fixed || !isNullOrUndefined((_a = this._options.zoom) == null ? void 0 : _a.enabled) && ((_b = this._options.zoom) == null ? void 0 : _b.enabled) === false) {
+        return;
+      }
+      const targetPositionMillis = this._fromDt.getTime() + targetPositionX / this._canvas.clientWidth * (this._toDt.getTime() - this._fromDt.getTime());
+      const zoomFactor = 1 - clamp(amount, -1, 1) * -0.1;
+      let targetFrom = targetPositionMillis - (targetPositionMillis - this._fromDt.getTime()) * zoomFactor;
+      let targetTo = targetPositionMillis + (this._toDt.getTime() - targetPositionMillis) * zoomFactor;
+      let targetRange = targetTo - targetFrom;
+      const clampedRange = clamp(targetRange, (_c = this._options.zoom) == null ? void 0 : _c.min, (_d = this._options.zoom) == null ? void 0 : _d.max);
+      if (targetRange != clampedRange) {
+        targetFrom = targetPositionMillis - (targetPositionMillis - targetFrom) * (clampedRange / targetRange);
+        targetTo = targetPositionMillis + (targetTo - targetPositionMillis) * (clampedRange / targetRange);
+        targetRange = clampedRange;
+      }
+      const minMaxRange = this._maxDate.getTime() - this._minDate.getTime();
+      if (targetFrom < this._minDate.getTime() && targetRange < minMaxRange) {
+        this._setFromTime(targetFrom);
+        this._setToTime(this._fromDt.getTime() + targetRange);
+      } else if (targetTo > this._maxDate.getTime() && targetRange < minMaxRange) {
+        this._setToTime(targetTo);
+        this._setFromTime(this._toDt.getTime() - targetRange);
+      } else {
+        this._setFromTime(targetFrom);
+        this._setToTime(targetTo);
+      }
+      this.calculateMinorAndMajorUnitTicks();
+    }
+    clearRange() {
+      this.setRange(new Date(0), new Date(41024448e5));
+    }
+    calculateRequiredHeight() {
+      var context = this._canvas.getContext("2d");
+      const unitLabelTextMetrics = context.measureText("Fri 13 April 1990");
+      return DEFAULT_UNIT_LABEL_PADDING * 4 + (unitLabelTextMetrics.actualBoundingBoxAscent + unitLabelTextMetrics.actualBoundingBoxDescent) * 2;
+    }
+    calculateMinorAndMajorUnitTicks() {
+      const minorTargetTickCount = Math.floor(this._canvas.clientWidth / 120);
+      const majorTargetTickCount = Math.floor(this._canvas.clientWidth / 320);
+      const { minor: minorUnitAndStep, major: majorUnitAndStep } = this._findSensibleUnitsAndSteps(minorTargetTickCount, majorTargetTickCount);
+      this._minorTickUnitAndStep = minorUnitAndStep;
+      this._majorTickUnitAndStep = majorUnitAndStep;
+      const minorTickDates = this._getTickDates(this._minorTickUnitAndStep);
+      const majorTickDates = this._getTickDates(this._majorTickUnitAndStep);
+      const milliRenderWidth = this._canvas.clientWidth / (this._toDt.getTime() - this._fromDt.getTime());
+      this._minorUnitTicks = minorTickDates.map((tickDate) => {
+        return {
+          date: tickDate,
+          xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
+        };
+      });
+      this._majorUnitTicks = majorTickDates.map((tickDate) => {
+        return {
+          date: tickDate,
+          xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
+        };
+      });
+    }
+    draw(context, yPosition, position) {
+      const rangeContainerHeight = this.calculateRequiredHeight();
+      context.clearRect(0, yPosition, context.canvas.clientWidth, rangeContainerHeight);
+      const minorTicksYPosition = position === "top" ? yPosition + rangeContainerHeight / 2 : yPosition;
+      const majorTicksYPosition = position === "top" ? yPosition : yPosition + rangeContainerHeight / 2;
+      for (const { date, xPosition } of this._minorUnitTicks) {
+        if (xPosition > 0 && xPosition < context.canvas.clientWidth) {
+          context.lineWidth = 1;
+          context.strokeStyle = "#c2c2c2";
+          context.setLineDash([3, 3]);
+          context.beginPath();
+          context.moveTo(xPosition, minorTicksYPosition);
+          context.lineTo(xPosition, minorTicksYPosition + rangeContainerHeight / 2);
+          context.stroke();
+        }
+        context.textBaseline = "alphabetic";
+        context.fillStyle = "#595959";
+        context.beginPath();
+        context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, minorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING);
+        context.stroke();
+      }
+      if (this._minorTickUnitAndStep.unit === "year") {
+        return;
+      }
+      for (let tickIndex = 0; tickIndex < this._majorUnitTicks.length; tickIndex++) {
+        const { date, xPosition } = this._majorUnitTicks[tickIndex];
+        const isStickyLabel = date.getTime() <= this._fromDt.getTime();
+        if (!isStickyLabel && xPosition > 0 && xPosition < context.canvas.clientWidth) {
+          context.lineWidth = 2;
+          context.lineCap = "round";
+          context.setLineDash([]);
+          context.beginPath();
+          context.moveTo(xPosition, majorTicksYPosition + 3);
+          context.lineTo(xPosition, majorTicksYPosition + rangeContainerHeight / 2 - 3);
+          context.stroke();
+        }
+        const tickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
+        let labelXPosition = xPosition + DEFAULT_UNIT_LABEL_PADDING;
+        if (isStickyLabel) {
+          const labelWidth = context.measureText(tickLabel).width + DEFAULT_UNIT_LABEL_PADDING;
+          const nextTickXPosition = this._majorUnitTicks[tickIndex + 1].xPosition;
+          labelXPosition = nextTickXPosition > labelWidth ? DEFAULT_UNIT_LABEL_PADDING : nextTickXPosition - labelWidth;
+        }
+        context.lineWidth = 0.5;
+        context.textBaseline = "alphabetic";
+        context.fillStyle = "#595959";
+        context.beginPath();
+        context.fillText(tickLabel, labelXPosition, majorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING);
+        context.stroke();
+      }
+    }
+    _findSensibleUnitsAndSteps(minorTargetTickCount, majorTargetTickCount) {
+      const getBestUnitAndStep = (units, targetTickCount) => {
+        const millisDiff = this._toDt.getTime() - this._fromDt.getTime();
+        const unitTickCounts = [];
+        units.forEach(({ unit, factor }) => {
+          const viableStepValues = [];
+          if (unit === "millisecond") {
+            viableStepValues.push(1, 10, 50, 100, 500);
+          } else if (unit === "second") {
+            viableStepValues.push(1, 10, 15, 30);
+          } else if (unit === "minute") {
+            viableStepValues.push(1, 10, 15, 30);
+          } else if (unit === "hour") {
+            viableStepValues.push(1, 2, 6, 12);
+          } else if (unit === "day") {
+            viableStepValues.push(1, 2, 5, 10);
+          } else if (unit === "month") {
+            viableStepValues.push(1, 3, 6);
+          } else if (unit === "year") {
+            viableStepValues.push(1, 2, 5, 10, 20, 50, 100, 500);
+          }
+          viableStepValues.forEach((step) => {
+            unitTickCounts.push({ unit, ticks: millisDiff / factor / step, step });
+          });
+        });
+        unitTickCounts.sort((a2, b) => {
+          return Math.abs(a2.ticks - Math.max(1, targetTickCount)) - Math.abs(b.ticks - Math.max(1, targetTickCount));
+        });
+        return { unit: unitTickCounts[0].unit, step: unitTickCounts[0].step };
+      };
+      const minorUnitAndStep = getBestUnitAndStep([
+        { unit: "millisecond", factor: 1 },
+        { unit: "second", factor: 1e3 },
+        { unit: "minute", factor: 60 * 1e3 },
+        { unit: "hour", factor: 60 * 60 * 1e3 },
+        { unit: "day", factor: 24 * 60 * 60 * 1e3 },
+        { unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 },
+        { unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 }
+      ], minorTargetTickCount);
+      const majorUnitsAndFactors = [];
+      if (minorUnitAndStep.unit === "millisecond") {
+        majorUnitsAndFactors.push({ unit: "second", factor: 1e3 });
+        majorUnitsAndFactors.push({ unit: "minute", factor: 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "hour", factor: 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnitAndStep.unit === "second") {
+        majorUnitsAndFactors.push({ unit: "minute", factor: 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "hour", factor: 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnitAndStep.unit === "minute") {
+        majorUnitsAndFactors.push({ unit: "hour", factor: 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnitAndStep.unit === "hour") {
+        majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnitAndStep.unit === "day") {
+        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnitAndStep.unit === "month") {
+        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else if (minorUnitAndStep.unit === "year") {
+        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+      } else {
+        throw new Error(`unknown minor unit: ${minorUnitAndStep.unit}`);
+      }
+      return {
+        minor: minorUnitAndStep,
+        major: getBestUnitAndStep(majorUnitsAndFactors, majorTargetTickCount)
+      };
+    }
+    _getTickDates(unitAndStep) {
+      let currentDate;
+      if (unitAndStep.unit === "year" || unitAndStep.unit === "month") {
+        currentDate = new Date(this._fromDt.getFullYear(), 0);
+      } else if (unitAndStep.unit === "day") {
+        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth());
+      } else if (unitAndStep.unit === "hour") {
+        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate());
+      } else if (unitAndStep.unit === "minute") {
+        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours());
+      } else if (unitAndStep.unit === "second") {
+        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes());
+      } else if (unitAndStep.unit === "millisecond") {
+        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds());
+      } else {
+        throw new Error(`unknown unit: ${unitAndStep.unit}`);
+      }
+      const minorTickDates = [currentDate];
+      while (currentDate.getTime() < this._toDt.getTime()) {
+        currentDate = new Date(currentDate.getTime());
+        switch (unitAndStep.unit) {
+          case "year":
+            currentDate.setFullYear(currentDate.getFullYear() + unitAndStep.step);
+            break;
+          case "month":
+            currentDate.setMonth(currentDate.getMonth() + unitAndStep.step);
+            break;
+          case "day":
+            currentDate.setDate(currentDate.getDate() + unitAndStep.step);
+            break;
+          case "hour":
+            currentDate.setHours(currentDate.getHours() + unitAndStep.step);
+            break;
+          case "minute":
+            currentDate.setMinutes(currentDate.getMinutes() + unitAndStep.step);
+            break;
+          case "second":
+            currentDate.setSeconds(currentDate.getSeconds() + unitAndStep.step);
+            break;
+          case "millisecond":
+            currentDate.setMilliseconds(currentDate.getMilliseconds() + unitAndStep.step);
+            break;
+          default:
+            throw new Error(`unknown unit: ${unitAndStep.unit}`);
+        }
+        minorTickDates.push(currentDate);
+      }
+      return minorTickDates;
+    }
+    _formatDate(date, unit, labelFormats) {
+      return this._dateFormatter.format(date, labelFormats[unit]);
+    }
+    _parseOptions() {
+      this._minDate = isNullOrUndefined(this._options.min) ? new Date(-864e13) : parseDate(this._options.min);
+      this._maxDate = isNullOrUndefined(this._options.max) ? new Date(864e13) : parseDate(this._options.max);
+      this.setRange(this.fromDt, this.toDt);
+      if (this._dataSet.minDate && this._dataSet.maxDate) {
+        this.setRange(this._dataSet.minDate, this._dataSet.maxDate);
+      }
+      if (!isNullOrUndefined(this._options.start)) {
+        this._setFromTime(parseDate(this._options.start).getTime());
+      }
+      if (!isNullOrUndefined(this._options.end)) {
+        this._setToTime(parseDate(this._options.end).getTime());
+      }
+    }
+    _setFromTime(time) {
+      this._fromDt.setTime(clamp(time, this._minDate.getTime(), this._maxDate.getTime()));
+    }
+    _setToTime(time) {
+      this._toDt.setTime(clamp(time, this._minDate.getTime(), this._maxDate.getTime()));
+    }
+  };
+
+  // src/TimelineTooltipView.ts
+  var TimelineTooltipView = class {
+    constructor(canvas, dataView, dateFormatter, options = {}) {
+      this._activeTooltipElement = null;
+      this._canvas = canvas;
+      this._dataView = dataView;
+      this._dateFormatter = dateFormatter;
+      this._options = options;
+      this._createCanvasEventHandlers();
+    }
+    _createCanvasEventHandlers() {
+      const getMouseOrPointerPosition = (event) => {
+        var rect = this._canvas.getBoundingClientRect();
+        return {
+          x: (event.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
+          y: (event.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
+        };
+      };
+      this._canvas.addEventListener("pointermove", (event) => {
+        if (!isNullOrUndefined(this._options.enabled) && !this._options.enabled) {
+          return;
+        }
+        const item = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
+        if (!item) {
+          this._clearTooltipElement();
+        } else {
+          if (!this._activeTooltipElement) {
+            this._createTooltipElement(item);
+          }
+          this._updateTooltipPosition(event.clientX, event.clientY);
+        }
+      });
+    }
+    _createTooltipShowTimer(item, posX, posY) {
+      var _a;
+      const timeout = setTimeout(() => {
+        if (!this._activeTooltipElement) {
+          this._createTooltipElement(item);
+          this._updateTooltipPosition(posX, posY);
+        }
+      }, (_a = this._options.delay) != null ? _a : 0);
+    }
+    _createTooltipElement(item) {
+      if (this._activeTooltipElement) {
+        return;
+      }
+      this._activeTooltipElement = document.createElement("div");
+      this._activeTooltipElement.classList.add("tempis-timeline-tooltip");
+      Object.assign(this._activeTooltipElement.style, {
+        position: "fixed",
+        pointerEvents: "none",
+        background: "rgba(0,0,0,0.7)",
+        color: "#fff",
+        padding: "4px 8px",
+        margin: "10px",
+        borderRadius: "5px",
+        fontSize: "12px",
+        zIndex: "9999"
+      });
+      this._activeTooltipElement.textContent = item.caption;
+      document.body.appendChild(this._activeTooltipElement);
+    }
+    _updateTooltipPosition(x2, y) {
+      if (!this._activeTooltipElement) {
+        return;
+      }
+      this._activeTooltipElement.style.left = `${x2}px`;
+      this._activeTooltipElement.style.top = `${y}px`;
+    }
+    _clearTooltipElement() {
+      if (!this._activeTooltipElement) {
+        return;
+      }
+      this._activeTooltipElement.remove();
+      this._activeTooltipElement = null;
+    }
+  };
+
   // node_modules/date-format-parse/es/util.js
   function isDate(value) {
     return value instanceof Date || Object.prototype.toString.call(value) === "[object Date]";
@@ -999,347 +1422,10 @@ var tempis_timeline = (() => {
   addParseFlag("w", match1to2, "week");
   addParseFlag("ww", match2, "week");
 
-  // src/TimelineRangeView.ts
-  var DEFAULT_MINOR_UNIT_LABEL_FORMATS = {
-    millisecond: "SSS",
-    second: "HH:mm:ss",
-    minute: "HH:mm",
-    hour: "HH:mm",
-    day: "D",
-    month: "MMM",
-    year: "YYYY"
-  };
-  var DEFAULT_MAJOR_UNIT_LABEL_FORMATS = {
-    second: "D MMMM HH:mm:ss",
-    minute: "D MMMM HH:mm",
-    hour: "ddd D MMMM HH:mm",
-    day: "ddd D MMMM",
-    month: "MMMM YYYY",
-    year: "YYYY"
-  };
-  var DEFAULT_UNIT_LABEL_PADDING = 4;
-  var TimelineRangeView = class {
-    constructor(canvas, dataSet, options = {}) {
-      this._fromDt = new Date();
-      this._toDt = new Date(this._fromDt.getTime() + 31556952e4);
-      this._minDate = new Date(-864e13);
-      this._maxDate = new Date(864e13);
-      this._minorTickUnitAndStep = { unit: "year", step: 2 };
-      this._majorTickUnitAndStep = { unit: "year", step: 10 };
-      this._minorUnitTicks = [];
-      this._majorUnitTicks = [];
-      this._canvas = canvas;
-      this._dataSet = dataSet;
-      this._options = options;
-      this._parseOptions();
-    }
-    get position() {
-      var _a;
-      return (_a = this._options.position) != null ? _a : "bottom";
-    }
-    get fromDt() {
-      return new Date(this._fromDt.getTime());
-    }
-    get toDt() {
-      return new Date(this._toDt.getTime());
-    }
-    get minorTicks() {
-      return this._minorUnitTicks;
-    }
-    setRange(from, to) {
-      this._setFromTime(from.getTime());
-      this._setToTime(to.getTime());
-      if (this._fromDt.getTime() === this._toDt.getTime()) {
-        this._setFromTime(this._fromDt.getTime() - 60 * 1e3);
-        this._setToTime(this._toDt.getTime() + 60 * 1e3);
-      }
-      this.calculateMinorAndMajorUnitTicks();
-    }
-    centerOnDate(date) {
-      const currentRangeLength = this._toDt.getTime() - this._fromDt.getTime();
-      this._fromDt.setTime(date.getTime() - currentRangeLength / 2);
-      this._toDt.setTime(date.getTime() + currentRangeLength / 2);
-      this.calculateMinorAndMajorUnitTicks();
-    }
-    moveRange(movementX) {
-      if (this._options.fixed) {
-        return;
-      }
-      const currentRangeLength = this._toDt.getTime() - this._fromDt.getTime();
-      const rangeXMillisValue = currentRangeLength / this._canvas.clientWidth;
-      const targetFrom = this._fromDt.getTime() + rangeXMillisValue * movementX;
-      const targetTo = this._toDt.getTime() + rangeXMillisValue * movementX;
-      const minMaxRange = this._maxDate.getTime() - this._minDate.getTime();
-      if (targetFrom < this._minDate.getTime() && currentRangeLength < minMaxRange) {
-        this._setFromTime(targetFrom);
-        this._setToTime(this._fromDt.getTime() + currentRangeLength);
-      } else if (targetTo > this._maxDate.getTime() && currentRangeLength < minMaxRange) {
-        this._setToTime(targetTo);
-        this._setFromTime(this._toDt.getTime() - currentRangeLength);
-      } else {
-        this._setFromTime(targetFrom);
-        this._setToTime(targetTo);
-      }
-      this.calculateMinorAndMajorUnitTicks();
-    }
-    zoomRange(amount, targetPositionX) {
-      var _a, _b, _c, _d;
-      if (this._options.fixed || !isNullOrUndefined((_a = this._options.zoom) == null ? void 0 : _a.enabled) && ((_b = this._options.zoom) == null ? void 0 : _b.enabled) === false) {
-        return;
-      }
-      const targetPositionMillis = this._fromDt.getTime() + targetPositionX / this._canvas.clientWidth * (this._toDt.getTime() - this._fromDt.getTime());
-      const zoomFactor = 1 - clamp(amount, -1, 1) * -0.1;
-      let targetFrom = targetPositionMillis - (targetPositionMillis - this._fromDt.getTime()) * zoomFactor;
-      let targetTo = targetPositionMillis + (this._toDt.getTime() - targetPositionMillis) * zoomFactor;
-      let targetRange = targetTo - targetFrom;
-      const clampedRange = clamp(targetRange, (_c = this._options.zoom) == null ? void 0 : _c.min, (_d = this._options.zoom) == null ? void 0 : _d.max);
-      if (targetRange != clampedRange) {
-        targetFrom = targetPositionMillis - (targetPositionMillis - targetFrom) * (clampedRange / targetRange);
-        targetTo = targetPositionMillis + (targetTo - targetPositionMillis) * (clampedRange / targetRange);
-        targetRange = clampedRange;
-      }
-      const minMaxRange = this._maxDate.getTime() - this._minDate.getTime();
-      if (targetFrom < this._minDate.getTime() && targetRange < minMaxRange) {
-        this._setFromTime(targetFrom);
-        this._setToTime(this._fromDt.getTime() + targetRange);
-      } else if (targetTo > this._maxDate.getTime() && targetRange < minMaxRange) {
-        this._setToTime(targetTo);
-        this._setFromTime(this._toDt.getTime() - targetRange);
-      } else {
-        this._setFromTime(targetFrom);
-        this._setToTime(targetTo);
-      }
-      this.calculateMinorAndMajorUnitTicks();
-    }
-    clearRange() {
-      this.setRange(new Date(0), new Date(41024448e5));
-    }
-    calculateRequiredHeight() {
-      var context = this._canvas.getContext("2d");
-      const unitLabelTextMetrics = context.measureText("Fri 13 April 1990");
-      return DEFAULT_UNIT_LABEL_PADDING * 4 + (unitLabelTextMetrics.actualBoundingBoxAscent + unitLabelTextMetrics.actualBoundingBoxDescent) * 2;
-    }
-    calculateMinorAndMajorUnitTicks() {
-      const minorTargetTickCount = Math.floor(this._canvas.clientWidth / 120);
-      const majorTargetTickCount = Math.floor(this._canvas.clientWidth / 320);
-      const { minor: minorUnitAndStep, major: majorUnitAndStep } = this._findSensibleUnitsAndSteps(minorTargetTickCount, majorTargetTickCount);
-      this._minorTickUnitAndStep = minorUnitAndStep;
-      this._majorTickUnitAndStep = majorUnitAndStep;
-      const minorTickDates = this._getTickDates(this._minorTickUnitAndStep);
-      const majorTickDates = this._getTickDates(this._majorTickUnitAndStep);
-      const milliRenderWidth = this._canvas.clientWidth / (this._toDt.getTime() - this._fromDt.getTime());
-      this._minorUnitTicks = minorTickDates.map((tickDate) => {
-        return {
-          date: tickDate,
-          xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
-        };
-      });
-      this._majorUnitTicks = majorTickDates.map((tickDate) => {
-        return {
-          date: tickDate,
-          xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
-        };
-      });
-    }
-    draw(context, yPosition, position) {
-      const rangeContainerHeight = this.calculateRequiredHeight();
-      context.clearRect(0, yPosition, context.canvas.clientWidth, rangeContainerHeight);
-      const minorTicksYPosition = position === "top" ? yPosition + rangeContainerHeight / 2 : yPosition;
-      const majorTicksYPosition = position === "top" ? yPosition : yPosition + rangeContainerHeight / 2;
-      for (const { date, xPosition } of this._minorUnitTicks) {
-        if (xPosition > 0 && xPosition < context.canvas.clientWidth) {
-          context.lineWidth = 1;
-          context.strokeStyle = "#c2c2c2";
-          context.setLineDash([3, 3]);
-          context.beginPath();
-          context.moveTo(xPosition, minorTicksYPosition);
-          context.lineTo(xPosition, minorTicksYPosition + rangeContainerHeight / 2);
-          context.stroke();
-        }
-        context.textBaseline = "alphabetic";
-        context.fillStyle = "#595959";
-        context.beginPath();
-        context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, minorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING);
-        context.stroke();
-      }
-      if (this._minorTickUnitAndStep.unit === "year") {
-        return;
-      }
-      for (let tickIndex = 0; tickIndex < this._majorUnitTicks.length; tickIndex++) {
-        const { date, xPosition } = this._majorUnitTicks[tickIndex];
-        const isStickyLabel = date.getTime() <= this._fromDt.getTime();
-        if (!isStickyLabel && xPosition > 0 && xPosition < context.canvas.clientWidth) {
-          context.lineWidth = 2;
-          context.lineCap = "round";
-          context.setLineDash([]);
-          context.beginPath();
-          context.moveTo(xPosition, majorTicksYPosition + 3);
-          context.lineTo(xPosition, majorTicksYPosition + rangeContainerHeight / 2 - 3);
-          context.stroke();
-        }
-        const tickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
-        let labelXPosition = xPosition + DEFAULT_UNIT_LABEL_PADDING;
-        if (isStickyLabel) {
-          const labelWidth = context.measureText(tickLabel).width + DEFAULT_UNIT_LABEL_PADDING;
-          const nextTickXPosition = this._majorUnitTicks[tickIndex + 1].xPosition;
-          labelXPosition = nextTickXPosition > labelWidth ? DEFAULT_UNIT_LABEL_PADDING : nextTickXPosition - labelWidth;
-        }
-        context.lineWidth = 0.5;
-        context.textBaseline = "alphabetic";
-        context.fillStyle = "#595959";
-        context.beginPath();
-        context.fillText(tickLabel, labelXPosition, majorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING);
-        context.stroke();
-      }
-    }
-    _findSensibleUnitsAndSteps(minorTargetTickCount, majorTargetTickCount) {
-      const getBestUnitAndStep = (units, targetTickCount) => {
-        const millisDiff = this._toDt.getTime() - this._fromDt.getTime();
-        const unitTickCounts = [];
-        units.forEach(({ unit, factor }) => {
-          const viableStepValues = [];
-          if (unit === "millisecond") {
-            viableStepValues.push(1, 10, 50, 100, 500);
-          } else if (unit === "second") {
-            viableStepValues.push(1, 10, 15, 30);
-          } else if (unit === "minute") {
-            viableStepValues.push(1, 10, 15, 30);
-          } else if (unit === "hour") {
-            viableStepValues.push(1, 2, 6, 12);
-          } else if (unit === "day") {
-            viableStepValues.push(1, 2, 5, 10);
-          } else if (unit === "month") {
-            viableStepValues.push(1, 3, 6);
-          } else if (unit === "year") {
-            viableStepValues.push(1, 2, 5, 10, 20, 50, 100, 500);
-          }
-          viableStepValues.forEach((step) => {
-            unitTickCounts.push({ unit, ticks: millisDiff / factor / step, step });
-          });
-        });
-        unitTickCounts.sort((a2, b) => {
-          return Math.abs(a2.ticks - Math.max(1, targetTickCount)) - Math.abs(b.ticks - Math.max(1, targetTickCount));
-        });
-        return { unit: unitTickCounts[0].unit, step: unitTickCounts[0].step };
-      };
-      const minorUnitAndStep = getBestUnitAndStep([
-        { unit: "millisecond", factor: 1 },
-        { unit: "second", factor: 1e3 },
-        { unit: "minute", factor: 60 * 1e3 },
-        { unit: "hour", factor: 60 * 60 * 1e3 },
-        { unit: "day", factor: 24 * 60 * 60 * 1e3 },
-        { unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 },
-        { unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 }
-      ], minorTargetTickCount);
-      const majorUnitsAndFactors = [];
-      if (minorUnitAndStep.unit === "millisecond") {
-        majorUnitsAndFactors.push({ unit: "second", factor: 1e3 });
-        majorUnitsAndFactors.push({ unit: "minute", factor: 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "hour", factor: 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
-      } else if (minorUnitAndStep.unit === "second") {
-        majorUnitsAndFactors.push({ unit: "minute", factor: 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "hour", factor: 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
-      } else if (minorUnitAndStep.unit === "minute") {
-        majorUnitsAndFactors.push({ unit: "hour", factor: 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
-      } else if (minorUnitAndStep.unit === "hour") {
-        majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
-      } else if (minorUnitAndStep.unit === "day") {
-        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
-      } else if (minorUnitAndStep.unit === "month") {
-        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
-      } else if (minorUnitAndStep.unit === "year") {
-        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
-      } else {
-        throw new Error(`unknown minor unit: ${minorUnitAndStep.unit}`);
-      }
-      return {
-        minor: minorUnitAndStep,
-        major: getBestUnitAndStep(majorUnitsAndFactors, majorTargetTickCount)
-      };
-    }
-    _getTickDates(unitAndStep) {
-      let currentDate;
-      if (unitAndStep.unit === "year" || unitAndStep.unit === "month") {
-        currentDate = new Date(this._fromDt.getFullYear(), 0);
-      } else if (unitAndStep.unit === "day") {
-        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth());
-      } else if (unitAndStep.unit === "hour") {
-        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate());
-      } else if (unitAndStep.unit === "minute") {
-        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours());
-      } else if (unitAndStep.unit === "second") {
-        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes());
-      } else if (unitAndStep.unit === "millisecond") {
-        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds());
-      } else {
-        throw new Error(`unknown unit: ${unitAndStep.unit}`);
-      }
-      const minorTickDates = [currentDate];
-      while (currentDate.getTime() < this._toDt.getTime()) {
-        currentDate = new Date(currentDate.getTime());
-        switch (unitAndStep.unit) {
-          case "year":
-            currentDate.setFullYear(currentDate.getFullYear() + unitAndStep.step);
-            break;
-          case "month":
-            currentDate.setMonth(currentDate.getMonth() + unitAndStep.step);
-            break;
-          case "day":
-            currentDate.setDate(currentDate.getDate() + unitAndStep.step);
-            break;
-          case "hour":
-            currentDate.setHours(currentDate.getHours() + unitAndStep.step);
-            break;
-          case "minute":
-            currentDate.setMinutes(currentDate.getMinutes() + unitAndStep.step);
-            break;
-          case "second":
-            currentDate.setSeconds(currentDate.getSeconds() + unitAndStep.step);
-            break;
-          case "millisecond":
-            currentDate.setMilliseconds(currentDate.getMilliseconds() + unitAndStep.step);
-            break;
-          default:
-            throw new Error(`unknown unit: ${unitAndStep.unit}`);
-        }
-        minorTickDates.push(currentDate);
-      }
-      return minorTickDates;
-    }
-    _formatDate(date, unit, labelFormats) {
-      return format(date, labelFormats[unit]);
-    }
-    _parseOptions() {
-      this._minDate = isNullOrUndefined(this._options.min) ? new Date(-864e13) : parseDate(this._options.min);
-      this._maxDate = isNullOrUndefined(this._options.max) ? new Date(864e13) : parseDate(this._options.max);
-      this.setRange(this.fromDt, this.toDt);
-      if (this._dataSet.minDate && this._dataSet.maxDate) {
-        this.setRange(this._dataSet.minDate, this._dataSet.maxDate);
-      }
-      if (!isNullOrUndefined(this._options.start)) {
-        this._setFromTime(parseDate(this._options.start).getTime());
-      }
-      if (!isNullOrUndefined(this._options.end)) {
-        this._setToTime(parseDate(this._options.end).getTime());
-      }
-    }
-    _setFromTime(time) {
-      this._fromDt.setTime(clamp(time, this._minDate.getTime(), this._maxDate.getTime()));
-    }
-    _setToTime(time) {
-      this._toDt.setTime(clamp(time, this._minDate.getTime(), this._maxDate.getTime()));
+  // src/DateFormatter.ts
+  var DateFormatter = class {
+    format(date, pattern) {
+      return format(date, pattern != null ? pattern : "YYYY-MM-DD HH:mm:ss.SSS");
     }
   };
 
@@ -1351,9 +1437,11 @@ var tempis_timeline = (() => {
       this._options = options;
       this._canvas = this._getCanvas(context);
       this._font = new TimelineFont((_a = this._options.style) == null ? void 0 : _a.font);
+      this._dateFormatter = new DateFormatter();
       this._dataSet = new TimelineDataSet(this._options);
       this._dataView = new TimelineDataView(this._dataSet);
-      this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._options.range);
+      this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._options.range);
+      this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._options.tooltip);
       this._resizeCanvas();
       if (options.responsive !== false) {
         this._createCanvasContainerResizeObserver();

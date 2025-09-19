@@ -9,6 +9,9 @@ export interface TempisTimelineOptions {
 
     /** The timeline range options. */
     range?: TempisTimelineRangeOptions;
+
+    /** The timeline tooltip options. */
+    tooltip?: TempisTimelineTooltipOptions;
     
     /** The timeline style options. */
     style?: TempisTimelineStyleOptions;
@@ -41,6 +44,16 @@ export interface TempisTimelineOptions {
  * - `"multi"`– Multiple items can be selected at once. Each item can be toggled independently.
  */
 export type TempisTimelineItemSelectionMode = "none" | "single" | "multi";
+
+export interface TempisTimelineTooltipOptions {
+    /** Whether tooltips are enabled. Defaults to `true`. */
+    enabled?: boolean;
+
+    /** The tooltip delay in milliseconds. Defaults to `0`. */
+    delay?: number;
+    
+    // style?: Partial<CSSStyleDeclaration>;
+}
 
 export interface TempisTimelineStyleOptions {
     /** The default font options to use in rendering text. */
