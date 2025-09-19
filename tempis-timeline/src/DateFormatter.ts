@@ -9,6 +9,6 @@ export class DateFormatter {
      */
     public format(date: Date, pattern?: string): string {
         // TODO We should be using a date adapter to get this label.
-        return format(date, pattern ?? 'YYYY-MM-DD HH:mm:ss.SSS');
+        return format(date, pattern ?? 'D MMMM HH:mm:ss');
     }
 }

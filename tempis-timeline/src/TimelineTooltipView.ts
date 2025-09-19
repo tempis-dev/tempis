@@ -112,7 +112,7 @@ export class TimelineTooltipView {
         Object.assign(this._activeTooltipElement.style, {
             position: "fixed",
             pointerEvents: "none",
-            background: "rgba(0,0,0,0.7)",
+            background: "rgba(0,0,0,0.8)",
             color: "#fff",
             padding: "4px 8px",
             margin: "10px",
@@ -122,7 +122,11 @@ export class TimelineTooltipView {
         });
 
         // TODO Remove
-        this._activeTooltipElement.textContent = item.caption;
+        if (item.end) {
+            this._activeTooltipElement.innerHTML = `<p style="margin:0;">${item.caption}</p><p style="margin:0;">${this._dateFormatter.format(item.start)} - ${this._dateFormatter.format(item.end)}</p>`;
+        } else {
+            this._activeTooltipElement.innerHTML = `<p style="margin:0;">${item.caption}</p><p style="margin:0;">${this._dateFormatter.format(item.start)}</p>`;
+        }
 
         document.body.appendChild(this._activeTooltipElement);
     }

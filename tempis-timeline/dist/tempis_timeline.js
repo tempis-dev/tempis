@@ -991,7 +991,7 @@ var tempis_timeline = (() => {
       Object.assign(this._activeTooltipElement.style, {
         position: "fixed",
         pointerEvents: "none",
-        background: "rgba(0,0,0,0.7)",
+        background: "rgba(0,0,0,0.8)",
         color: "#fff",
         padding: "4px 8px",
         margin: "10px",
@@ -999,7 +999,11 @@ var tempis_timeline = (() => {
         fontSize: "12px",
         zIndex: "9999"
       });
-      this._activeTooltipElement.textContent = item.caption;
+      if (item.end) {
+        this._activeTooltipElement.innerHTML = `<p style="margin:0;">${item.caption}</p><p style="margin:0;">${this._dateFormatter.format(item.start)} - ${this._dateFormatter.format(item.end)}</p>`;
+      } else {
+        this._activeTooltipElement.innerHTML = `<p style="margin:0;">${item.caption}</p><p style="margin:0;">${this._dateFormatter.format(item.start)}</p>`;
+      }
       document.body.appendChild(this._activeTooltipElement);
     }
     _updateTooltipPosition(x2, y) {
@@ -1425,7 +1429,7 @@ var tempis_timeline = (() => {
   // src/DateFormatter.ts
   var DateFormatter = class {
     format(date, pattern) {
-      return format(date, pattern != null ? pattern : "YYYY-MM-DD HH:mm:ss.SSS");
+      return format(date, pattern != null ? pattern : "D MMMM HH:mm:ss");
     }
   };
 
