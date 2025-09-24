@@ -943,7 +943,7 @@ var tempis_timeline = (() => {
   // src/TimelineTooltipView.ts
   var TimelineTooltipView = class {
     constructor(canvas, dataView, dateFormatter, options = {}) {
-      this._activeTooltipElement = null;
+      this._activeTooltip = null;
       this._canvas = canvas;
       this._dataView = dataView;
       this._dateFormatter = dateFormatter;
@@ -964,9 +964,9 @@ var tempis_timeline = (() => {
         }
         const item = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
         if (!item) {
-          this._clearTooltipElement();
+          this._clearTooltip();
         } else {
-          if (!this._activeTooltipElement) {
+          if (!this._activeTooltip) {
             this._createTooltipElement(item);
           }
           this._updateTooltipPosition(event.clientX, event.clientY);
@@ -976,19 +976,19 @@ var tempis_timeline = (() => {
     _createTooltipShowTimer(item, posX, posY) {
       var _a;
       const timeout = setTimeout(() => {
-        if (!this._activeTooltipElement) {
+        if (!this._activeTooltip) {
           this._createTooltipElement(item);
           this._updateTooltipPosition(posX, posY);
         }
       }, (_a = this._options.delay) != null ? _a : 0);
     }
     _createTooltipElement(item) {
-      if (this._activeTooltipElement) {
+      if (this._activeTooltip) {
         return;
       }
-      this._activeTooltipElement = document.createElement("div");
-      this._activeTooltipElement.classList.add("tempis-timeline-tooltip");
-      Object.assign(this._activeTooltipElement.style, {
+      const activeTooltipElement = document.createElement("div");
+      activeTooltipElement.classList.add("tempis-timeline-tooltip");
+      Object.assign(activeTooltipElement.style, {
         position: "fixed",
         pointerEvents: "none",
         background: "rgba(0,0,0,0.8)",
@@ -996,29 +996,31 @@ var tempis_timeline = (() => {
         padding: "4px 8px",
         margin: "10px",
         borderRadius: "5px",
-        fontSize: "12px",
+        fontSize: "14px",
         zIndex: "9999"
       });
       if (item.end) {
-        this._activeTooltipElement.innerHTML = `<p style="margin:0;">${item.caption}</p><p style="margin:0;">${this._dateFormatter.format(item.start)} - ${this._dateFormatter.format(item.end)}</p>`;
+        activeTooltipElement.innerHTML = `<p style="margin:0;">${item.caption}</p><p style="margin:0;">${this._dateFormatter.format(item.start)} - ${this._dateFormatter.format(item.end)}</p>`;
       } else {
-        this._activeTooltipElement.innerHTML = `<p style="margin:0;">${item.caption}</p><p style="margin:0;">${this._dateFormatter.format(item.start)}</p>`;
+        activeTooltipElement.innerHTML = `<p style="margin:0;">${item.caption}</p><p style="margin:0;">${this._dateFormatter.format(item.start)}</p>`;
       }
-      document.body.appendChild(this._activeTooltipElement);
+      document.body.appendChild(activeTooltipElement);
+      this._activeTooltip = {
+        itemId: item.id,
+        element: activeTooltipElement
+      };
     }
     _updateTooltipPosition(x2, y) {
-      if (!this._activeTooltipElement) {
+      if (!this._activeTooltip) {
         return;
       }
-      this._activeTooltipElement.style.left = `${x2}px`;
-      this._activeTooltipElement.style.top = `${y}px`;
+      this._activeTooltip.element.style.left = `${x2}px`;
+      this._activeTooltip.element.style.top = `${y}px`;
     }
-    _clearTooltipElement() {
-      if (!this._activeTooltipElement) {
-        return;
-      }
-      this._activeTooltipElement.remove();
-      this._activeTooltipElement = null;
+    _clearTooltip() {
+      var _a;
+      (_a = this._activeTooltip) == null ? void 0 : _a.element.remove();
+      this._activeTooltip = null;
     }
   };
 

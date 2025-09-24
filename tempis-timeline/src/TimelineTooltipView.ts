@@ -5,7 +5,7 @@ import { TimelineItem } from "./TimelineItem";
 import { isNullOrUndefined } from "./Utilities";
 
 type ActiveTooltip = {
-    itemId: number;
+    itemId: string | number;
     element: HTMLDivElement;
 }
 
@@ -25,8 +25,8 @@ export class TimelineTooltipView {
     /** The tooltip options. */
     private readonly _options: TempisTimelineTooltipOptions;
 
-    /** The active tooltip element. */
-    private _activeTooltipElement: HTMLDivElement | null = null;
+    /** The active tooltip. */
+    private _activeTooltip: ActiveTooltip | null = null;
 
     /**
      * Creates a new instance of the TimelineTooltipView class.
@@ -70,10 +70,10 @@ export class TimelineTooltipView {
 
             // If we are not hovering over an item then we should clear the tooltip element id there is one and any pending timer.
             if (!item) {
-                this._clearTooltipElement();
+                this._clearTooltip();
             } else {
                 // If we are hovering over an item then we should create a tooltip element if there is not one already.
-                if (!this._activeTooltipElement) {
+                if (!this._activeTooltip) {
                     this._createTooltipElement(item);
                 }
 
@@ -87,7 +87,7 @@ export class TimelineTooltipView {
 
     private _createTooltipShowTimer(item: TimelineItem, posX: number, posY: number) {
         const timeout = setTimeout(() => {
-            if (!this._activeTooltipElement) {
+            if (!this._activeTooltip) {
                 // Create the tooltip element.
                 this._createTooltipElement(item);
 
@@ -99,17 +99,17 @@ export class TimelineTooltipView {
 
     private _createTooltipElement(item: TimelineItem): void {
         // There is nothing to do if we have already have a tooltip element.
-        if (this._activeTooltipElement) {
+        if (this._activeTooltip) {
             return;
         }
 
         // TODO Handle tooltip template.
 
-        this._activeTooltipElement = document.createElement('div');
-        this._activeTooltipElement.classList.add('tempis-timeline-tooltip');
+        const activeTooltipElement = document.createElement('div');
+        activeTooltipElement.classList.add('tempis-timeline-tooltip');
 
         // Default styles
-        Object.assign(this._activeTooltipElement.style, {
+        Object.assign(activeTooltipElement.style, {
             position: "fixed",
             pointerEvents: "none",
             background: "rgba(0,0,0,0.8)",
@@ -117,35 +117,46 @@ export class TimelineTooltipView {
             padding: "4px 8px",
             margin: "10px",
             borderRadius: "5px",
-            fontSize: "12px",
+            fontSize: "14px",
             zIndex: "9999"
         });
 
         // TODO Remove
         if (item.end) {
-            this._activeTooltipElement.innerHTML = `<p style="margin:0;">${item.caption}</p><p style="margin:0;">${this._dateFormatter.format(item.start)} - ${this._dateFormatter.format(item.end)}</p>`;
+            activeTooltipElement.innerHTML = `<p style="margin:0;">${item.caption}</p><p style="margin:0;">${this._dateFormatter.format(item.start)} - ${this._dateFormatter.format(item.end)}</p>`;
         } else {
-            this._activeTooltipElement.innerHTML = `<p style="margin:0;">${item.caption}</p><p style="margin:0;">${this._dateFormatter.format(item.start)}</p>`;
+            activeTooltipElement.innerHTML = `<p style="margin:0;">${item.caption}</p><p style="margin:0;">${this._dateFormatter.format(item.start)}</p>`;
         }
 
-        document.body.appendChild(this._activeTooltipElement);
+        // Add the tooltip element to the document body.
+        document.body.appendChild(activeTooltipElement);
+
+        // Set the active tooltip.
+        this._activeTooltip = {
+            itemId: item.id,
+            element: activeTooltipElement
+        };
     }
 
+    /**
+     * Update the position of the active tooltip.
+     * @param x 
+     * @param y
+     */
     private _updateTooltipPosition(x: number, y: number) {
-        if (!this._activeTooltipElement) {
+        if (!this._activeTooltip) {
             return;
         }
 
-        this._activeTooltipElement.style.left = `${x}px`;
-        this._activeTooltipElement.style.top = `${y}px`;
+        this._activeTooltip.element.style.left = `${x}px`;
+        this._activeTooltip.element.style.top = `${y}px`;
     }
 
-    private _clearTooltipElement() {
-        if (!this._activeTooltipElement) {
-            return;
-        }
-
-        this._activeTooltipElement.remove();
-        this._activeTooltipElement = null;
+    /**
+     * Clear the active tooltip.
+     */
+    private _clearTooltip() {
+        this._activeTooltip?.element.remove();
+        this._activeTooltip = null;
     }
 }
