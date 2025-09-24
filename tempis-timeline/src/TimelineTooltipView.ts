@@ -1,13 +1,8 @@
 import { DateFormatter } from "./DateFormatter";
 import { TempisTimelineTooltipOptions } from "./TempisTimelineOptions";
 import { TimelineDataView } from "./TimelineDataView";
-import { TimelineItem } from "./TimelineItem";
+import { TimelineTooltip } from "./TimelineTooltip";
 import { isNullOrUndefined } from "./Utilities";
-
-type ActiveTooltip = {
-    itemId: string | number;
-    element: HTMLDivElement;
-}
 
 /**
  * A class responsible for tracking mouse movement over the timeline canvas and displaying tooltips.
@@ -26,7 +21,7 @@ export class TimelineTooltipView {
     private readonly _options: TempisTimelineTooltipOptions;
 
     /** The active tooltip. */
-    private _activeTooltip: ActiveTooltip | null = null;
+    private _activeTooltip: TimelineTooltip | null = null;
 
     /**
      * Creates a new instance of the TimelineTooltipView class.
@@ -68,95 +63,25 @@ export class TimelineTooltipView {
             // Try to find the item at mouse position.
             const item = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
 
-            // If we are not hovering over an item then we should clear the tooltip element id there is one and any pending timer.
+            // If we are not hovering over an item then we should clear the active tooltip.
             if (!item) {
-                this._clearTooltip();
+                this._activeTooltip?.destroy();
+                this._activeTooltip = null;
             } else {
-                // If we are hovering over an item then we should create a tooltip element if there is not one already.
-                if (!this._activeTooltip) {
-                    this._createTooltipElement(item);
+                // Do we already have an active tooltip?
+                if (this._activeTooltip && this._activeTooltip.id === item.id) {
+                    this._activeTooltip.setPosition(event.clientX, event.clientY);
+                    return;
+                } else if (this._activeTooltip && this._activeTooltip.id !== item.id) {
+                    this._activeTooltip?.destroy();
+                    this._activeTooltip = null;
                 }
 
-                // Update the tooltip element position.
-                this._updateTooltipPosition(event.clientX, event.clientY);
+                // Create the tooltip.
+                this._activeTooltip = new TimelineTooltip(item, this._dateFormatter, event.clientX, event.clientY, this._options.delay);
             }
         });
 
         // TODO Add a handler for the cursor moving off of the canvas to clear up any active tooltip.
-    }
-
-    private _createTooltipShowTimer(item: TimelineItem, posX: number, posY: number) {
-        const timeout = setTimeout(() => {
-            if (!this._activeTooltip) {
-                // Create the tooltip element.
-                this._createTooltipElement(item);
-
-                 // Update the tooltip element position.
-                this._updateTooltipPosition(posX, posY);
-            }
-        }, this._options.delay ?? 0);
-    }
-
-    private _createTooltipElement(item: TimelineItem): void {
-        // There is nothing to do if we have already have a tooltip element.
-        if (this._activeTooltip) {
-            return;
-        }
-
-        // TODO Handle tooltip template.
-
-        const activeTooltipElement = document.createElement('div');
-        activeTooltipElement.classList.add('tempis-timeline-tooltip');
-
-        // Default styles
-        Object.assign(activeTooltipElement.style, {
-            position: "fixed",
-            pointerEvents: "none",
-            background: "rgba(0,0,0,0.8)",
-            color: "#fff",
-            padding: "4px 8px",
-            margin: "10px",
-            borderRadius: "5px",
-            fontSize: "14px",
-            zIndex: "9999"
-        });
-
-        // TODO Remove
-        if (item.end) {
-            activeTooltipElement.innerHTML = `<p style="margin:0;">${item.caption}</p><p style="margin:0;">${this._dateFormatter.format(item.start)} - ${this._dateFormatter.format(item.end)}</p>`;
-        } else {
-            activeTooltipElement.innerHTML = `<p style="margin:0;">${item.caption}</p><p style="margin:0;">${this._dateFormatter.format(item.start)}</p>`;
-        }
-
-        // Add the tooltip element to the document body.
-        document.body.appendChild(activeTooltipElement);
-
-        // Set the active tooltip.
-        this._activeTooltip = {
-            itemId: item.id,
-            element: activeTooltipElement
-        };
-    }
-
-    /**
-     * Update the position of the active tooltip.
-     * @param x 
-     * @param y
-     */
-    private _updateTooltipPosition(x: number, y: number) {
-        if (!this._activeTooltip) {
-            return;
-        }
-
-        this._activeTooltip.element.style.left = `${x}px`;
-        this._activeTooltip.element.style.top = `${y}px`;
-    }
-
-    /**
-     * Clear the active tooltip.
-     */
-    private _clearTooltip() {
-        this._activeTooltip?.element.remove();
-        this._activeTooltip = null;
     }
 }

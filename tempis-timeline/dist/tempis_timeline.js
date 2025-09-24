@@ -940,6 +940,69 @@ var tempis_timeline = (() => {
     }
   };
 
+  // src/TimelineTooltip.ts
+  var TimelineTooltip = class {
+    constructor(item, dateFormatter, x2, y, showDelay = 0) {
+      this._activeElement = null;
+      this._activeShowTimer = null;
+      this._posX = 0;
+      this._posY = 0;
+      this._item = item;
+      this._dateFormatter = dateFormatter;
+      this._posX = x2;
+      this._posY = y;
+      this._activeShowTimer = setTimeout(() => {
+        this._activeShowTimer = null;
+        this._createElement();
+      }, showDelay);
+    }
+    get id() {
+      return this._item.id;
+    }
+    setPosition(x2, y) {
+      this._posX = x2;
+      this._posY = y;
+      if (this._activeElement) {
+        this._activeElement.style.left = `${x2}px`;
+        this._activeElement.style.top = `${y}px`;
+      }
+    }
+    destroy() {
+      var _a;
+      if (this._activeShowTimer) {
+        clearTimeout(this._activeShowTimer);
+      }
+      (_a = this._activeElement) == null ? void 0 : _a.remove();
+      this._activeElement = null;
+    }
+    _createElement() {
+      if (this._activeElement) {
+        return;
+      }
+      this._activeElement = document.createElement("div");
+      this._activeElement.classList.add("tempis-timeline-tooltip");
+      Object.assign(this._activeElement.style, {
+        position: "fixed",
+        pointerEvents: "none",
+        background: "rgba(0,0,0,0.8)",
+        color: "#fff",
+        padding: "4px 8px",
+        margin: "10px",
+        borderRadius: "5px",
+        fontSize: "14px",
+        zIndex: "9999"
+      });
+      if (this._item.end) {
+        this._activeElement.innerHTML = `<p style="margin:0;">${this._item.caption}</p><p style="margin:0;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
+      } else {
+        this._activeElement.innerHTML = `<p style="margin:0;">${this._item.caption}</p><p style="margin:0;">${this._dateFormatter.format(this._item.start)}</p>`;
+      }
+      this._activeElement.style.left = `${this._posX}px`;
+      this._activeElement.style.top = `${this._posY}px`;
+      document.body.appendChild(this._activeElement);
+    }
+  };
+
   // src/TimelineTooltipView.ts
   var TimelineTooltipView = class {
     constructor(canvas, dataView, dateFormatter, options = {}) {
@@ -959,68 +1022,25 @@ var tempis_timeline = (() => {
         };
       };
       this._canvas.addEventListener("pointermove", (event) => {
+        var _a, _b;
         if (!isNullOrUndefined(this._options.enabled) && !this._options.enabled) {
           return;
         }
         const item = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
         if (!item) {
-          this._clearTooltip();
+          (_a = this._activeTooltip) == null ? void 0 : _a.destroy();
+          this._activeTooltip = null;
         } else {
-          if (!this._activeTooltip) {
-            this._createTooltipElement(item);
+          if (this._activeTooltip && this._activeTooltip.id === item.id) {
+            this._activeTooltip.setPosition(event.clientX, event.clientY);
+            return;
+          } else if (this._activeTooltip && this._activeTooltip.id !== item.id) {
+            (_b = this._activeTooltip) == null ? void 0 : _b.destroy();
+            this._activeTooltip = null;
           }
-          this._updateTooltipPosition(event.clientX, event.clientY);
+          this._activeTooltip = new TimelineTooltip(item, this._dateFormatter, event.clientX, event.clientY, this._options.delay);
         }
       });
-    }
-    _createTooltipShowTimer(item, posX, posY) {
-      var _a;
-      const timeout = setTimeout(() => {
-        if (!this._activeTooltip) {
-          this._createTooltipElement(item);
-          this._updateTooltipPosition(posX, posY);
-        }
-      }, (_a = this._options.delay) != null ? _a : 0);
-    }
-    _createTooltipElement(item) {
-      if (this._activeTooltip) {
-        return;
-      }
-      const activeTooltipElement = document.createElement("div");
-      activeTooltipElement.classList.add("tempis-timeline-tooltip");
-      Object.assign(activeTooltipElement.style, {
-        position: "fixed",
-        pointerEvents: "none",
-        background: "rgba(0,0,0,0.8)",
-        color: "#fff",
-        padding: "4px 8px",
-        margin: "10px",
-        borderRadius: "5px",
-        fontSize: "14px",
-        zIndex: "9999"
-      });
-      if (item.end) {
-        activeTooltipElement.innerHTML = `<p style="margin:0;">${item.caption}</p><p style="margin:0;">${this._dateFormatter.format(item.start)} - ${this._dateFormatter.format(item.end)}</p>`;
-      } else {
-        activeTooltipElement.innerHTML = `<p style="margin:0;">${item.caption}</p><p style="margin:0;">${this._dateFormatter.format(item.start)}</p>`;
-      }
-      document.body.appendChild(activeTooltipElement);
-      this._activeTooltip = {
-        itemId: item.id,
-        element: activeTooltipElement
-      };
-    }
-    _updateTooltipPosition(x2, y) {
-      if (!this._activeTooltip) {
-        return;
-      }
-      this._activeTooltip.element.style.left = `${x2}px`;
-      this._activeTooltip.element.style.top = `${y}px`;
-    }
-    _clearTooltip() {
-      var _a;
-      (_a = this._activeTooltip) == null ? void 0 : _a.element.remove();
-      this._activeTooltip = null;
     }
   };
 
