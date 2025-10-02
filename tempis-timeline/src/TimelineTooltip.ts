@@ -112,9 +112,9 @@ export class TimelineTooltip {
 
         // TODO Remove
         if (this._item.end) {
-            this._activeElement.innerHTML = `<p style="margin:0;">${this._item.caption}</p><p style="margin:0;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
+            this._activeElement.innerHTML = `<p style="margin:0;font-weight:bold;">${this._item.caption}</p><p style="margin:0;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
         } else {
-            this._activeElement.innerHTML = `<p style="margin:0;">${this._item.caption}</p><p style="margin:0;">${this._dateFormatter.format(this._item.start)}</p>`;
+            this._activeElement.innerHTML = `<p style="margin:0;font-weight:bold;">${this._item.caption}</p><p style="margin:0;">${this._dateFormatter.format(this._item.start)}</p>`;
         }
 
         // Set the initial tooltip position.
