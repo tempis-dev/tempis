@@ -52,7 +52,7 @@ export class TempisTimeline {
         this._dataSet = new TimelineDataSet(this._options);
         this._dataView = new TimelineDataView(this._dataSet);
         this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._options.range);
-        this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._options.tooltip);
+        this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._options.tooltip);
 
         // Do our initial canvas resize.
         this._resizeCanvas();

@@ -1,6 +1,7 @@
 import { DateFormatter } from "./DateFormatter";
 import { TempisTimelineTooltipOptions } from "./TempisTimelineOptions";
 import { TimelineDataView } from "./TimelineDataView";
+import { TimelineFont } from "./TimelineFont";
 import { TimelineTooltip } from "./TimelineTooltip";
 import { isNullOrUndefined } from "./Utilities";
 
@@ -17,6 +18,9 @@ export class TimelineTooltipView {
     /** The date formatter. */
     private readonly _dateFormatter: DateFormatter;
 
+    /** The timeline font. */
+    private readonly _font: TimelineFont;
+
     /** The tooltip options. */
     private readonly _options: TempisTimelineTooltipOptions;
 
@@ -28,12 +32,14 @@ export class TimelineTooltipView {
      * @param canvas The timeline canvas.
      * @param dataView The timeline data view.
      * @param dateFormatter The date formatter.
+     * @param font The timeline font.
      * @param options The tooltip options.
      */
-    public constructor(canvas: HTMLCanvasElement, dataView: TimelineDataView, dateFormatter: DateFormatter, options: TempisTimelineTooltipOptions = {}) {
+    public constructor(canvas: HTMLCanvasElement, dataView: TimelineDataView, dateFormatter: DateFormatter, font: TimelineFont, options: TempisTimelineTooltipOptions = {}) {
         this._canvas = canvas;
         this._dataView = dataView;
         this._dateFormatter = dateFormatter;
+        this._font = font;
         this._options = options;
 
         this._createCanvasEventHandlers();
@@ -78,7 +84,7 @@ export class TimelineTooltipView {
                 }
 
                 // Create the tooltip.
-                this._activeTooltip = new TimelineTooltip(item, this._dateFormatter, event.clientX, event.clientY, this._options.delay);
+                this._activeTooltip = new TimelineTooltip(item, this._dateFormatter, this._font, event.clientX, event.clientY, this._options.delay);
             }
         });
 

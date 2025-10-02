@@ -1,5 +1,8 @@
 import { SelectionChangeEvent } from "./Event";
 
+/**
+ * The options passed when creating an instance of TempisTimeline.
+ */
 export interface TempisTimelineOptions {
     /** Whether the canvas should resize to match the dimensions of its parent container. */
     responsive?: boolean;

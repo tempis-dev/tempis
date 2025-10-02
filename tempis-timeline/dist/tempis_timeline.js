@@ -942,13 +942,14 @@ var tempis_timeline = (() => {
 
   // src/TimelineTooltip.ts
   var TimelineTooltip = class {
-    constructor(item, dateFormatter, x2, y, showDelay = 0) {
+    constructor(item, dateFormatter, font, x2, y, showDelay = 0) {
       this._activeElement = null;
       this._activeShowTimer = null;
       this._posX = 0;
       this._posY = 0;
       this._item = item;
       this._dateFormatter = dateFormatter;
+      this._font = font;
       this._posX = x2;
       this._posY = y;
       this._activeShowTimer = setTimeout(() => {
@@ -989,8 +990,8 @@ var tempis_timeline = (() => {
         padding: "4px 8px",
         margin: "10px",
         borderRadius: "5px",
-        fontSize: "14px",
-        zIndex: "9999"
+        zIndex: "9999",
+        font: this._font.font
       });
       if (this._item.end) {
         this._activeElement.innerHTML = `<p style="margin:0;">${this._item.caption}</p><p style="margin:0;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
@@ -1005,11 +1006,12 @@ var tempis_timeline = (() => {
 
   // src/TimelineTooltipView.ts
   var TimelineTooltipView = class {
-    constructor(canvas, dataView, dateFormatter, options = {}) {
+    constructor(canvas, dataView, dateFormatter, font, options = {}) {
       this._activeTooltip = null;
       this._canvas = canvas;
       this._dataView = dataView;
       this._dateFormatter = dateFormatter;
+      this._font = font;
       this._options = options;
       this._createCanvasEventHandlers();
     }
@@ -1038,7 +1040,7 @@ var tempis_timeline = (() => {
             (_b = this._activeTooltip) == null ? void 0 : _b.destroy();
             this._activeTooltip = null;
           }
-          this._activeTooltip = new TimelineTooltip(item, this._dateFormatter, event.clientX, event.clientY, this._options.delay);
+          this._activeTooltip = new TimelineTooltip(item, this._dateFormatter, this._font, event.clientX, event.clientY, this._options.delay);
         }
       });
     }
@@ -1467,7 +1469,7 @@ var tempis_timeline = (() => {
       this._dataSet = new TimelineDataSet(this._options);
       this._dataView = new TimelineDataView(this._dataSet);
       this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._options.range);
-      this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._options.tooltip);
+      this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._options.tooltip);
       this._resizeCanvas();
       if (options.responsive !== false) {
         this._createCanvasContainerResizeObserver();

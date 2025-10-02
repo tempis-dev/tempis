@@ -1,4 +1,5 @@
 import { DateFormatter } from "./DateFormatter";
+import { TimelineFont } from "./TimelineFont";
 import { TimelineItem } from "./TimelineItem";
 
 export class TimelineTooltip {
@@ -7,6 +8,9 @@ export class TimelineTooltip {
 
     /** The date formatter. */
     private readonly _dateFormatter: DateFormatter;
+
+    /** The timeline font. */
+    private readonly _font: TimelineFont;
 
     /** The tooltip element. */
     private _activeElement: HTMLDivElement | null = null;
@@ -23,11 +27,16 @@ export class TimelineTooltip {
     /**
      * Creates a new instance of the TimelineTooltip class and shows a tooltip for the given item.
      * @param item The tooltip item.
+     * @param dateFormatter The date formatter.
+     * @param font The timeline font.
+     * @param x The initial tooltip x position.
+     * @param y The initial tooltip y position.
      * @param showDelay The delay to wait before showing the tooltip element.
      */
-    public constructor(item: TimelineItem, dateFormatter: DateFormatter, x: number, y: number, showDelay: number = 0) {
+    public constructor(item: TimelineItem, dateFormatter: DateFormatter, font: TimelineFont, x: number, y: number, showDelay: number = 0) {
         this._item = item;
         this._dateFormatter = dateFormatter;
+        this._font = font;
         this._posX = x;
         this._posY = y;
 
@@ -88,7 +97,7 @@ export class TimelineTooltip {
         this._activeElement = document.createElement('div');
         this._activeElement.classList.add('tempis-timeline-tooltip');
 
-        // Default styles
+        // Apply the default styles for the default tooltip element.
         Object.assign(this._activeElement.style, {
             position: "fixed",
             pointerEvents: "none",
@@ -97,8 +106,8 @@ export class TimelineTooltip {
             padding: "4px 8px",
             margin: "10px",
             borderRadius: "5px",
-            fontSize: "14px",
-            zIndex: "9999"
+            zIndex: "9999",
+            font: this._font.font
         });
 
         // TODO Remove
