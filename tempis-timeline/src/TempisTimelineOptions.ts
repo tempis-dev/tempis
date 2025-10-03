@@ -54,8 +54,31 @@ export interface TempisTimelineTooltipOptions {
 
     /** The tooltip delay in milliseconds. Defaults to `0`. */
     delay?: number;
-    
-    // style?: Partial<CSSStyleDeclaration>;
+
+    /**
+     * Optional function for customizing the content of timeline item tooltips.
+     *
+     * If provided, this function will be called whenever a tooltip is shown.
+     * It receives the timeline item being hovered/focused and should return either:
+     *
+     * - An `HTMLElement`: appended directly as the tooltip content.
+     * - A `string`: injected into the tooltip as raw HTML (`innerHTML`).
+     *
+     * If no template is provided, a default tooltip showing the item caption and date range will be used.
+     *
+     * @param {TempisTimelineItem} item The item for which the tooltip is being generated.
+     * @returns {HTMLElement | string} Custom tooltip content.
+     */
+    template?: (item: TempisTimelineItem) => HTMLElement | string;
+
+    /**
+     * Optional predicate to decide if the tooltip for a specific item should be shown.
+     * If not provided, tooltips are always shown unless all tooltips are disabled.
+     *
+     * @param {TempisTimelineItem} item The item for which the tooltip is potentially being shown.
+     * @returns {boolean} Whether the tooltip should be shown.
+     */
+    shouldShow?: (item: TempisTimelineItem) => boolean;
 }
 
 export interface TempisTimelineStyleOptions {
