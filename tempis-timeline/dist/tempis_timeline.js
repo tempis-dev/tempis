@@ -979,6 +979,7 @@ var tempis_timeline = (() => {
       this._activeElement = null;
     }
     _createElement() {
+      var _a, _b, _c;
       if (this._activeElement) {
         return;
       }
@@ -993,12 +994,15 @@ var tempis_timeline = (() => {
         zIndex: "9999",
         font: this._font.font
       });
-      if (this._options.template) {
-        const tooltipContentElement = this._options.template(this._item.id);
-        if (isNullOrUndefined(tooltipContentElement) || !(tooltipContentElement instanceof HTMLElement)) {
-          throw new Error("The tooltip template function must return a HTMLElement");
+      const customTooltipContent = (_c = (_b = (_a = this._options).template) == null ? void 0 : _b.call(_a, this._item.id)) != null ? _c : null;
+      if (customTooltipContent) {
+        if (customTooltipContent instanceof HTMLElement) {
+          this._activeElement.appendChild(customTooltipContent);
+        } else if (typeof customTooltipContent === "string") {
+          this._activeElement.innerHTML = customTooltipContent;
+        } else {
+          throw new Error("The value returned from the tooltip template function was not a string or HTMLElement");
         }
-        this._activeElement.appendChild(tooltipContentElement);
       } else {
         Object.assign(this._activeElement.style, {
           background: "rgba(0,0,0,0.8)",

@@ -69,7 +69,7 @@ export interface TempisTimelineTooltipOptions {
      * @param {string | number} id The identifier of the item for which the tooltip is being generated.
      * @returns {HTMLElement | string} Custom tooltip content.
      */
-    template?: (id: string | number) => HTMLElement | string;
+    template?: (id: string | number) => HTMLElement | string | null;
 
     /**
      * Optional predicate to decide if the tooltip for a specific item should be shown.

@@ -115,18 +115,21 @@ export class TimelineTooltip {
             font: this._font.font
         });
 
-        // If the user has define a tooltip template then we will be using that to create the tooltip content instead of making a default tooltip.
-        if (this._options.template) {
-            // Call the template function to get the custom tooltip content element.
-            const tooltipContentElement = this._options.template(this._item.id);
+        // If the user has define a tooltip template then we may be using that to create the tooltip content instead of making a default tooltip.
+        const customTooltipContent = this._options.template?.(this._item.id) ?? null;
 
-            // We should verify that the user actually provided an element.
-            if (isNullOrUndefined(tooltipContentElement) || !(tooltipContentElement instanceof HTMLElement)) {
-                throw new Error("The tooltip template function must return a HTMLElement");
+        // If custom tooltip content was provided by a call to the template function then we should add it to our tooltip element. Otherwise, we should add the default tooltip content.
+        if (customTooltipContent) {
+            // We expect the user to have returned an element or a html string.
+            if (customTooltipContent instanceof HTMLElement) {
+                // Append the tooltip content element to the tooltip element.
+                this._activeElement.appendChild(customTooltipContent);
+            } else if (typeof customTooltipContent === "string") {
+                // The tooltip content is a string that we will assume is valid html.
+                this._activeElement.innerHTML = customTooltipContent;
+            } else {
+                throw new Error("The value returned from the tooltip template function was not a string or HTMLElement");
             }
-
-            // Append the tooltip content element to the tooltip element.
-            this._activeElement.appendChild(tooltipContentElement);
         } else {
             // Apply the default styles for the default tooltip element.
             Object.assign(this._activeElement.style, {
@@ -137,8 +140,7 @@ export class TimelineTooltip {
                 borderRadius: "5px"
             });
 
-            // Set the default tooltip content.
-            // This will just be a header of the item caption as well as the start date for PIT items and start and end date for range items.
+            // Set the default tooltip content which is a header of the item caption as well as the start date for PIT items and start and end date for range items.
             if (this._item.end) {
                 this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.caption}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
             } else {

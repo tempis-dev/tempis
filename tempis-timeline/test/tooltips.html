@@ -39,6 +39,21 @@
       delay: 500,
       shouldShow: (id) => id !== 0,
       template: (id) => {
+        // We don't feel like creating a custom tooltip for "Stubbed Toe, like, really bad".
+        if (id === 6) {
+          return null;
+        }
+
+        // We feel like returning a html string for "snoring"
+        if (id === 5) {
+          return `
+  <div>
+    <b>Example Item</b><br>
+    Jan 1, 2025 – Jan 5, 2025
+  </div>
+`;
+        }
+
         // Create an image element
         const img = document.createElement('img');
 
