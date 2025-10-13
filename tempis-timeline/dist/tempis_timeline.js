@@ -942,20 +942,22 @@ var tempis_timeline = (() => {
 
   // src/TimelineTooltip.ts
   var TimelineTooltip = class {
-    constructor(item, dateFormatter, font, x2, y, showDelay = 0) {
+    constructor(item, dateFormatter, font, options, x2, y) {
       this._activeElement = null;
       this._activeShowTimer = null;
       this._posX = 0;
       this._posY = 0;
+      var _a;
       this._item = item;
       this._dateFormatter = dateFormatter;
       this._font = font;
+      this._options = options;
       this._posX = x2;
       this._posY = y;
       this._activeShowTimer = setTimeout(() => {
         this._activeShowTimer = null;
         this._createElement();
-      }, showDelay);
+      }, (_a = options.delay) != null ? _a : 0);
     }
     get id() {
       return this._item.id;
@@ -980,23 +982,36 @@ var tempis_timeline = (() => {
       if (this._activeElement) {
         return;
       }
+      if (this._options.shouldShow && !this._options.shouldShow(this._item.id)) {
+        return;
+      }
       this._activeElement = document.createElement("div");
       this._activeElement.classList.add("tempis-timeline-tooltip");
       Object.assign(this._activeElement.style, {
         position: "fixed",
         pointerEvents: "none",
-        background: "rgba(0,0,0,0.8)",
-        color: "#fff",
-        margin: "10px",
-        padding: "0.3em",
-        borderRadius: "5px",
         zIndex: "9999",
         font: this._font.font
       });
-      if (this._item.end) {
-        this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.caption}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
+      if (this._options.template) {
+        const tooltipContentElement = this._options.template(this._item.id);
+        if (isNullOrUndefined(tooltipContentElement) || !(tooltipContentElement instanceof HTMLElement)) {
+          throw new Error("The tooltip template function must return a HTMLElement");
+        }
+        this._activeElement.appendChild(tooltipContentElement);
       } else {
-        this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.caption}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)}</p>`;
+        Object.assign(this._activeElement.style, {
+          background: "rgba(0,0,0,0.8)",
+          color: "#fff",
+          margin: "10px",
+          padding: "0.2em",
+          borderRadius: "5px"
+        });
+        if (this._item.end) {
+          this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.caption}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
+        } else {
+          this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.caption}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)}</p>`;
+        }
       }
       this._activeElement.style.left = `${this._posX}px`;
       this._activeElement.style.top = `${this._posY}px`;
@@ -1040,7 +1055,7 @@ var tempis_timeline = (() => {
             (_b = this._activeTooltip) == null ? void 0 : _b.destroy();
             this._activeTooltip = null;
           }
-          this._activeTooltip = new TimelineTooltip(item, this._dateFormatter, this._font, event.clientX, event.clientY, this._options.delay);
+          this._activeTooltip = new TimelineTooltip(item, this._dateFormatter, this._font, this._options, event.clientX, event.clientY);
         }
       });
     }

@@ -36,7 +36,22 @@
     },
     tooltip: {
       enabled: true,
-      delay: 500
+      delay: 500,
+      shouldShow: (id) => id !== 0,
+      template: (id) => {
+        // Create an image element
+        const img = document.createElement('img');
+
+        img.style.width = '150px';
+        img.style.height = '150px';
+        img.style.objectFit = 'contain';
+        img.style.display = 'block';
+
+        // Load a random cat GIF
+        img.src = 'https://cataas.com/cat/gif?rand=' + Math.random();
+
+        return img;
+      }
     },
     items: [
       { 

@@ -66,19 +66,19 @@ export interface TempisTimelineTooltipOptions {
      *
      * If no template is provided, a default tooltip showing the item caption and date range will be used.
      *
-     * @param {TempisTimelineItem} item The item for which the tooltip is being generated.
+     * @param {string | number} id The identifier of the item for which the tooltip is being generated.
      * @returns {HTMLElement | string} Custom tooltip content.
      */
-    template?: (item: TempisTimelineItem) => HTMLElement | string;
+    template?: (id: string | number) => HTMLElement | string;
 
     /**
      * Optional predicate to decide if the tooltip for a specific item should be shown.
      * If not provided, tooltips are always shown unless all tooltips are disabled.
      *
-     * @param {TempisTimelineItem} item The item for which the tooltip is potentially being shown.
+     * @param {string | number} id The identifier of the item for which the tooltip is potentially being shown.
      * @returns {boolean} Whether the tooltip should be shown.
      */
-    shouldShow?: (item: TempisTimelineItem) => boolean;
+    shouldShow?: (id: string | number) => boolean;
 }
 
 export interface TempisTimelineStyleOptions {
