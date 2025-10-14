@@ -26,8 +26,8 @@ export interface TempisTimelineOptions {
     items: TempisTimelineItem[];
 
     /**
-     * Defines how items in a timeline can be selected.
-     * - `"none"` – No items can be selected (view-only mode). This is the default value.
+     * Defines how items in a timeline can be selected. Defaults to `"none"`.
+     * - `"none"` – No items can be selected (view-only mode).
      * - `"single"` – Only one item can be selected at a time. Selecting a new item clears the previous selection.
      * - `"multi"`– Multiple items can be selected at once. Each item can be toggled independently.
      */
@@ -42,7 +42,7 @@ export interface TempisTimelineOptions {
 
 /**
  * Defines how items in a timeline can be selected.
- * - `"none"` – No items can be selected (view-only mode). This is the default value.
+ * - `"none"` – No items can be selected (view-only mode).
  * - `"single"` – Only one item can be selected at a time. Selecting a new item clears the previous selection.
  * - `"multi"`– Multiple items can be selected at once. Each item can be toggled independently.
  */
@@ -56,15 +56,23 @@ export interface TempisTimelineTooltipOptions {
     delay?: number;
 
     /**
+     * Controls how tooltip positioning behaves when near edges. Defaults to `"none"`.
+     * - `"none"`: The tooltip is positioned directly near the cursor and may overflow the viewport or canvas.
+     * - `"canvas"`: The tooltip will attempt to stay within the canvas bounds by flipping horizontally/vertically as needed.
+     * - `"viewport"`: The tooltip will attempt to stay within the browser viewport by flipping horizontally/vertically as needed.
+     */
+    overflowBehavior?: TempisTimelineTooltipOverflowBehavior;
+
+    /**
      * Optional function for customizing the content of timeline item tooltips.
      *
      * If provided, this function will be called whenever a tooltip is shown.
-     * It receives the timeline item being hovered/focused and should return either:
+     * It receives the identifier of the timeline item being hovered/focused and should return either:
      *
      * - An `HTMLElement`: appended directly as the tooltip content.
      * - A `string`: injected into the tooltip as raw HTML (`innerHTML`).
      *
-     * If no template is provided, a default tooltip showing the item caption and date range will be used.
+     * If no template is provided, or the template function returns null, a default tooltip showing the item caption and date range will be used.
      *
      * @param {string | number} id The identifier of the item for which the tooltip is being generated.
      * @returns {HTMLElement | string} Custom tooltip content.
@@ -80,6 +88,14 @@ export interface TempisTimelineTooltipOptions {
      */
     shouldShow?: (id: string | number) => boolean;
 }
+
+/**
+ * Controls how tooltip positioning behaves when near edges.
+ * - `"none"`: The tooltip is positioned directly near the cursor and may overflow the viewport or canvas.
+ * - `"canvas"`: The tooltip will attempt to stay within the canvas bounds by flipping horizontally/vertically as needed.
+ * - `"viewport"`: The tooltip will attempt to stay within the browser viewport by flipping horizontally/vertically as needed.
+ */
+export type TempisTimelineTooltipOverflowBehavior = "none" | "canvas" | "viewport";
 
 export interface TempisTimelineStyleOptions {
     /** The default font options to use in rendering text. */

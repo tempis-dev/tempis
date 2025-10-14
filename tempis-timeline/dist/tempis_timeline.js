@@ -965,10 +965,12 @@ var tempis_timeline = (() => {
     setPosition(x2, y) {
       this._posX = x2;
       this._posY = y;
-      if (this._activeElement) {
-        this._activeElement.style.left = `${x2}px`;
-        this._activeElement.style.top = `${y}px`;
+      if (!this._activeElement) {
+        return;
       }
+      this._activeElement.style.left = `${x2}px`;
+      this._activeElement.style.top = `${y}px`;
+      this._handleOverflow();
     }
     destroy() {
       var _a;
@@ -1020,6 +1022,46 @@ var tempis_timeline = (() => {
       this._activeElement.style.left = `${this._posX}px`;
       this._activeElement.style.top = `${this._posY}px`;
       document.body.appendChild(this._activeElement);
+      this._handleOverflow();
+    }
+    _handleOverflow() {
+      if (!this._activeElement) {
+        return;
+      }
+      if (!this._options.overflowBehavior) {
+        return;
+      }
+      let boundingRect;
+      switch (this._options.overflowBehavior) {
+        case "none":
+          return;
+        case "canvas":
+          boundingRect = {
+            left: 0,
+            top: 0,
+            right: window.innerWidth,
+            bottom: window.innerHeight,
+            width: window.innerWidth,
+            height: window.innerHeight
+          };
+          break;
+        case "viewport":
+          boundingRect = {
+            left: 0,
+            top: 0,
+            right: window.innerWidth,
+            bottom: window.innerHeight,
+            width: window.innerWidth,
+            height: window.innerHeight
+          };
+          break;
+        default:
+          throw new Error(`Unknown overflow behavior: '${this._options.overflowBehavior}'`);
+      }
+      const tooltipRect = this._activeElement.getBoundingClientRect();
+      const translateX = this._posX + tooltipRect.width >= boundingRect.right ? "-100%" : "0px";
+      const translateY = this._posY + tooltipRect.height >= boundingRect.bottom ? "-100%" : "0px";
+      this._activeElement.style.transform = `translate(${translateX}, ${translateY})`;
     }
   };
 

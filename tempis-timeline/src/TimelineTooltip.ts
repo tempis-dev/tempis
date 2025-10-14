@@ -68,11 +68,15 @@ export class TimelineTooltip {
     public setPosition(x: number, y: number) {
         this._posX = x;
         this._posY = y;
-        
-        if (this._activeElement) {
-            this._activeElement.style.left = `${x}px`;
-            this._activeElement.style.top = `${y}px`;
+
+        if (!this._activeElement) {
+            return;
         }
+        
+        this._activeElement.style.left = `${x}px`;
+        this._activeElement.style.top = `${y}px`;
+
+        this._handleOverflow();
     }
 
     /**
@@ -154,5 +158,68 @@ export class TimelineTooltip {
 
         // Add the tooltip element to the document body.
         document.body.appendChild(this._activeElement);
+
+        // Now that we have added the tooltip to the document we should handle any potential overflow.
+        this._handleOverflow();
+    }
+
+    /**
+     * Handle the tooltip overflow.
+     * This will flip the tooltip to keep it in the defined bounds if the user has defined any overflow behavior
+     */
+    private _handleOverflow(): void {
+        // There is nothing to do if we have no active tooltip element.
+        if (!this._activeElement) {
+            return;
+        }
+
+        // There is also nothing to do if the user has not defined any overflow behaviour.
+        if (!this._options.overflowBehavior) {
+            return;
+        }
+
+        let boundingRect: { left: number, top: number, width: number, height: number, right: number, bottom: number };
+
+        switch (this._options.overflowBehavior) {
+            case "none":
+                // There is also nothing to do if the user has explicitly set "none".
+                return;
+
+            case "canvas":
+                // TODO Replace with canvas.getBoundingClientRect()
+                boundingRect = {
+                    left: 0,
+                    top: 0,
+                    right: window.innerWidth,
+                    bottom: window.innerHeight,
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                };
+                break;
+
+            case "viewport":
+                boundingRect = {
+                    left: 0,
+                    top: 0,
+                    right: window.innerWidth,
+                    bottom: window.innerHeight,
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                };
+                break;
+
+            default:
+                throw new Error(`Unknown overflow behavior: '${this._options.overflowBehavior}'`);
+        }
+
+        // Get the tooltip rect.
+        const tooltipRect = this._activeElement.getBoundingClientRect();
+
+        // Determine the x/y translation values we would need to potentially flip the tooltip to keep it in the defined bounds. 
+        const translateX = (this._posX + tooltipRect.width) >= boundingRect.right ? "-100%" : "0px";
+        const translateY = (this._posY + tooltipRect.height) >= boundingRect.bottom ? "-100%" : "0px";
+
+        // Apply the transform to the tooltip.
+        this._activeElement.style.transform = `translate(${translateX}, ${translateY})`;
     }
 }
