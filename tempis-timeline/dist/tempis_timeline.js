@@ -1062,6 +1062,11 @@ var tempis_timeline = (() => {
           this._activeTooltip = new TimelineTooltip(item, this._dateFormatter, this._font, this._options, event.clientX, event.clientY);
         }
       });
+      this._canvas.addEventListener("pointerout", (event) => {
+        var _a;
+        (_a = this._activeTooltip) == null ? void 0 : _a.destroy();
+        this._activeTooltip = null;
+      });
     }
   };
 
