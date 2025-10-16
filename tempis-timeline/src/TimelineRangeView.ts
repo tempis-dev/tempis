@@ -1,8 +1,7 @@
-import { format } from 'date-format-parse';
-
 import { TempisTimelineRangeOptions, TempisTimelineRangePosition, TempisTimelineRangeUnitLabelFormats } from "./TempisTimelineOptions";
 import { TimelineDataSet } from './TimelineDataSet';
 import { clamp, isNullOrUndefined, parseDate } from "./Utilities";
+import { DateFormatter } from './DateFormatter';
 
 export type Unit = 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'month' | 'year' | 'none';
 
@@ -41,6 +40,9 @@ export class TimelineRangeView {
     /** The underlying dataset model. */
     private readonly _dataSet: TimelineDataSet;
 
+    /** The date formatter. */
+    private readonly _dateFormatter: DateFormatter;
+
     /** The timeline range options. */
     private readonly _options: TempisTimelineRangeOptions;
 
@@ -75,14 +77,16 @@ export class TimelineRangeView {
     private _majorUnitTicks: RangeTick[] = [];
 
     /**
-     * Creates a new instance of the TimelineRange class.
+     * Creates a new instance of the TimelineRangeView class.
      * @param canvas The canvas.
      * @param dataSet The timeline dataset model.
+     * @param dateFormatter The date formatter.
      * @param options The timeline range options.
      */
-    public constructor(canvas: HTMLCanvasElement, dataSet: TimelineDataSet, options: TempisTimelineRangeOptions = {}) {
+    public constructor(canvas: HTMLCanvasElement, dataSet: TimelineDataSet, dateFormatter: DateFormatter, options: TempisTimelineRangeOptions = {}) {
         this._canvas = canvas;
         this._dataSet = dataSet
+        this._dateFormatter = dateFormatter;
         this._options = options;
 
         // Parse the range options.
@@ -593,15 +597,14 @@ export class TimelineRangeView {
 
     /**
      * Formats the given date as a string, using the label format for the specified unit.
-     * @param date 
-     * @param unit 
-     * @param labelFormats 
-     * @returns 
+     * @param date The date to format.
+     * @param unit The date unit.
+     * @param labelFormats  The label formats to source the pattern from.
+     * @returns The given date as a string, using the label format for the specified unit.
      */
     private _formatDate(date: Date, unit: Unit, labelFormats: TempisTimelineRangeUnitLabelFormats): string {
         // TODO We should be checking the range options for a non-default label format for this unit.
-        // TODO We should be using a date adapter to get this label.
-        return format(date, (labelFormats as any)[unit]);
+        return this._dateFormatter.format(date, (labelFormats as any)[unit]);
     }
 
     /**

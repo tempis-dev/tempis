@@ -6,6 +6,8 @@ import { TimelineItem } from "./TimelineItem";
 import { TimelineRangeView } from "./TimelineRangeView";
 import { SelectionChangeEvent } from "./Event";
 import { isNullOrUndefined, parseDate } from "./Utilities";
+import { TimelineTooltipView } from "./TimelineTooltipView";
+import { DateFormatter } from "./DateFormatter";
 
 export class TempisTimeline {
     /** The timeline canvas. */
@@ -16,15 +18,21 @@ export class TempisTimeline {
 
     /** The timeline dataset. */
     private readonly _dataSet: TimelineDataSet;
-    
-    /** The timeline range. */
-    private readonly _rangeView: TimelineRangeView;
 
     /** The timeline data view. */
     private readonly _dataView: TimelineDataView;
 
+    /** The timeline range. */
+    private readonly _rangeView: TimelineRangeView;
+
+    /** The timeline tooltip view. */
+    private readonly _tooltipView: TimelineTooltipView;
+
     /** The default timeline font. */
     private readonly _font: TimelineFont;
+
+    /** The date formatter. */
+    private readonly _dateFormatter: DateFormatter;
 
     /** The canvas container resize observer. */
     private _canvasContainerResizeObserver: ResizeObserver | null = null;
@@ -39,9 +47,12 @@ export class TempisTimeline {
 
         this._canvas = this._getCanvas(context);
         this._font = new TimelineFont(this._options.style?.font);
+        this._dateFormatter = new DateFormatter();
+
         this._dataSet = new TimelineDataSet(this._options);
         this._dataView = new TimelineDataView(this._dataSet);
-        this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._options.range);
+        this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._options.range);
+        this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._options.tooltip);
 
         // Do our initial canvas resize.
         this._resizeCanvas();
