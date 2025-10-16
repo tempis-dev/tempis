@@ -942,13 +942,14 @@ var tempis_timeline = (() => {
 
   // src/TimelineTooltip.ts
   var TimelineTooltip = class {
-    constructor(item, dateFormatter, font, options, x2, y) {
+    constructor(item, canvas, dateFormatter, font, options, x2, y) {
       this._activeElement = null;
       this._activeShowTimer = null;
       this._posX = 0;
       this._posY = 0;
       var _a;
       this._item = item;
+      this._canvas = canvas;
       this._dateFormatter = dateFormatter;
       this._font = font;
       this._options = options;
@@ -1036,14 +1037,7 @@ var tempis_timeline = (() => {
         case "none":
           return;
         case "canvas":
-          boundingRect = {
-            left: 0,
-            top: 0,
-            right: window.innerWidth,
-            bottom: window.innerHeight,
-            width: window.innerWidth,
-            height: window.innerHeight
-          };
+          boundingRect = this._canvas.getBoundingClientRect();
           break;
         case "viewport":
           boundingRect = {
@@ -1101,7 +1095,7 @@ var tempis_timeline = (() => {
             (_b = this._activeTooltip) == null ? void 0 : _b.destroy();
             this._activeTooltip = null;
           }
-          this._activeTooltip = new TimelineTooltip(item, this._dateFormatter, this._font, this._options, event.clientX, event.clientY);
+          this._activeTooltip = new TimelineTooltip(item, this._canvas, this._dateFormatter, this._font, this._options, event.clientX, event.clientY);
         }
       });
       this._canvas.addEventListener("pointerout", (event) => {

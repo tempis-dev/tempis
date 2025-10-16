@@ -2,11 +2,13 @@ import { DateFormatter } from "./DateFormatter";
 import { TempisTimelineTooltipOptions } from "./TempisTimelineOptions";
 import { TimelineFont } from "./TimelineFont";
 import { TimelineItem } from "./TimelineItem";
-import { isNullOrUndefined } from "./Utilities";
 
 export class TimelineTooltip {
     /** The item that the tooltip is being shown for. */
     private readonly _item: TimelineItem;
+
+    /** The timeline canvas. */
+    private readonly _canvas: HTMLCanvasElement;
 
     /** The date formatter. */
     private readonly _dateFormatter: DateFormatter;
@@ -32,14 +34,16 @@ export class TimelineTooltip {
     /**
      * Creates a new instance of the TimelineTooltip class and shows a tooltip for the given item.
      * @param item The tooltip item.
+     * @param canvas The timeline canvas.
      * @param dateFormatter The date formatter.
      * @param font The timeline font.
      * @param options The tooltip options.
      * @param x The initial tooltip x position.
      * @param y The initial tooltip y position.
      */
-    public constructor(item: TimelineItem, dateFormatter: DateFormatter, font: TimelineFont, options: TempisTimelineTooltipOptions, x: number, y: number) {
+    public constructor(item: TimelineItem, canvas: HTMLCanvasElement, dateFormatter: DateFormatter, font: TimelineFont, options: TempisTimelineTooltipOptions, x: number, y: number) {
         this._item = item;
+        this._canvas = canvas;
         this._dateFormatter = dateFormatter;
         this._font = font;
         this._options = options;
@@ -186,15 +190,7 @@ export class TimelineTooltip {
                 return;
 
             case "canvas":
-                // TODO Replace with canvas.getBoundingClientRect()
-                boundingRect = {
-                    left: 0,
-                    top: 0,
-                    right: window.innerWidth,
-                    bottom: window.innerHeight,
-                    width: window.innerWidth,
-                    height: window.innerHeight
-                };
+                boundingRect = this._canvas.getBoundingClientRect();
                 break;
 
             case "viewport":

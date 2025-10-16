@@ -84,7 +84,7 @@ export class TimelineTooltipView {
                 }
 
                 // Create the tooltip.
-                this._activeTooltip = new TimelineTooltip(item, this._dateFormatter, this._font, this._options, event.clientX, event.clientY);
+                this._activeTooltip = new TimelineTooltip(item, this._canvas, this._dateFormatter, this._font, this._options, event.clientX, event.clientY);
             }
         });
 
