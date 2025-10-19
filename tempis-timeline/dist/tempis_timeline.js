@@ -344,6 +344,7 @@ var tempis_timeline = (() => {
   var TimelineDataView = class {
     constructor(dataSet) {
       this._scrollYOffset = 0;
+      this._lastDrawYPosition = 0;
       this._drawPlan = null;
       this._dataSet = dataSet;
     }
@@ -357,6 +358,7 @@ var tempis_timeline = (() => {
       context.clearRect(0, yPosition, context.canvas.width, viewHeight);
       this._drawMinorUnitBars(context, range.minorTicks, yPosition, viewHeight);
       this._drawGroups(context, yPosition, maxHeight);
+      this._lastDrawYPosition = yPosition;
       return viewHeight;
     }
     getItemAtPoint(point) {
@@ -365,7 +367,7 @@ var tempis_timeline = (() => {
       }
       for (const groupDrawPlan of this._drawPlan.groupDrawPlans) {
         for (const itemDrawPlan of groupDrawPlan.rows.flat()) {
-          if (point.x >= itemDrawPlan.xPositionStart && point.x <= itemDrawPlan.xPositionEnd && point.y >= itemDrawPlan.yPositionStart + this._scrollYOffset && point.y <= itemDrawPlan.yPositionEnd + this._scrollYOffset) {
+          if (point.x >= itemDrawPlan.xPositionStart && point.x <= itemDrawPlan.xPositionEnd && point.y >= itemDrawPlan.yPositionStart + this._scrollYOffset + this._lastDrawYPosition && point.y <= itemDrawPlan.yPositionEnd + this._scrollYOffset + this._lastDrawYPosition) {
             return itemDrawPlan.item;
           }
         }

@@ -69,6 +69,9 @@ export class TimelineDataView {
     /** The current scroll Y offset. */
     private _scrollYOffset: number = 0;
 
+    /** Gets the y position from where this view was last drawn. */
+    private _lastDrawYPosition: number = 0;
+
     /** The current data view draw plan. */
     private _drawPlan: DataViewDrawPlan | null = null;
     
@@ -116,6 +119,10 @@ export class TimelineDataView {
 
         // Draw our groups and items!
         this._drawGroups(context, yPosition, maxHeight);
+
+        // Set the y position from where this view was last drawn.
+        // This will be used to help align absolute canvas pointer positions with data view elements.
+        this._lastDrawYPosition = yPosition;
         
         // Return the height of the rendered view.
         return viewHeight;
@@ -136,7 +143,7 @@ export class TimelineDataView {
         for (const groupDrawPlan of this._drawPlan.groupDrawPlans) {
             for (const itemDrawPlan of groupDrawPlan.rows.flat()) {
                 if (point.x >= itemDrawPlan.xPositionStart && point.x <= itemDrawPlan.xPositionEnd 
-                    && point.y >= (itemDrawPlan.yPositionStart + this._scrollYOffset) && point.y <= (itemDrawPlan.yPositionEnd + this._scrollYOffset)) {
+                    && point.y >= (itemDrawPlan.yPositionStart + this._scrollYOffset + this._lastDrawYPosition) && point.y <= (itemDrawPlan.yPositionEnd + this._scrollYOffset + this._lastDrawYPosition)) {
                     return itemDrawPlan.item;
                 }
             }
