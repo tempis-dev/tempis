@@ -13,6 +13,9 @@ export interface TempisTimelineOptions {
     /** The timeline range options. */
     range?: TempisTimelineRangeOptions;
 
+    /** The timeline legend options. */
+    legend?: TempisTimelineLegendOptions;
+
     /** The timeline tooltip options. */
     tooltip?: TempisTimelineTooltipOptions;
     
@@ -142,8 +145,6 @@ export interface TempisTimelineItemStyle {
     borderRadius?: number;
 };
 
-export type TempisTimelineRangePosition = "top" | "bottom" | "both" | "none";
-
 export type TempisTimelineRangeUnitLabelFormats = {
     millisecond?: string,
     second?: string,
@@ -161,6 +162,8 @@ export interface TempisTimelineRangeUnitOptions {
     /** The range unit label formats. */
     formats?: TempisTimelineRangeUnitLabelFormats;
 };
+
+export type TempisTimelineRangePosition = "top" | "bottom" | "both" | "none";
 
 export interface TempisTimelineRangeOptions {
     /** Whether the timeline range is fixed and cannot be modified via user interaction. */
@@ -201,6 +204,25 @@ export interface TempisTimelineRangeZoomOptions {
     /** The maximum range that can be zoomed to in milliseconds. */
     max?: number;
 };
+
+export type TempisTimelineLegendPosition = "top" | "bottom" | "none";
+
+export type TempisTimelineAlignment = "start" | "center" | "end";
+
+export interface TempisTimelineLegendItemOptions {
+
+}
+
+export interface TempisTimelineLegendOptions {
+    /** The legend position. */
+    position?: TempisTimelineLegendPosition;
+
+    /** The legend horizontal alignment. */
+    alignment?: TempisTimelineAlignment;
+
+    /** The legend item options. */
+    item?: TempisTimelineLegendItemOptions;
+}
 
 export interface TempisTimelineItem {
     /** The item identifier. */

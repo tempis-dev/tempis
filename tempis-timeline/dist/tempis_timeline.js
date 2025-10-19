@@ -1106,6 +1106,30 @@ var tempis_timeline = (() => {
     }
   };
 
+  // src/TimelineLegendView.ts
+  var TimelineLegendView = class {
+    constructor(canvas, options = {}) {
+      this._canvas = canvas;
+      this._options = options;
+    }
+    get position() {
+      var _a;
+      return (_a = this._options.position) != null ? _a : "bottom";
+    }
+    calculateRequiredHeight() {
+      var context = this._canvas.getContext("2d");
+      return 50;
+    }
+    draw(context, yPosition) {
+      const legendContainerHeight = this.calculateRequiredHeight();
+      context.clearRect(0, yPosition, context.canvas.clientWidth, legendContainerHeight);
+      context.fillStyle = "#595959";
+      context.beginPath();
+      context.roundRect(0, yPosition, context.canvas.clientWidth, legendContainerHeight);
+      context.fill();
+    }
+  };
+
   // node_modules/date-format-parse/es/util.js
   function isDate(value) {
     return value instanceof Date || Object.prototype.toString.call(value) === "[object Date]";
@@ -1529,6 +1553,7 @@ var tempis_timeline = (() => {
       this._dataSet = new TimelineDataSet(this._options);
       this._dataView = new TimelineDataView(this._dataSet);
       this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._options.range);
+      this._legendView = new TimelineLegendView(this._canvas, this._options.legend);
       this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._options.tooltip);
       this._resizeCanvas();
       if (options.responsive !== false) {
@@ -1683,19 +1708,45 @@ var tempis_timeline = (() => {
       context.clearRect(0, 0, this._canvas.clientWidth, this._canvas.clientHeight);
       context.font = this._font.font;
       const rangeViewHeight = this._rangeView.calculateRequiredHeight();
-      const dataViewYPosition = ["top", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0;
-      const dataViewMaxHeight = this._canvas.clientHeight - dataViewYPosition - (["bottom", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0);
-      const dataViewHeight = this._dataView.draw(context, this._rangeView, dataViewYPosition, dataViewMaxHeight, !!this._options.fillVertically);
-      let totalRenderHeight = dataViewHeight;
+      const legendViewHeight = this._legendView.calculateRequiredHeight();
+      let dataViewYPosition = 0;
+      if (this._legendView.position === "top") {
+        dataViewYPosition += legendViewHeight;
+      }
       if (["top", "both"].includes(this._rangeView.position)) {
-        this._rangeView.draw(context, 0, "top");
-        totalRenderHeight += rangeViewHeight;
+        dataViewYPosition += rangeViewHeight;
       }
+      let dataViewMaxHeight = this._canvas.clientHeight - dataViewYPosition;
       if (["bottom", "both"].includes(this._rangeView.position)) {
-        this._rangeView.draw(context, dataViewYPosition + dataViewHeight, "bottom");
-        totalRenderHeight += rangeViewHeight;
+        dataViewMaxHeight -= rangeViewHeight;
       }
-      context.clearRect(0, totalRenderHeight, this._canvas.clientWidth, this._canvas.clientHeight - totalRenderHeight);
+      if (this._legendView.position === "bottom") {
+        dataViewMaxHeight -= legendViewHeight;
+      }
+      let renderOffsetY = 0;
+      if (this._legendView.position === "top") {
+        this._legendView.draw(context, renderOffsetY);
+        renderOffsetY += legendViewHeight;
+      }
+      if (["top", "both"].includes(this._rangeView.position)) {
+        this._rangeView.draw(context, renderOffsetY, "top");
+        renderOffsetY += rangeViewHeight;
+      }
+      context.save();
+      context.beginPath();
+      context.rect(0, renderOffsetY, this._canvas.clientWidth, dataViewMaxHeight);
+      context.clip();
+      renderOffsetY += this._dataView.draw(context, this._rangeView, renderOffsetY, dataViewMaxHeight, !!this._options.fillVertically);
+      context.restore();
+      if (["bottom", "both"].includes(this._rangeView.position)) {
+        this._rangeView.draw(context, renderOffsetY, "bottom");
+        renderOffsetY += rangeViewHeight;
+      }
+      if (this._legendView.position === "bottom") {
+        this._legendView.draw(context, renderOffsetY);
+        renderOffsetY += legendViewHeight;
+      }
+      context.clearRect(0, renderOffsetY, this._canvas.clientWidth, this._canvas.clientHeight - renderOffsetY);
     }
     _onCanvasClicked() {
       if (this._selectionMode === "none") {
