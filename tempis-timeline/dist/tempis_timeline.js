@@ -345,6 +345,7 @@ var tempis_timeline = (() => {
     constructor(dataSet) {
       this._scrollYOffset = 0;
       this._lastDrawYPosition = 0;
+      this._lastDrawHeight = 0;
       this._drawPlan = null;
       this._dataSet = dataSet;
     }
@@ -354,15 +355,18 @@ var tempis_timeline = (() => {
     draw(context, range, yPosition, maxHeight, fillVertically) {
       this._drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
       this._scrollYOffset = clamp(this._scrollYOffset, Math.min(0, maxHeight - this._drawPlan.height), 0);
-      const viewHeight = fillVertically ? maxHeight : Math.min(this._drawPlan.height, maxHeight);
-      context.clearRect(0, yPosition, context.canvas.width, viewHeight);
-      this._drawMinorUnitBars(context, range.minorTicks, yPosition, viewHeight);
+      this._lastDrawHeight = fillVertically ? maxHeight : Math.min(this._drawPlan.height, maxHeight);
+      context.clearRect(0, yPosition, context.canvas.width, this._lastDrawHeight);
+      this._drawMinorUnitBars(context, range.minorTicks, yPosition, this._lastDrawHeight);
       this._drawGroups(context, yPosition, maxHeight);
       this._lastDrawYPosition = yPosition;
-      return viewHeight;
+      return this._lastDrawHeight;
     }
     getItemAtPoint(point) {
       if (!this._drawPlan) {
+        return null;
+      }
+      if (point.y < this._lastDrawYPosition || point.y > this._lastDrawYPosition + this._lastDrawHeight) {
         return null;
       }
       for (const groupDrawPlan of this._drawPlan.groupDrawPlans) {

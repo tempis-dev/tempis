@@ -72,6 +72,9 @@ export class TimelineDataView {
     /** Gets the y position from where this view was last drawn. */
     private _lastDrawYPosition: number = 0;
 
+    /** Gets the height of his view when last drawn. */
+    private _lastDrawHeight: number = 0;
+
     /** The current data view draw plan. */
     private _drawPlan: DataViewDrawPlan | null = null;
     
@@ -109,13 +112,13 @@ export class TimelineDataView {
 
         // Calculate the height of this rendered view, this may be less than the max height.
         // If fillVertically is true then we should always use the max height.
-        const viewHeight = fillVertically ? maxHeight : Math.min(this._drawPlan.height, maxHeight);
+        this._lastDrawHeight = fillVertically ? maxHeight : Math.min(this._drawPlan.height, maxHeight);
 
         // Clear the data view area.
-        context.clearRect(0, yPosition, context.canvas.width, viewHeight);
+        context.clearRect(0, yPosition, context.canvas.width, this._lastDrawHeight);
 
         // TODO Draw minor unit tick bars IF configured.
-        this._drawMinorUnitBars(context, range.minorTicks, yPosition, viewHeight);
+        this._drawMinorUnitBars(context, range.minorTicks, yPosition, this._lastDrawHeight);
 
         // Draw our groups and items!
         this._drawGroups(context, yPosition, maxHeight);
@@ -123,9 +126,9 @@ export class TimelineDataView {
         // Set the y position from where this view was last drawn.
         // This will be used to help align absolute canvas pointer positions with data view elements.
         this._lastDrawYPosition = yPosition;
-        
+
         // Return the height of the rendered view.
-        return viewHeight;
+        return this._lastDrawHeight;
     }
 
     /**
@@ -136,6 +139,11 @@ export class TimelineDataView {
     public getItemAtPoint(point: { x: number; y: number; }): TimelineItem | null {
         // There is nothing to do if we have no draw plan.
         if (!this._drawPlan) {
+            return null;
+        }
+
+        // Do not get items for points that overflow the vertical constraints of the data view.
+        if (point.y < this._lastDrawYPosition || point.y > (this._lastDrawYPosition + this._lastDrawHeight)) {
             return null;
         }
 
