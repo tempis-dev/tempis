@@ -338,8 +338,8 @@ var tempis_timeline = (() => {
 
   // src/TimelineDataView.ts
   var DEFAULT_GROUP_VERTICAL_LABEL_MARGIN = 6;
-  var DEFAULT_ITEM_VERTICAL_MARGIN = 8;
-  var DEFAULT_GROUP_MARGIN = 12;
+  var DEFAULT_ITEM_VERTICAL_MARGIN = 4;
+  var DEFAULT_GROUP_MARGIN = 8;
   var MINIMUM_RENDERED_LABEL_WIDTH = 5;
   var TimelineDataView = class {
     constructor(dataSet) {

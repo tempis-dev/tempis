@@ -51,10 +51,10 @@ export interface DataViewItemDrawPlan {
 const DEFAULT_GROUP_VERTICAL_LABEL_MARGIN: number = 6;
 
 /** The default amount of vertical margin to use for items. */
-const DEFAULT_ITEM_VERTICAL_MARGIN: number = 8;
+const DEFAULT_ITEM_VERTICAL_MARGIN: number = 4;
 
 /** The default amount of vertical margin to use for each group. */
-const DEFAULT_GROUP_MARGIN: number = 12;
+const DEFAULT_GROUP_MARGIN: number = 8;
 
 /** The minimum amount of available horizontal space required to render a label. */
 const MINIMUM_RENDERED_LABEL_WIDTH: number = 5;
