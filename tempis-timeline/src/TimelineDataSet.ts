@@ -77,6 +77,61 @@ export class TimelineDataSet {
     }
 
     /**
+     * Enables the category with the specified name.
+     * @param name The category name.
+     */
+    public enableCategory(name: string): void {
+        // Try to get the category with the given name.
+        const category = this.getCategory(name);
+
+        if (category) {
+            // TODO Trigger some kind of "changed" event if value changed.
+            category.isDisabled = false;
+        }
+    }
+
+    /**
+     * Disables the category with the specified name.
+     * @param name The category name.
+     */
+    public disableCategory(name: string): void {
+        // Try to get the category with the given name.
+        const category = this.getCategory(name);
+
+        if (category) {
+            // TODO Trigger some kind of "changed" event if value changed.
+            category.isDisabled = true;
+        }
+    }
+
+    /**
+     * Sets the specified category as being focused and sets all others to not being focused.
+     * @param name The category name.
+     */
+    public focusCategory(name: string): void {
+        // Try to get the category with the given name.
+        const targetCategory = this.getCategory(name);
+
+        // Update the focused state of all categories.
+        for (const category of this._categories) {
+            // TODO Trigger some kind of "changed" event if value changed.
+            category.isFocused = category === targetCategory;
+        }
+    }
+
+    /**
+     * Sets the specified category as being focused and sets all others to not being focused.
+     * @param name The category name.
+     */
+    public unfocusCategories(): void {
+        // Update the focused state of all categories.
+        for (const category of this._categories) {
+            // TODO Trigger some kind of "changed" event if value changed.
+            category.isFocused = false;
+        }
+    }
+
+    /**
      * Gets all selected timeline items.
      * @returns All selected timeline items.
      */

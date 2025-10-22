@@ -1,8 +1,12 @@
 import { TempisTimelineLegendOptions, TempisTimelineLegendPosition } from "./TempisTimelineOptions";
+import { TimelineDataSet } from "./TimelineDataSet";
 
 export class TimelineLegendView {
     /** The timeline canvas. */
     private readonly _canvas: HTMLCanvasElement;
+
+    /** The underlying dataset model. */
+    private readonly _dataSet: TimelineDataSet;
 
     /** The timeline legend options. */
     private readonly _options: TempisTimelineLegendOptions;
@@ -10,10 +14,12 @@ export class TimelineLegendView {
     /**
      * Creates a new instance of the TimelineLegendView class.
      * @param canvas The timeline canvas.
+     * @param dataSet The timeline dataset model.
      * @param options The timeline legend options.
      */
-    public constructor(canvas: HTMLCanvasElement, options: TempisTimelineLegendOptions = {}) {
+    public constructor(canvas: HTMLCanvasElement, dataSet: TimelineDataSet, options: TempisTimelineLegendOptions = {}) {
         this._canvas = canvas;
+        this._dataSet = dataSet;
         this._options = options;
     }
 
@@ -53,5 +59,10 @@ export class TimelineLegendView {
         context.beginPath();
         context.roundRect(0, yPosition, context.canvas.clientWidth, legendContainerHeight);
         context.fill();
+
+        // TODO Draw the categories.
+        context.fillStyle = "#ffffff";
+        context.textBaseline = "top";
+        context.fillText(this._dataSet.categories.map((category) => category.name).join(" - "), 6, yPosition + 6);
     }
 }

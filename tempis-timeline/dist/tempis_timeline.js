@@ -139,6 +139,8 @@ var tempis_timeline = (() => {
   // src/TimelineItemCategory.ts
   var TimelineItemCategory = class {
     constructor(name, style) {
+      this._isDisabled = false;
+      this._isFocused = false;
       this._name = name;
       this._style = style;
     }
@@ -147,6 +149,18 @@ var tempis_timeline = (() => {
     }
     get style() {
       return this._style;
+    }
+    get isDisabled() {
+      return this._isDisabled;
+    }
+    set isDisabled(value) {
+      this._isDisabled = value;
+    }
+    get isFocused() {
+      return this._isFocused;
+    }
+    set isFocused(value) {
+      this._isFocused = value;
     }
   };
 
@@ -248,6 +262,29 @@ var tempis_timeline = (() => {
     getCategory(name) {
       var _a;
       return (_a = this._categories.find((category) => category.name === name)) != null ? _a : null;
+    }
+    enableCategory(name) {
+      const category = this.getCategory(name);
+      if (category) {
+        category.isDisabled = false;
+      }
+    }
+    disableCategory(name) {
+      const category = this.getCategory(name);
+      if (category) {
+        category.isDisabled = true;
+      }
+    }
+    focusCategory(name) {
+      const targetCategory = this.getCategory(name);
+      for (const category of this._categories) {
+        category.isFocused = category === targetCategory;
+      }
+    }
+    unfocusCategories() {
+      for (const category of this._categories) {
+        category.isFocused = false;
+      }
     }
     getSelectedItems() {
       const selectedItems = [];
@@ -1114,8 +1151,9 @@ var tempis_timeline = (() => {
 
   // src/TimelineLegendView.ts
   var TimelineLegendView = class {
-    constructor(canvas, options = {}) {
+    constructor(canvas, dataSet, options = {}) {
       this._canvas = canvas;
+      this._dataSet = dataSet;
       this._options = options;
     }
     get position() {
@@ -1133,6 +1171,9 @@ var tempis_timeline = (() => {
       context.beginPath();
       context.roundRect(0, yPosition, context.canvas.clientWidth, legendContainerHeight);
       context.fill();
+      context.fillStyle = "#ffffff";
+      context.textBaseline = "top";
+      context.fillText(this._dataSet.categories.map((category) => category.name).join(" - "), 6, yPosition + 6);
     }
   };
 
@@ -1559,7 +1600,7 @@ var tempis_timeline = (() => {
       this._dataSet = new TimelineDataSet(this._options);
       this._dataView = new TimelineDataView(this._dataSet);
       this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._options.range);
-      this._legendView = new TimelineLegendView(this._canvas, this._options.legend);
+      this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._options.legend);
       this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._options.tooltip);
       this._resizeCanvas();
       if (options.responsive !== false) {

@@ -7,6 +7,12 @@ export class TimelineItemCategory {
     /** The item style to apply to items linked to this category. */
     private readonly _style: TempisTimelineItemStyle;
 
+    /** A flag defining whether the category is disabled. */
+    private _isDisabled: boolean = false;
+
+    /** A flag defining whether the category is focused. */
+    private _isFocused: boolean = false;
+
     /**
      * Creates a new instance of the TimelineItemCategory class.
      * @param name The category name.
@@ -25,5 +31,21 @@ export class TimelineItemCategory {
     /** Gets the item style to apply to items linked to this category. */
     public get style(): TempisTimelineItemStyle {
         return this._style;
+    }
+
+    /** Gets or sets whether the category is disabled. */
+    public get isDisabled(): boolean {
+        return this._isDisabled;
+    }
+    public set isDisabled(value: boolean) {
+        this._isDisabled = value;
+    }
+
+    /** Gets or sets whether the category is focused. */
+    public get isFocused(): boolean {
+        return this._isFocused;
+    }
+    public set isFocused(value: boolean) {
+        this._isFocused = value;
     }
 }
