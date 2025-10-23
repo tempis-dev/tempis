@@ -281,7 +281,7 @@ export class TimelineRangeView {
         var context = this._canvas.getContext('2d')!;
 
         // Apply the font that will be used to the render the labels.
-        // TODO This should be set from some default or the configured font.
+        // TODO This should be set from some default or the configured font. Can use context save/reset to apply it.
 
         // Get the text metrics for an example date value.
         const unitLabelTextMetrics = context.measureText("Fri 13 April 1990");

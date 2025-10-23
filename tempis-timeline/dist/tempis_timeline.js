@@ -1150,8 +1150,10 @@ var tempis_timeline = (() => {
   };
 
   // src/TimelineLegendView.ts
+  var DEFAULT_CATEGORY_MARGIN = 2;
   var TimelineLegendView = class {
     constructor(canvas, dataSet, options = {}) {
+      this._drawPlan = null;
       this._canvas = canvas;
       this._dataSet = dataSet;
       this._options = options;
@@ -1161,19 +1163,51 @@ var tempis_timeline = (() => {
       return (_a = this._options.position) != null ? _a : "bottom";
     }
     calculateRequiredHeight() {
+      var _a, _b;
       var context = this._canvas.getContext("2d");
-      return 50;
+      this._createViewDrawPlan(context);
+      return (_b = (_a = this._drawPlan) == null ? void 0 : _a.height) != null ? _b : 0;
     }
     draw(context, yPosition) {
-      const legendContainerHeight = this.calculateRequiredHeight();
-      context.clearRect(0, yPosition, context.canvas.clientWidth, legendContainerHeight);
+      if (!this._drawPlan) {
+        return;
+      }
+      context.clearRect(0, yPosition, this._drawPlan.width, this._drawPlan.height);
       context.fillStyle = "#595959";
       context.beginPath();
-      context.roundRect(0, yPosition, context.canvas.clientWidth, legendContainerHeight);
+      context.roundRect(0, yPosition, this._drawPlan.width, this._drawPlan.height);
       context.fill();
       context.fillStyle = "#ffffff";
       context.textBaseline = "top";
       context.fillText(this._dataSet.categories.map((category) => category.name).join(" - "), 6, yPosition + 6);
+    }
+    _createViewDrawPlan(context) {
+      if (this._dataSet.categories.length === 0) {
+        this._drawPlan = null;
+        return;
+      }
+      const elements = [];
+      const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Category Label");
+      const labelHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
+      const markerLabelGap = labelHeight / 2;
+      for (const category of this._dataSet.categories) {
+        if (isNullOrUndefined(category.name) || category.name === "") {
+          continue;
+        }
+        const { width } = context.measureText(category.name);
+        elements.push({
+          category,
+          width: width + markerLabelGap + DEFAULT_CATEGORY_MARGIN * 2,
+          height: labelHeight + DEFAULT_CATEGORY_MARGIN * 2,
+          labelHeight,
+          markerLabelGap
+        });
+      }
+      this._drawPlan = {
+        height: 50,
+        width: context.canvas.clientWidth,
+        categoryDrawPlans: []
+      };
     }
   };
 
