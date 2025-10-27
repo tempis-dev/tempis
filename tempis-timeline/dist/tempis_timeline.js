@@ -1150,7 +1150,7 @@ var tempis_timeline = (() => {
   };
 
   // src/TimelineLegendView.ts
-  var DEFAULT_CATEGORY_MARGIN = 2;
+  var DEFAULT_CATEGORY_MARGIN = 10;
   var TimelineLegendView = class {
     constructor(canvas, dataSet, options = {}) {
       this._drawPlan = null;
@@ -1161,6 +1161,14 @@ var tempis_timeline = (() => {
     get position() {
       var _a;
       return (_a = this._options.position) != null ? _a : "bottom";
+    }
+    get alignment() {
+      var _a;
+      return (_a = this._options.alignment) != null ? _a : "center";
+    }
+    get itemMarkerStyle() {
+      var _a, _b;
+      return (_b = (_a = this._options.item) == null ? void 0 : _a.markerStyle) != null ? _b : "square-rounded";
     }
     calculateRequiredHeight() {
       var _a, _b;
@@ -1173,13 +1181,33 @@ var tempis_timeline = (() => {
         return;
       }
       context.clearRect(0, yPosition, this._drawPlan.width, this._drawPlan.height);
-      context.fillStyle = "#595959";
-      context.beginPath();
-      context.roundRect(0, yPosition, this._drawPlan.width, this._drawPlan.height);
-      context.fill();
-      context.fillStyle = "#ffffff";
-      context.textBaseline = "top";
-      context.fillText(this._dataSet.categories.map((category) => category.name).join(" - "), 6, yPosition + 6);
+      for (const categoryDrawPlan of this._drawPlan.categoryDrawPlans) {
+        let markerRadius = 0;
+        switch (this.itemMarkerStyle) {
+          case "square":
+            markerRadius = 0;
+            break;
+          case "square-rounded":
+            markerRadius = categoryDrawPlan.markerSize / 4;
+            break;
+          case "circle":
+            markerRadius = categoryDrawPlan.markerSize;
+            break;
+          default:
+            throw new Error(`unknown marker style: ${this.itemMarkerStyle}`);
+        }
+        context.fillStyle = categoryDrawPlan.category.style.backgroundColor;
+        context.beginPath();
+        context.roundRect(categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN, categoryDrawPlan.yPositionStart + DEFAULT_CATEGORY_MARGIN + yPosition, categoryDrawPlan.markerSize, categoryDrawPlan.markerSize, markerRadius);
+        context.fill();
+        context.fillStyle = "#595959";
+        context.textBaseline = "top";
+        context.fillText(
+          categoryDrawPlan.category.name,
+          categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap,
+          categoryDrawPlan.yPositionStart + DEFAULT_CATEGORY_MARGIN + yPosition
+        );
+      }
     }
     _createViewDrawPlan(context) {
       if (this._dataSet.categories.length === 0) {
@@ -1189,6 +1217,7 @@ var tempis_timeline = (() => {
       const elements = [];
       const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Category Label");
       const labelHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
+      const itemHeight = labelHeight + DEFAULT_CATEGORY_MARGIN * 2;
       const markerLabelGap = labelHeight / 2;
       for (const category of this._dataSet.categories) {
         if (isNullOrUndefined(category.name) || category.name === "") {
@@ -1197,16 +1226,49 @@ var tempis_timeline = (() => {
         const { width } = context.measureText(category.name);
         elements.push({
           category,
-          width: width + markerLabelGap + DEFAULT_CATEGORY_MARGIN * 2,
-          height: labelHeight + DEFAULT_CATEGORY_MARGIN * 2,
+          width: width + markerLabelGap + labelHeight + DEFAULT_CATEGORY_MARGIN * 2,
+          height: itemHeight,
           labelHeight,
           markerLabelGap
         });
       }
+      const elementRows = [[]];
+      let currentElementRowWidth = 0;
+      for (const element of elements) {
+        if (currentElementRowWidth + element.width > context.canvas.clientWidth && elementRows[elementRows.length - 1].length > 0) {
+          elementRows.push([]);
+          currentElementRowWidth = 0;
+        }
+        elementRows[elementRows.length - 1].push(element);
+        currentElementRowWidth += element.width;
+      }
+      const categoryDrawPlans = [];
+      for (const elementRow of elementRows) {
+        const rowIndex = elementRows.indexOf(elementRow);
+        const rowTotalWidth = elementRow.reduce((previous, current) => previous + current.width, 0);
+        let currentXPosition = 0;
+        if (this.alignment === "center") {
+          currentXPosition = Math.max(0, context.canvas.clientWidth / 2 - rowTotalWidth / 2);
+        } else if (this.alignment === "end") {
+          currentXPosition = Math.max(0, context.canvas.clientWidth - rowTotalWidth);
+        }
+        for (const element of elementRow) {
+          categoryDrawPlans.push({
+            category: element.category,
+            markerSize: element.labelHeight,
+            markerLabelGap: element.markerLabelGap,
+            xPositionStart: currentXPosition,
+            xPositionEnd: currentXPosition + element.width,
+            yPositionStart: rowIndex * element.height,
+            yPositionEnd: rowIndex * element.height + element.height
+          });
+          currentXPosition += element.width;
+        }
+      }
       this._drawPlan = {
-        height: 50,
+        height: itemHeight * elementRows.length,
         width: context.canvas.clientWidth,
-        categoryDrawPlans: []
+        categoryDrawPlans
       };
     }
   };

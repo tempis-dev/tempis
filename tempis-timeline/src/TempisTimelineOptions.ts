@@ -209,8 +209,15 @@ export type TempisTimelineLegendPosition = "top" | "bottom" | "none";
 
 export type TempisTimelineAlignment = "start" | "center" | "end";
 
-export interface TempisTimelineLegendItemOptions {
+export type TempisTimelineMarkerStyle = "square" | "square-rounded" | "circle";
 
+export interface TempisTimelineLegendItemOptions {
+    /** The legend item marker style. Defaults to `"square-rounded"` */
+    markerStyle?: TempisTimelineMarkerStyle;
+
+    /** The amount of padding to apply to the legend item. */
+    // TODO Apply this.
+    padding?: number;
 }
 
 export interface TempisTimelineLegendOptions {

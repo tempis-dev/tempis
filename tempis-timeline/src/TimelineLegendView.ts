@@ -1,4 +1,4 @@
-import { TempisTimelineLegendOptions, TempisTimelineLegendPosition } from "./TempisTimelineOptions";
+import { TempisTimelineAlignment, TempisTimelineLegendOptions, TempisTimelineLegendPosition, TempisTimelineMarkerStyle } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineItemCategory } from "./TimelineItemCategory";
 import { isNullOrUndefined } from "./Utilities";
@@ -18,6 +18,10 @@ export interface LegendCategoryDrawPlan {
     /** The category. */
     category: TimelineItemCategory;
 
+    markerSize: number;
+
+    markerLabelGap: number;
+
     xPositionStart: number;
 
     xPositionEnd: number;
@@ -28,7 +32,7 @@ export interface LegendCategoryDrawPlan {
 }
 
 /** The default amount of margin to use for each category. */
-const DEFAULT_CATEGORY_MARGIN: number = 2;
+const DEFAULT_CATEGORY_MARGIN: number = 10;
 
 export class TimelineLegendView {
     /** The timeline canvas. */
@@ -63,6 +67,20 @@ export class TimelineLegendView {
     }
 
     /**
+     * Gets the alignment option value.
+     */
+    public get alignment(): TempisTimelineAlignment {
+        return this._options.alignment ?? "center";
+    }
+
+    /**
+     * Gets the legend item marker style.
+     */
+    public get itemMarkerStyle(): TempisTimelineMarkerStyle {
+        return this._options.item?.markerStyle ?? "square-rounded";
+    }
+
+    /**
      * Calculate the height of this view when rendered.
      * @returns The height of this view when rendered.
      */
@@ -91,16 +109,42 @@ export class TimelineLegendView {
         // Clear the legend view area.
         context.clearRect(0, yPosition, this._drawPlan.width, this._drawPlan.height);
 
-        // TODO Draw a test rectangle at the view position.
-        context.fillStyle = "#595959";
-        context.beginPath();
-        context.roundRect(0, yPosition, this._drawPlan.width, this._drawPlan.height);
-        context.fill();
+        // Draw a marker and label for each category.
+        for (const categoryDrawPlan of this._drawPlan.categoryDrawPlans) {
+            // Figure out the marker radius to use which is determines by the item marker style.
+            let markerRadius = 0;
+            switch (this.itemMarkerStyle) {
+                case "square":
+                    markerRadius = 0;
+                    break;
 
-        // TODO Draw the categories.
-        context.fillStyle = "#ffffff";
-        context.textBaseline = "top";
-        context.fillText(this._dataSet.categories.map((category) => category.name).join(" - "), 6, yPosition + 6);
+                case "square-rounded":
+                    markerRadius = categoryDrawPlan.markerSize / 4;
+                    break;
+
+                case "circle":
+                    markerRadius = categoryDrawPlan.markerSize;
+                    break;
+
+                default:
+                    throw new Error(`unknown marker style: ${this.itemMarkerStyle}`);
+            }
+
+            // Draw the category marker.
+            context.fillStyle = categoryDrawPlan.category.style.backgroundColor!;
+            context.beginPath();
+            context.roundRect(categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN, categoryDrawPlan.yPositionStart + DEFAULT_CATEGORY_MARGIN + yPosition, categoryDrawPlan.markerSize, categoryDrawPlan.markerSize, markerRadius);
+            context.fill();
+            
+            // Draw the category label.
+            context.fillStyle = "#595959";
+            context.textBaseline = "top";
+            context.fillText(
+                categoryDrawPlan.category.name, 
+                categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap, 
+                categoryDrawPlan.yPositionStart + DEFAULT_CATEGORY_MARGIN + yPosition
+            );
+        }
     }
 
     /**
@@ -114,12 +158,15 @@ export class TimelineLegendView {
             return;
         }
 
-        // Create an array to hold the unpositioned legend elements.
-        const elements: { category: TimelineItemCategory, width: number; height: number; labelHeight: number; markerLabelGap: number; }[] = [];
+        type SizedElement = { category: TimelineItemCategory, width: number; height: number; labelHeight: number; markerLabelGap: number; };
 
-        // Calculate the label height to use for every category (to be consistent).
+        // Create an array to hold the sized legend elements.
+        const elements: SizedElement[] = [];
+
+        // Calculate the label height to use for every category (to be consistent) and the item height.
         const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Category Label");
         const labelHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
+        const itemHeight = labelHeight + (DEFAULT_CATEGORY_MARGIN * 2);
 
         // Calculate the gap between the colour marker and the label, this should be derived from the text size.
         const markerLabelGap = labelHeight / 2; 
@@ -136,20 +183,74 @@ export class TimelineLegendView {
 
             elements.push({ 
                 category, 
-                width: width + markerLabelGap + (DEFAULT_CATEGORY_MARGIN * 2), 
-                height: labelHeight + (DEFAULT_CATEGORY_MARGIN * 2),
+                width: width + markerLabelGap + labelHeight + (DEFAULT_CATEGORY_MARGIN * 2), 
+                height: itemHeight,
                 labelHeight,
                 markerLabelGap
             });
         }
 
-        // TODO Make an empty 2d array to hold our items, iterate over each element and when the sum of all widths of items in newest row > canvas width then start on new row
+        // Make a 2D array to represent the rows of legend elements.
+        const elementRows: SizedElement[][] = [[]];
+        let currentElementRowWidth = 0;
 
+        // Iterate over each element and add it to our 2D array representing the rows of elements in our legend.
+        for (const element of elements) {
+            // If adding this element would exceed the available width, start a new row.
+            // If this item would be the only one in the row and is still wider than the view then it should still get its own row and overflow.
+            // If the canvas width is not wide enough to show an item (probably has a long label or canvas is narrow) then we should show a label ellipses at draw.
+            if (currentElementRowWidth + element.width > context.canvas.clientWidth && elementRows[elementRows.length - 1].length > 0) {
+                elementRows.push([]);
+                currentElementRowWidth = 0;
+            }
+
+            // Add the element to the current row.
+            elementRows[elementRows.length - 1].push(element);
+
+            // Update the running width.
+            currentElementRowWidth += element.width;
+        }
+
+        const categoryDrawPlans: LegendCategoryDrawPlan[] = [];
+
+        // Iterate over the element rows and elements in each row and create a category draw plan for each.
+        for (const elementRow of elementRows) {
+            // Get the index of the current row.
+            const rowIndex = elementRows.indexOf(elementRow);
+
+            // Calculate the width of all items in the row so we know where to start positioning them from.
+            const rowTotalWidth = elementRow.reduce((previous, current) => previous + current.width, 0);
+
+            let currentXPosition = 0;
+
+            // We need to apply an initial x offset if we aren't aligning the items with the start of the container.
+            if (this.alignment === "center") {
+                currentXPosition = Math.max(0, (context.canvas.clientWidth / 2) - (rowTotalWidth / 2));
+            } else if (this.alignment === "end") {
+                currentXPosition = Math.max(0, context.canvas.clientWidth - rowTotalWidth);
+            }
+
+            // Iterate over each element in the row and create a category item plan with the the correct x/y start/end values.
+            for (const element of elementRow) {
+                categoryDrawPlans.push({
+                    category: element.category,
+                    markerSize: element.labelHeight,
+                    markerLabelGap: element.markerLabelGap,
+                    xPositionStart: currentXPosition,
+                    xPositionEnd: currentXPosition + element.width,
+                    yPositionStart: rowIndex * element.height,
+                    yPositionEnd: (rowIndex * element.height) + element.height
+                });
+                
+                currentXPosition += element.width;
+            }
+        }
+
+        // Set the draw plan.
         this._drawPlan = {
-            // TODO Fix this!
-            height: 50,
+            height: itemHeight * elementRows.length,
             width: context.canvas.clientWidth,
-            categoryDrawPlans: []
+            categoryDrawPlans
         };
     }
 }
