@@ -85,38 +85,48 @@ export function doDateRangesOverlap(aStart: Date, aEnd: Date, bStart: Date, bEnd
 }
 
 /**
- * Truncates and applies an ellipses to the given text so that it would fit in the given max width for the given canvas context
- * TODO Improve the performance of this function. It is currently very slow.
- * @param context The canvas context to use to measure the text width.
- * @param value The original text.
- * @param maxWidth The max width that the text should fit in.
- * @returns The truncated text with an ellipses applied if the text cannot fit in the given max width.
+ * Draws text onto a canvas, truncating it visually with an ellipsis ("...") if it exceeds the specified maximum width.
+ * @param {CanvasRenderingContext2D} context - The 2D rendering context of the canvas.
+ * @param {string} text The text to render.
+ * @param {number} x The x-coordinate where the text starts.
+ * @param {number} y The y-coordinate where the text baseline is drawn.
+ * @param {number} maxWidth The maximum allowed width for the text (including the ellipsis).
  */
-export function fitCanvasText(context: CanvasRenderingContext2D, value: string, maxWidth: number): string {
-    // Get the width of the entire string.
-    let stringWidth = context.measureText(value).width;
-
-    // Is the string empty or the width of our string already less than the max width? If so just return it.
-    if (!value || stringWidth <= maxWidth) {
-        return value;
+export function drawClippedText(context: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number) {
+    // There is nothing to do if we have no text to draw.
+    if (!text) {
+        return;
     }
 
-    const ellipsisWidth = context.measureText("...").width;
+    const ellipsis = "...";
+    const ellipsisWidth = context.measureText(ellipsis).width;
+    const textWidth = context.measureText(text).width;
 
-    // If our ellipses width is already greater than our max width then return an empty string.
-    if (ellipsisWidth > maxWidth) {
-        return "";
+    // If the text already fits then just draw it normally.
+    if (textWidth <= maxWidth) {
+        context.fillText(text, x, y);
+        return;
     }
 
-    let stringCharacterLength = value.length;
+    // If the ellipsis alone doesn't fit, skip drawing
+    if (ellipsisWidth > maxWidth) return;
 
-    // Find the longest possible length of our string that will give a width (including the ellipsis width) that is less than the max width.
-    while (stringWidth >= maxWidth - ellipsisWidth && stringCharacterLength-- > 1) {
-        value = value.substring(0, stringCharacterLength);
-        stringWidth = context.measureText(value).width;
-    }
-    
-    return `${value}...`;
+    // Save context state
+    context.save();
+
+    // Define clipping region (leave space for the ellipsis)
+    context.beginPath();
+    context.rect(x, y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
+    context.clip();
+
+    // Draw the full text — will be visually clipped
+    context.fillText(text, x, y);
+
+    // Restore clipping
+    context.restore();
+
+    // Draw ellipsis at the end
+    context.fillText(ellipsis, x + maxWidth - ellipsisWidth, y);
 }
 
 /**

@@ -68,21 +68,26 @@ var tempis_timeline = (() => {
       return true;
     return false;
   }
-  function fitCanvasText(context, value, maxWidth) {
-    let stringWidth = context.measureText(value).width;
-    if (!value || stringWidth <= maxWidth) {
-      return value;
+  function drawClippedText(context, text, x2, y, maxWidth) {
+    if (!text) {
+      return;
     }
-    const ellipsisWidth = context.measureText("...").width;
-    if (ellipsisWidth > maxWidth) {
-      return "";
+    const ellipsis = "...";
+    const ellipsisWidth = context.measureText(ellipsis).width;
+    const textWidth = context.measureText(text).width;
+    if (textWidth <= maxWidth) {
+      context.fillText(text, x2, y);
+      return;
     }
-    let stringCharacterLength = value.length;
-    while (stringWidth >= maxWidth - ellipsisWidth && stringCharacterLength-- > 1) {
-      value = value.substring(0, stringCharacterLength);
-      stringWidth = context.measureText(value).width;
-    }
-    return `${value}...`;
+    if (ellipsisWidth > maxWidth)
+      return;
+    context.save();
+    context.beginPath();
+    context.rect(x2, y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
+    context.clip();
+    context.fillText(text, x2, y);
+    context.restore();
+    context.fillText(ellipsis, x2 + maxWidth - ellipsisWidth, y);
   }
   function defaults(...sources) {
     if (sources.length === 0)
@@ -514,9 +519,13 @@ var tempis_timeline = (() => {
         if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
           context.textBaseline = "middle";
           context.fillStyle = itemFontColor;
-          context.beginPath();
-          context.fillText(fitCanvasText(context, itemDrawPlan.item.label, maxLabelWidth), labelStartPositionX, itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + 1 + scrolledYPosition);
-          context.stroke();
+          drawClippedText(
+            context,
+            itemDrawPlan.item.label,
+            labelStartPositionX,
+            itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + 1 + scrolledYPosition,
+            maxLabelWidth
+          );
         }
       }
     }

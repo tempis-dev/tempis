@@ -1,7 +1,7 @@
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineItem } from "./TimelineItem";
 import { RangeTick, TimelineRangeView } from "./TimelineRangeView";
-import { clamp, fitCanvasText } from "./Utilities";
+import { clamp, drawClippedText } from "./Utilities";
 
 export interface DataViewDrawPlan {
     /** The height that is required to draw all groups and items within the specified date range. */
@@ -322,9 +322,15 @@ export class TimelineDataView {
             if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
                 context.textBaseline = "middle";
                 context.fillStyle = itemFontColor;
-                context.beginPath();
-                context.fillText(fitCanvasText(context, itemDrawPlan.item.label, maxLabelWidth), labelStartPositionX, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2) + 1) + scrolledYPosition);
-                context.stroke();
+      
+                // Draw the item label, but clip it if there is not enough available horizontal space to do so.
+                drawClippedText(
+                    context, 
+                    itemDrawPlan.item.label, 
+                    labelStartPositionX,
+                    (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2) + 1) + scrolledYPosition,
+                    maxLabelWidth
+                );
             }
         }
     }
