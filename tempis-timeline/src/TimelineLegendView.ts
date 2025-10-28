@@ -35,8 +35,11 @@ export interface LegendCategoryDrawPlan {
     height: number;
 }
 
-/** The default amount of margin to use for each category. */
-const DEFAULT_CATEGORY_MARGIN: number = 10;
+/** The default amount of margin to use for each legend category. */
+const DEFAULT_CATEGORY_MARGIN: number = 4;
+
+/** The default amount of padding to use for the legend. */
+const DEFAULT_LEGEND_PADDING: number = 8;
 
 export class TimelineLegendView {
     /** The timeline canvas. */
@@ -194,6 +197,9 @@ export class TimelineLegendView {
             });
         }
 
+        // Figure out the available width of the legend excluding the padding.
+        const availableWidth = context.canvas.clientWidth - (DEFAULT_LEGEND_PADDING * 2);
+
         // Make a 2D array to represent the rows of legend elements.
         const elementRows: SizedElement[][] = [[]];
         let currentElementRowWidth = 0;
@@ -203,7 +209,7 @@ export class TimelineLegendView {
             // If adding this element would exceed the available width, start a new row.
             // If this item would be the only one in the row and is still wider than the view then it should still get its own row and overflow.
             // If the canvas width is not wide enough to show an item (probably has a long label or canvas is narrow) then we should show a label ellipses at draw.
-            if (currentElementRowWidth + element.width > context.canvas.clientWidth && elementRows[elementRows.length - 1].length > 0) {
+            if (currentElementRowWidth + element.width > availableWidth && elementRows[elementRows.length - 1].length > 0) {
                 elementRows.push([]);
                 currentElementRowWidth = 0;
             }
@@ -229,9 +235,9 @@ export class TimelineLegendView {
 
             // We need to apply an initial x offset if we aren't aligning the items with the start of the container.
             if (this.alignment === "center") {
-                currentXPosition = Math.max(0, (context.canvas.clientWidth / 2) - (rowTotalWidth / 2));
+                currentXPosition = Math.max(0, (availableWidth / 2) - (rowTotalWidth / 2));
             } else if (this.alignment === "end") {
-                currentXPosition = Math.max(0, context.canvas.clientWidth - rowTotalWidth);
+                currentXPosition = Math.max(0, availableWidth - rowTotalWidth);
             }
 
             // Iterate over each element in the row and create a category item plan with the the correct x/y start/end values.
@@ -240,10 +246,10 @@ export class TimelineLegendView {
                     category: element.category,
                     markerSize: element.labelHeight,
                     markerLabelGap: element.markerLabelGap,
-                    xPositionStart: currentXPosition,
-                    xPositionEnd: currentXPosition + element.width,
-                    yPositionStart: rowIndex * element.height,
-                    yPositionEnd: (rowIndex * element.height) + element.height,
+                    xPositionStart: currentXPosition + DEFAULT_LEGEND_PADDING,
+                    xPositionEnd: currentXPosition + element.width + DEFAULT_LEGEND_PADDING,
+                    yPositionStart: (rowIndex * element.height) + DEFAULT_LEGEND_PADDING,
+                    yPositionEnd: (rowIndex * element.height) + element.height + DEFAULT_LEGEND_PADDING,
                     width: element.width,
                     height: element.height
                 });
@@ -254,7 +260,7 @@ export class TimelineLegendView {
 
         // Set the draw plan.
         this._drawPlan = {
-            height: itemHeight * elementRows.length,
+            height: (itemHeight * elementRows.length) + (DEFAULT_LEGEND_PADDING * 2),
             width: context.canvas.clientWidth,
             categoryDrawPlans
         };

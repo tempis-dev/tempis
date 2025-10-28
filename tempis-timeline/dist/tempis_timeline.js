@@ -1154,7 +1154,8 @@ var tempis_timeline = (() => {
   };
 
   // src/TimelineLegendView.ts
-  var DEFAULT_CATEGORY_MARGIN = 10;
+  var DEFAULT_CATEGORY_MARGIN = 4;
+  var DEFAULT_LEGEND_PADDING = 8;
   var TimelineLegendView = class {
     constructor(canvas, dataSet, options = {}) {
       this._drawPlan = null;
@@ -1236,10 +1237,11 @@ var tempis_timeline = (() => {
           markerLabelGap
         });
       }
+      const availableWidth = context.canvas.clientWidth - DEFAULT_LEGEND_PADDING * 2;
       const elementRows = [[]];
       let currentElementRowWidth = 0;
       for (const element of elements) {
-        if (currentElementRowWidth + element.width > context.canvas.clientWidth && elementRows[elementRows.length - 1].length > 0) {
+        if (currentElementRowWidth + element.width > availableWidth && elementRows[elementRows.length - 1].length > 0) {
           elementRows.push([]);
           currentElementRowWidth = 0;
         }
@@ -1252,19 +1254,19 @@ var tempis_timeline = (() => {
         const rowTotalWidth = elementRow.reduce((previous, current) => previous + current.width, 0);
         let currentXPosition = 0;
         if (this.alignment === "center") {
-          currentXPosition = Math.max(0, context.canvas.clientWidth / 2 - rowTotalWidth / 2);
+          currentXPosition = Math.max(0, availableWidth / 2 - rowTotalWidth / 2);
         } else if (this.alignment === "end") {
-          currentXPosition = Math.max(0, context.canvas.clientWidth - rowTotalWidth);
+          currentXPosition = Math.max(0, availableWidth - rowTotalWidth);
         }
         for (const element of elementRow) {
           categoryDrawPlans.push({
             category: element.category,
             markerSize: element.labelHeight,
             markerLabelGap: element.markerLabelGap,
-            xPositionStart: currentXPosition,
-            xPositionEnd: currentXPosition + element.width,
-            yPositionStart: rowIndex * element.height,
-            yPositionEnd: rowIndex * element.height + element.height,
+            xPositionStart: currentXPosition + DEFAULT_LEGEND_PADDING,
+            xPositionEnd: currentXPosition + element.width + DEFAULT_LEGEND_PADDING,
+            yPositionStart: rowIndex * element.height + DEFAULT_LEGEND_PADDING,
+            yPositionEnd: rowIndex * element.height + element.height + DEFAULT_LEGEND_PADDING,
             width: element.width,
             height: element.height
           });
@@ -1272,7 +1274,7 @@ var tempis_timeline = (() => {
         }
       }
       this._drawPlan = {
-        height: itemHeight * elementRows.length,
+        height: itemHeight * elementRows.length + DEFAULT_LEGEND_PADDING * 2,
         width: context.canvas.clientWidth,
         categoryDrawPlans
       };
