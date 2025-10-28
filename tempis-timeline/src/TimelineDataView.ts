@@ -311,7 +311,7 @@ export class TimelineDataView {
         }
 
         // Draw the item label (if there is one).
-        if (itemDrawPlan.item.caption) {
+        if (itemDrawPlan.item.label) {
             // Calculate the actual x position of the label, we should attempt to keep this in the bounds of the view.
             const labelStartPositionX = Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
 
@@ -323,7 +323,7 @@ export class TimelineDataView {
                 context.textBaseline = "middle";
                 context.fillStyle = itemFontColor;
                 context.beginPath();
-                context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2) + 1) + scrolledYPosition);
+                context.fillText(fitCanvasText(context, itemDrawPlan.item.label, maxLabelWidth), labelStartPositionX, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2) + 1) + scrolledYPosition);
                 context.stroke();
             }
         }
@@ -368,9 +368,9 @@ export class TimelineDataView {
                     endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
                 } else {
                     // This is a PIT item, the start and end positions of our x axis will be derived from the width of the label and the start date.
-                    // TODO Determine what to do when we have PIT item with no caption.
+                    // TODO Determine what to do when we have PIT item with no label.
                     // TODO Set the context font to be whatever we will be using to render the actual item label.
-                    const itemLabelWidth = context.measureText(item.caption ?? "?").width + (item.style.padding! * 2);
+                    const itemLabelWidth = context.measureText(item.label ?? "?").width + (item.style.padding! * 2);
 
                     // Let's set the start and end x position to be equidistant from the actual point in time that this item is for.
                     startPositionX = (milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime())) - (itemLabelWidth / 2);

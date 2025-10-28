@@ -75,7 +75,7 @@ export interface TempisTimelineTooltipOptions {
      * - An `HTMLElement`: appended directly as the tooltip content.
      * - A `string`: injected into the tooltip as raw HTML (`innerHTML`).
      *
-     * If no template is provided, or the template function returns null, a default tooltip showing the item caption and date range will be used.
+     * If no template is provided, or the template function returns null, a default tooltip showing the item label and date range will be used.
      *
      * @param {string | number} id The identifier of the item for which the tooltip is being generated.
      * @returns {HTMLElement | string} Custom tooltip content.
@@ -236,7 +236,7 @@ export interface TempisTimelineItem {
     id: string | number;
     start: string | number | Date;
     end?: string | number | Date;
-    caption?: string;
+    label?: string;
     grouping?: string;
     category?: string;
     style?: TempisTimelineItemStyle;

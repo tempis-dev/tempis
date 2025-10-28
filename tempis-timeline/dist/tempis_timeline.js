@@ -197,7 +197,7 @@ var tempis_timeline = (() => {
       var _a;
       this._definition = definition;
       this._id = definition.id;
-      this._caption = (_a = definition.caption) != null ? _a : "";
+      this._label = (_a = definition.label) != null ? _a : "";
       this._start = parseDate(definition.start);
       this._end = definition.end ? parseDate(definition.end) : null;
       this._style = style;
@@ -209,8 +209,8 @@ var tempis_timeline = (() => {
     get id() {
       return this._id;
     }
-    get caption() {
-      return this._caption;
+    get label() {
+      return this._label;
     }
     get start() {
       return this._start;
@@ -504,14 +504,14 @@ var tempis_timeline = (() => {
         context.roundRect(itemDrawPlan.xPositionStart + context.lineWidth / 2, scrolledYPosition + itemDrawPlan.yPositionStart + context.lineWidth / 2, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - context.lineWidth, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - +context.lineWidth, itemBorderRadius);
         context.stroke();
       }
-      if (itemDrawPlan.item.caption) {
+      if (itemDrawPlan.item.label) {
         const labelStartPositionX = Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
         const maxLabelWidth = Math.max(0, Math.ceil(itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX));
         if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
           context.textBaseline = "middle";
           context.fillStyle = itemFontColor;
           context.beginPath();
-          context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + 1 + scrolledYPosition);
+          context.fillText(fitCanvasText(context, itemDrawPlan.item.label, maxLabelWidth), labelStartPositionX, itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + 1 + scrolledYPosition);
           context.stroke();
         }
       }
@@ -534,7 +534,7 @@ var tempis_timeline = (() => {
             startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
             endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
           } else {
-            const itemLabelWidth = context.measureText((_a = item.caption) != null ? _a : "?").width + item.style.padding * 2;
+            const itemLabelWidth = context.measureText((_a = item.label) != null ? _a : "?").width + item.style.padding * 2;
             startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime()) - itemLabelWidth / 2;
             endPositionX = startPositionX + itemLabelWidth;
             pointInTimePositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
@@ -1058,9 +1058,9 @@ var tempis_timeline = (() => {
           borderRadius: "5px"
         });
         if (this._item.end) {
-          this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.caption}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
+          this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
         } else {
-          this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.caption}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)}</p>`;
+          this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)}</p>`;
         }
       }
       this._activeElement.style.left = `${this._posX}px`;

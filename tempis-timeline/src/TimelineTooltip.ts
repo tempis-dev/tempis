@@ -148,11 +148,11 @@ export class TimelineTooltip {
                 borderRadius: "5px"
             });
 
-            // Set the default tooltip content which is a header of the item caption as well as the start date for PIT items and start and end date for range items.
+            // Set the default tooltip content which is a header of the item label as well as the start date for PIT items and start and end date for range items.
             if (this._item.end) {
-                this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.caption}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
+                this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
             } else {
-                this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.caption}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)}</p>`;
+                this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)}</p>`;
             }
         }
 
