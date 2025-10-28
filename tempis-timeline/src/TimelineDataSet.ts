@@ -200,7 +200,7 @@ export class TimelineDataSet {
             // If the user has not defined a category color then we will grab the next available one from the global color palette.
             categoryStyle.backgroundColor = categoryStyle.backgroundColor ?? getNextPaletteColor.next().value;
 
-            this._categories.push(new TimelineItemCategory(categoryDefinition.name, categoryStyle));
+            this._categories.push(new TimelineItemCategory(categoryDefinition.name, categoryDefinition.label, categoryStyle));
 
             categoryNames.push(categoryDefinition.name);
         }

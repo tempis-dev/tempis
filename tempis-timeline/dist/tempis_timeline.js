@@ -138,14 +138,18 @@ var tempis_timeline = (() => {
 
   // src/TimelineItemCategory.ts
   var TimelineItemCategory = class {
-    constructor(name, style) {
+    constructor(name, label, style) {
       this._isDisabled = false;
       this._isFocused = false;
       this._name = name;
+      this._label = label;
       this._style = style;
     }
     get name() {
       return this._name;
+    }
+    get label() {
+      return this._label;
     }
     get style() {
       return this._style;
@@ -319,7 +323,7 @@ var tempis_timeline = (() => {
         }
         const categoryStyle = (_b = categoryDefinition.style) != null ? _b : {};
         categoryStyle.backgroundColor = (_c = categoryStyle.backgroundColor) != null ? _c : getNextPaletteColor.next().value;
-        this._categories.push(new TimelineItemCategory(categoryDefinition.name, categoryStyle));
+        this._categories.push(new TimelineItemCategory(categoryDefinition.name, categoryDefinition.label, categoryStyle));
         categoryNames.push(categoryDefinition.name);
       }
     }
@@ -1201,11 +1205,11 @@ var tempis_timeline = (() => {
         context.roundRect(categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN, categoryDrawPlan.yPositionStart + DEFAULT_CATEGORY_MARGIN + yPosition, categoryDrawPlan.markerSize, categoryDrawPlan.markerSize, markerRadius);
         context.fill();
         context.fillStyle = "#595959";
-        context.textBaseline = "top";
+        context.textBaseline = "middle";
         context.fillText(
-          categoryDrawPlan.category.name,
+          categoryDrawPlan.category.label,
           categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap,
-          categoryDrawPlan.yPositionStart + DEFAULT_CATEGORY_MARGIN + yPosition
+          categoryDrawPlan.yPositionStart + categoryDrawPlan.height / 2 + yPosition
         );
       }
     }
@@ -1220,10 +1224,10 @@ var tempis_timeline = (() => {
       const itemHeight = labelHeight + DEFAULT_CATEGORY_MARGIN * 2;
       const markerLabelGap = labelHeight / 2;
       for (const category of this._dataSet.categories) {
-        if (isNullOrUndefined(category.name) || category.name === "") {
+        if (isNullOrUndefined(category.label) || category.label === "") {
           continue;
         }
-        const { width } = context.measureText(category.name);
+        const { width } = context.measureText(category.label);
         elements.push({
           category,
           width: width + markerLabelGap + labelHeight + DEFAULT_CATEGORY_MARGIN * 2,
@@ -1260,7 +1264,9 @@ var tempis_timeline = (() => {
             xPositionStart: currentXPosition,
             xPositionEnd: currentXPosition + element.width,
             yPositionStart: rowIndex * element.height,
-            yPositionEnd: rowIndex * element.height + element.height
+            yPositionEnd: rowIndex * element.height + element.height,
+            width: element.width,
+            height: element.height
           });
           currentXPosition += element.width;
         }

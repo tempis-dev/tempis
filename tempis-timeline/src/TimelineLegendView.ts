@@ -29,6 +29,10 @@ export interface LegendCategoryDrawPlan {
     yPositionStart: number;
 
     yPositionEnd: number;
+
+    width: number;
+
+    height: number;
 }
 
 /** The default amount of margin to use for each category. */
@@ -138,11 +142,11 @@ export class TimelineLegendView {
             
             // Draw the category label.
             context.fillStyle = "#595959";
-            context.textBaseline = "top";
+            context.textBaseline = "middle";
             context.fillText(
-                categoryDrawPlan.category.name, 
+                categoryDrawPlan.category.label, 
                 categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap, 
-                categoryDrawPlan.yPositionStart + DEFAULT_CATEGORY_MARGIN + yPosition
+                categoryDrawPlan.yPositionStart + (categoryDrawPlan.height / 2) + yPosition
             );
         }
     }
@@ -174,12 +178,12 @@ export class TimelineLegendView {
         // Create a legend element for each category with it's drawn width and height.
         for (const category of this._dataSet.categories) {
             // We shouldn't create elements for categories with no name.
-            if (isNullOrUndefined(category.name) || category.name === "") {
+            if (isNullOrUndefined(category.label) || category.label === "") {
                 continue;
             }
 
             // Measure the category name text dimensions to get the width of the label.
-            const { width } = context.measureText(category.name);
+            const { width } = context.measureText(category.label);
 
             elements.push({ 
                 category, 
@@ -239,7 +243,9 @@ export class TimelineLegendView {
                     xPositionStart: currentXPosition,
                     xPositionEnd: currentXPosition + element.width,
                     yPositionStart: rowIndex * element.height,
-                    yPositionEnd: (rowIndex * element.height) + element.height
+                    yPositionEnd: (rowIndex * element.height) + element.height,
+                    width: element.width,
+                    height: element.height
                 });
                 
                 currentXPosition += element.width;

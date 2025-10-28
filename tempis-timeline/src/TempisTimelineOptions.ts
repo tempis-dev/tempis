@@ -247,6 +247,9 @@ export interface TempisTimelineCategory {
     /** The category name, correlating to the 'category' property of items. */
     name: string;
 
+    /** The category label. */
+    label: string;
+
     /** The style to apply to items in this category. The backgroundColor property will be applied as the legend key color. */
     style?: TempisTimelineItemStyle;
 };
