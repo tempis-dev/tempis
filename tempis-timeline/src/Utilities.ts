@@ -84,6 +84,14 @@ export function doDateRangesOverlap(aStart: Date, aEnd: Date, bStart: Date, bEnd
     return false;
 }
 
+/**
+ * Truncates and applies an ellipses to the given text so that it would fit in the given max width for the given canvas context
+ * TODO Improve the performance of this function. It is currently very slow.
+ * @param context The canvas context to use to measure the text width.
+ * @param value The original text.
+ * @param maxWidth The max width that the text should fit in.
+ * @returns The truncated text with an ellipses applied if the text cannot fit in the given max width.
+ */
 export function fitCanvasText(context: CanvasRenderingContext2D, value: string, maxWidth: number): string {
     // Get the width of the entire string.
     let stringWidth = context.measureText(value).width;
@@ -111,6 +119,37 @@ export function fitCanvasText(context: CanvasRenderingContext2D, value: string, 
     return `${value}...`;
 }
 
+/**
+ * Merges multiple source objects into the first one, assigning default values 
+ * for properties that are `null` or `undefined` in the target.
+ *
+ * The function iterates over each source (from left to right) and copies any 
+ * property that does not already exist (i.e., is `null` or `undefined`) on 
+ * the target. The target is the first object in the argument list and is 
+ * mutated in place.
+ *
+ * @template T - The object type of all source objects.
+ * @param {...Partial<T>[]} sources - One or more partial objects to merge. 
+ *   - The first object acts as the target to receive defaults.
+ *   - Subsequent objects provide default values.
+ *
+ * @returns {Partial<T> | undefined} 
+ * Returns the target object with defaults applied, or `undefined` if no sources are provided.
+ *
+ * @example
+ * const a = { name: "Alice" };
+ * const b = { age: 25, name: "Bob" };
+ * const c = { country: "USA" };
+ *
+ * // Only fills missing fields in 'a' (since 'name' is already set)
+ * const result = defaults(a, b, c);
+ * console.log(result); 
+ * // → { name: "Alice", age: 25, country: "USA" }
+ *
+ * @note
+ * - This function mutates the first argument (`sources[0]`).
+ * - Only `null` or `undefined` properties are replaced; falsy values like `0` or `""` are preserved.
+ */
 export function defaults<T extends object>(...sources: Partial<T>[]): Partial<T> | undefined {
   if (sources.length === 0) return undefined;
 
