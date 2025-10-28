@@ -1216,10 +1216,12 @@ var tempis_timeline = (() => {
         context.fill();
         context.fillStyle = "#595959";
         context.textBaseline = "middle";
-        context.fillText(
+        drawClippedText(
+          context,
           categoryDrawPlan.category.label,
           categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap,
-          categoryDrawPlan.yPositionStart + categoryDrawPlan.height / 2 + yPosition
+          categoryDrawPlan.yPositionStart + categoryDrawPlan.height / 2 + yPosition,
+          this._drawPlan.width - (categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
         );
       }
     }

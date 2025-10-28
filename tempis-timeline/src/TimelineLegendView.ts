@@ -1,7 +1,7 @@
 import { TempisTimelineAlignment, TempisTimelineLegendOptions, TempisTimelineLegendPosition, TempisTimelineMarkerStyle } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineItemCategory } from "./TimelineItemCategory";
-import { isNullOrUndefined } from "./Utilities";
+import { drawClippedText, isNullOrUndefined } from "./Utilities";
 
 export interface LegendViewDrawPlan {
     /** The height of the view. */
@@ -143,14 +143,16 @@ export class TimelineLegendView {
             context.roundRect(categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN, categoryDrawPlan.yPositionStart + DEFAULT_CATEGORY_MARGIN + yPosition, categoryDrawPlan.markerSize, categoryDrawPlan.markerSize, markerRadius);
             context.fill();
             
-            // Draw the category label.
+            // Draw the category label clipped to the available legend view width.
             context.fillStyle = "#595959";
             context.textBaseline = "middle";
-            context.fillText(
-                categoryDrawPlan.category.label, 
+            drawClippedText(
+                context, 
+                categoryDrawPlan.category.label,
                 categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap, 
-                categoryDrawPlan.yPositionStart + (categoryDrawPlan.height / 2) + yPosition
-            );
+                categoryDrawPlan.yPositionStart + (categoryDrawPlan.height / 2) + yPosition,
+                this._drawPlan.width - (categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
+            )
         }
     }
 
