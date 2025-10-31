@@ -1128,13 +1128,6 @@ var tempis_timeline = (() => {
       this._createCanvasEventHandlers();
     }
     _createCanvasEventHandlers() {
-      const getMouseOrPointerPosition = (event) => {
-        var rect = this._canvas.getBoundingClientRect();
-        return {
-          x: (event.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
-          y: (event.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
-        };
-      };
       let isPointerDown = false;
       this._canvas.addEventListener("pointerdown", () => {
         var _a;
@@ -1142,37 +1135,48 @@ var tempis_timeline = (() => {
         (_a = this._activeTooltip) == null ? void 0 : _a.destroy();
         this._activeTooltip = null;
       });
-      this._canvas.addEventListener("pointerup", () => {
+      this._canvas.addEventListener("pointerup", (event) => {
         isPointerDown = false;
+        this._createTooltip(event);
       });
       this._canvas.addEventListener("pointermove", (event) => {
-        var _a, _b;
-        if (!isNullOrUndefined(this._options.enabled) && !this._options.enabled) {
-          return;
-        }
         if (isPointerDown) {
           return;
         }
-        const item = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
-        if (!item) {
-          (_a = this._activeTooltip) == null ? void 0 : _a.destroy();
-          this._activeTooltip = null;
-        } else {
-          if (this._activeTooltip && this._activeTooltip.id === item.id) {
-            this._activeTooltip.setPosition(event.clientX, event.clientY);
-            return;
-          } else if (this._activeTooltip && this._activeTooltip.id !== item.id) {
-            (_b = this._activeTooltip) == null ? void 0 : _b.destroy();
-            this._activeTooltip = null;
-          }
-          this._activeTooltip = new TimelineTooltip(item, this._canvas, this._dateFormatter, this._font, this._options, event.clientX, event.clientY);
-        }
+        this._createTooltip(event);
       });
       this._canvas.addEventListener("pointerout", (event) => {
         var _a;
         (_a = this._activeTooltip) == null ? void 0 : _a.destroy();
         this._activeTooltip = null;
       });
+    }
+    _createTooltip(event) {
+      var _a, _b;
+      const getMouseOrPointerPosition = (event2) => {
+        var rect = this._canvas.getBoundingClientRect();
+        return {
+          x: (event2.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
+          y: (event2.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
+        };
+      };
+      if (!isNullOrUndefined(this._options.enabled) && !this._options.enabled) {
+        return;
+      }
+      const item = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
+      if (!item) {
+        (_a = this._activeTooltip) == null ? void 0 : _a.destroy();
+        this._activeTooltip = null;
+      } else {
+        if (this._activeTooltip && this._activeTooltip.id === item.id) {
+          this._activeTooltip.setPosition(event.clientX, event.clientY);
+          return;
+        } else if (this._activeTooltip && this._activeTooltip.id !== item.id) {
+          (_b = this._activeTooltip) == null ? void 0 : _b.destroy();
+          this._activeTooltip = null;
+        }
+        this._activeTooltip = new TimelineTooltip(item, this._canvas, this._dateFormatter, this._font, this._options, event.clientX, event.clientY);
+      }
     }
   };
 
