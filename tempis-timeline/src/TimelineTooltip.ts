@@ -3,6 +3,9 @@ import { TempisTimelineTooltipOptions } from "./TempisTimelineOptions";
 import { TimelineFont } from "./TimelineFont";
 import { TimelineItem } from "./TimelineItem";
 
+/** The default tooltip delay in millis. */
+const DEFAULT_TOOLTIP_DELAY_MS = 500; 
+
 export class TimelineTooltip {
     /** The item that the tooltip is being shown for. */
     private readonly _item: TimelineItem;
@@ -54,7 +57,7 @@ export class TimelineTooltip {
         this._activeShowTimer = setTimeout(() => {
             this._activeShowTimer = null;
             this._createElement();
-        }, options.delay ?? 0);
+        }, options.delay ?? DEFAULT_TOOLTIP_DELAY_MS);
     }
 
     /**

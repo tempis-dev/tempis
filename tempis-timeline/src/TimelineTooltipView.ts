@@ -58,13 +58,35 @@ export class TimelineTooltipView {
             };
         }
 
+        // A flag defining whether the pointer is currently down.
+        // This is used to determine if we can show a tooltip.
+        let isPointerDown = false;
+
+        // Handle the pointer down event.
+        this._canvas.addEventListener('pointerdown', () => {
+            isPointerDown = true;
+
+            // Clicking on the canvas should kill any active or pending tooltip.
+            this._activeTooltip?.destroy();
+            this._activeTooltip = null;
+        });
+
+        // Handle the pointer down event.
+        this._canvas.addEventListener('pointerup', () => {
+            isPointerDown = false;
+        });
+
+        // Handle the pointer being moved on the canvas.
         this._canvas.addEventListener('pointermove', (event) => {
             // There is nothing to do if tooltips are not enabled.
             if (!isNullOrUndefined(this._options.enabled) && !this._options.enabled) {
                 return;
             }
 
-            // TODO If we have no active tooltip element then clear the current tooltip timer if there is one.
+            // There is nothing to do if our pointer is currently down as we don't want tooltips showing if we are dragging/selecting.
+            if (isPointerDown) {
+                return;
+            }
             
             // Try to find the item at mouse position.
             const item = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));

@@ -1,14 +1,19 @@
 import { TempisTimelineItemStyle, TempisTimelineItem as TimelineItemDefinition } from "./TempisTimelineOptions";
 import { parseDate } from "./Utilities";
 
-/** The default item style. */
+/**
+ * The default item style.
+ */
 export const DEFAULT_ITEM_STYLE: TempisTimelineItemStyle = {
     backgroundColor: "#1a006eff",
     fontColor: "#FFFFFF",
-    padding: 12,
+    padding: 10,
     borderRadius: 5
 };
 
+/**
+ * Represents an item in the timeline.
+ */
 export class TimelineItem {
     private readonly _definition: TimelineItemDefinition;
     private readonly _id: string | number;
@@ -35,26 +40,32 @@ export class TimelineItem {
         this._isSelected = !!definition.selected;
     }
 
+    /** Gets the item definition. */
     public get definition(): TimelineItemDefinition {
         return this._definition;
     }
 
+    /** Gets the item identifier. */
     public get id(): string | number {
         return this._id;
     }
 
+    /** Gets the item label. */
     public get label(): string {
         return this._label;
     }
 
+    /** Gets the start date of the item. */
     public get start(): Date {
         return this._start;
     }
 
+    /** Gets the end date of the item, or null if the item is a PIT item. */
     public get end(): Date | null {
         return this._end;
     }
 
+    /** Gets the item style. */
     public get style(): TempisTimelineItemStyle {
         return this._style;
     }

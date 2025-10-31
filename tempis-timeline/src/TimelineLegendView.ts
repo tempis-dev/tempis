@@ -54,6 +54,9 @@ export class TimelineLegendView {
     /** The current view draw plan. */
     private _drawPlan: LegendViewDrawPlan | null = null;
 
+    /** Gets the y position from where this view was last drawn. */
+    private _lastDrawYPosition: number = 0;
+
     /**
      * Creates a new instance of the TimelineLegendView class.
      * @param canvas The timeline canvas.
@@ -64,6 +67,8 @@ export class TimelineLegendView {
         this._canvas = canvas;
         this._dataSet = dataSet;
         this._options = options;
+
+        this._createCanvasEventHandlers();
     }
 
     /**
@@ -154,6 +159,10 @@ export class TimelineLegendView {
                 this._drawPlan.width - (categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
             )
         }
+
+        // Set the y position from where this view was last drawn.
+        // This will be used to help align absolute canvas pointer positions with legend elements.
+        this._lastDrawYPosition = yPosition;
     }
 
     /**
@@ -266,5 +275,28 @@ export class TimelineLegendView {
             width: context.canvas.clientWidth,
             categoryDrawPlans
         };
+    }
+
+    /**
+     * Creates the canvas event handlers for timeline user interface interactions.
+     */
+    private _createCanvasEventHandlers() {
+        // A function that gets the position on the canvas for the mouse event or pointer event.
+        const getMouseOrPointerPosition = (event: PointerEvent | MouseEvent) => {
+            var rect = this._canvas.getBoundingClientRect();
+            return {
+                x: (event.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
+                y: (event.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
+            };
+        }
+
+        // Handle the pointer down event.
+        this._canvas.addEventListener('pointerdown', (event) => {
+            const pointerPosition = getMouseOrPointerPosition(event);
+
+            if (this._drawPlan && pointerPosition.y >= this._lastDrawYPosition && pointerPosition.y <= (this._lastDrawYPosition + this._drawPlan.height)) {
+                console.log("legend click!");
+            }
+        });
     }
 }

@@ -198,7 +198,7 @@ var tempis_timeline = (() => {
   var DEFAULT_ITEM_STYLE = {
     backgroundColor: "#1a006eff",
     fontColor: "#FFFFFF",
-    padding: 12,
+    padding: 10,
     borderRadius: 5
   };
   var TimelineItem = class {
@@ -997,6 +997,7 @@ var tempis_timeline = (() => {
   };
 
   // src/TimelineTooltip.ts
+  var DEFAULT_TOOLTIP_DELAY_MS = 500;
   var TimelineTooltip = class {
     constructor(item, canvas, dateFormatter, font, options, x2, y) {
       this._activeElement = null;
@@ -1014,7 +1015,7 @@ var tempis_timeline = (() => {
       this._activeShowTimer = setTimeout(() => {
         this._activeShowTimer = null;
         this._createElement();
-      }, (_a = options.delay) != null ? _a : 0);
+      }, (_a = options.delay) != null ? _a : DEFAULT_TOOLTIP_DELAY_MS);
     }
     get id() {
       return this._item.id;
@@ -1134,9 +1135,22 @@ var tempis_timeline = (() => {
           y: (event.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
         };
       };
+      let isPointerDown = false;
+      this._canvas.addEventListener("pointerdown", () => {
+        var _a;
+        isPointerDown = true;
+        (_a = this._activeTooltip) == null ? void 0 : _a.destroy();
+        this._activeTooltip = null;
+      });
+      this._canvas.addEventListener("pointerup", () => {
+        isPointerDown = false;
+      });
       this._canvas.addEventListener("pointermove", (event) => {
         var _a, _b;
         if (!isNullOrUndefined(this._options.enabled) && !this._options.enabled) {
+          return;
+        }
+        if (isPointerDown) {
           return;
         }
         const item = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
@@ -1168,9 +1182,11 @@ var tempis_timeline = (() => {
   var TimelineLegendView = class {
     constructor(canvas, dataSet, options = {}) {
       this._drawPlan = null;
+      this._lastDrawYPosition = 0;
       this._canvas = canvas;
       this._dataSet = dataSet;
       this._options = options;
+      this._createCanvasEventHandlers();
     }
     get position() {
       var _a;
@@ -1224,6 +1240,7 @@ var tempis_timeline = (() => {
           this._drawPlan.width - (categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
         );
       }
+      this._lastDrawYPosition = yPosition;
     }
     _createViewDrawPlan(context) {
       if (this._dataSet.categories.length === 0) {
@@ -1289,6 +1306,21 @@ var tempis_timeline = (() => {
         width: context.canvas.clientWidth,
         categoryDrawPlans
       };
+    }
+    _createCanvasEventHandlers() {
+      const getMouseOrPointerPosition = (event) => {
+        var rect = this._canvas.getBoundingClientRect();
+        return {
+          x: (event.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
+          y: (event.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
+        };
+      };
+      this._canvas.addEventListener("pointerdown", (event) => {
+        const pointerPosition = getMouseOrPointerPosition(event);
+        if (this._drawPlan && pointerPosition.y >= this._lastDrawYPosition && pointerPosition.y <= this._lastDrawYPosition + this._drawPlan.height) {
+          console.log("legend click!");
+        }
+      });
     }
   };
 
