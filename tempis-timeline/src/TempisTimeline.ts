@@ -70,6 +70,9 @@ export class TempisTimeline {
         // Create the canvas event handlers.
         this._createCanvasEventHandlers();
 
+        // We should register a callback to redraw the timeline every time our dataset is updated.
+        this._dataSet.registerUpdateCallback(() => this._draw());
+
         // Do our initial draw.
         this._draw();
     }

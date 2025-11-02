@@ -17,6 +17,7 @@ export const DEFAULT_ITEM_STYLE: TempisTimelineItemStyle = {
 export class TimelineItem {
     private readonly _definition: TimelineItemDefinition;
     private readonly _id: string | number;
+    private readonly _category: string | null;
     private readonly _label: string;
     private readonly _start: Date;
     private readonly _end: Date | null;
@@ -33,6 +34,7 @@ export class TimelineItem {
     public constructor(definition: TimelineItemDefinition, style: TempisTimelineItemStyle) {
         this._definition = definition;
         this._id = definition.id;
+        this._category = definition.category ?? null;
         this._label = definition.label ?? "";
         this._start = parseDate(definition.start);
         this._end = definition.end ? parseDate(definition.end) : null;
@@ -48,6 +50,11 @@ export class TimelineItem {
     /** Gets the item identifier. */
     public get id(): string | number {
         return this._id;
+    }
+
+    /** Gets the item category name, or null if no category is defined. */
+    public get category(): string | null {
+        return this._category;
     }
 
     /** Gets the item label. */

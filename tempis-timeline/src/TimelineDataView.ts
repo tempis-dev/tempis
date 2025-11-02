@@ -59,6 +59,12 @@ const DEFAULT_GROUP_MARGIN: number = 8;
 /** The minimum amount of available horizontal space required to render a label. */
 const MINIMUM_RENDERED_LABEL_WIDTH: number = 5;
 
+/** The background colour to use for any unfocused items. */
+const UNFOCUSED_ITEM_BACKGROUND_COLOUR = "#d6d6d6ff";
+
+/** The text colour to use for any unfocused items. */
+const UNFOCUSED_ITEM_FONT_COLOUR = "#ffffffff";
+
 export class TimelineDataView {
     /** The minimum height of the data view. */
     private static _minimumHeight: number = 50;
@@ -240,21 +246,34 @@ export class TimelineDataView {
      * @param scrolledYPosition The y position of the top of the view, taking into account the current scroll offset.
      */
     private _drawGroupItem(itemDrawPlan: DataViewItemDrawPlan, context: CanvasRenderingContext2D, scrolledYPosition: number) {
-        const itemFontColor = itemDrawPlan.item.style.fontColor!;
-        const itemBackgroundColor = itemDrawPlan.item.style.backgroundColor!;
-        const itemPadding = itemDrawPlan.item.style.padding!;
-        const itemBorderRadius = itemDrawPlan.item.style.borderRadius!;
-        const itemBorderThickness = itemDrawPlan.item.style.borderThickness;
-        const itemBorderColor = itemDrawPlan.item.style.borderColor;
+        // Get the item and the item category (if it is associated with a category).
+        const item = itemDrawPlan.item;
+        const itemCategory = item.category ? this._dataSet.getCategory(item.category) : null;
+
+        // Get the item styles.
+        const itemPadding = item.style.padding!;
+        const itemBorderRadius = item.style.borderRadius!;
+        const itemBorderThickness = item.style.borderThickness;
+        let itemBackgroundColor = item.style.backgroundColor!;
+        let itemFontColor = item.style.fontColor!;
+        let itemBorderColor = item.style.borderColor;
 
         // If the item is too small to be rendered then we should just skip it to improve performance.
         if ((itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart) < 1) {
             return;
         }
 
+        // If a category is being focused, but this item doesn't belong to that category, then render it with the unfocused item background and font colour. 
+        // TODO This should eventually just use a lighter version of item.style.backgroundColor! based on the result of some function.
+        if (this._dataSet.focusedCategory && !itemCategory?.isFocused) {
+            itemBackgroundColor = UNFOCUSED_ITEM_BACKGROUND_COLOUR;
+            itemBorderColor = UNFOCUSED_ITEM_BACKGROUND_COLOUR;
+            itemFontColor = UNFOCUSED_ITEM_FONT_COLOUR;
+        }
+
         // If the item is selected then we should rendering an underlying selection indicator rectangle.
         // TODO Improve the way we render the selected item, this is a bit hacky.
-        if (itemDrawPlan.item.isSelected) {
+        if (item.isSelected) {
             context.shadowColor = "rgba(0, 0, 0, 1)";
             context.shadowBlur = 15;
             context.shadowOffsetX = 0;
@@ -311,7 +330,7 @@ export class TimelineDataView {
         }
 
         // Draw the item label (if there is one).
-        if (itemDrawPlan.item.label) {
+        if (item.label) {
             // Calculate the actual x position of the label, we should attempt to keep this in the bounds of the view.
             const labelStartPositionX = Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
 
@@ -326,7 +345,7 @@ export class TimelineDataView {
                 // Draw the item label, but clip it if there is not enough available horizontal space to do so.
                 drawClippedText(
                     context, 
-                    itemDrawPlan.item.label, 
+                    item.label, 
                     labelStartPositionX,
                     (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2) + 1) + scrolledYPosition,
                     maxLabelWidth

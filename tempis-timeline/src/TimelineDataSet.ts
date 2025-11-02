@@ -5,6 +5,14 @@ import { getGlobalPalette } from "./ColorPalette";
 import { DEFAULT_ITEM_STYLE, TimelineItem } from "./TimelineItem";
 import { defaults } from "./Utilities";
 
+/**
+ * A callback function that can be registered to be invoked when the dataset is updated.
+ */
+export type UpdateCallback = () => void;
+
+/**
+ * The timeline dataset model.
+ */
 export class TimelineDataSet {
     /** The timeline item groupings. */
     private _groupings: TimelineItemGrouping[] = [];
@@ -17,6 +25,12 @@ export class TimelineDataSet {
 
     /** The maximum date of any item. */
     private _maxDate: Date | null = null;
+
+    /** The currently focused category. */
+    private _focusedCategory: TimelineItemCategory | null = null;
+
+    /** The registered update callbacks that are to be invoked when the dataset is updated. */
+    private _registeredUpdateCallbacks: UpdateCallback[] = [];
 
     /**
      * Create a new instance of the TimelineDataSet class.
@@ -45,6 +59,11 @@ export class TimelineDataSet {
     /** Gets the max date of any item in the dataset, or null if empty. */
     public get maxDate(): Date | null {
         return this._maxDate;
+    }
+
+    /** Gets the currently focused category, or null if there is no focused category. */
+    public get focusedCategory(): TimelineItemCategory | null {
+        return this._focusedCategory;
     }
 
     /**
@@ -84,9 +103,11 @@ export class TimelineDataSet {
         // Try to get the category with the given name.
         const category = this.getCategory(name);
 
-        if (category) {
-            // TODO Trigger some kind of "changed" event if value changed.
+        if (category && category.isDisabled) {
+            // Mark the disabled category as enabled.
             category.isDisabled = false;
+
+            this._invokeUpdateCallbacks();
         }
     }
 
@@ -98,9 +119,11 @@ export class TimelineDataSet {
         // Try to get the category with the given name.
         const category = this.getCategory(name);
 
-        if (category) {
-            // TODO Trigger some kind of "changed" event if value changed.
+        if (category && !category.isDisabled) {
+            // Mark the enabled category as disabled.
             category.isDisabled = true;
+
+            this._invokeUpdateCallbacks();
         }
     }
 
@@ -109,13 +132,30 @@ export class TimelineDataSet {
      * @param name The category name.
      */
     public focusCategory(name: string): void {
-        // Try to get the category with the given name.
-        const targetCategory = this.getCategory(name);
+        // If the category is already focused then there is nothing to do.
+        if (this._focusedCategory?.name === name) {
+            return;
+        }
+
+        let newlyFocusedCategory: TimelineItemCategory | null = null;
 
         // Update the focused state of all categories.
         for (const category of this._categories) {
-            // TODO Trigger some kind of "changed" event if value changed.
-            category.isFocused = category === targetCategory;
+            // Is this category the one to focus?
+            const isFocusedCategory = category.name === name;
+            
+            // Update the focused state of the category.
+            category.isFocused = isFocusedCategory;
+
+            if (isFocusedCategory) {
+                newlyFocusedCategory = category;
+            }
+        }
+
+        // Has our focused category changed?
+        if (this._focusedCategory !== newlyFocusedCategory) {
+            this._focusedCategory = newlyFocusedCategory;
+            this._invokeUpdateCallbacks();
         }
     }
 
@@ -124,11 +164,18 @@ export class TimelineDataSet {
      * @param name The category name.
      */
     public unfocusCategories(): void {
-        // Update the focused state of all categories.
-        for (const category of this._categories) {
-            // TODO Trigger some kind of "changed" event if value changed.
-            category.isFocused = false;
+        // If there is no focused category then there is nothing to do.
+        if (!this._focusedCategory) {
+            return;
         }
+
+        // Update the focused state of the focused category, all others should already be unfocused.
+        this._focusedCategory.isFocused = false;
+
+        // Clear the focused category.
+        this._focusedCategory = null;
+
+        this._invokeUpdateCallbacks();
     }
 
     /**
@@ -153,7 +200,18 @@ export class TimelineDataSet {
         this._createCategories(options);
 
         // Then we need to create our actual groupings and item models.
-        this._createGroupings(options);        
+        this._createGroupings(options);
+        
+        // We have updated the dataset, so any registered update callbacks should be invoked.
+        this._invokeUpdateCallbacks();
+    }
+
+    /**
+     * Register a callback to be invoked when the dataset is updated.
+     * @param callback The callback to be invoked when the dataset is updated.
+     */
+    public registerUpdateCallback(callback: UpdateCallback): void {
+        this._registeredUpdateCallbacks.push(callback);
     }
 
     /**
@@ -292,5 +350,14 @@ export class TimelineDataSet {
 
         this._minDate = minDate;
         this._maxDate = maxDate;
+    }
+
+    /**
+     * Invoke all registered update callbacks.
+     */
+    private _invokeUpdateCallbacks(): void {
+        for (const callback of this._registeredUpdateCallbacks) {
+            callback();
+        }
     }
 }

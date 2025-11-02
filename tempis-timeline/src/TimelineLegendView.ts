@@ -290,13 +290,81 @@ export class TimelineLegendView {
             };
         }
 
-        // Handle the pointer down event.
-        this._canvas.addEventListener('pointerdown', (event) => {
+        // TODO Throttle the pointer move handler, we don't need it every move. 
+
+        // Handle the pointer move event.
+        this._canvas.addEventListener('pointermove', (event) => {
+            // There is nothing to do if we have no draw plan as we have no rendered categories.
+            if (!this._drawPlan) {
+                return null;
+            }
+
             const pointerPosition = getMouseOrPointerPosition(event);
 
-            if (this._drawPlan && pointerPosition.y >= this._lastDrawYPosition && pointerPosition.y <= (this._lastDrawYPosition + this._drawPlan.height)) {
-                console.log("legend click!");
+            // Do not get items for points that overflow the vertical constraints of the data view.
+            if (pointerPosition.y < this._lastDrawYPosition || pointerPosition.y > (this._lastDrawYPosition + this._drawPlan.height)) {
+                return null;
+            }
+
+            // Attempt to get the category at the pointer position
+            const targetCategory = this._getCategoryAtPoint(pointerPosition);
+
+            // If we have a target category then we should set it as focused, otherwise we are unfocusing all categories.
+            if (targetCategory) {
+                this._dataSet.focusCategory(targetCategory.name);
+            } else {
+                this._dataSet.unfocusCategories();
             }
         });
+
+        // Handle the pointer down event.
+        this._canvas.addEventListener('pointerdown', (event) => {
+            // There is nothing to do if we have no draw plan as we have no rendered categories.
+            if (!this._drawPlan) {
+                return null;
+            }
+
+            const pointerPosition = getMouseOrPointerPosition(event);
+
+            // There is also nothing to do if the pointer event happened outside the bounds of this view.
+            if (pointerPosition.y < this._lastDrawYPosition || pointerPosition.y > (this._lastDrawYPosition + this._drawPlan.height)) {
+                return null;
+            }
+
+            // TODO Handle legend click.
+        });
+
+        // Add a handler for the cursor moving off of the canvas to ensure that we don't leave any categories focused.
+        this._canvas.addEventListener('pointerout', (event) => {
+            this._dataSet.unfocusCategories();
+        });
+    }
+
+    /**
+     * Gets the legend category at the specified point in the view, or null if there is no item at that point.
+     * @param point The point at which to get the legend category.
+     * @returns The item at the specified point, or null if there is no item at that point.
+     */
+    private _getCategoryAtPoint(point: { x: number; y: number; }): TimelineItemCategory | null {
+        // There is nothing to do if we have no draw plan as we have no rendered categories.
+        if (!this._drawPlan) {
+            return null;
+        }
+
+        // Do not get items for points that overflow the vertical constraints of the legend view.
+        if (point.y < this._lastDrawYPosition || point.y > (this._lastDrawYPosition + this._drawPlan.height)) {
+            return null;
+        }
+
+        // Iterate over each category in the legend to see if the point is within the bounds of the category.
+        for (const categoryDrawPlan of this._drawPlan.categoryDrawPlans) {
+            if (point.x >= categoryDrawPlan.xPositionStart && point.x <= categoryDrawPlan.xPositionEnd 
+                && point.y >= (categoryDrawPlan.yPositionStart + this._lastDrawYPosition) && point.y <= (categoryDrawPlan.yPositionEnd + this._lastDrawYPosition)) {
+                return categoryDrawPlan.category;
+            }
+        }
+
+        // We did not find an category at the specified point.
+        return null;
     }
 }

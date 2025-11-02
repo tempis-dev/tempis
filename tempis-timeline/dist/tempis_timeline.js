@@ -203,10 +203,11 @@ var tempis_timeline = (() => {
   };
   var TimelineItem = class {
     constructor(definition, style) {
-      var _a;
+      var _a, _b;
       this._definition = definition;
       this._id = definition.id;
-      this._label = (_a = definition.label) != null ? _a : "";
+      this._category = (_a = definition.category) != null ? _a : null;
+      this._label = (_b = definition.label) != null ? _b : "";
       this._start = parseDate(definition.start);
       this._end = definition.end ? parseDate(definition.end) : null;
       this._style = style;
@@ -217,6 +218,9 @@ var tempis_timeline = (() => {
     }
     get id() {
       return this._id;
+    }
+    get category() {
+      return this._category;
     }
     get label() {
       return this._label;
@@ -245,6 +249,8 @@ var tempis_timeline = (() => {
       this._categories = [];
       this._minDate = null;
       this._maxDate = null;
+      this._focusedCategory = null;
+      this._registeredUpdateCallbacks = [];
       this.update(options);
     }
     get groupings() {
@@ -258,6 +264,9 @@ var tempis_timeline = (() => {
     }
     get maxDate() {
       return this._maxDate;
+    }
+    get focusedCategory() {
+      return this._focusedCategory;
     }
     getItemById(id) {
       for (const group of this._groupings) {
@@ -274,26 +283,43 @@ var tempis_timeline = (() => {
     }
     enableCategory(name) {
       const category = this.getCategory(name);
-      if (category) {
+      if (category && category.isDisabled) {
         category.isDisabled = false;
+        this._invokeUpdateCallbacks();
       }
     }
     disableCategory(name) {
       const category = this.getCategory(name);
-      if (category) {
+      if (category && !category.isDisabled) {
         category.isDisabled = true;
+        this._invokeUpdateCallbacks();
       }
     }
     focusCategory(name) {
-      const targetCategory = this.getCategory(name);
+      var _a;
+      if (((_a = this._focusedCategory) == null ? void 0 : _a.name) === name) {
+        return;
+      }
+      let newlyFocusedCategory = null;
       for (const category of this._categories) {
-        category.isFocused = category === targetCategory;
+        const isFocusedCategory = category.name === name;
+        category.isFocused = isFocusedCategory;
+        if (isFocusedCategory) {
+          newlyFocusedCategory = category;
+        }
+      }
+      if (this._focusedCategory !== newlyFocusedCategory) {
+        this._focusedCategory = newlyFocusedCategory;
+        this._invokeUpdateCallbacks();
       }
     }
     unfocusCategories() {
-      for (const category of this._categories) {
-        category.isFocused = false;
+      if (!this._focusedCategory) {
+        return;
       }
+      this._focusedCategory.isFocused = false;
+      this._focusedCategory = null;
+      this._invokeUpdateCallbacks();
     }
     getSelectedItems() {
       const selectedItems = [];
@@ -305,6 +331,10 @@ var tempis_timeline = (() => {
     update(options) {
       this._createCategories(options);
       this._createGroupings(options);
+      this._invokeUpdateCallbacks();
+    }
+    registerUpdateCallback(callback) {
+      this._registeredUpdateCallbacks.push(callback);
     }
     _createCategories(options) {
       var _a, _b, _c;
@@ -380,6 +410,11 @@ var tempis_timeline = (() => {
       this._minDate = minDate;
       this._maxDate = maxDate;
     }
+    _invokeUpdateCallbacks() {
+      for (const callback of this._registeredUpdateCallbacks) {
+        callback();
+      }
+    }
   };
 
   // src/TimelineDataView.ts
@@ -387,6 +422,8 @@ var tempis_timeline = (() => {
   var DEFAULT_ITEM_VERTICAL_MARGIN = 4;
   var DEFAULT_GROUP_MARGIN = 8;
   var MINIMUM_RENDERED_LABEL_WIDTH = 5;
+  var UNFOCUSED_ITEM_BACKGROUND_COLOUR = "#d6d6d6ff";
+  var UNFOCUSED_ITEM_FONT_COLOUR = "#ffffffff";
   var TimelineDataView = class {
     constructor(dataSet) {
       this._scrollYOffset = 0;
@@ -468,16 +505,23 @@ var tempis_timeline = (() => {
       }
     }
     _drawGroupItem(itemDrawPlan, context, scrolledYPosition) {
-      const itemFontColor = itemDrawPlan.item.style.fontColor;
-      const itemBackgroundColor = itemDrawPlan.item.style.backgroundColor;
-      const itemPadding = itemDrawPlan.item.style.padding;
-      const itemBorderRadius = itemDrawPlan.item.style.borderRadius;
-      const itemBorderThickness = itemDrawPlan.item.style.borderThickness;
-      const itemBorderColor = itemDrawPlan.item.style.borderColor;
+      const item = itemDrawPlan.item;
+      const itemCategory = item.category ? this._dataSet.getCategory(item.category) : null;
+      const itemPadding = item.style.padding;
+      const itemBorderRadius = item.style.borderRadius;
+      const itemBorderThickness = item.style.borderThickness;
+      let itemBackgroundColor = item.style.backgroundColor;
+      let itemFontColor = item.style.fontColor;
+      let itemBorderColor = item.style.borderColor;
       if (itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart < 1) {
         return;
       }
-      if (itemDrawPlan.item.isSelected) {
+      if (this._dataSet.focusedCategory && !(itemCategory == null ? void 0 : itemCategory.isFocused)) {
+        itemBackgroundColor = UNFOCUSED_ITEM_BACKGROUND_COLOUR;
+        itemBorderColor = UNFOCUSED_ITEM_BACKGROUND_COLOUR;
+        itemFontColor = UNFOCUSED_ITEM_FONT_COLOUR;
+      }
+      if (item.isSelected) {
         context.shadowColor = "rgba(0, 0, 0, 1)";
         context.shadowBlur = 15;
         context.shadowOffsetX = 0;
@@ -513,7 +557,7 @@ var tempis_timeline = (() => {
         context.roundRect(itemDrawPlan.xPositionStart + context.lineWidth / 2, scrolledYPosition + itemDrawPlan.yPositionStart + context.lineWidth / 2, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - context.lineWidth, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - +context.lineWidth, itemBorderRadius);
         context.stroke();
       }
-      if (itemDrawPlan.item.label) {
+      if (item.label) {
         const labelStartPositionX = Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
         const maxLabelWidth = Math.max(0, Math.ceil(itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX));
         if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
@@ -521,7 +565,7 @@ var tempis_timeline = (() => {
           context.fillStyle = itemFontColor;
           drawClippedText(
             context,
-            itemDrawPlan.item.label,
+            item.label,
             labelStartPositionX,
             itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + 1 + scrolledYPosition,
             maxLabelWidth
@@ -1319,12 +1363,47 @@ var tempis_timeline = (() => {
           y: (event.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
         };
       };
-      this._canvas.addEventListener("pointerdown", (event) => {
+      this._canvas.addEventListener("pointermove", (event) => {
+        if (!this._drawPlan) {
+          return null;
+        }
         const pointerPosition = getMouseOrPointerPosition(event);
-        if (this._drawPlan && pointerPosition.y >= this._lastDrawYPosition && pointerPosition.y <= this._lastDrawYPosition + this._drawPlan.height) {
-          console.log("legend click!");
+        if (pointerPosition.y < this._lastDrawYPosition || pointerPosition.y > this._lastDrawYPosition + this._drawPlan.height) {
+          return null;
+        }
+        const targetCategory = this._getCategoryAtPoint(pointerPosition);
+        if (targetCategory) {
+          this._dataSet.focusCategory(targetCategory.name);
+        } else {
+          this._dataSet.unfocusCategories();
         }
       });
+      this._canvas.addEventListener("pointerdown", (event) => {
+        if (!this._drawPlan) {
+          return null;
+        }
+        const pointerPosition = getMouseOrPointerPosition(event);
+        if (pointerPosition.y < this._lastDrawYPosition || pointerPosition.y > this._lastDrawYPosition + this._drawPlan.height) {
+          return null;
+        }
+      });
+      this._canvas.addEventListener("pointerout", (event) => {
+        this._dataSet.unfocusCategories();
+      });
+    }
+    _getCategoryAtPoint(point) {
+      if (!this._drawPlan) {
+        return null;
+      }
+      if (point.y < this._lastDrawYPosition || point.y > this._lastDrawYPosition + this._drawPlan.height) {
+        return null;
+      }
+      for (const categoryDrawPlan of this._drawPlan.categoryDrawPlans) {
+        if (point.x >= categoryDrawPlan.xPositionStart && point.x <= categoryDrawPlan.xPositionEnd && point.y >= categoryDrawPlan.yPositionStart + this._lastDrawYPosition && point.y <= categoryDrawPlan.yPositionEnd + this._lastDrawYPosition) {
+          return categoryDrawPlan.category;
+        }
+      }
+      return null;
     }
   };
 
@@ -1758,6 +1837,7 @@ var tempis_timeline = (() => {
         this._createCanvasContainerResizeObserver();
       }
       this._createCanvasEventHandlers();
+      this._dataSet.registerUpdateCallback(() => this._draw());
       this._draw();
     }
     get _selectionMode() {
