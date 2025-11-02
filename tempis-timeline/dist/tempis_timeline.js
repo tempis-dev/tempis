@@ -247,6 +247,7 @@ var tempis_timeline = (() => {
     constructor(options) {
       this._groupings = [];
       this._categories = [];
+      this._categoriesMap = {};
       this._minDate = null;
       this._maxDate = null;
       this._focusedCategory = null;
@@ -279,7 +280,7 @@ var tempis_timeline = (() => {
     }
     getCategory(name) {
       var _a;
-      return (_a = this._categories.find((category) => category.name === name)) != null ? _a : null;
+      return (_a = this._categoriesMap[name]) != null ? _a : null;
     }
     enableCategory(name) {
       const category = this.getCategory(name);
@@ -361,6 +362,10 @@ var tempis_timeline = (() => {
         this._categories.push(new TimelineItemCategory(categoryDefinition.name, categoryDefinition.label, categoryStyle));
         categoryNames.push(categoryDefinition.name);
       }
+      this._categoriesMap = this._categories.reduce((map, category) => {
+        map[category.name] = category;
+        return map;
+      }, {});
     }
     _createGroupings(options) {
       var _a, _b;
@@ -516,7 +521,7 @@ var tempis_timeline = (() => {
       if (itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart < 1) {
         return;
       }
-      if (this._dataSet.focusedCategory && !(itemCategory == null ? void 0 : itemCategory.isFocused)) {
+      if (this._dataSet.focusedCategory && !this._dataSet.focusedCategory.isDisabled && !(itemCategory == null ? void 0 : itemCategory.isFocused)) {
         itemBackgroundColor = UNFOCUSED_ITEM_BACKGROUND_COLOUR;
         itemBorderColor = UNFOCUSED_ITEM_BACKGROUND_COLOUR;
         itemFontColor = UNFOCUSED_ITEM_FONT_COLOUR;
@@ -578,7 +583,11 @@ var tempis_timeline = (() => {
       const groupDrawPlans = [];
       const milliRenderWidth = context.canvas.clientWidth / (rangeToDt.getTime() - rangeFromDt.getTime());
       for (const grouping of this._dataSet.groupings) {
-        const itemsInRange = grouping.getItemsInRange(rangeFromDt, rangeToDt);
+        let itemsInRange = grouping.getItemsInRange(rangeFromDt, rangeToDt);
+        itemsInRange = itemsInRange.filter((item) => {
+          const itemCategory = item.category ? this._dataSet.getCategory(item.category) : null;
+          return !(itemCategory == null ? void 0 : itemCategory.isDisabled);
+        });
         if (!itemsInRange.length) {
           continue;
         }
@@ -1227,6 +1236,7 @@ var tempis_timeline = (() => {
   // src/TimelineLegendView.ts
   var DEFAULT_CATEGORY_MARGIN = 4;
   var DEFAULT_LEGEND_PADDING = 8;
+  var DISABLED_CATEGORY_ALPHA = 0.4;
   var TimelineLegendView = class {
     constructor(canvas, dataSet, options = {}) {
       this._drawPlan = null;
@@ -1260,6 +1270,9 @@ var tempis_timeline = (() => {
       }
       context.clearRect(0, yPosition, this._drawPlan.width, this._drawPlan.height);
       for (const categoryDrawPlan of this._drawPlan.categoryDrawPlans) {
+        if (categoryDrawPlan.category.isDisabled) {
+          context.globalAlpha = DISABLED_CATEGORY_ALPHA;
+        }
         let markerRadius = 0;
         switch (this.itemMarkerStyle) {
           case "square":
@@ -1287,6 +1300,7 @@ var tempis_timeline = (() => {
           categoryDrawPlan.yPositionStart + categoryDrawPlan.height / 2 + yPosition,
           this._drawPlan.width - (categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
         );
+        context.globalAlpha = 1;
       }
       this._lastDrawYPosition = yPosition;
     }
@@ -1386,6 +1400,16 @@ var tempis_timeline = (() => {
         if (pointerPosition.y < this._lastDrawYPosition || pointerPosition.y > this._lastDrawYPosition + this._drawPlan.height) {
           return null;
         }
+        const targetCategory = this._getCategoryAtPoint(pointerPosition);
+        if (!targetCategory) {
+          return;
+        }
+        if (targetCategory.isDisabled) {
+          this._dataSet.enableCategory(targetCategory.name);
+        } else {
+          this._dataSet.disableCategory(targetCategory.name);
+        }
+        this._dataSet.unfocusCategories();
       });
       this._canvas.addEventListener("pointerout", (event) => {
         this._dataSet.unfocusCategories();

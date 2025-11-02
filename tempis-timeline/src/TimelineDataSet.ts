@@ -20,6 +20,9 @@ export class TimelineDataSet {
     /** The timeline item categories. */
     private _categories: TimelineItemCategory[] = [];
 
+    /** A mapping of category names to timeline item categories. This is used for quick lookup. */
+    private _categoriesMap: Record<string, TimelineItemCategory> = {};
+
     /** The minimum date of any item. */
     private _minDate: Date | null = null;
 
@@ -92,7 +95,7 @@ export class TimelineDataSet {
      * @returns The category with the specified name, or null if one does not exist.
      */
     public getCategory(name: string): TimelineItemCategory | null {
-        return this._categories.find((category) => category.name === name) ?? null;
+        return this._categoriesMap[name] ?? null;
     }
 
     /**
@@ -262,6 +265,12 @@ export class TimelineDataSet {
 
             categoryNames.push(categoryDefinition.name);
         }
+
+        // Update our categories map.
+        this._categoriesMap = this._categories.reduce((map, category) => {
+            map[category.name] = category;
+            return map;
+        }, {} as Record<string, TimelineItemCategory>);
     }
 
     /**

@@ -265,7 +265,7 @@ export class TimelineDataView {
 
         // If a category is being focused, but this item doesn't belong to that category, then render it with the unfocused item background and font colour. 
         // TODO This should eventually just use a lighter version of item.style.backgroundColor! based on the result of some function.
-        if (this._dataSet.focusedCategory && !itemCategory?.isFocused) {
+        if (this._dataSet.focusedCategory && !this._dataSet.focusedCategory.isDisabled && !itemCategory?.isFocused) {
             itemBackgroundColor = UNFOCUSED_ITEM_BACKGROUND_COLOUR;
             itemBorderColor = UNFOCUSED_ITEM_BACKGROUND_COLOUR;
             itemFontColor = UNFOCUSED_ITEM_FONT_COLOUR;
@@ -371,7 +371,15 @@ export class TimelineDataView {
         // Work out all item stacks first. We aren't calculating any y positions or heights here we can do that after.
         for (const grouping of this._dataSet.groupings) {
             // Get all items in the current visible range.
-            const itemsInRange = grouping.getItemsInRange(rangeFromDt, rangeToDt);
+            let itemsInRange = grouping.getItemsInRange(rangeFromDt, rangeToDt);
+
+            // Filter out any items that are in disabled categories.
+            itemsInRange = itemsInRange.filter((item) => {
+                // Try to get the category for the item.
+                const itemCategory = item.category ? this._dataSet.getCategory(item.category) : null;
+
+                return !itemCategory?.isDisabled;
+            });
 
             // If there are no items in this group that are within the current range view then we should just skip this group.
             if (!itemsInRange.length) {

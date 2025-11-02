@@ -41,6 +41,9 @@ const DEFAULT_CATEGORY_MARGIN: number = 4;
 /** The default amount of padding to use for the legend. */
 const DEFAULT_LEGEND_PADDING: number = 8;
 
+/** The alpha to apply when rendering disabled legend categories. */
+const DISABLED_CATEGORY_ALPHA: number = 0.4;
+
 export class TimelineLegendView {
     /** The timeline canvas. */
     private readonly _canvas: HTMLCanvasElement;
@@ -123,6 +126,11 @@ export class TimelineLegendView {
 
         // Draw a marker and label for each category.
         for (const categoryDrawPlan of this._drawPlan.categoryDrawPlans) {
+            // If the category is disabled then we want to render it with some opacity.
+            if (categoryDrawPlan.category.isDisabled) {
+                context.globalAlpha = DISABLED_CATEGORY_ALPHA;
+            }
+
             // Figure out the marker radius to use which is determines by the item marker style.
             let markerRadius = 0;
             switch (this.itemMarkerStyle) {
@@ -158,6 +166,9 @@ export class TimelineLegendView {
                 categoryDrawPlan.yPositionStart + (categoryDrawPlan.height / 2) + yPosition,
                 this._drawPlan.width - (categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
             )
+
+            // Reset the context global alpha as we may have modified it if the category is disabled.
+            context.globalAlpha = 1.0;
         }
 
         // Set the y position from where this view was last drawn.
@@ -331,7 +342,22 @@ export class TimelineLegendView {
                 return null;
             }
 
-            // TODO Handle legend click.
+            // Attempt to get the category at the pointer position
+            const targetCategory = this._getCategoryAtPoint(pointerPosition);
+
+            // If we didn't click on a category then there is nothing to do.
+            if (!targetCategory) {
+                return;
+            }
+
+            // Disable or enable the category based on whether it is already disabled.
+            if (targetCategory.isDisabled) {
+                this._dataSet.enableCategory(targetCategory.name);
+            } else {
+                this._dataSet.disableCategory(targetCategory.name);
+            }
+
+            this._dataSet.unfocusCategories();
         });
 
         // Add a handler for the cursor moving off of the canvas to ensure that we don't leave any categories focused.
