@@ -68,21 +68,26 @@ var tempis_timeline = (() => {
       return true;
     return false;
   }
-  function fitCanvasText(context, value, maxWidth) {
-    let stringWidth = context.measureText(value).width;
-    if (!value || stringWidth <= maxWidth) {
-      return value;
+  function drawClippedText(context, text, x2, y, maxWidth) {
+    if (!text) {
+      return;
     }
-    const ellipsisWidth = context.measureText("...").width;
-    if (ellipsisWidth > maxWidth) {
-      return "";
+    const ellipsis = "...";
+    const ellipsisWidth = context.measureText(ellipsis).width;
+    const textWidth = context.measureText(text).width;
+    if (textWidth <= maxWidth) {
+      context.fillText(text, x2, y);
+      return;
     }
-    let stringCharacterLength = value.length;
-    while (stringWidth >= maxWidth - ellipsisWidth && stringCharacterLength-- > 1) {
-      value = value.substring(0, stringCharacterLength);
-      stringWidth = context.measureText(value).width;
-    }
-    return `${value}...`;
+    if (ellipsisWidth > maxWidth)
+      return;
+    context.save();
+    context.beginPath();
+    context.rect(x2, y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
+    context.clip();
+    context.fillText(text, x2, y);
+    context.restore();
+    context.fillText(ellipsis, x2 + maxWidth - ellipsisWidth, y);
   }
   function defaults(...sources) {
     if (sources.length === 0)
@@ -138,15 +143,33 @@ var tempis_timeline = (() => {
 
   // src/TimelineItemCategory.ts
   var TimelineItemCategory = class {
-    constructor(name, style) {
+    constructor(name, label, style) {
+      this._isDisabled = false;
+      this._isFocused = false;
       this._name = name;
+      this._label = label;
       this._style = style;
     }
     get name() {
       return this._name;
     }
+    get label() {
+      return this._label;
+    }
     get style() {
       return this._style;
+    }
+    get isDisabled() {
+      return this._isDisabled;
+    }
+    set isDisabled(value) {
+      this._isDisabled = value;
+    }
+    get isFocused() {
+      return this._isFocused;
+    }
+    set isFocused(value) {
+      this._isFocused = value;
     }
   };
 
@@ -175,15 +198,16 @@ var tempis_timeline = (() => {
   var DEFAULT_ITEM_STYLE = {
     backgroundColor: "#1a006eff",
     fontColor: "#FFFFFF",
-    padding: 12,
+    padding: 10,
     borderRadius: 5
   };
   var TimelineItem = class {
     constructor(definition, style) {
-      var _a;
+      var _a, _b;
       this._definition = definition;
       this._id = definition.id;
-      this._caption = (_a = definition.caption) != null ? _a : "";
+      this._category = (_a = definition.category) != null ? _a : null;
+      this._label = (_b = definition.label) != null ? _b : "";
       this._start = parseDate(definition.start);
       this._end = definition.end ? parseDate(definition.end) : null;
       this._style = style;
@@ -195,8 +219,11 @@ var tempis_timeline = (() => {
     get id() {
       return this._id;
     }
-    get caption() {
-      return this._caption;
+    get category() {
+      return this._category;
+    }
+    get label() {
+      return this._label;
     }
     get start() {
       return this._start;
@@ -220,8 +247,11 @@ var tempis_timeline = (() => {
     constructor(options) {
       this._groupings = [];
       this._categories = [];
+      this._categoriesMap = {};
       this._minDate = null;
       this._maxDate = null;
+      this._focusedCategory = null;
+      this._registeredUpdateCallbacks = [];
       this.update(options);
     }
     get groupings() {
@@ -236,6 +266,9 @@ var tempis_timeline = (() => {
     get maxDate() {
       return this._maxDate;
     }
+    get focusedCategory() {
+      return this._focusedCategory;
+    }
     getItemById(id) {
       for (const group of this._groupings) {
         const item = group.getItemById(id);
@@ -247,7 +280,47 @@ var tempis_timeline = (() => {
     }
     getCategory(name) {
       var _a;
-      return (_a = this._categories.find((category) => category.name === name)) != null ? _a : null;
+      return (_a = this._categoriesMap[name]) != null ? _a : null;
+    }
+    enableCategory(name) {
+      const category = this.getCategory(name);
+      if (category && category.isDisabled) {
+        category.isDisabled = false;
+        this._invokeUpdateCallbacks();
+      }
+    }
+    disableCategory(name) {
+      const category = this.getCategory(name);
+      if (category && !category.isDisabled) {
+        category.isDisabled = true;
+        this._invokeUpdateCallbacks();
+      }
+    }
+    focusCategory(name) {
+      var _a;
+      if (((_a = this._focusedCategory) == null ? void 0 : _a.name) === name) {
+        return;
+      }
+      let newlyFocusedCategory = null;
+      for (const category of this._categories) {
+        const isFocusedCategory = category.name === name;
+        category.isFocused = isFocusedCategory;
+        if (isFocusedCategory) {
+          newlyFocusedCategory = category;
+        }
+      }
+      if (this._focusedCategory !== newlyFocusedCategory) {
+        this._focusedCategory = newlyFocusedCategory;
+        this._invokeUpdateCallbacks();
+      }
+    }
+    unfocusCategories() {
+      if (!this._focusedCategory) {
+        return;
+      }
+      this._focusedCategory.isFocused = false;
+      this._focusedCategory = null;
+      this._invokeUpdateCallbacks();
     }
     getSelectedItems() {
       const selectedItems = [];
@@ -259,6 +332,10 @@ var tempis_timeline = (() => {
     update(options) {
       this._createCategories(options);
       this._createGroupings(options);
+      this._invokeUpdateCallbacks();
+    }
+    registerUpdateCallback(callback) {
+      this._registeredUpdateCallbacks.push(callback);
     }
     _createCategories(options) {
       var _a, _b, _c;
@@ -282,9 +359,13 @@ var tempis_timeline = (() => {
         }
         const categoryStyle = (_b = categoryDefinition.style) != null ? _b : {};
         categoryStyle.backgroundColor = (_c = categoryStyle.backgroundColor) != null ? _c : getNextPaletteColor.next().value;
-        this._categories.push(new TimelineItemCategory(categoryDefinition.name, categoryStyle));
+        this._categories.push(new TimelineItemCategory(categoryDefinition.name, categoryDefinition.label, categoryStyle));
         categoryNames.push(categoryDefinition.name);
       }
+      this._categoriesMap = this._categories.reduce((map, category) => {
+        map[category.name] = category;
+        return map;
+      }, {});
     }
     _createGroupings(options) {
       var _a, _b;
@@ -334,16 +415,25 @@ var tempis_timeline = (() => {
       this._minDate = minDate;
       this._maxDate = maxDate;
     }
+    _invokeUpdateCallbacks() {
+      for (const callback of this._registeredUpdateCallbacks) {
+        callback();
+      }
+    }
   };
 
   // src/TimelineDataView.ts
   var DEFAULT_GROUP_VERTICAL_LABEL_MARGIN = 6;
-  var DEFAULT_ITEM_VERTICAL_MARGIN = 8;
-  var DEFAULT_GROUP_MARGIN = 12;
+  var DEFAULT_ITEM_VERTICAL_MARGIN = 4;
+  var DEFAULT_GROUP_MARGIN = 8;
   var MINIMUM_RENDERED_LABEL_WIDTH = 5;
+  var UNFOCUSED_ITEM_BACKGROUND_COLOUR = "#d6d6d6ff";
+  var UNFOCUSED_ITEM_FONT_COLOUR = "#ffffffff";
   var TimelineDataView = class {
     constructor(dataSet) {
       this._scrollYOffset = 0;
+      this._lastDrawYPosition = 0;
+      this._lastDrawHeight = 0;
       this._drawPlan = null;
       this._dataSet = dataSet;
     }
@@ -353,19 +443,23 @@ var tempis_timeline = (() => {
     draw(context, range, yPosition, maxHeight, fillVertically) {
       this._drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
       this._scrollYOffset = clamp(this._scrollYOffset, Math.min(0, maxHeight - this._drawPlan.height), 0);
-      const viewHeight = fillVertically ? maxHeight : Math.min(this._drawPlan.height, maxHeight);
-      context.clearRect(0, yPosition, context.canvas.width, viewHeight);
-      this._drawMinorUnitBars(context, range.minorTicks, yPosition, viewHeight);
+      this._lastDrawHeight = fillVertically ? maxHeight : Math.min(this._drawPlan.height, maxHeight);
+      context.clearRect(0, yPosition, context.canvas.width, this._lastDrawHeight);
+      this._drawMinorUnitBars(context, range.minorTicks, yPosition, this._lastDrawHeight);
       this._drawGroups(context, yPosition, maxHeight);
-      return viewHeight;
+      this._lastDrawYPosition = yPosition;
+      return this._lastDrawHeight;
     }
     getItemAtPoint(point) {
       if (!this._drawPlan) {
         return null;
       }
+      if (point.y < this._lastDrawYPosition || point.y > this._lastDrawYPosition + this._lastDrawHeight) {
+        return null;
+      }
       for (const groupDrawPlan of this._drawPlan.groupDrawPlans) {
         for (const itemDrawPlan of groupDrawPlan.rows.flat()) {
-          if (point.x >= itemDrawPlan.xPositionStart && point.x <= itemDrawPlan.xPositionEnd && point.y >= itemDrawPlan.yPositionStart + this._scrollYOffset && point.y <= itemDrawPlan.yPositionEnd + this._scrollYOffset) {
+          if (point.x >= itemDrawPlan.xPositionStart && point.x <= itemDrawPlan.xPositionEnd && point.y >= itemDrawPlan.yPositionStart + this._scrollYOffset + this._lastDrawYPosition && point.y <= itemDrawPlan.yPositionEnd + this._scrollYOffset + this._lastDrawYPosition) {
             return itemDrawPlan.item;
           }
         }
@@ -416,16 +510,23 @@ var tempis_timeline = (() => {
       }
     }
     _drawGroupItem(itemDrawPlan, context, scrolledYPosition) {
-      const itemFontColor = itemDrawPlan.item.style.fontColor;
-      const itemBackgroundColor = itemDrawPlan.item.style.backgroundColor;
-      const itemPadding = itemDrawPlan.item.style.padding;
-      const itemBorderRadius = itemDrawPlan.item.style.borderRadius;
-      const itemBorderThickness = itemDrawPlan.item.style.borderThickness;
-      const itemBorderColor = itemDrawPlan.item.style.borderColor;
+      const item = itemDrawPlan.item;
+      const itemCategory = item.category ? this._dataSet.getCategory(item.category) : null;
+      const itemPadding = item.style.padding;
+      const itemBorderRadius = item.style.borderRadius;
+      const itemBorderThickness = item.style.borderThickness;
+      let itemBackgroundColor = item.style.backgroundColor;
+      let itemFontColor = item.style.fontColor;
+      let itemBorderColor = item.style.borderColor;
       if (itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart < 1) {
         return;
       }
-      if (itemDrawPlan.item.isSelected) {
+      if (this._dataSet.focusedCategory && !this._dataSet.focusedCategory.isDisabled && !(itemCategory == null ? void 0 : itemCategory.isFocused)) {
+        itemBackgroundColor = UNFOCUSED_ITEM_BACKGROUND_COLOUR;
+        itemBorderColor = UNFOCUSED_ITEM_BACKGROUND_COLOUR;
+        itemFontColor = UNFOCUSED_ITEM_FONT_COLOUR;
+      }
+      if (item.isSelected) {
         context.shadowColor = "rgba(0, 0, 0, 1)";
         context.shadowBlur = 15;
         context.shadowOffsetX = 0;
@@ -461,15 +562,19 @@ var tempis_timeline = (() => {
         context.roundRect(itemDrawPlan.xPositionStart + context.lineWidth / 2, scrolledYPosition + itemDrawPlan.yPositionStart + context.lineWidth / 2, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - context.lineWidth, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - +context.lineWidth, itemBorderRadius);
         context.stroke();
       }
-      if (itemDrawPlan.item.caption) {
+      if (item.label) {
         const labelStartPositionX = Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
         const maxLabelWidth = Math.max(0, Math.ceil(itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX));
         if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
           context.textBaseline = "middle";
           context.fillStyle = itemFontColor;
-          context.beginPath();
-          context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + 1 + scrolledYPosition);
-          context.stroke();
+          drawClippedText(
+            context,
+            item.label,
+            labelStartPositionX,
+            itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 + 1 + scrolledYPosition,
+            maxLabelWidth
+          );
         }
       }
     }
@@ -478,7 +583,11 @@ var tempis_timeline = (() => {
       const groupDrawPlans = [];
       const milliRenderWidth = context.canvas.clientWidth / (rangeToDt.getTime() - rangeFromDt.getTime());
       for (const grouping of this._dataSet.groupings) {
-        const itemsInRange = grouping.getItemsInRange(rangeFromDt, rangeToDt);
+        let itemsInRange = grouping.getItemsInRange(rangeFromDt, rangeToDt);
+        itemsInRange = itemsInRange.filter((item) => {
+          const itemCategory = item.category ? this._dataSet.getCategory(item.category) : null;
+          return !(itemCategory == null ? void 0 : itemCategory.isDisabled);
+        });
         if (!itemsInRange.length) {
           continue;
         }
@@ -491,7 +600,7 @@ var tempis_timeline = (() => {
             startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
             endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
           } else {
-            const itemLabelWidth = context.measureText((_a = item.caption) != null ? _a : "?").width + item.style.padding * 2;
+            const itemLabelWidth = context.measureText((_a = item.label) != null ? _a : "?").width + item.style.padding * 2;
             startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime()) - itemLabelWidth / 2;
             endPositionX = startPositionX + itemLabelWidth;
             pointInTimePositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
@@ -941,6 +1050,7 @@ var tempis_timeline = (() => {
   };
 
   // src/TimelineTooltip.ts
+  var DEFAULT_TOOLTIP_DELAY_MS = 500;
   var TimelineTooltip = class {
     constructor(item, canvas, dateFormatter, font, options, x2, y) {
       this._activeElement = null;
@@ -958,7 +1068,7 @@ var tempis_timeline = (() => {
       this._activeShowTimer = setTimeout(() => {
         this._activeShowTimer = null;
         this._createElement();
-      }, (_a = options.delay) != null ? _a : 0);
+      }, (_a = options.delay) != null ? _a : DEFAULT_TOOLTIP_DELAY_MS);
     }
     get id() {
       return this._item.id;
@@ -1015,9 +1125,9 @@ var tempis_timeline = (() => {
           borderRadius: "5px"
         });
         if (this._item.end) {
-          this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.caption}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
+          this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
         } else {
-          this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.caption}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)}</p>`;
+          this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)}</p>`;
         }
       }
       this._activeElement.style.left = `${this._posX}px`;
@@ -1071,6 +1181,207 @@ var tempis_timeline = (() => {
       this._createCanvasEventHandlers();
     }
     _createCanvasEventHandlers() {
+      let isPointerDown = false;
+      this._canvas.addEventListener("pointerdown", () => {
+        var _a;
+        isPointerDown = true;
+        (_a = this._activeTooltip) == null ? void 0 : _a.destroy();
+        this._activeTooltip = null;
+      });
+      this._canvas.addEventListener("pointerup", (event) => {
+        isPointerDown = false;
+        this._createTooltip(event);
+      });
+      this._canvas.addEventListener("pointermove", (event) => {
+        if (isPointerDown) {
+          return;
+        }
+        this._createTooltip(event);
+      });
+      this._canvas.addEventListener("pointerout", (event) => {
+        var _a;
+        (_a = this._activeTooltip) == null ? void 0 : _a.destroy();
+        this._activeTooltip = null;
+      });
+    }
+    _createTooltip(event) {
+      var _a, _b;
+      const getMouseOrPointerPosition = (event2) => {
+        var rect = this._canvas.getBoundingClientRect();
+        return {
+          x: (event2.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
+          y: (event2.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
+        };
+      };
+      if (!isNullOrUndefined(this._options.enabled) && !this._options.enabled) {
+        return;
+      }
+      const item = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
+      if (!item) {
+        (_a = this._activeTooltip) == null ? void 0 : _a.destroy();
+        this._activeTooltip = null;
+      } else {
+        if (this._activeTooltip && this._activeTooltip.id === item.id) {
+          this._activeTooltip.setPosition(event.clientX, event.clientY);
+          return;
+        } else if (this._activeTooltip && this._activeTooltip.id !== item.id) {
+          (_b = this._activeTooltip) == null ? void 0 : _b.destroy();
+          this._activeTooltip = null;
+        }
+        this._activeTooltip = new TimelineTooltip(item, this._canvas, this._dateFormatter, this._font, this._options, event.clientX, event.clientY);
+      }
+    }
+  };
+
+  // src/TimelineLegendView.ts
+  var DEFAULT_CATEGORY_PADDING = 4;
+  var DEFAULT_LEGEND_PADDING = 8;
+  var DISABLED_CATEGORY_ALPHA = 0.4;
+  var TimelineLegendView = class {
+    constructor(canvas, dataSet, options = {}) {
+      this._drawPlan = null;
+      this._lastDrawYPosition = 0;
+      this._canvas = canvas;
+      this._dataSet = dataSet;
+      this._options = options;
+      this._createCanvasEventHandlers();
+    }
+    get position() {
+      var _a;
+      return (_a = this._options.position) != null ? _a : "bottom";
+    }
+    get alignment() {
+      var _a;
+      return (_a = this._options.alignment) != null ? _a : "center";
+    }
+    get itemMarkerStyle() {
+      var _a, _b;
+      return (_b = (_a = this._options.item) == null ? void 0 : _a.markerStyle) != null ? _b : "square-rounded";
+    }
+    get itemPadding() {
+      var _a, _b;
+      return (_b = (_a = this._options.item) == null ? void 0 : _a.padding) != null ? _b : DEFAULT_CATEGORY_PADDING;
+    }
+    get isHighlightOnHover() {
+      var _a, _b;
+      return (_b = (_a = this._options.item) == null ? void 0 : _a.isHighlightOnHover) != null ? _b : true;
+    }
+    get isFilterOnClick() {
+      var _a, _b;
+      return (_b = (_a = this._options.item) == null ? void 0 : _a.isFilterOnClick) != null ? _b : true;
+    }
+    calculateRequiredHeight() {
+      var _a, _b;
+      var context = this._canvas.getContext("2d");
+      this._createViewDrawPlan(context);
+      return (_b = (_a = this._drawPlan) == null ? void 0 : _a.height) != null ? _b : 0;
+    }
+    draw(context, yPosition) {
+      if (!this._drawPlan) {
+        return;
+      }
+      context.clearRect(0, yPosition, this._drawPlan.width, this._drawPlan.height);
+      for (const categoryDrawPlan of this._drawPlan.categoryDrawPlans) {
+        if (categoryDrawPlan.category.isDisabled) {
+          context.globalAlpha = DISABLED_CATEGORY_ALPHA;
+        }
+        let markerRadius = 0;
+        switch (this.itemMarkerStyle) {
+          case "square":
+            markerRadius = 0;
+            break;
+          case "square-rounded":
+            markerRadius = categoryDrawPlan.markerSize / 4;
+            break;
+          case "circle":
+            markerRadius = categoryDrawPlan.markerSize;
+            break;
+          default:
+            throw new Error(`unknown marker style: ${this.itemMarkerStyle}`);
+        }
+        context.fillStyle = categoryDrawPlan.category.style.backgroundColor;
+        context.beginPath();
+        context.roundRect(categoryDrawPlan.xPositionStart + this.itemPadding, categoryDrawPlan.yPositionStart + this.itemPadding + yPosition, categoryDrawPlan.markerSize, categoryDrawPlan.markerSize, markerRadius);
+        context.fill();
+        context.fillStyle = "#595959";
+        context.textBaseline = "middle";
+        drawClippedText(
+          context,
+          categoryDrawPlan.category.label,
+          categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap,
+          categoryDrawPlan.yPositionStart + categoryDrawPlan.height / 2 + yPosition,
+          this._drawPlan.width - (categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
+        );
+        context.globalAlpha = 1;
+      }
+      this._lastDrawYPosition = yPosition;
+    }
+    _createViewDrawPlan(context) {
+      if (this._dataSet.categories.length === 0) {
+        this._drawPlan = null;
+        return;
+      }
+      const elements = [];
+      const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Category Label");
+      const labelHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
+      const itemHeight = labelHeight + this.itemPadding * 2;
+      const markerLabelGap = labelHeight / 2;
+      for (const category of this._dataSet.categories) {
+        if (isNullOrUndefined(category.label) || category.label === "") {
+          continue;
+        }
+        const { width } = context.measureText(category.label);
+        elements.push({
+          category,
+          width: width + markerLabelGap + labelHeight + this.itemPadding * 2,
+          height: itemHeight,
+          labelHeight,
+          markerLabelGap
+        });
+      }
+      const availableWidth = context.canvas.clientWidth - DEFAULT_LEGEND_PADDING * 2;
+      const elementRows = [[]];
+      let currentElementRowWidth = 0;
+      for (const element of elements) {
+        if (currentElementRowWidth + element.width > availableWidth && elementRows[elementRows.length - 1].length > 0) {
+          elementRows.push([]);
+          currentElementRowWidth = 0;
+        }
+        elementRows[elementRows.length - 1].push(element);
+        currentElementRowWidth += element.width;
+      }
+      const categoryDrawPlans = [];
+      for (const elementRow of elementRows) {
+        const rowIndex = elementRows.indexOf(elementRow);
+        const rowTotalWidth = elementRow.reduce((previous, current) => previous + current.width, 0);
+        let currentXPosition = 0;
+        if (this.alignment === "center") {
+          currentXPosition = Math.max(0, availableWidth / 2 - rowTotalWidth / 2);
+        } else if (this.alignment === "end") {
+          currentXPosition = Math.max(0, availableWidth - rowTotalWidth);
+        }
+        for (const element of elementRow) {
+          categoryDrawPlans.push({
+            category: element.category,
+            markerSize: element.labelHeight,
+            markerLabelGap: element.markerLabelGap,
+            xPositionStart: currentXPosition + DEFAULT_LEGEND_PADDING,
+            xPositionEnd: currentXPosition + element.width + DEFAULT_LEGEND_PADDING,
+            yPositionStart: rowIndex * element.height + DEFAULT_LEGEND_PADDING,
+            yPositionEnd: rowIndex * element.height + element.height + DEFAULT_LEGEND_PADDING,
+            width: element.width,
+            height: element.height
+          });
+          currentXPosition += element.width;
+        }
+      }
+      this._drawPlan = {
+        height: itemHeight * elementRows.length + DEFAULT_LEGEND_PADDING * 2,
+        width: context.canvas.clientWidth,
+        categoryDrawPlans
+      };
+    }
+    _createCanvasEventHandlers() {
       const getMouseOrPointerPosition = (event) => {
         var rect = this._canvas.getBoundingClientRect();
         return {
@@ -1079,30 +1390,62 @@ var tempis_timeline = (() => {
         };
       };
       this._canvas.addEventListener("pointermove", (event) => {
-        var _a, _b;
-        if (!isNullOrUndefined(this._options.enabled) && !this._options.enabled) {
+        if (!this._drawPlan) {
+          return null;
+        }
+        if (!this.isHighlightOnHover) {
           return;
         }
-        const item = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
-        if (!item) {
-          (_a = this._activeTooltip) == null ? void 0 : _a.destroy();
-          this._activeTooltip = null;
+        const pointerPosition = getMouseOrPointerPosition(event);
+        if (pointerPosition.y < this._lastDrawYPosition || pointerPosition.y > this._lastDrawYPosition + this._drawPlan.height) {
+          return null;
+        }
+        const targetCategory = this._getCategoryAtPoint(pointerPosition);
+        if (targetCategory) {
+          this._dataSet.focusCategory(targetCategory.name);
         } else {
-          if (this._activeTooltip && this._activeTooltip.id === item.id) {
-            this._activeTooltip.setPosition(event.clientX, event.clientY);
-            return;
-          } else if (this._activeTooltip && this._activeTooltip.id !== item.id) {
-            (_b = this._activeTooltip) == null ? void 0 : _b.destroy();
-            this._activeTooltip = null;
-          }
-          this._activeTooltip = new TimelineTooltip(item, this._canvas, this._dateFormatter, this._font, this._options, event.clientX, event.clientY);
+          this._dataSet.unfocusCategories();
         }
       });
-      this._canvas.addEventListener("pointerout", (event) => {
-        var _a;
-        (_a = this._activeTooltip) == null ? void 0 : _a.destroy();
-        this._activeTooltip = null;
+      this._canvas.addEventListener("pointerdown", (event) => {
+        if (!this._drawPlan) {
+          return null;
+        }
+        if (!this.isFilterOnClick) {
+          return;
+        }
+        const pointerPosition = getMouseOrPointerPosition(event);
+        if (pointerPosition.y < this._lastDrawYPosition || pointerPosition.y > this._lastDrawYPosition + this._drawPlan.height) {
+          return null;
+        }
+        const targetCategory = this._getCategoryAtPoint(pointerPosition);
+        if (!targetCategory) {
+          return;
+        }
+        if (targetCategory.isDisabled) {
+          this._dataSet.enableCategory(targetCategory.name);
+        } else {
+          this._dataSet.disableCategory(targetCategory.name);
+        }
+        this._dataSet.unfocusCategories();
       });
+      this._canvas.addEventListener("pointerout", (event) => {
+        this._dataSet.unfocusCategories();
+      });
+    }
+    _getCategoryAtPoint(point) {
+      if (!this._drawPlan) {
+        return null;
+      }
+      if (point.y < this._lastDrawYPosition || point.y > this._lastDrawYPosition + this._drawPlan.height) {
+        return null;
+      }
+      for (const categoryDrawPlan of this._drawPlan.categoryDrawPlans) {
+        if (point.x >= categoryDrawPlan.xPositionStart && point.x <= categoryDrawPlan.xPositionEnd && point.y >= categoryDrawPlan.yPositionStart + this._lastDrawYPosition && point.y <= categoryDrawPlan.yPositionEnd + this._lastDrawYPosition) {
+          return categoryDrawPlan.category;
+        }
+      }
+      return null;
     }
   };
 
@@ -1529,12 +1872,14 @@ var tempis_timeline = (() => {
       this._dataSet = new TimelineDataSet(this._options);
       this._dataView = new TimelineDataView(this._dataSet);
       this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._options.range);
+      this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._options.legend);
       this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._options.tooltip);
       this._resizeCanvas();
       if (options.responsive !== false) {
         this._createCanvasContainerResizeObserver();
       }
       this._createCanvasEventHandlers();
+      this._dataSet.registerUpdateCallback(() => this._draw());
       this._draw();
     }
     get _selectionMode() {
@@ -1683,19 +2028,45 @@ var tempis_timeline = (() => {
       context.clearRect(0, 0, this._canvas.clientWidth, this._canvas.clientHeight);
       context.font = this._font.font;
       const rangeViewHeight = this._rangeView.calculateRequiredHeight();
-      const dataViewYPosition = ["top", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0;
-      const dataViewMaxHeight = this._canvas.clientHeight - dataViewYPosition - (["bottom", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0);
-      const dataViewHeight = this._dataView.draw(context, this._rangeView, dataViewYPosition, dataViewMaxHeight, !!this._options.fillVertically);
-      let totalRenderHeight = dataViewHeight;
+      const legendViewHeight = this._legendView.calculateRequiredHeight();
+      let dataViewYPosition = 0;
+      if (this._legendView.position === "top") {
+        dataViewYPosition += legendViewHeight;
+      }
       if (["top", "both"].includes(this._rangeView.position)) {
-        this._rangeView.draw(context, 0, "top");
-        totalRenderHeight += rangeViewHeight;
+        dataViewYPosition += rangeViewHeight;
       }
+      let dataViewMaxHeight = this._canvas.clientHeight - dataViewYPosition;
       if (["bottom", "both"].includes(this._rangeView.position)) {
-        this._rangeView.draw(context, dataViewYPosition + dataViewHeight, "bottom");
-        totalRenderHeight += rangeViewHeight;
+        dataViewMaxHeight -= rangeViewHeight;
       }
-      context.clearRect(0, totalRenderHeight, this._canvas.clientWidth, this._canvas.clientHeight - totalRenderHeight);
+      if (this._legendView.position === "bottom") {
+        dataViewMaxHeight -= legendViewHeight;
+      }
+      let renderOffsetY = 0;
+      if (this._legendView.position === "top") {
+        this._legendView.draw(context, renderOffsetY);
+        renderOffsetY += legendViewHeight;
+      }
+      if (["top", "both"].includes(this._rangeView.position)) {
+        this._rangeView.draw(context, renderOffsetY, "top");
+        renderOffsetY += rangeViewHeight;
+      }
+      context.save();
+      context.beginPath();
+      context.rect(0, renderOffsetY, this._canvas.clientWidth, dataViewMaxHeight);
+      context.clip();
+      renderOffsetY += this._dataView.draw(context, this._rangeView, renderOffsetY, dataViewMaxHeight, !!this._options.fillVertically);
+      context.restore();
+      if (["bottom", "both"].includes(this._rangeView.position)) {
+        this._rangeView.draw(context, renderOffsetY, "bottom");
+        renderOffsetY += rangeViewHeight;
+      }
+      if (this._legendView.position === "bottom") {
+        this._legendView.draw(context, renderOffsetY);
+        renderOffsetY += legendViewHeight;
+      }
+      context.clearRect(0, renderOffsetY, this._canvas.clientWidth, this._canvas.clientHeight - renderOffsetY);
     }
     _onCanvasClicked() {
       if (this._selectionMode === "none") {

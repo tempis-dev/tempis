@@ -13,6 +13,9 @@ export interface TempisTimelineOptions {
     /** The timeline range options. */
     range?: TempisTimelineRangeOptions;
 
+    /** The timeline legend options. */
+    legend?: TempisTimelineLegendOptions;
+
     /** The timeline tooltip options. */
     tooltip?: TempisTimelineTooltipOptions;
     
@@ -72,7 +75,7 @@ export interface TempisTimelineTooltipOptions {
      * - An `HTMLElement`: appended directly as the tooltip content.
      * - A `string`: injected into the tooltip as raw HTML (`innerHTML`).
      *
-     * If no template is provided, or the template function returns null, a default tooltip showing the item caption and date range will be used.
+     * If no template is provided, or the template function returns null, a default tooltip showing the item label and date range will be used.
      *
      * @param {string | number} id The identifier of the item for which the tooltip is being generated.
      * @returns {HTMLElement | string} Custom tooltip content.
@@ -142,8 +145,6 @@ export interface TempisTimelineItemStyle {
     borderRadius?: number;
 };
 
-export type TempisTimelineRangePosition = "top" | "bottom" | "both" | "none";
-
 export type TempisTimelineRangeUnitLabelFormats = {
     millisecond?: string,
     second?: string,
@@ -161,6 +162,8 @@ export interface TempisTimelineRangeUnitOptions {
     /** The range unit label formats. */
     formats?: TempisTimelineRangeUnitLabelFormats;
 };
+
+export type TempisTimelineRangePosition = "top" | "bottom" | "both" | "none";
 
 export interface TempisTimelineRangeOptions {
     /** Whether the timeline range is fixed and cannot be modified via user interaction. */
@@ -202,12 +205,43 @@ export interface TempisTimelineRangeZoomOptions {
     max?: number;
 };
 
+export type TempisTimelineLegendPosition = "top" | "bottom" | "none";
+
+export type TempisTimelineAlignment = "start" | "center" | "end";
+
+export type TempisTimelineMarkerStyle = "square" | "square-rounded" | "circle";
+
+export interface TempisTimelineLegendItemOptions {
+    /** The legend item marker style. Defaults to `"square-rounded"` */
+    markerStyle?: TempisTimelineMarkerStyle;
+
+    /** The flag defining whether to highlight category items in the timeline when the corresponding category is hovered over in the legend. Defaults to `true` */
+    isHighlightOnHover?: boolean;
+
+    /** The flag defining whether clicking a category in the legend toggles the visibility of all timeline items belonging to that category. Defaults to `true` */
+    isFilterOnClick?: boolean;
+
+    /** The amount of padding to apply to the legend item. */
+    padding?: number;
+}
+
+export interface TempisTimelineLegendOptions {
+    /** The legend position. */
+    position?: TempisTimelineLegendPosition;
+
+    /** The legend horizontal alignment. */
+    alignment?: TempisTimelineAlignment;
+
+    /** The legend item options. */
+    item?: TempisTimelineLegendItemOptions;
+}
+
 export interface TempisTimelineItem {
     /** The item identifier. */
     id: string | number;
     start: string | number | Date;
     end?: string | number | Date;
-    caption?: string;
+    label?: string;
     grouping?: string;
     category?: string;
     style?: TempisTimelineItemStyle;
@@ -217,6 +251,9 @@ export interface TempisTimelineItem {
 export interface TempisTimelineCategory {
     /** The category name, correlating to the 'category' property of items. */
     name: string;
+
+    /** The category label. */
+    label: string;
 
     /** The style to apply to items in this category. The backgroundColor property will be applied as the legend key color. */
     style?: TempisTimelineItemStyle;

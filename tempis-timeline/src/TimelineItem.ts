@@ -1,18 +1,24 @@
 import { TempisTimelineItemStyle, TempisTimelineItem as TimelineItemDefinition } from "./TempisTimelineOptions";
 import { parseDate } from "./Utilities";
 
-/** The default item style. */
+/**
+ * The default item style.
+ */
 export const DEFAULT_ITEM_STYLE: TempisTimelineItemStyle = {
     backgroundColor: "#1a006eff",
     fontColor: "#FFFFFF",
-    padding: 12,
+    padding: 10,
     borderRadius: 5
 };
 
+/**
+ * Represents an item in the timeline.
+ */
 export class TimelineItem {
     private readonly _definition: TimelineItemDefinition;
     private readonly _id: string | number;
-    private readonly _caption: string;
+    private readonly _category: string | null;
+    private readonly _label: string;
     private readonly _start: Date;
     private readonly _end: Date | null;
     private readonly _style: TempisTimelineItemStyle;
@@ -28,33 +34,45 @@ export class TimelineItem {
     public constructor(definition: TimelineItemDefinition, style: TempisTimelineItemStyle) {
         this._definition = definition;
         this._id = definition.id;
-        this._caption = definition.caption ?? "";
+        this._category = definition.category ?? null;
+        this._label = definition.label ?? "";
         this._start = parseDate(definition.start);
         this._end = definition.end ? parseDate(definition.end) : null;
         this._style = style;
         this._isSelected = !!definition.selected;
     }
 
+    /** Gets the item definition. */
     public get definition(): TimelineItemDefinition {
         return this._definition;
     }
 
+    /** Gets the item identifier. */
     public get id(): string | number {
         return this._id;
     }
 
-    public get caption(): string {
-        return this._caption;
+    /** Gets the item category name, or null if no category is defined. */
+    public get category(): string | null {
+        return this._category;
     }
 
+    /** Gets the item label. */
+    public get label(): string {
+        return this._label;
+    }
+
+    /** Gets the start date of the item. */
     public get start(): Date {
         return this._start;
     }
 
+    /** Gets the end date of the item, or null if the item is a PIT item. */
     public get end(): Date | null {
         return this._end;
     }
 
+    /** Gets the item style. */
     public get style(): TempisTimelineItemStyle {
         return this._style;
     }

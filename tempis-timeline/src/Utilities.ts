@@ -84,33 +84,82 @@ export function doDateRangesOverlap(aStart: Date, aEnd: Date, bStart: Date, bEnd
     return false;
 }
 
-export function fitCanvasText(context: CanvasRenderingContext2D, value: string, maxWidth: number): string {
-    // Get the width of the entire string.
-    let stringWidth = context.measureText(value).width;
-
-    // Is the string empty or the width of our string already less than the max width? If so just return it.
-    if (!value || stringWidth <= maxWidth) {
-        return value;
+/**
+ * Draws text onto a canvas, truncating it visually with an ellipsis ("...") if it exceeds the specified maximum width.
+ * @param {CanvasRenderingContext2D} context - The 2D rendering context of the canvas.
+ * @param {string} text The text to render.
+ * @param {number} x The x-coordinate where the text starts.
+ * @param {number} y The y-coordinate where the text baseline is drawn.
+ * @param {number} maxWidth The maximum allowed width for the text (including the ellipsis).
+ */
+export function drawClippedText(context: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number) {
+    // There is nothing to do if we have no text to draw.
+    if (!text) {
+        return;
     }
 
-    const ellipsisWidth = context.measureText("...").width;
+    const ellipsis = "...";
+    const ellipsisWidth = context.measureText(ellipsis).width;
+    const textWidth = context.measureText(text).width;
 
-    // If our ellipses width is already greater than our max width then return an empty string.
-    if (ellipsisWidth > maxWidth) {
-        return "";
+    // If the text already fits then just draw it normally.
+    if (textWidth <= maxWidth) {
+        context.fillText(text, x, y);
+        return;
     }
 
-    let stringCharacterLength = value.length;
+    // If the ellipsis alone doesn't fit, skip drawing
+    if (ellipsisWidth > maxWidth) return;
 
-    // Find the longest possible length of our string that will give a width (including the ellipsis width) that is less than the max width.
-    while (stringWidth >= maxWidth - ellipsisWidth && stringCharacterLength-- > 1) {
-        value = value.substring(0, stringCharacterLength);
-        stringWidth = context.measureText(value).width;
-    }
-    
-    return `${value}...`;
+    // Save context state
+    context.save();
+
+    // Define clipping region (leave space for the ellipsis)
+    context.beginPath();
+    context.rect(x, y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
+    context.clip();
+
+    // Draw the full text — will be visually clipped
+    context.fillText(text, x, y);
+
+    // Restore clipping
+    context.restore();
+
+    // Draw ellipsis at the end
+    context.fillText(ellipsis, x + maxWidth - ellipsisWidth, y);
 }
 
+/**
+ * Merges multiple source objects into the first one, assigning default values 
+ * for properties that are `null` or `undefined` in the target.
+ *
+ * The function iterates over each source (from left to right) and copies any 
+ * property that does not already exist (i.e., is `null` or `undefined`) on 
+ * the target. The target is the first object in the argument list and is 
+ * mutated in place.
+ *
+ * @template T - The object type of all source objects.
+ * @param {...Partial<T>[]} sources - One or more partial objects to merge. 
+ *   - The first object acts as the target to receive defaults.
+ *   - Subsequent objects provide default values.
+ *
+ * @returns {Partial<T> | undefined} 
+ * Returns the target object with defaults applied, or `undefined` if no sources are provided.
+ *
+ * @example
+ * const a = { name: "Alice" };
+ * const b = { age: 25, name: "Bob" };
+ * const c = { country: "USA" };
+ *
+ * // Only fills missing fields in 'a' (since 'name' is already set)
+ * const result = defaults(a, b, c);
+ * console.log(result); 
+ * // → { name: "Alice", age: 25, country: "USA" }
+ *
+ * @note
+ * - This function mutates the first argument (`sources[0]`).
+ * - Only `null` or `undefined` properties are replaced; falsy values like `0` or `""` are preserved.
+ */
 export function defaults<T extends object>(...sources: Partial<T>[]): Partial<T> | undefined {
   if (sources.length === 0) return undefined;
 

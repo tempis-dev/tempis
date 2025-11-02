@@ -4,9 +4,10 @@ import { TimelineDataView } from "./TimelineDataView";
 import { TimelineFont } from "./TimelineFont";
 import { TimelineItem } from "./TimelineItem";
 import { TimelineRangeView } from "./TimelineRangeView";
+import { TimelineTooltipView } from "./TimelineTooltipView";
+import { TimelineLegendView } from "./TimelineLegendView";
 import { SelectionChangeEvent } from "./Event";
 import { isNullOrUndefined, parseDate } from "./Utilities";
-import { TimelineTooltipView } from "./TimelineTooltipView";
 import { DateFormatter } from "./DateFormatter";
 
 export class TempisTimeline {
@@ -24,6 +25,9 @@ export class TempisTimeline {
 
     /** The timeline range. */
     private readonly _rangeView: TimelineRangeView;
+
+    /** The timeline legend view. */
+    private readonly _legendView: TimelineLegendView;
 
     /** The timeline tooltip view. */
     private readonly _tooltipView: TimelineTooltipView;
@@ -52,6 +56,7 @@ export class TempisTimeline {
         this._dataSet = new TimelineDataSet(this._options);
         this._dataView = new TimelineDataView(this._dataSet);
         this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._options.range);
+        this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._options.legend);
         this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._options.tooltip);
 
         // Do our initial canvas resize.
@@ -64,6 +69,9 @@ export class TempisTimeline {
 
         // Create the canvas event handlers.
         this._createCanvasEventHandlers();
+
+        // We should register a callback to redraw the timeline every time our dataset is updated.
+        this._dataSet.registerUpdateCallback(() => this._draw());
 
         // Do our initial draw.
         this._draw();
@@ -374,34 +382,88 @@ export class TempisTimeline {
         // Calculate how much height the range view will take up when drawn.
         const rangeViewHeight = this._rangeView.calculateRequiredHeight();
 
-        // Find the max height that we can render the data view before we need to have it scroll.
-        // This is determined by how much vertical space is taken up by the range bar(s).
-        // TODO This will eventually have to take the legend height into account.
-        const dataViewYPosition = ["top", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0;
-        const dataViewMaxHeight = this._canvas.clientHeight - dataViewYPosition - (["bottom", "both"].includes(this._rangeView.position) ? rangeViewHeight : 0);
+        // Calculate how much height the legend view will take up when drawn.
+        const legendViewHeight = this._legendView.calculateRequiredHeight();
 
-        // Draw the data view and get the height of it.
-        const dataViewHeight = this._dataView.draw(context, this._rangeView, dataViewYPosition, dataViewMaxHeight, !!this._options.fillVertically);
+        // Set the default y position of the data view which would render the data view form the top of the canvas.
+        // This will be corrected for if a range and/or legend will be rendered above the data view. 
+        let dataViewYPosition = 0;
 
-        // Keep track of how much height we have taken up when rendering all timeline elements.
-        let totalRenderHeight = dataViewHeight;
+        // If we are drawing a legend view above the data view then offset the data view y position by the calculated height of the legend view.
+        if (this._legendView.position === "top") {
+            dataViewYPosition += legendViewHeight;
+        }
 
-        // Are we rendering a top range bar?
+        // If we are drawing a range view above the data view then offset the data view y position by the calculated height of the range view.
         if (["top", "both"].includes(this._rangeView.position)) {
-            this._rangeView.draw(context, 0 , "top");
-            totalRenderHeight += rangeViewHeight;
+            dataViewYPosition += rangeViewHeight;
         }
 
-        // Are we rendering a bottom range bar?
+        // Set the default max height of the data view which would render the data view from below any legend or range view at the top of the canvas to the bottom of the canvas.
+        let dataViewMaxHeight = this._canvas.clientHeight - dataViewYPosition;
+
+        // If we are drawing a range view below the data view then reduce the max height of the data view to account for it.
         if (["bottom", "both"].includes(this._rangeView.position)) {
-            this._rangeView.draw(context, dataViewYPosition + dataViewHeight, "bottom");
-            totalRenderHeight += rangeViewHeight;
+            dataViewMaxHeight -= rangeViewHeight;
         }
 
-        // TODO Need to draw color grouping legend if using groups and colours.
+        // If we are drawing a legend view below the data view then reduce the max height of the data view to account for it.
+        if (this._legendView.position === "bottom") {
+            dataViewMaxHeight -= legendViewHeight;
+        }
+
+        /**
+         * The rendering of the views starts here and is done in the following order:
+         * 1. Legend view (if configured 'top' or 'both')
+         * 2. Range view (if configured 'top')
+         * 3. Data view
+         * 4. Range view (if configured 'bottom' or 'both')
+         * 5. Legend view (if configured 'bottom')
+         */
+
+        // We are going to render our stacked legend/range/data views so we need to keep track of the overall y render offset position. 
+        let renderOffsetY = 0;
+
+        // The first thing to render would be a top legend bar (if configured to do so).
+        if (this._legendView.position === "top") {
+            this._legendView.draw(context, renderOffsetY);
+            renderOffsetY += legendViewHeight;
+        }
+
+        // The next thing to render would be a top range bar (if configured to do so).
+        if (["top", "both"].includes(this._rangeView.position)) {
+            this._rangeView.draw(context, renderOffsetY, "top");
+            renderOffsetY += rangeViewHeight;
+        }
+
+        // The next thing to render would be the data view.
+        // We need to clip an area of the canvas from the current y render offset to prevent the data view rendering over any top legend/range view.
+        context.save();
+        context.beginPath();
+        context.rect(0, renderOffsetY, this._canvas.clientWidth, dataViewMaxHeight);
+        context.clip();
+
+        // Render the data view.
+        // The result of this is the resulting data view height which we should add to the total render height.
+        renderOffsetY += this._dataView.draw(context, this._rangeView, renderOffsetY, dataViewMaxHeight, !!this._options.fillVertically);
+
+        // Restore the original render context, this will bin the clipping rect we put in place to restrict the data view render.
+        context.restore();
+
+        // The next thing to render would be a bottom range bar (if configured to do so).
+        if (["bottom", "both"].includes(this._rangeView.position)) {
+            this._rangeView.draw(context, renderOffsetY, "bottom");
+            renderOffsetY += rangeViewHeight;
+        }
+
+        // The last thing to render would be a bottom legend bar (if configured to do so).
+        if (this._legendView.position === "bottom") {
+            this._legendView.draw(context, renderOffsetY);
+            renderOffsetY += legendViewHeight;
+        }
 
         // Clear the canvas from below the bottom of the bottom range view or bottom of the timeline or the bottom of the legend. 
-        context.clearRect(0, totalRenderHeight, this._canvas.clientWidth, this._canvas.clientHeight - totalRenderHeight);
+        context.clearRect(0, renderOffsetY, this._canvas.clientWidth, this._canvas.clientHeight - renderOffsetY);
     }
 
     /**

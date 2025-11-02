@@ -1,7 +1,7 @@
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineItem } from "./TimelineItem";
 import { RangeTick, TimelineRangeView } from "./TimelineRangeView";
-import { clamp, fitCanvasText } from "./Utilities";
+import { clamp, drawClippedText } from "./Utilities";
 
 export interface DataViewDrawPlan {
     /** The height that is required to draw all groups and items within the specified date range. */
@@ -51,13 +51,19 @@ export interface DataViewItemDrawPlan {
 const DEFAULT_GROUP_VERTICAL_LABEL_MARGIN: number = 6;
 
 /** The default amount of vertical margin to use for items. */
-const DEFAULT_ITEM_VERTICAL_MARGIN: number = 8;
+const DEFAULT_ITEM_VERTICAL_MARGIN: number = 4;
 
 /** The default amount of vertical margin to use for each group. */
-const DEFAULT_GROUP_MARGIN: number = 12;
+const DEFAULT_GROUP_MARGIN: number = 8;
 
 /** The minimum amount of available horizontal space required to render a label. */
 const MINIMUM_RENDERED_LABEL_WIDTH: number = 5;
+
+/** The background colour to use for any unfocused items. */
+const UNFOCUSED_ITEM_BACKGROUND_COLOUR = "#d6d6d6ff";
+
+/** The text colour to use for any unfocused items. */
+const UNFOCUSED_ITEM_FONT_COLOUR = "#ffffffff";
 
 export class TimelineDataView {
     /** The minimum height of the data view. */
@@ -68,6 +74,12 @@ export class TimelineDataView {
 
     /** The current scroll Y offset. */
     private _scrollYOffset: number = 0;
+
+    /** Gets the y position from where this view was last drawn. */
+    private _lastDrawYPosition: number = 0;
+
+    /** Gets the height of his view when last drawn. */
+    private _lastDrawHeight: number = 0;
 
     /** The current data view draw plan. */
     private _drawPlan: DataViewDrawPlan | null = null;
@@ -106,19 +118,23 @@ export class TimelineDataView {
 
         // Calculate the height of this rendered view, this may be less than the max height.
         // If fillVertically is true then we should always use the max height.
-        const viewHeight = fillVertically ? maxHeight : Math.min(this._drawPlan.height, maxHeight);
+        this._lastDrawHeight = fillVertically ? maxHeight : Math.min(this._drawPlan.height, maxHeight);
 
         // Clear the data view area.
-        context.clearRect(0, yPosition, context.canvas.width, viewHeight);
+        context.clearRect(0, yPosition, context.canvas.width, this._lastDrawHeight);
 
         // TODO Draw minor unit tick bars IF configured.
-        this._drawMinorUnitBars(context, range.minorTicks, yPosition, viewHeight);
+        this._drawMinorUnitBars(context, range.minorTicks, yPosition, this._lastDrawHeight);
 
         // Draw our groups and items!
         this._drawGroups(context, yPosition, maxHeight);
-        
+
+        // Set the y position from where this view was last drawn.
+        // This will be used to help align absolute canvas pointer positions with data view elements.
+        this._lastDrawYPosition = yPosition;
+
         // Return the height of the rendered view.
-        return viewHeight;
+        return this._lastDrawHeight;
     }
 
     /**
@@ -132,11 +148,16 @@ export class TimelineDataView {
             return null;
         }
 
+        // Do not get items for points that overflow the vertical constraints of the data view.
+        if (point.y < this._lastDrawYPosition || point.y > (this._lastDrawYPosition + this._lastDrawHeight)) {
+            return null;
+        }
+
         // Iterate over each group and each item in the group to see if the point is within the bounds of the item.
         for (const groupDrawPlan of this._drawPlan.groupDrawPlans) {
             for (const itemDrawPlan of groupDrawPlan.rows.flat()) {
                 if (point.x >= itemDrawPlan.xPositionStart && point.x <= itemDrawPlan.xPositionEnd 
-                    && point.y >= (itemDrawPlan.yPositionStart + this._scrollYOffset) && point.y <= (itemDrawPlan.yPositionEnd + this._scrollYOffset)) {
+                    && point.y >= (itemDrawPlan.yPositionStart + this._scrollYOffset + this._lastDrawYPosition) && point.y <= (itemDrawPlan.yPositionEnd + this._scrollYOffset + this._lastDrawYPosition)) {
                     return itemDrawPlan.item;
                 }
             }
@@ -225,21 +246,34 @@ export class TimelineDataView {
      * @param scrolledYPosition The y position of the top of the view, taking into account the current scroll offset.
      */
     private _drawGroupItem(itemDrawPlan: DataViewItemDrawPlan, context: CanvasRenderingContext2D, scrolledYPosition: number) {
-        const itemFontColor = itemDrawPlan.item.style.fontColor!;
-        const itemBackgroundColor = itemDrawPlan.item.style.backgroundColor!;
-        const itemPadding = itemDrawPlan.item.style.padding!;
-        const itemBorderRadius = itemDrawPlan.item.style.borderRadius!;
-        const itemBorderThickness = itemDrawPlan.item.style.borderThickness;
-        const itemBorderColor = itemDrawPlan.item.style.borderColor;
+        // Get the item and the item category (if it is associated with a category).
+        const item = itemDrawPlan.item;
+        const itemCategory = item.category ? this._dataSet.getCategory(item.category) : null;
+
+        // Get the item styles.
+        const itemPadding = item.style.padding!;
+        const itemBorderRadius = item.style.borderRadius!;
+        const itemBorderThickness = item.style.borderThickness;
+        let itemBackgroundColor = item.style.backgroundColor!;
+        let itemFontColor = item.style.fontColor!;
+        let itemBorderColor = item.style.borderColor;
 
         // If the item is too small to be rendered then we should just skip it to improve performance.
         if ((itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart) < 1) {
             return;
         }
 
+        // If a category is being focused, but this item doesn't belong to that category, then render it with the unfocused item background and font colour. 
+        // TODO This should eventually just use a lighter version of item.style.backgroundColor! based on the result of some function.
+        if (this._dataSet.focusedCategory && !this._dataSet.focusedCategory.isDisabled && !itemCategory?.isFocused) {
+            itemBackgroundColor = UNFOCUSED_ITEM_BACKGROUND_COLOUR;
+            itemBorderColor = UNFOCUSED_ITEM_BACKGROUND_COLOUR;
+            itemFontColor = UNFOCUSED_ITEM_FONT_COLOUR;
+        }
+
         // If the item is selected then we should rendering an underlying selection indicator rectangle.
         // TODO Improve the way we render the selected item, this is a bit hacky.
-        if (itemDrawPlan.item.isSelected) {
+        if (item.isSelected) {
             context.shadowColor = "rgba(0, 0, 0, 1)";
             context.shadowBlur = 15;
             context.shadowOffsetX = 0;
@@ -296,7 +330,7 @@ export class TimelineDataView {
         }
 
         // Draw the item label (if there is one).
-        if (itemDrawPlan.item.caption) {
+        if (item.label) {
             // Calculate the actual x position of the label, we should attempt to keep this in the bounds of the view.
             const labelStartPositionX = Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
 
@@ -307,9 +341,15 @@ export class TimelineDataView {
             if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
                 context.textBaseline = "middle";
                 context.fillStyle = itemFontColor;
-                context.beginPath();
-                context.fillText(fitCanvasText(context, itemDrawPlan.item.caption, maxLabelWidth), labelStartPositionX, (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2) + 1) + scrolledYPosition);
-                context.stroke();
+      
+                // Draw the item label, but clip it if there is not enough available horizontal space to do so.
+                drawClippedText(
+                    context, 
+                    item.label, 
+                    labelStartPositionX,
+                    (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2) + 1) + scrolledYPosition,
+                    maxLabelWidth
+                );
             }
         }
     }
@@ -331,7 +371,15 @@ export class TimelineDataView {
         // Work out all item stacks first. We aren't calculating any y positions or heights here we can do that after.
         for (const grouping of this._dataSet.groupings) {
             // Get all items in the current visible range.
-            const itemsInRange = grouping.getItemsInRange(rangeFromDt, rangeToDt);
+            let itemsInRange = grouping.getItemsInRange(rangeFromDt, rangeToDt);
+
+            // Filter out any items that are in disabled categories.
+            itemsInRange = itemsInRange.filter((item) => {
+                // Try to get the category for the item.
+                const itemCategory = item.category ? this._dataSet.getCategory(item.category) : null;
+
+                return !itemCategory?.isDisabled;
+            });
 
             // If there are no items in this group that are within the current range view then we should just skip this group.
             if (!itemsInRange.length) {
@@ -353,9 +401,9 @@ export class TimelineDataView {
                     endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
                 } else {
                     // This is a PIT item, the start and end positions of our x axis will be derived from the width of the label and the start date.
-                    // TODO Determine what to do when we have PIT item with no caption.
+                    // TODO Determine what to do when we have PIT item with no label.
                     // TODO Set the context font to be whatever we will be using to render the actual item label.
-                    const itemLabelWidth = context.measureText(item.caption ?? "?").width + (item.style.padding! * 2);
+                    const itemLabelWidth = context.measureText(item.label ?? "?").width + (item.style.padding! * 2);
 
                     // Let's set the start and end x position to be equidistant from the actual point in time that this item is for.
                     startPositionX = (milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime())) - (itemLabelWidth / 2);

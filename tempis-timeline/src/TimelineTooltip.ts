@@ -3,6 +3,9 @@ import { TempisTimelineTooltipOptions } from "./TempisTimelineOptions";
 import { TimelineFont } from "./TimelineFont";
 import { TimelineItem } from "./TimelineItem";
 
+/** The default tooltip delay in millis. */
+const DEFAULT_TOOLTIP_DELAY_MS = 500; 
+
 export class TimelineTooltip {
     /** The item that the tooltip is being shown for. */
     private readonly _item: TimelineItem;
@@ -54,7 +57,7 @@ export class TimelineTooltip {
         this._activeShowTimer = setTimeout(() => {
             this._activeShowTimer = null;
             this._createElement();
-        }, options.delay ?? 0);
+        }, options.delay ?? DEFAULT_TOOLTIP_DELAY_MS);
     }
 
     /**
@@ -148,11 +151,11 @@ export class TimelineTooltip {
                 borderRadius: "5px"
             });
 
-            // Set the default tooltip content which is a header of the item caption as well as the start date for PIT items and start and end date for range items.
+            // Set the default tooltip content which is a header of the item label as well as the start date for PIT items and start and end date for range items.
             if (this._item.end) {
-                this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.caption}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
+                this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
             } else {
-                this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.caption}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)}</p>`;
+                this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)}</p>`;
             }
         }
 

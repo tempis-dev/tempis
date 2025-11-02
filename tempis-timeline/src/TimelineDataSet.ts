@@ -5,6 +5,14 @@ import { getGlobalPalette } from "./ColorPalette";
 import { DEFAULT_ITEM_STYLE, TimelineItem } from "./TimelineItem";
 import { defaults } from "./Utilities";
 
+/**
+ * A callback function that can be registered to be invoked when the dataset is updated.
+ */
+export type UpdateCallback = () => void;
+
+/**
+ * The timeline dataset model.
+ */
 export class TimelineDataSet {
     /** The timeline item groupings. */
     private _groupings: TimelineItemGrouping[] = [];
@@ -12,11 +20,20 @@ export class TimelineDataSet {
     /** The timeline item categories. */
     private _categories: TimelineItemCategory[] = [];
 
+    /** A mapping of category names to timeline item categories. This is used for quick lookup. */
+    private _categoriesMap: Record<string, TimelineItemCategory> = {};
+
     /** The minimum date of any item. */
     private _minDate: Date | null = null;
 
     /** The maximum date of any item. */
     private _maxDate: Date | null = null;
+
+    /** The currently focused category. */
+    private _focusedCategory: TimelineItemCategory | null = null;
+
+    /** The registered update callbacks that are to be invoked when the dataset is updated. */
+    private _registeredUpdateCallbacks: UpdateCallback[] = [];
 
     /**
      * Create a new instance of the TimelineDataSet class.
@@ -47,6 +64,11 @@ export class TimelineDataSet {
         return this._maxDate;
     }
 
+    /** Gets the currently focused category, or null if there is no focused category. */
+    public get focusedCategory(): TimelineItemCategory | null {
+        return this._focusedCategory;
+    }
+
     /**
      * Gets the item with the specified identifier, or null if it does not exist.
      * @param id The item identifier to search for.
@@ -73,7 +95,90 @@ export class TimelineDataSet {
      * @returns The category with the specified name, or null if one does not exist.
      */
     public getCategory(name: string): TimelineItemCategory | null {
-        return this._categories.find((category) => category.name === name) ?? null;
+        return this._categoriesMap[name] ?? null;
+    }
+
+    /**
+     * Enables the category with the specified name.
+     * @param name The category name.
+     */
+    public enableCategory(name: string): void {
+        // Try to get the category with the given name.
+        const category = this.getCategory(name);
+
+        if (category && category.isDisabled) {
+            // Mark the disabled category as enabled.
+            category.isDisabled = false;
+
+            this._invokeUpdateCallbacks();
+        }
+    }
+
+    /**
+     * Disables the category with the specified name.
+     * @param name The category name.
+     */
+    public disableCategory(name: string): void {
+        // Try to get the category with the given name.
+        const category = this.getCategory(name);
+
+        if (category && !category.isDisabled) {
+            // Mark the enabled category as disabled.
+            category.isDisabled = true;
+
+            this._invokeUpdateCallbacks();
+        }
+    }
+
+    /**
+     * Sets the specified category as being focused and sets all others to not being focused.
+     * @param name The category name.
+     */
+    public focusCategory(name: string): void {
+        // If the category is already focused then there is nothing to do.
+        if (this._focusedCategory?.name === name) {
+            return;
+        }
+
+        let newlyFocusedCategory: TimelineItemCategory | null = null;
+
+        // Update the focused state of all categories.
+        for (const category of this._categories) {
+            // Is this category the one to focus?
+            const isFocusedCategory = category.name === name;
+            
+            // Update the focused state of the category.
+            category.isFocused = isFocusedCategory;
+
+            if (isFocusedCategory) {
+                newlyFocusedCategory = category;
+            }
+        }
+
+        // Has our focused category changed?
+        if (this._focusedCategory !== newlyFocusedCategory) {
+            this._focusedCategory = newlyFocusedCategory;
+            this._invokeUpdateCallbacks();
+        }
+    }
+
+    /**
+     * Sets the specified category as being focused and sets all others to not being focused.
+     * @param name The category name.
+     */
+    public unfocusCategories(): void {
+        // If there is no focused category then there is nothing to do.
+        if (!this._focusedCategory) {
+            return;
+        }
+
+        // Update the focused state of the focused category, all others should already be unfocused.
+        this._focusedCategory.isFocused = false;
+
+        // Clear the focused category.
+        this._focusedCategory = null;
+
+        this._invokeUpdateCallbacks();
     }
 
     /**
@@ -98,7 +203,18 @@ export class TimelineDataSet {
         this._createCategories(options);
 
         // Then we need to create our actual groupings and item models.
-        this._createGroupings(options);        
+        this._createGroupings(options);
+        
+        // We have updated the dataset, so any registered update callbacks should be invoked.
+        this._invokeUpdateCallbacks();
+    }
+
+    /**
+     * Register a callback to be invoked when the dataset is updated.
+     * @param callback The callback to be invoked when the dataset is updated.
+     */
+    public registerUpdateCallback(callback: UpdateCallback): void {
+        this._registeredUpdateCallbacks.push(callback);
     }
 
     /**
@@ -145,10 +261,16 @@ export class TimelineDataSet {
             // If the user has not defined a category color then we will grab the next available one from the global color palette.
             categoryStyle.backgroundColor = categoryStyle.backgroundColor ?? getNextPaletteColor.next().value;
 
-            this._categories.push(new TimelineItemCategory(categoryDefinition.name, categoryStyle));
+            this._categories.push(new TimelineItemCategory(categoryDefinition.name, categoryDefinition.label, categoryStyle));
 
             categoryNames.push(categoryDefinition.name);
         }
+
+        // Update our categories map.
+        this._categoriesMap = this._categories.reduce((map, category) => {
+            map[category.name] = category;
+            return map;
+        }, {} as Record<string, TimelineItemCategory>);
     }
 
     /**
@@ -237,5 +359,14 @@ export class TimelineDataSet {
 
         this._minDate = minDate;
         this._maxDate = maxDate;
+    }
+
+    /**
+     * Invoke all registered update callbacks.
+     */
+    private _invokeUpdateCallbacks(): void {
+        for (const callback of this._registeredUpdateCallbacks) {
+            callback();
+        }
     }
 }

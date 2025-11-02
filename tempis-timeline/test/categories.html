@@ -26,9 +26,19 @@
   const timelineOptions = {
     responsive: true,
     range: {
-      position: "bottom",
+      position: "both",
       minimum: null,
       maximum: null,
+    },
+    legend: {
+      position: "bottom",
+      alignment: "center",
+      item: {
+        markerStyle: "square-rounded",
+        isHighlightOnHover: true,
+        isFilterOnClick: true,
+        padding: 4
+      }
     },
     zoom: {
       enabled: true
@@ -41,84 +51,93 @@
     categories: [
       {
         name: "work",
+        label: "Work",
       },
       {
         name: "play",
+        label: "Play",
+      },
+      {
+        name: "accident",
+        label: "Accident",
+        style: {
+          backgroundColor: "#d90b2a"
+        }
       }
     ],
     items: [
       { 
         id: 0,
-        caption: "Sleeping",
+        label: "Sleeping",
         start: new Date("Thu Jan 23 2025 00:00:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 08:30:00 GMT+0000"),
         category: "play"
       },
       { 
         id: 1,
-        caption: "Working",
+        label: "Working",
         start: new Date("Thu Jan 23 2025 09:00:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 17:00:00 GMT+0000"),
         category: "work"
       },
       { 
         id: 2,
-        caption: "Eating",
+        label: "Eating",
         start: new Date("Thu Jan 23 2025 17:15:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 18:00:00 GMT+0000"),
         category: "work"
       },
       { 
         id: 3,
-        caption: "Playing",
+        label: "Playing",
         start: new Date("Thu Jan 23 2025 18:30:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 21:00:00 GMT+0000"),
         category: "play"
       },
       { 
         id: 4,
-        caption: "Sleeping",
+        label: "Sleeping",
         start: new Date("Thu Jan 23 2025 21:10:00 GMT+0000"),
         end: new Date("Thu Jan 24 2025 00:00:00 GMT+0000"),
         category: "play"
       },
       { 
         id: 5,
-        caption: "Snoring",
+        label: "Snoring",
         start: new Date("Thu Jan 23 2025 02:30:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 07:30:00 GMT+0000"),
         category: "play"
       },
       { 
         id: 6,
-        caption: "Stubbed Toe, like, really bad",
+        label: "Stubbed Toe, like, really bad",
         start: new Date("Thu Jan 23 2025 11:32:30 GMT+0000"),
-        category: "work"
+        category: "accident"
       },
       { 
         id: 7,
-        caption: "Sleeping",
+        label: "Sleeping",
         start: new Date("Thu Jan 23 2025 00:00:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 11:30:00 GMT+0000"),
         category: "play"
       },
       { 
         id: 8,
-        caption: "Sniffing",
+        label: "Sniffing",
         start: new Date("Thu Jan 23 2025 11:35:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 13:45:00 GMT+0000"),
         category: "play"
       },
       { 
         id: 9,
-        caption: "Eating",
+        label: "Eating",
         start: new Date("Thu Jan 23 2025 13:05:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 13:45:00 GMT+0000"),
         category: "play"
       },
       { 
         id: 10,
-        caption: "Sleeping",
+        label: "Sleeping",
         start: new Date("Thu Jan 23 2025 14:00:00 GMT+0000"),
         end: new Date("Thu Jan 24 2025 00:00:00 GMT+0000"),
         category: "play"
