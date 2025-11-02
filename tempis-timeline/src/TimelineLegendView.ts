@@ -406,8 +406,17 @@ export class TimelineLegendView {
             isPointerDown = false;
         });
 
-        // Add a handler for the cursor moving off of the canvas to ensure that we don't leave any categories focused.
+        // Handle the pointer leaving the canvas.
         this._canvas.addEventListener('pointerout', (event) => {
+            // Ensure that we don't leave any categories focused when our pointer leaves the canvas.
+            this._dataSet.unfocusCategories();
+        });
+
+        // Handle the wheel event.
+        this._canvas.addEventListener('wheel', (event) => {
+            // Scrolling the wheel can update the position of the legend when `options.fillVertically` is not set.
+            // This could potentially move our cursor off of a category we were focusing on and even move us onto another.
+            // Clear any focused category....just in case.
             this._dataSet.unfocusCategories();
         });
     }

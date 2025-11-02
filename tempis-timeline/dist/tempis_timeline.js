@@ -1440,6 +1440,9 @@ var tempis_timeline = (() => {
       this._canvas.addEventListener("pointerout", (event) => {
         this._dataSet.unfocusCategories();
       });
+      this._canvas.addEventListener("wheel", (event) => {
+        this._dataSet.unfocusCategories();
+      });
     }
     _getCategoryAtPoint(point) {
       if (!this._drawPlan) {
