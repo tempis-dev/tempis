@@ -1234,7 +1234,7 @@ var tempis_timeline = (() => {
   };
 
   // src/TimelineLegendView.ts
-  var DEFAULT_CATEGORY_MARGIN = 4;
+  var DEFAULT_CATEGORY_PADDING = 4;
   var DEFAULT_LEGEND_PADDING = 8;
   var DISABLED_CATEGORY_ALPHA = 0.4;
   var TimelineLegendView = class {
@@ -1257,6 +1257,18 @@ var tempis_timeline = (() => {
     get itemMarkerStyle() {
       var _a, _b;
       return (_b = (_a = this._options.item) == null ? void 0 : _a.markerStyle) != null ? _b : "square-rounded";
+    }
+    get itemPadding() {
+      var _a, _b;
+      return (_b = (_a = this._options.item) == null ? void 0 : _a.padding) != null ? _b : DEFAULT_CATEGORY_PADDING;
+    }
+    get isHighlightOnHover() {
+      var _a, _b;
+      return (_b = (_a = this._options.item) == null ? void 0 : _a.isHighlightOnHover) != null ? _b : true;
+    }
+    get isFilterOnClick() {
+      var _a, _b;
+      return (_b = (_a = this._options.item) == null ? void 0 : _a.isFilterOnClick) != null ? _b : true;
     }
     calculateRequiredHeight() {
       var _a, _b;
@@ -1289,16 +1301,16 @@ var tempis_timeline = (() => {
         }
         context.fillStyle = categoryDrawPlan.category.style.backgroundColor;
         context.beginPath();
-        context.roundRect(categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN, categoryDrawPlan.yPositionStart + DEFAULT_CATEGORY_MARGIN + yPosition, categoryDrawPlan.markerSize, categoryDrawPlan.markerSize, markerRadius);
+        context.roundRect(categoryDrawPlan.xPositionStart + this.itemPadding, categoryDrawPlan.yPositionStart + this.itemPadding + yPosition, categoryDrawPlan.markerSize, categoryDrawPlan.markerSize, markerRadius);
         context.fill();
         context.fillStyle = "#595959";
         context.textBaseline = "middle";
         drawClippedText(
           context,
           categoryDrawPlan.category.label,
-          categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap,
+          categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap,
           categoryDrawPlan.yPositionStart + categoryDrawPlan.height / 2 + yPosition,
-          this._drawPlan.width - (categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
+          this._drawPlan.width - (categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
         );
         context.globalAlpha = 1;
       }
@@ -1312,7 +1324,7 @@ var tempis_timeline = (() => {
       const elements = [];
       const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Category Label");
       const labelHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
-      const itemHeight = labelHeight + DEFAULT_CATEGORY_MARGIN * 2;
+      const itemHeight = labelHeight + this.itemPadding * 2;
       const markerLabelGap = labelHeight / 2;
       for (const category of this._dataSet.categories) {
         if (isNullOrUndefined(category.label) || category.label === "") {
@@ -1321,7 +1333,7 @@ var tempis_timeline = (() => {
         const { width } = context.measureText(category.label);
         elements.push({
           category,
-          width: width + markerLabelGap + labelHeight + DEFAULT_CATEGORY_MARGIN * 2,
+          width: width + markerLabelGap + labelHeight + this.itemPadding * 2,
           height: itemHeight,
           labelHeight,
           markerLabelGap
@@ -1381,6 +1393,9 @@ var tempis_timeline = (() => {
         if (!this._drawPlan) {
           return null;
         }
+        if (!this.isHighlightOnHover) {
+          return;
+        }
         const pointerPosition = getMouseOrPointerPosition(event);
         if (pointerPosition.y < this._lastDrawYPosition || pointerPosition.y > this._lastDrawYPosition + this._drawPlan.height) {
           return null;
@@ -1395,6 +1410,9 @@ var tempis_timeline = (() => {
       this._canvas.addEventListener("pointerdown", (event) => {
         if (!this._drawPlan) {
           return null;
+        }
+        if (!this.isFilterOnClick) {
+          return;
         }
         const pointerPosition = getMouseOrPointerPosition(event);
         if (pointerPosition.y < this._lastDrawYPosition || pointerPosition.y > this._lastDrawYPosition + this._drawPlan.height) {

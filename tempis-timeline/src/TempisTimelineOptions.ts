@@ -215,8 +215,13 @@ export interface TempisTimelineLegendItemOptions {
     /** The legend item marker style. Defaults to `"square-rounded"` */
     markerStyle?: TempisTimelineMarkerStyle;
 
+    /** The flag defining whether to highlight category items in the timeline when the corresponding category is hovered over in the legend. Defaults to `true` */
+    isHighlightOnHover?: boolean;
+
+    /** The flag defining whether clicking a category in the legend toggles the visibility of all timeline items belonging to that category. Defaults to `true` */
+    isFilterOnClick?: boolean;
+
     /** The amount of padding to apply to the legend item. */
-    // TODO Apply this.
     padding?: number;
 }
 

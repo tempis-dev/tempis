@@ -35,8 +35,8 @@ export interface LegendCategoryDrawPlan {
     height: number;
 }
 
-/** The default amount of margin to use for each legend category. */
-const DEFAULT_CATEGORY_MARGIN: number = 4;
+/** The default amount of padding to use for each legend category. */
+const DEFAULT_CATEGORY_PADDING: number = 4;
 
 /** The default amount of padding to use for the legend. */
 const DEFAULT_LEGEND_PADDING: number = 8;
@@ -93,6 +93,27 @@ export class TimelineLegendView {
      */
     public get itemMarkerStyle(): TempisTimelineMarkerStyle {
         return this._options.item?.markerStyle ?? "square-rounded";
+    }
+
+    /**
+     * Gets the legend item padding.
+     */
+    public get itemPadding(): number {
+        return this._options.item?.padding ?? DEFAULT_CATEGORY_PADDING;
+    }
+
+    /**
+     * Gets a flag defining whether to highlight category items in the timeline when the corresponding category is hovered over in the legend.
+     */
+    public get isHighlightOnHover(): boolean {
+        return this._options.item?.isHighlightOnHover ?? true;
+    }
+
+    /**
+     * Gets a flag defining whether clicking a category in the legend toggles the visibility of all timeline items belonging to that category.
+     */
+    public get isFilterOnClick(): boolean {
+        return this._options.item?.isFilterOnClick ?? true;
     }
 
     /**
@@ -153,7 +174,7 @@ export class TimelineLegendView {
             // Draw the category marker.
             context.fillStyle = categoryDrawPlan.category.style.backgroundColor!;
             context.beginPath();
-            context.roundRect(categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN, categoryDrawPlan.yPositionStart + DEFAULT_CATEGORY_MARGIN + yPosition, categoryDrawPlan.markerSize, categoryDrawPlan.markerSize, markerRadius);
+            context.roundRect(categoryDrawPlan.xPositionStart + this.itemPadding, categoryDrawPlan.yPositionStart + this.itemPadding + yPosition, categoryDrawPlan.markerSize, categoryDrawPlan.markerSize, markerRadius);
             context.fill();
             
             // Draw the category label clipped to the available legend view width.
@@ -162,9 +183,9 @@ export class TimelineLegendView {
             drawClippedText(
                 context, 
                 categoryDrawPlan.category.label,
-                categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap, 
+                categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap, 
                 categoryDrawPlan.yPositionStart + (categoryDrawPlan.height / 2) + yPosition,
-                this._drawPlan.width - (categoryDrawPlan.xPositionStart + DEFAULT_CATEGORY_MARGIN + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
+                this._drawPlan.width - (categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
             )
 
             // Reset the context global alpha as we may have modified it if the category is disabled.
@@ -195,7 +216,7 @@ export class TimelineLegendView {
         // Calculate the label height to use for every category (to be consistent) and the item height.
         const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Category Label");
         const labelHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
-        const itemHeight = labelHeight + (DEFAULT_CATEGORY_MARGIN * 2);
+        const itemHeight = labelHeight + (this.itemPadding * 2);
 
         // Calculate the gap between the colour marker and the label, this should be derived from the text size.
         const markerLabelGap = labelHeight / 2; 
@@ -212,7 +233,7 @@ export class TimelineLegendView {
 
             elements.push({ 
                 category, 
-                width: width + markerLabelGap + labelHeight + (DEFAULT_CATEGORY_MARGIN * 2), 
+                width: width + markerLabelGap + labelHeight + (this.itemPadding * 2), 
                 height: itemHeight,
                 labelHeight,
                 markerLabelGap
@@ -310,6 +331,11 @@ export class TimelineLegendView {
                 return null;
             }
 
+            // There is nothing to do if we aren't going to be setting any focused categories.
+            if (!this.isHighlightOnHover) {
+                return;
+            }
+
             const pointerPosition = getMouseOrPointerPosition(event);
 
             // Do not get items for points that overflow the vertical constraints of the data view.
@@ -333,6 +359,11 @@ export class TimelineLegendView {
             // There is nothing to do if we have no draw plan as we have no rendered categories.
             if (!this._drawPlan) {
                 return null;
+            }
+
+            // There is nothing to do if we aren't going to be toggling the enabled state of any categories when clicked.
+            if (!this.isFilterOnClick) {
+                return;
             }
 
             const pointerPosition = getMouseOrPointerPosition(event);
