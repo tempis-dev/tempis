@@ -322,7 +322,10 @@ export class TimelineLegendView {
             };
         }
 
-        // TODO Throttle the pointer move handler, we don't need it every move. 
+        // TODO Throttle the pointer move handler, we don't need it every move.
+
+        // A flag defining whether the pointer is currently down.
+        let isPointerDown = false;
 
         // Handle the pointer move event.
         this._canvas.addEventListener('pointermove', (event) => {
@@ -335,6 +338,11 @@ export class TimelineLegendView {
             if (!this.isHighlightOnHover) {
                 return;
             }
+
+            // We don't want to toggle the focus of any categories if the user is just dragging over the legend view.
+            if (isPointerDown) {
+                return;
+            } 
 
             const pointerPosition = getMouseOrPointerPosition(event);
 
@@ -356,6 +364,8 @@ export class TimelineLegendView {
 
         // Handle the pointer down event.
         this._canvas.addEventListener('pointerdown', (event) => {
+            isPointerDown = true;
+
             // There is nothing to do if we have no draw plan as we have no rendered categories.
             if (!this._drawPlan) {
                 return null;
@@ -389,6 +399,11 @@ export class TimelineLegendView {
             }
 
             this._dataSet.unfocusCategories();
+        });
+
+        // Handle the pointer down event.
+        this._canvas.addEventListener('pointerup', (event) => {
+            isPointerDown = false;
         });
 
         // Add a handler for the cursor moving off of the canvas to ensure that we don't leave any categories focused.

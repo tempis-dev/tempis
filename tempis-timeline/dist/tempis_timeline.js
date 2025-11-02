@@ -1389,11 +1389,15 @@ var tempis_timeline = (() => {
           y: (event.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
         };
       };
+      let isPointerDown = false;
       this._canvas.addEventListener("pointermove", (event) => {
         if (!this._drawPlan) {
           return null;
         }
         if (!this.isHighlightOnHover) {
+          return;
+        }
+        if (isPointerDown) {
           return;
         }
         const pointerPosition = getMouseOrPointerPosition(event);
@@ -1408,6 +1412,7 @@ var tempis_timeline = (() => {
         }
       });
       this._canvas.addEventListener("pointerdown", (event) => {
+        isPointerDown = true;
         if (!this._drawPlan) {
           return null;
         }
@@ -1428,6 +1433,9 @@ var tempis_timeline = (() => {
           this._dataSet.disableCategory(targetCategory.name);
         }
         this._dataSet.unfocusCategories();
+      });
+      this._canvas.addEventListener("pointerup", (event) => {
+        isPointerDown = false;
       });
       this._canvas.addEventListener("pointerout", (event) => {
         this._dataSet.unfocusCategories();
