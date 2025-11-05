@@ -239,12 +239,26 @@ export interface TempisTimelineLegendOptions {
 export interface TempisTimelineItem {
     /** The item identifier. */
     id: string | number;
+
+    /** The item start date as a date string, number of millis or Date object. */
     start: string | number | Date;
+
+    /** The item end date (if item is a range) as a date string, number of millis or Date object. */
     end?: string | number | Date;
+
+    /** The item label. */
     label?: string;
+
+    /** The item grouping. */
     grouping?: string;
+
+    /** The item category. */
     category?: string;
+
+    /** The item style. */
     style?: TempisTimelineItemStyle;
+
+    /** A flag defining whether the item is selected. */
     selected?: boolean;
 };
 
