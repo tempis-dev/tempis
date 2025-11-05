@@ -1402,6 +1402,7 @@ var tempis_timeline = (() => {
         }
         const pointerPosition = getMouseOrPointerPosition(event);
         if (pointerPosition.y < this._lastDrawYPosition || pointerPosition.y > this._lastDrawYPosition + this._drawPlan.height) {
+          this._dataSet.unfocusCategories();
           return null;
         }
         const targetCategory = this._getCategoryAtPoint(pointerPosition);

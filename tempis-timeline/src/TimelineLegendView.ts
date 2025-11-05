@@ -348,6 +348,9 @@ export class TimelineLegendView {
 
             // Do not get items for points that overflow the vertical constraints of the data view.
             if (pointerPosition.y < this._lastDrawYPosition || pointerPosition.y > (this._lastDrawYPosition + this._drawPlan.height)) {
+                // Ensure that we are not leaving any categories focused.
+                this._dataSet.unfocusCategories();
+                
                 return null;
             }
 
