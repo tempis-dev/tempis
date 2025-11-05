@@ -623,7 +623,7 @@ var tempis_timeline = (() => {
           };
           let wasItemAddedToExistingRowStack = false;
           for (const rowStack of itemDrawPlanStacks) {
-            if (rowStack.length === 0 || rowStack[rowStack.length - 1].xPositionEnd < itemDrawPlan.xPositionStart) {
+            if (rowStack.length === 0 || rowStack[rowStack.length - 1].xPositionEnd <= itemDrawPlan.xPositionStart) {
               rowStack.push(itemDrawPlan);
               wasItemAddedToExistingRowStack = true;
               break;

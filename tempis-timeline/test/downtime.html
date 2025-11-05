@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Downtime</title>
+  <script src="../dist/tempis_timeline.js"></script>
+</head>
+<style>
+  html {
+    background-color: #ebebeb;
+  }
+  .canvas-container {
+    width: 100%;
+    height: 600px;
+    resize: both;
+    overflow: hidden;
+  }
+</style>
+<body>
+  <div class="canvas-container">
+    <canvas id="canvas">
+  </div>
+</body>
+<script>
+  // Create our timeline options.
+  const timelineOptions = {
+    responsive: true,
+    fillVertically: false,
+    range: {
+      position: "bottom",
+      start: new Date("Nov 01 2025 23:45:00 GMT+0000"),
+      end: new Date("Nov 02 2025 04:00:00 GMT+0000"),
+    },
+    font: {
+      size: 14
+    },
+    style: {
+      item: {
+        padding: undefined,
+        borderColor: undefined,
+        borderThickness: undefined,
+        borderRadius: undefined
+      },
+    },
+    categories: [
+      { name: "Maintenance", label: "Maintenance", style: { backgroundColor: "#3b82f6" } },
+      { name: "Power Failure", label: "Power Failure", style: { backgroundColor: "#ef4444" } },
+      { name: "Material Shortage", label: "Material Shortage", style: { backgroundColor: "#f59e0b" } },
+      { name: "Operator Break", label: "Operator Break", style: { backgroundColor: "#10b981" } },
+      { name: "Quality Issue", label: "Quality Issue", style: { backgroundColor: "#8b5cf6" } },
+      { name: "Setup Change", label: "Setup Change", style: { backgroundColor: "#6366f1" } },
+      { name: "Sensor Fault", label: "Sensor Fault", style: { backgroundColor: "#ec4899" } },
+      { name: "Cooling Delay", label: "Cooling Delay", style: { backgroundColor: "#06b6d4" } }
+    ],
+    items: [
+      // MACHINE 1
+      { id: 0, label: "Setup Change", category: "Setup Change", start: new Date("Sun Nov 02 2025 00:00:00 GMT+0000"), end: new Date("Sun Nov 02 2025 00:30:00 GMT+0000"), grouping: "Machine 1" },
+      { id: 1, label: "Power Failure", category: "Power Failure", start: new Date("Sun Nov 02 2025 00:30:00 GMT+0000"), end: new Date("Sun Nov 02 2025 01:15:00 GMT+0000"), grouping: "Machine 1" },
+      { id: 3, label: "Maintenance", category: "Maintenance", start: new Date("Sun Nov 02 2025 01:40:00 GMT+0000"), end: new Date("Sun Nov 02 2025 02:30:00 GMT+0000"), grouping: "Machine 1" },
+      { id: 4, label: "Cooling Delay", category: "Cooling Delay", start: new Date("Sun Nov 02 2025 02:30:00 GMT+0000"), end: new Date("Sun Nov 02 2025 03:00:00 GMT+0000"), grouping: "Machine 1" },
+      { id: 6, label: "Material Shortage", category: "Material Shortage", start: new Date("Sun Nov 02 2025 03:20:00 GMT+0000"), end: new Date("Sun Nov 02 2025 04:00:00 GMT+0000"), grouping: "Machine 1" },
+      { id: 7, label: "Sensor Fault", category: "Sensor Fault", start: new Date("Sun Nov 02 2025 04:00:00 GMT+0000"), end: new Date("Sun Nov 02 2025 04:45:00 GMT+0000"), grouping: "Machine 1" },
+      { id: 8, label: "Quality Issue", category: "Quality Issue", start: new Date("Sun Nov 02 2025 04:45:00 GMT+0000"), end: new Date("Sun Nov 02 2025 05:20:00 GMT+0000"), grouping: "Machine 1" },
+      { id: 9, label: "Maintenance", category: "Maintenance", start: new Date("Sun Nov 02 2025 05:20:00 GMT+0000"), end: new Date("Sun Nov 02 2025 06:00:00 GMT+0000"), grouping: "Machine 1" },
+      { id: 12, label: "Sensor Fault", category: "Sensor Fault", start: new Date("Sun Nov 03 2025 01:10:00 GMT+0000"), end: new Date("Sun Nov 03 2025 01:35:00 GMT+0000"), grouping: "Machine 1" },
+      { id: 13, label: "Cooling Delay", category: "Cooling Delay", start: new Date("Sun Nov 03 2025 01:35:00 GMT+0000"), end: new Date("Sun Nov 03 2025 02:05:00 GMT+0000"), grouping: "Machine 1" },
+      { id: 14, label: "Material Shortage", category: "Material Shortage", start: new Date("Sun Nov 03 2025 02:05:00 GMT+0000"), end: new Date("Sun Nov 03 2025 02:50:00 GMT+0000"), grouping: "Machine 1" },
+
+      // MACHINE 2
+      { id: 15, label: "Maintenance", category: "Maintenance", start: new Date("Sun Nov 02 2025 00:10:00 GMT+0000"), end: new Date("Sun Nov 02 2025 00:55:00 GMT+0000"), grouping: "Machine 2" },
+      { id: 18, label: "Cooling Delay", category: "Cooling Delay", start: new Date("Sun Nov 02 2025 01:55:00 GMT+0000"), end: new Date("Sun Nov 02 2025 02:20:00 GMT+0000"), grouping: "Machine 2" },
+      { id: 19, label: "Sensor Fault", category: "Sensor Fault", start: new Date("Sun Nov 02 2025 02:20:00 GMT+0000"), end: new Date("Sun Nov 02 2025 03:00:00 GMT+0000"), grouping: "Machine 2" },
+      { id: 20, label: "Operator Break", category: "Operator Break", start: new Date("Sun Nov 02 2025 03:00:00 GMT+0000"), end: new Date("Sun Nov 02 2025 03:15:00 GMT+0000"), grouping: "Machine 2" },
+      { id: 21, label: "Material Shortage", category: "Material Shortage", start: new Date("Sun Nov 02 2025 03:15:00 GMT+0000"), end: new Date("Sun Nov 02 2025 04:00:00 GMT+0000"), grouping: "Machine 2" },
+      { id: 22, label: "Quality Issue", category: "Quality Issue", start: new Date("Sun Nov 02 2025 04:00:00 GMT+0000"), end: new Date("Sun Nov 02 2025 04:35:00 GMT+0000"), grouping: "Machine 2" },
+      { id: 23, label: "Maintenance", category: "Maintenance", start: new Date("Sun Nov 02 2025 04:35:00 GMT+0000"), end: new Date("Sun Nov 02 2025 05:15:00 GMT+0000"), grouping: "Machine 2" },
+      { id: 25, label: "Sensor Fault", category: "Sensor Fault", start: new Date("Sun Nov 03 2025 00:45:00 GMT+0000"), end: new Date("Sun Nov 03 2025 01:10:00 GMT+0000"), grouping: "Machine 2" },
+      { id: 26, label: "Setup Change", category: "Setup Change", start: new Date("Sun Nov 03 2025 01:10:00 GMT+0000"), end: new Date("Sun Nov 03 2025 01:40:00 GMT+0000"), grouping: "Machine 2" },
+
+      // MACHINE 3
+      { id: 27, label: "Setup Change", category: "Setup Change", start: new Date("Sun Nov 02 2025 00:05:00 GMT+0000"), end: new Date("Sun Nov 02 2025 00:40:00 GMT+0000"), grouping: "Machine 3" },
+      { id: 28, label: "Maintenance", category: "Maintenance", start: new Date("Sun Nov 02 2025 00:40:00 GMT+0000"), end: new Date("Sun Nov 02 2025 01:10:00 GMT+0000"), grouping: "Machine 3" },
+      { id: 29, label: "Cooling Delay", category: "Cooling Delay", start: new Date("Sun Nov 02 2025 01:10:00 GMT+0000"), end: new Date("Sun Nov 02 2025 01:35:00 GMT+0000"), grouping: "Machine 3" },
+      { id: 31, label: "Power Failure", category: "Power Failure", start: new Date("Sun Nov 02 2025 02:10:00 GMT+0000"), end: new Date("Sun Nov 02 2025 02:55:00 GMT+0000"), grouping: "Machine 3" },
+      { id: 32, label: "Material Shortage", category: "Material Shortage", start: new Date("Sun Nov 02 2025 02:55:00 GMT+0000"), end: new Date("Sun Nov 02 2025 03:40:00 GMT+0000"), grouping: "Machine 3" },
+      { id: 33, label: "Operator Break", category: "Operator Break", start: new Date("Sun Nov 02 2025 03:40:00 GMT+0000"), end: new Date("Sun Nov 02 2025 04:00:00 GMT+0000"), grouping: "Machine 3" },
+      { id: 34, label: "Quality Issue", category: "Quality Issue", start: new Date("Sun Nov 02 2025 04:00:00 GMT+0000"), end: new Date("Sun Nov 02 2025 04:35:00 GMT+0000"), grouping: "Machine 3" },
+      { id: 35, label: "Setup Change", category: "Setup Change", start: new Date("Sun Nov 02 2025 04:35:00 GMT+0000"), end: new Date("Sun Nov 02 2025 05:05:00 GMT+0000"), grouping: "Machine 3" },
+      { id: 38, label: "Cooling Delay", category: "Cooling Delay", start: new Date("Sun Nov 03 2025 00:40:00 GMT+0000"), end: new Date("Sun Nov 03 2025 01:00:00 GMT+0000"), grouping: "Machine 3" },
+      { id: 39, label: "Sensor Fault", category: "Sensor Fault", start: new Date("Sun Nov 03 2025 01:00:00 GMT+0000"), end: new Date("Sun Nov 03 2025 01:25:00 GMT+0000"), grouping: "Machine 3" },
+      { id: 40, label: "Quality Issue", category: "Quality Issue", start: new Date("Sun Nov 03 2025 01:25:00 GMT+0000"), end: new Date("Sun Nov 03 2025 01:50:00 GMT+0000"), grouping: "Machine 3" },
+      { id: 41, label: "Operator Break", category: "Operator Break", start: new Date("Sun Nov 03 2025 01:50:00 GMT+0000"), end: new Date("Sun Nov 03 2025 02:10:00 GMT+0000"), grouping: "Machine 3" },
+      { id: 42, label: "Material Shortage", category: "Material Shortage", start: new Date("Sun Nov 03 2025 02:10:00 GMT+0000"), end: new Date("Sun Nov 03 2025 02:45:00 GMT+0000"), grouping: "Machine 3" },
+
+      // MACHINE 4
+      { id: 44, label: "Maintenance", category: "Maintenance", start: new Date("Sun Nov 02 2025 00:15:00 GMT+0000"), end: new Date("Sun Nov 02 2025 00:50:00 GMT+0000"), grouping: "Machine 4" },
+      { id: 45, label: "Setup Change", category: "Setup Change", start: new Date("Sun Nov 02 2025 00:50:00 GMT+0000"), end: new Date("Sun Nov 02 2025 01:15:00 GMT+0000"), grouping: "Machine 4" },
+      { id: 46, label: "Sensor Fault", category: "Sensor Fault", start: new Date("Sun Nov 02 2025 01:15:00 GMT+0000"), end: new Date("Sun Nov 02 2025 01:45:00 GMT+0000"), grouping: "Machine 4" },
+      { id: 49, label: "Power Failure", category: "Power Failure", start: new Date("Sun Nov 02 2025 02:30:00 GMT+0000"), end: new Date("Sun Nov 02 2025 03:10:00 GMT+0000"), grouping: "Machine 4" },
+      { id: 50, label: "Quality Issue", category: "Quality Issue", start: new Date("Sun Nov 02 2025 03:10:00 GMT+0000"), end: new Date("Sun Nov 02 2025 03:45:00 GMT+0000"), grouping: "Machine 4" },
+      { id: 51, label: "Material Shortage", category: "Material Shortage", start: new Date("Sun Nov 02 2025 03:45:00 GMT+0000"), end: new Date("Sun Nov 02 2025 04:20:00 GMT+0000"), grouping: "Machine 4" },
+      { id: 52, label: "Setup Change", category: "Setup Change", start: new Date("Sun Nov 02 2025 04:20:00 GMT+0000"), end: new Date("Sun Nov 02 2025 04:50:00 GMT+0000"), grouping: "Machine 4" },
+      { id: 53, label: "Maintenance", category: "Maintenance", start: new Date("Sun Nov 02 2025 04:50:00 GMT+0000"), end: new Date("Sun Nov 02 2025 05:35:00 GMT+0000"), grouping: "Machine 4" },
+      { id: 54, label: "Power Failure", category: "Power Failure", start: new Date("Sun Nov 03 2025 00:00:00 GMT+0000"), end: new Date("Sun Nov 03 2025 00:30:00 GMT+0000"), grouping: "Machine 4" },
+      { id: 55, label: "Quality Issue", category: "Quality Issue", start: new Date("Sun Nov 03 2025 00:30:00 GMT+0000"), end: new Date("Sun Nov 03 2025 00:55:00 GMT+0000"), grouping: "Machine 4" },
+      { id: 56, label: "Operator Break", category: "Operator Break", start: new Date("Sun Nov 03 2025 00:55:00 GMT+0000"), end: new Date("Sun Nov 03 2025 01:15:00 GMT+0000"), grouping: "Machine 4" },
+      { id: 57, label: "Cooling Delay", category: "Cooling Delay", start: new Date("Sun Nov 03 2025 01:15:00 GMT+0000"), end: new Date("Sun Nov 03 2025 01:35:00 GMT+0000"), grouping: "Machine 4" },
+      { id: 58, label: "Sensor Fault", category: "Sensor Fault", start: new Date("Sun Nov 03 2025 01:35:00 GMT+0000"), end: new Date("Sun Nov 03 2025 02:00:00 GMT+0000"), grouping: "Machine 4" },
+      { id: 59, label: "Material Shortage", category: "Material Shortage", start: new Date("Sun Nov 03 2025 02:00:00 GMT+0000"), end: new Date("Sun Nov 03 2025 02:40:00 GMT+0000"), grouping: "Machine 4" },
+
+      // MACHINE 5
+      { id: 60, label: "Maintenance", category: "Maintenance", start: new Date("Sun Nov 02 2025 00:10:00 GMT+0000"), end: new Date("Sun Nov 02 2025 00:45:00 GMT+0000"), grouping: "Machine 5" },
+      { id: 61, label: "Power Failure", category: "Power Failure", start: new Date("Sun Nov 02 2025 00:45:00 GMT+0000"), end: new Date("Sun Nov 02 2025 01:25:00 GMT+0000"), grouping: "Machine 5" },
+      { id: 62, label: "Quality Issue", category: "Quality Issue", start: new Date("Sun Nov 02 2025 01:25:00 GMT+0000"), end: new Date("Sun Nov 02 2025 01:50:00 GMT+0000"), grouping: "Machine 5" },
+      { id: 63, label: "Operator Break", category: "Operator Break", start: new Date("Sun Nov 02 2025 01:50:00 GMT+0000"), end: new Date("Sun Nov 02 2025 02:10:00 GMT+0000"), grouping: "Machine 5" },
+      { id: 64, label: "Setup Change", category: "Setup Change", start: new Date("Sun Nov 02 2025 02:10:00 GMT+0000"), end: new Date("Sun Nov 02 2025 02:35:00 GMT+0000"), grouping: "Machine 5" },
+      { id: 65, label: "Sensor Fault", category: "Sensor Fault", start: new Date("Sun Nov 02 2025 02:35:00 GMT+0000"), end: new Date("Sun Nov 02 2025 03:00:00 GMT+0000"), grouping: "Machine 5" },
+      { id: 67, label: "Material Shortage", category: "Material Shortage", start: new Date("Sun Nov 02 2025 03:25:00 GMT+0000"), end: new Date("Sun Nov 02 2025 04:00:00 GMT+0000"), grouping: "Machine 5" },
+      { id: 68, label: "Maintenance", category: "Maintenance", start: new Date("Sun Nov 02 2025 04:00:00 GMT+0000"), end: new Date("Sun Nov 02 2025 04:40:00 GMT+0000"), grouping: "Machine 5" },
+      { id: 69, label: "Quality Issue", category: "Quality Issue", start: new Date("Sun Nov 02 2025 04:40:00 GMT+0000"), end: new Date("Sun Nov 02 2025 05:10:00 GMT+0000"), grouping: "Machine 5" },
+      { id: 70, label: "Operator Break", category: "Operator Break", start: new Date("Sun Nov 03 2025 00:00:00 GMT+0000"), end: new Date("Sun Nov 03 2025 00:25:00 GMT+0000"), grouping: "Machine 5" },
+      { id: 71, label: "Setup Change", category: "Setup Change", start: new Date("Sun Nov 03 2025 00:25:00 GMT+0000"), end: new Date("Sun Nov 03 2025 00:55:00 GMT+0000"), grouping: "Machine 5" },
+      { id: 73, label: "Cooling Delay", category: "Cooling Delay", start: new Date("Sun Nov 03 2025 01:20:00 GMT+0000"), end: new Date("Sun Nov 03 2025 01:40:00 GMT+0000"), grouping: "Machine 5" },
+      { id: 74, label: "Material Shortage", category: "Material Shortage", start: new Date("Sun Nov 03 2025 01:40:00 GMT+0000"), end: new Date("Sun Nov 03 2025 02:15:00 GMT+0000"), grouping: "Machine 5" },
+      { id: 75, label: "Power Failure", category: "Power Failure", start: new Date("Sun Nov 03 2025 02:15:00 GMT+0000"), end: new Date("Sun Nov 03 2025 02:50:00 GMT+0000"), grouping: "Machine 5" },
+
+      // MACHINE 6
+      { id: 76, label: "Power Failure", category: "Power Failure", start: new Date("Sun Nov 02 2025 00:20:00 GMT+0000"), end: new Date("Sun Nov 02 2025 00:55:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 78, label: "Setup Change", category: "Setup Change", start: new Date("Sun Nov 02 2025 01:25:00 GMT+0000"), end: new Date("Sun Nov 02 2025 01:50:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 79, label: "Cooling Delay", category: "Cooling Delay", start: new Date("Sun Nov 02 2025 01:50:00 GMT+0000"), end: new Date("Sun Nov 02 2025 02:15:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 80, label: "Operator Break", category: "Operator Break", start: new Date("Sun Nov 02 2025 02:15:00 GMT+0000"), end: new Date("Sun Nov 02 2025 02:35:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 82, label: "Material Shortage", category: "Material Shortage", start: new Date("Sun Nov 02 2025 03:00:00 GMT+0000"), end: new Date("Sun Nov 02 2025 03:40:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 83, label: "Quality Issue", category: "Quality Issue", start: new Date("Sun Nov 02 2025 03:40:00 GMT+0000"), end: new Date("Sun Nov 02 2025 04:10:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 84, label: "Maintenance", category: "Maintenance", start: new Date("Sun Nov 02 2025 04:10:00 GMT+0000"), end: new Date("Sun Nov 02 2025 04:45:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 85, label: "Setup Change", category: "Setup Change", start: new Date("Sun Nov 02 2025 04:45:00 GMT+0000"), end: new Date("Sun Nov 02 2025 05:10:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 86, label: "Power Failure", category: "Power Failure", start: new Date("Sun Nov 03 2025 00:00:00 GMT+0000"), end: new Date("Sun Nov 03 2025 00:35:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 87, label: "Quality Issue", category: "Quality Issue", start: new Date("Sun Nov 03 2025 00:35:00 GMT+0000"), end: new Date("Sun Nov 03 2025 01:00:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 90, label: "Sensor Fault", category: "Sensor Fault", start: new Date("Sun Nov 03 2025 01:45:00 GMT+0000"), end: new Date("Sun Nov 03 2025 02:10:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 91, label: "Material Shortage", category: "Material Shortage", start: new Date("Sun Nov 03 2025 02:10:00 GMT+0000"), end: new Date("Sun Nov 03 2025 02:45:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 92, label: "Maintenance", category: "Maintenance", start: new Date("Sun Nov 03 2025 02:45:00 GMT+0000"), end: new Date("Sun Nov 03 2025 03:25:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 93, label: "Setup Change", category: "Setup Change", start: new Date("Sun Nov 03 2025 03:25:00 GMT+0000"), end: new Date("Sun Nov 03 2025 03:50:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 94, label: "Cooling Delay", category: "Cooling Delay", start: new Date("Sun Nov 03 2025 03:50:00 GMT+0000"), end: new Date("Sun Nov 03 2025 04:15:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 95, label: "Operator Break", category: "Operator Break", start: new Date("Sun Nov 03 2025 04:15:00 GMT+0000"), end: new Date("Sun Nov 03 2025 04:40:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 96, label: "Power Failure", category: "Power Failure", start: new Date("Sun Nov 03 2025 04:40:00 GMT+0000"), end: new Date("Sun Nov 03 2025 05:10:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 97, label: "Quality Issue", category: "Quality Issue", start: new Date("Sun Nov 03 2025 05:10:00 GMT+0000"), end: new Date("Sun Nov 03 2025 05:35:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 98, label: "Material Shortage", category: "Material Shortage", start: new Date("Sun Nov 03 2025 05:35:00 GMT+0000"), end: new Date("Sun Nov 03 2025 06:00:00 GMT+0000"), grouping: "Machine 6" },
+      { id: 99, label: "Maintenance", category: "Maintenance", start: new Date("Sun Nov 03 2025 06:00:00 GMT+0000"), end: new Date("Sun Nov 03 2025 06:40:00 GMT+0000"), grouping: "Machine 6" },
+
+      // You can continue this pattern every hour or every few minutes...
+    ]
+  };
+
+  // Create our timeline and stick a reference to it on the window for easy access.
+  window["timeline"] = new tempis_timeline.TempisTimeline("#canvas", timelineOptions);
+</script>
+</html>

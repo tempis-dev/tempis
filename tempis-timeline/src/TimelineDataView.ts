@@ -443,7 +443,7 @@ export class TimelineDataView {
 
                 // Look for an existing row to place this item in. It may not fit in any due to overlaps.
                 for (const rowStack of itemDrawPlanStacks) {
-                    if (rowStack.length === 0 || rowStack[rowStack.length - 1].xPositionEnd < itemDrawPlan.xPositionStart) {
+                    if (rowStack.length === 0 || rowStack[rowStack.length - 1].xPositionEnd <= itemDrawPlan.xPositionStart) {
                         // The current item will fit nicely into the current row.
                         rowStack.push(itemDrawPlan);
 
