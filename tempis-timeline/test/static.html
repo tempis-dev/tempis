@@ -9,15 +9,21 @@
   html {
     background-color: #ebebeb;
   }
-  #canvas {
+
+  #canvas-container {
     width: 600px;
-    height: 400px;
-    resize: both;
-    overflow: hidden;
+    height: 600px;
+  }
+
+  #canvas {
+    width: 500px;
+    height: 500px;
   }
 </style>
 <body>
-  <canvas id="canvas">
+  <div id="canvas-container">
+    <canvas id="canvas">
+  </div>
 </body>
 <script>
   // Create our timeline options.

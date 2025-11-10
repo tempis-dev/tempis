@@ -385,8 +385,17 @@ export class TempisTimeline {
      * This is used to ensure that the canvas is rendered at the correct size for the device.
      */
     private _applyCanvasDPRScaling(): void {
-         // Get the canvas context.
+        // Get the canvas context.
         const canvasContext = this._canvas.getContext("2d")!;
+
+        // If the canvas has no CSS size set, warn and fix it based on current box size.
+        // We need to do this as setting the internal intrinsic width/height of a canvas that
+        // has no CSS size set will actually also set the CSS style to match, breaking the scaling.
+        if (this._canvas.style.width === "" && this._canvas.style.height === "") {
+            console.warn("tempis-timeline: No canvas CSS width/height set; canvas layout may resize unexpectedly. Setting it to current size to prevent layout scaling issues.");
+            this._canvas.style.width = this._canvas.offsetWidth + "px";
+            this._canvas.style.height = this._canvas.offsetHeight + "px";
+        }
 
         // Get the device pixel ratio from the window, or default to 1.
         const dpr = window.devicePixelRatio || 1; 
