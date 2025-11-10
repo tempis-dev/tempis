@@ -388,14 +388,9 @@ export class TempisTimeline {
         // Get the canvas context.
         const canvasContext = this._canvas.getContext("2d")!;
 
-        // If the canvas has no CSS size set, warn and fix it based on current box size.
-        // We need to do this as setting the internal intrinsic width/height of a canvas that
-        // has no CSS size set will actually also set the CSS style to match, breaking the scaling.
-        if (this._canvas.style.width === "" && this._canvas.style.height === "") {
-            console.warn("tempis-timeline: No canvas CSS width/height set; canvas layout may resize unexpectedly. Setting it to current size to prevent layout scaling issues.");
-            this._canvas.style.width = this._canvas.offsetWidth + "px";
-            this._canvas.style.height = this._canvas.offsetHeight + "px";
-        }
+        // Grab the CSS width and height of the canvas before we apply the scaling.
+        const originalCanvasWidth = this._canvas.offsetWidth;
+        const originalCanvasHeight = this._canvas.offsetHeight;
 
         // Get the device pixel ratio from the window, or default to 1.
         const dpr = window.devicePixelRatio || 1; 
@@ -406,6 +401,12 @@ export class TempisTimeline {
 
         // Scale the drawing context to account for the increased pixel density.
         canvasContext.scale(dpr, dpr);
+
+        // If the CSS size of the canvas changed as a result of us setting the internal width/height then we should let
+        // the user know that they need to define a width and height for their canvas in order to avoid layout issues.
+        if (originalCanvasWidth !== this._canvas.offsetWidth || originalCanvasHeight !== this._canvas.offsetHeight) {
+            console.warn("tempis-timeline: Canvas layout changed after setting inner width/height. Define canvas CSS width/height to prevent layout issues.");
+        }
     }
 
     /**

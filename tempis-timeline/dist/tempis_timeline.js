@@ -2044,15 +2044,15 @@ var tempis_timeline = (() => {
     }
     _applyCanvasDPRScaling() {
       const canvasContext = this._canvas.getContext("2d");
-      if (this._canvas.style.width === "" && this._canvas.style.height === "") {
-        console.warn("tempis-timeline: No canvas CSS width/height set; canvas layout may resize unexpectedly. Setting it to current size to prevent layout scaling issues.");
-        this._canvas.style.width = this._canvas.offsetWidth + "px";
-        this._canvas.style.height = this._canvas.offsetHeight + "px";
-      }
+      const originalCanvasWidth = this._canvas.offsetWidth;
+      const originalCanvasHeight = this._canvas.offsetHeight;
       const dpr = window.devicePixelRatio || 1;
       this._canvas.width = this._canvas.offsetWidth * dpr;
       this._canvas.height = this._canvas.offsetHeight * dpr;
       canvasContext.scale(dpr, dpr);
+      if (originalCanvasWidth !== this._canvas.offsetWidth || originalCanvasHeight !== this._canvas.offsetHeight) {
+        console.warn("tempis-timeline: Canvas layout changed after setting inner width/height. Define canvas CSS width/height to prevent layout issues.");
+      }
     }
     _draw() {
       var context = this._canvas.getContext("2d");
