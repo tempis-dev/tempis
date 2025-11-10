@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Static</title>
+  <script src="../dist/tempis_timeline.js"></script>
+</head>
+<style>
+  html {
+    background-color: #ebebeb;
+  }
+  #canvas {
+    width: 600px;
+    height: 400px;
+    resize: both;
+    overflow: hidden;
+  }
+</style>
+<body>
+  <canvas id="canvas">
+</body>
+<script>
+  // Create our timeline options.
+  const timelineOptions = {
+    responsive: false,
+    fillVertically: false,
+    range: {
+      position: "bottom"
+    },
+    font: {
+      size: 14
+    },
+    items: [
+      { 
+        id: 0,
+        label: "sleeping",
+        start: new Date("Thu Jan 23 2025 00:00:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 08:30:00 GMT+0000"),
+        grouping: "Nik's Day"
+      },
+      { 
+        id: 1,
+        label: "working",
+        start: new Date("Thu Jan 23 2025 09:00:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 17:00:00 GMT+0000"),
+        grouping: "Nik's Day"
+      },
+      { 
+        id: 2,
+        label: "eating",
+        start: new Date("Thu Jan 23 2025 17:15:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 18:00:00 GMT+0000"),
+        grouping: "Nik's Day"
+      },
+      { 
+        id: 3,
+        label: "playing",
+        start: new Date("Thu Jan 23 2025 18:30:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 21:00:00 GMT+0000"),
+        grouping: "Nik's Day"
+      },
+      { 
+        id: 4,
+        label: "sleeping",
+        start: new Date("Thu Jan 23 2025 21:10:00 GMT+0000"),
+        end: new Date("Thu Jan 24 2025 00:00:00 GMT+0000"),
+        grouping: "Nik's Day"
+      },
+      { 
+        id: 5,
+        label: "snoring",
+        start: new Date("Thu Jan 23 2025 02:30:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 07:30:00 GMT+0000"),
+        grouping: "Nik's Day"
+      },
+      { 
+        id: 6,
+        label: "Stubbed Toe, like, really bad",
+        start: new Date("Thu Jan 23 2025 11:32:30 GMT+0000"),
+        grouping: "Becky's Day"
+      },
+      { 
+        id: 7,
+        label: "sleeping",
+        start: new Date("Thu Jan 23 2025 00:00:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 11:30:00 GMT+0000"),
+        grouping: "Tilly's Day"
+      },
+      { 
+        id: 8,
+        label: "sniffing",
+        start: new Date("Thu Jan 23 2025 11:35:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 13:45:00 GMT+0000"),
+        grouping: "Tilly's Day"
+      },
+      { 
+        id: 9,
+        label: "eating",
+        start: new Date("Thu Jan 23 2025 13:05:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 13:45:00 GMT+0000"),
+        grouping: "Tilly's Day"
+      },
+      { 
+        id: 10,
+        label: "sleeping",
+        start: new Date("Thu Jan 23 2025 14:00:00 GMT+0000"),
+        end: new Date("Thu Jan 24 2025 00:00:00 GMT+0000"),
+        grouping: "Tilly's Day"
+      },
+    ]
+  };
+
+  // Create our timeline and stick a reference to it on the window for easy access.
+  window["timeline"] = new tempis_timeline.TempisTimeline("#canvas", timelineOptions);
+</script>
+</html>
