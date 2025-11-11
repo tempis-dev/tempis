@@ -2037,8 +2037,10 @@ var tempis_timeline = (() => {
       if (!canvasContainerElement) {
         throw new Error("Cannot resize canvas as it has no parent element, is it detached?");
       }
-      this._canvas.style.width = canvasContainerElement.getBoundingClientRect().width + "px";
-      this._canvas.style.height = canvasContainerElement.getBoundingClientRect().height + "px";
+      this._canvas.style.display = "block";
+      this._canvas.style.boxSizing = "border-box";
+      this._canvas.style.width = canvasContainerElement.clientWidth + "px";
+      this._canvas.style.height = canvasContainerElement.clientHeight + "px";
       this._applyCanvasDPRScaling();
       this._rangeView.calculateMinorAndMajorUnitTicks();
     }

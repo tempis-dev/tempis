@@ -369,9 +369,15 @@ export class TempisTimeline {
             throw new Error("Cannot resize canvas as it has no parent element, is it detached?");
         }
 
+        // Ensure the canvas is a block-level, border-box element to prevent layout feedback loops.
+        // Without these, the canvas (which is inline by default) can cause its parent to grow slightly
+        // on each resize, leading to an infinite vertical expansion.
+        this._canvas.style.display = "block";
+        this._canvas.style.boxSizing = "border-box";
+
         // Set actual display size of the canvas (css pixels).
-        this._canvas.style.width = canvasContainerElement.getBoundingClientRect().width + "px";
-        this._canvas.style.height = canvasContainerElement.getBoundingClientRect().height + "px";
+        this._canvas.style.width = canvasContainerElement.clientWidth + "px";
+        this._canvas.style.height = canvasContainerElement.clientHeight + "px";
 
         // Apply the window device pixel ratio scaling to the canvas.
         this._applyCanvasDPRScaling();
