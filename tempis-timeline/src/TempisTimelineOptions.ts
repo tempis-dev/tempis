@@ -10,6 +10,9 @@ export interface TempisTimelineOptions {
     /** Whether the timeline should fill the vertical space of the canvas. */
     fillVertically?: boolean;
 
+    /** Whether the timeline and any default tooltips should be rendered right-to-left. */
+    rtl?: boolean;
+
     /** The timeline range options. */
     range?: TempisTimelineRangeOptions;
 

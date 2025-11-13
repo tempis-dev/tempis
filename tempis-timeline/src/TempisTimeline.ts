@@ -56,7 +56,7 @@ export class TempisTimeline {
         this._dataSet = new TimelineDataSet(this._options);
         this._dataView = new TimelineDataView(this._dataSet);
         this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._options.range);
-        this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._options.legend);
+        this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._isRTL, this._options.legend);
         this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._options.tooltip);
 
         // Do our initial canvas resize.
@@ -89,6 +89,11 @@ export class TempisTimeline {
     /** Gets whether the timeline is rendering responsively. */
     private get _isResponsive(): boolean {
         return this._options.responsive ?? false;
+    }
+
+    /** Gets whether the timeline is rendering right-to-left. */
+    private get _isRTL(): boolean {
+        return this._options.rtl ?? false;
     }
 
     /**

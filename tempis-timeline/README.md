@@ -9,6 +9,7 @@ The options object passed when creating an instance of TempisTimeline.
 |--------|------|---------|-------------|
 | `responsive` | `boolean` | `false` | Whether the canvas should resize to match the dimensions of its parent container. |
 | `fillVertically` | `boolean` | `false` | Whether the timeline should fill the vertical space of the canvas. |
+| `rtl` | `boolean` | `false` | Whether the timeline and any default tooltips should be rendered right-to-left. |
 | `range` | `TempisTimelineRangeOptions` | — | Timeline range configuration including start, end, min/max, zoom, units, and position. |
 | `legend` | `TempisTimelineLegendOptions` | — | Configuration for the timeline legend including position, alignment, and item options. |
 | `tooltip` | `TempisTimelineTooltipOptions` | — | Configuration for item tooltips including delay, overflow behavior, and content templates. |

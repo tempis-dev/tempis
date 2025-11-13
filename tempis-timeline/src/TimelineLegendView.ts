@@ -51,6 +51,9 @@ export class TimelineLegendView {
     /** The underlying dataset model. */
     private readonly _dataSet: TimelineDataSet;
 
+    /** The flag defining whether the timeline is being rendered right-to-left. */
+    private readonly _isRTL: boolean;
+
     /** The timeline legend options. */
     private readonly _options: TempisTimelineLegendOptions;
 
@@ -64,11 +67,13 @@ export class TimelineLegendView {
      * Creates a new instance of the TimelineLegendView class.
      * @param canvas The timeline canvas.
      * @param dataSet The timeline dataset model.
+     * @param isRTL Whether the timeline is being rendered right-to-left.
      * @param options The timeline legend options.
      */
-    public constructor(canvas: HTMLCanvasElement, dataSet: TimelineDataSet, options: TempisTimelineLegendOptions = {}) {
+    public constructor(canvas: HTMLCanvasElement, dataSet: TimelineDataSet, isRTL: boolean, options: TempisTimelineLegendOptions = {}) {
         this._canvas = canvas;
         this._dataSet = dataSet;
+        this._isRTL = isRTL;
         this._options = options;
 
         this._createCanvasEventHandlers();
@@ -174,19 +179,47 @@ export class TimelineLegendView {
             // Draw the category marker.
             context.fillStyle = categoryDrawPlan.category.style.backgroundColor!;
             context.beginPath();
-            context.roundRect(categoryDrawPlan.xPositionStart + this.itemPadding, categoryDrawPlan.yPositionStart + this.itemPadding + yPosition, categoryDrawPlan.markerSize, categoryDrawPlan.markerSize, markerRadius);
+            // If right-to-left then the marker will be drawn to the right of the label.
+            if (this._isRTL) {
+                context.roundRect(
+                    Math.min(categoryDrawPlan.xPositionEnd - this.itemPadding - categoryDrawPlan.markerSize, this._drawPlan.width - categoryDrawPlan.markerSize - DEFAULT_LEGEND_PADDING), 
+                    categoryDrawPlan.yPositionStart + this.itemPadding + yPosition, 
+                    categoryDrawPlan.markerSize, 
+                    categoryDrawPlan.markerSize,
+                    markerRadius
+                );
+            } else {
+                context.roundRect(
+                    categoryDrawPlan.xPositionStart + this.itemPadding,
+                    categoryDrawPlan.yPositionStart + this.itemPadding + yPosition,
+                    categoryDrawPlan.markerSize,
+                    categoryDrawPlan.markerSize,
+                    markerRadius
+                );
+            }
             context.fill();
             
             // Draw the category label clipped to the available legend view width.
             context.fillStyle = "#595959";
             context.textBaseline = "middle";
-            drawClippedText(
-                context, 
-                categoryDrawPlan.category.label,
-                categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap, 
-                categoryDrawPlan.yPositionStart + (categoryDrawPlan.height / 2) + yPosition,
-                this._drawPlan.width - (categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
-            )
+            // If right-to-left then the label will be drawn to the left of the marker.
+            if (this._isRTL) {
+                drawClippedText(
+                    context, 
+                    categoryDrawPlan.category.label,
+                    categoryDrawPlan.xPositionStart + this.itemPadding, 
+                    categoryDrawPlan.yPositionStart + (categoryDrawPlan.height / 2) + yPosition,
+                    this._drawPlan.width - (categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
+                );
+            } else {
+                drawClippedText(
+                    context, 
+                    categoryDrawPlan.category.label,
+                    categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap, 
+                    categoryDrawPlan.yPositionStart + (categoryDrawPlan.height / 2) + yPosition,
+                    this._drawPlan.width - (categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
+                );
+            }
 
             // Reset the context global alpha as we may have modified it if the category is disabled.
             context.globalAlpha = 1.0;
@@ -277,14 +310,19 @@ export class TimelineLegendView {
             let currentXPosition = 0;
 
             // We need to apply an initial x offset if we aren't aligning the items with the start of the container.
-            if (this.alignment === "center") {
+            if (this.alignment === "start") {
+                // In right-to-left, "start" means align to the right edge, otherwise the left edge.
+                currentXPosition =  this._isRTL ? Math.max(0, availableWidth - rowTotalWidth) : 0;
+            } else if (this.alignment === "center") {
                 currentXPosition = Math.max(0, (availableWidth / 2) - (rowTotalWidth / 2));
             } else if (this.alignment === "end") {
-                currentXPosition = Math.max(0, availableWidth - rowTotalWidth);
+                // In right-to-left, "end" means align to the left edge, otherwise the right edge.
+                currentXPosition = this._isRTL ? 0 : Math.max(0, availableWidth - rowTotalWidth);
             }
 
             // Iterate over each element in the row and create a category item plan with the the correct x/y start/end values.
-            for (const element of elementRow) {
+            // If we are rendering the timeline right-to-left then we need to reverse the order of the row elements.
+            for (const element of this._isRTL ? elementRow.slice().reverse() : elementRow) {
                 categoryDrawPlans.push({
                     category: element.category,
                     markerSize: element.labelHeight,
@@ -350,7 +388,6 @@ export class TimelineLegendView {
             if (pointerPosition.y < this._lastDrawYPosition || pointerPosition.y > (this._lastDrawYPosition + this._drawPlan.height)) {
                 // Ensure that we are not leaving any categories focused.
                 this._dataSet.unfocusCategories();
-                
                 return null;
             }
 
