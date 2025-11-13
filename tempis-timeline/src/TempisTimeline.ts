@@ -62,9 +62,13 @@ export class TempisTimeline {
         // Do our initial canvas resize.
         this._resizeCanvas();
 
-        // We should set up a resize observer to keep our canvas dimensions inline with that of its parent element if the timeline is responsive.
-        if (options.responsive !== false) {
+        // Is our timeline going to be responsive?
+        if (this._isResponsive) {
+            // We should set up a resize observer to keep our canvas dimensions inline with that of its parent element if the timeline is responsive.
            this._createCanvasContainerResizeObserver();
+        } else {
+            // We still need to apply our DPR scaling to our canvas if we aren't rendering responsively.
+            this._applyCanvasDPRScaling();
         }
 
         // Create the canvas event handlers.
@@ -80,6 +84,11 @@ export class TempisTimeline {
     /** Gets the item selection mode. */
     private get _selectionMode(): TempisTimelineItemSelectionMode {
         return this._options.selection ?? "none";
+    }
+
+    /** Gets whether the timeline is rendering responsively. */
+    private get _isResponsive(): boolean {
+        return this._options.responsive ?? false;
     }
 
     /**
@@ -152,6 +161,20 @@ export class TempisTimeline {
         }
 
         // We may have updated the range so we need to redraw the timeline.
+        this._draw();
+    }
+
+    /**
+     * Redraw the timeline.
+     */
+    public redraw(): void {
+        // Our canvas size or window scaling may have changed, so we should reapply the canvas DPR scaling. 
+        this._applyCanvasDPRScaling();
+
+        // Our canvas size or window scaling may have changed, we will need to recalculate the ticks for our range.
+        this._rangeView.calculateMinorAndMajorUnitTicks();
+
+        // Draw the timeline.
         this._draw();
     }
 
@@ -346,13 +369,36 @@ export class TempisTimeline {
             throw new Error("Cannot resize canvas as it has no parent element, is it detached?");
         }
 
+        // Ensure the canvas is a block-level, border-box element to prevent layout feedback loops.
+        // Without these, the canvas (which is inline by default) can cause its parent to grow slightly
+        // on each resize, leading to an infinite vertical expansion.
+        this._canvas.style.display = "block";
+        this._canvas.style.boxSizing = "border-box";
+
+        // Set actual display size of the canvas (css pixels).
+        this._canvas.style.width = canvasContainerElement.clientWidth + "px";
+        this._canvas.style.height = canvasContainerElement.clientHeight + "px";
+
+        // Apply the window device pixel ratio scaling to the canvas.
+        this._applyCanvasDPRScaling();
+
+        // Now that the canvas has resized we will need to recalculate the ticks for our range.
+        this._rangeView.calculateMinorAndMajorUnitTicks();
+    }
+
+    /**
+     * Apply the window device pixel ratio scaling to the canvas.
+     * This is used to ensure that the canvas is rendered at the correct size for the device.
+     */
+    private _applyCanvasDPRScaling(): void {
         // Get the canvas context.
         const canvasContext = this._canvas.getContext("2d")!;
 
-        // Set actual display size of the canvas (css pixels).
-        this._canvas.style.width = canvasContainerElement.getBoundingClientRect().width + "px";
-        this._canvas.style.height = canvasContainerElement.getBoundingClientRect().height + "px";
+        // Grab the CSS width and height of the canvas before we apply the scaling.
+        const originalCanvasWidth = this._canvas.offsetWidth;
+        const originalCanvasHeight = this._canvas.offsetHeight;
 
+        // Get the device pixel ratio from the window, or default to 1.
         const dpr = window.devicePixelRatio || 1; 
 
         // Set the "physical" size of the canvas, this is the number of pixels that the canvas has.
@@ -362,8 +408,11 @@ export class TempisTimeline {
         // Scale the drawing context to account for the increased pixel density.
         canvasContext.scale(dpr, dpr);
 
-        // Now that the canvas has resized we will need to recalculate the ticks for our range.
-        this._rangeView.calculateMinorAndMajorUnitTicks();
+        // If the CSS size of the canvas changed as a result of us setting the internal width/height then we should let
+        // the user know that they need to define a width and height for their canvas in order to avoid layout issues.
+        if (originalCanvasWidth !== this._canvas.offsetWidth || originalCanvasHeight !== this._canvas.offsetHeight) {
+            console.warn("tempis-timeline: Canvas layout changed after setting inner width/height. Define canvas CSS width/height to prevent layout issues.");
+        }
     }
 
     /**

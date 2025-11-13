@@ -1887,8 +1887,10 @@ var tempis_timeline = (() => {
       this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._options.legend);
       this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._options.tooltip);
       this._resizeCanvas();
-      if (options.responsive !== false) {
+      if (this._isResponsive) {
         this._createCanvasContainerResizeObserver();
+      } else {
+        this._applyCanvasDPRScaling();
       }
       this._createCanvasEventHandlers();
       this._dataSet.registerUpdateCallback(() => this._draw());
@@ -1897,6 +1899,10 @@ var tempis_timeline = (() => {
     get _selectionMode() {
       var _a;
       return (_a = this._options.selection) != null ? _a : "none";
+    }
+    get _isResponsive() {
+      var _a;
+      return (_a = this._options.responsive) != null ? _a : false;
     }
     getSelection() {
       return this._dataSet.getSelectedItems().map((item) => item.id);
@@ -1928,6 +1934,11 @@ var tempis_timeline = (() => {
         const end = parseDate(options.range[1]);
         this._rangeView.setRange(start, end);
       }
+      this._draw();
+    }
+    redraw() {
+      this._applyCanvasDPRScaling();
+      this._rangeView.calculateMinorAndMajorUnitTicks();
       this._draw();
     }
     _getCanvas(context) {
@@ -2026,14 +2037,24 @@ var tempis_timeline = (() => {
       if (!canvasContainerElement) {
         throw new Error("Cannot resize canvas as it has no parent element, is it detached?");
       }
+      this._canvas.style.display = "block";
+      this._canvas.style.boxSizing = "border-box";
+      this._canvas.style.width = canvasContainerElement.clientWidth + "px";
+      this._canvas.style.height = canvasContainerElement.clientHeight + "px";
+      this._applyCanvasDPRScaling();
+      this._rangeView.calculateMinorAndMajorUnitTicks();
+    }
+    _applyCanvasDPRScaling() {
       const canvasContext = this._canvas.getContext("2d");
-      this._canvas.style.width = canvasContainerElement.getBoundingClientRect().width + "px";
-      this._canvas.style.height = canvasContainerElement.getBoundingClientRect().height + "px";
+      const originalCanvasWidth = this._canvas.offsetWidth;
+      const originalCanvasHeight = this._canvas.offsetHeight;
       const dpr = window.devicePixelRatio || 1;
       this._canvas.width = this._canvas.offsetWidth * dpr;
       this._canvas.height = this._canvas.offsetHeight * dpr;
       canvasContext.scale(dpr, dpr);
-      this._rangeView.calculateMinorAndMajorUnitTicks();
+      if (originalCanvasWidth !== this._canvas.offsetWidth || originalCanvasHeight !== this._canvas.offsetHeight) {
+        console.warn("tempis-timeline: Canvas layout changed after setting inner width/height. Define canvas CSS width/height to prevent layout issues.");
+      }
     }
     _draw() {
       var context = this._canvas.getContext("2d");
