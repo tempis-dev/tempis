@@ -724,7 +724,7 @@ var tempis_timeline = (() => {
   };
   var DEFAULT_UNIT_LABEL_PADDING = 4;
   var TimelineRangeView = class {
-    constructor(canvas, dataSet, dateFormatter, options = {}) {
+    constructor(canvas, dataSet, dateFormatter, isRTL, options = {}) {
       this._fromDt = new Date();
       this._toDt = new Date(this._fromDt.getTime() + 31556952e4);
       this._minDate = new Date(-864e13);
@@ -736,6 +736,7 @@ var tempis_timeline = (() => {
       this._canvas = canvas;
       this._dataSet = dataSet;
       this._dateFormatter = dateFormatter;
+      this._isRTL = isRTL;
       this._options = options;
       this._parseOptions();
     }
@@ -837,13 +838,13 @@ var tempis_timeline = (() => {
       this._minorUnitTicks = minorTickDates.map((tickDate) => {
         return {
           date: tickDate,
-          xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
+          xPosition: this._isRTL ? this._canvas.clientWidth - milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime()) : milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
         };
       });
       this._majorUnitTicks = majorTickDates.map((tickDate) => {
         return {
           date: tickDate,
-          xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
+          xPosition: this._isRTL ? this._canvas.clientWidth - milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime()) : milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
         };
       });
     }
@@ -862,10 +863,23 @@ var tempis_timeline = (() => {
           context.lineTo(xPosition, minorTicksYPosition + rangeContainerHeight / 2);
           context.stroke();
         }
+        const minorTickLabel = this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS);
         context.textBaseline = "alphabetic";
         context.fillStyle = "#595959";
         context.beginPath();
-        context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, minorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING);
+        if (this._isRTL) {
+          context.fillText(
+            minorTickLabel,
+            xPosition - DEFAULT_UNIT_LABEL_PADDING - context.measureText(minorTickLabel).width,
+            minorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING
+          );
+        } else {
+          context.fillText(
+            minorTickLabel,
+            xPosition + DEFAULT_UNIT_LABEL_PADDING,
+            minorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING
+          );
+        }
         context.stroke();
       }
       if (this._minorTickUnitAndStep.unit === "year") {
@@ -873,7 +887,8 @@ var tempis_timeline = (() => {
       }
       for (let tickIndex = 0; tickIndex < this._majorUnitTicks.length; tickIndex++) {
         const { date, xPosition } = this._majorUnitTicks[tickIndex];
-        const isStickyLabel = date.getTime() <= this._fromDt.getTime();
+        const nextMajorTick = this._majorUnitTicks[tickIndex + 1];
+        const isStickyLabel = date.getTime() <= this._fromDt.getTime() && nextMajorTick && nextMajorTick.date.getTime() > this._fromDt.getTime();
         if (!isStickyLabel && xPosition > 0 && xPosition < context.canvas.clientWidth) {
           context.lineWidth = 2;
           context.lineCap = "round";
@@ -883,18 +898,23 @@ var tempis_timeline = (() => {
           context.lineTo(xPosition, majorTicksYPosition + rangeContainerHeight / 2 - 3);
           context.stroke();
         }
-        const tickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
-        let labelXPosition = xPosition + DEFAULT_UNIT_LABEL_PADDING;
+        const majorTickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
+        let labelXPosition = this._isRTL ? xPosition - DEFAULT_UNIT_LABEL_PADDING - context.measureText(majorTickLabel).width : xPosition + DEFAULT_UNIT_LABEL_PADDING;
         if (isStickyLabel) {
-          const labelWidth = context.measureText(tickLabel).width + DEFAULT_UNIT_LABEL_PADDING;
-          const nextTickXPosition = this._majorUnitTicks[tickIndex + 1].xPosition;
-          labelXPosition = nextTickXPosition > labelWidth ? DEFAULT_UNIT_LABEL_PADDING : nextTickXPosition - labelWidth;
+          const labelWidth = context.measureText(majorTickLabel).width + DEFAULT_UNIT_LABEL_PADDING;
+          if (nextMajorTick) {
+            if (this._isRTL) {
+              labelXPosition = nextMajorTick.xPosition <= context.canvas.clientWidth - labelWidth ? context.canvas.clientWidth - labelWidth : nextMajorTick.xPosition + DEFAULT_UNIT_LABEL_PADDING;
+            } else {
+              labelXPosition = nextMajorTick.xPosition >= labelWidth ? DEFAULT_UNIT_LABEL_PADDING : nextMajorTick.xPosition - labelWidth;
+            }
+          }
         }
         context.lineWidth = 0.5;
         context.textBaseline = "alphabetic";
         context.fillStyle = "#595959";
         context.beginPath();
-        context.fillText(tickLabel, labelXPosition, majorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING);
+        context.fillText(majorTickLabel, labelXPosition, majorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING);
         context.stroke();
       }
     }
@@ -1912,7 +1932,7 @@ var tempis_timeline = (() => {
       this._dateFormatter = new DateFormatter();
       this._dataSet = new TimelineDataSet(this._options);
       this._dataView = new TimelineDataView(this._dataSet);
-      this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._options.range);
+      this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._isRTL, this._options.range);
       this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._isRTL, this._options.legend);
       this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._options.tooltip);
       this._resizeCanvas();

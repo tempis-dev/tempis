@@ -55,7 +55,7 @@ export class TempisTimeline {
 
         this._dataSet = new TimelineDataSet(this._options);
         this._dataView = new TimelineDataView(this._dataSet);
-        this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._options.range);
+        this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._isRTL, this._options.range);
         this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._isRTL, this._options.legend);
         this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._options.tooltip);
 
