@@ -280,7 +280,8 @@ export class TempisTimeline {
 
             // Use movementX for range scrolling.
             if (Math.abs(event.movementX) >= 1) {
-                this._rangeView.moveRange(-event.movementX);
+                // If right-to-left then dragging right is moving the range forward in time, otherwise backwards.
+                this._rangeView.moveRange(this._isRTL ? event.movementX : -event.movementX);
             }
 
             // Use movementY for data view scrolling.

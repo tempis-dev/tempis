@@ -2043,7 +2043,7 @@ var tempis_timeline = (() => {
           return;
         }
         if (Math.abs(event.movementX) >= 1) {
-          this._rangeView.moveRange(-event.movementX);
+          this._rangeView.moveRange(this._isRTL ? event.movementX : -event.movementX);
         }
         if (Math.abs(event.movementY) >= 1) {
           this._dataView.scrollByYMovement(event.movementY);
