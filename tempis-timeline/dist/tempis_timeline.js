@@ -423,19 +423,20 @@ var tempis_timeline = (() => {
   };
 
   // src/TimelineDataView.ts
-  var DEFAULT_GROUP_VERTICAL_LABEL_MARGIN = 6;
+  var DEFAULT_GROUP_LABEL_MARGIN = 6;
   var DEFAULT_ITEM_VERTICAL_MARGIN = 4;
   var DEFAULT_GROUP_MARGIN = 8;
   var MINIMUM_RENDERED_LABEL_WIDTH = 5;
   var UNFOCUSED_ITEM_BACKGROUND_COLOUR = "#d6d6d6ff";
   var UNFOCUSED_ITEM_FONT_COLOUR = "#ffffffff";
   var TimelineDataView = class {
-    constructor(dataSet) {
+    constructor(dataSet, isRTL) {
       this._scrollYOffset = 0;
       this._lastDrawYPosition = 0;
       this._lastDrawHeight = 0;
       this._drawPlan = null;
       this._dataSet = dataSet;
+      this._isRTL = isRTL;
     }
     scrollByYMovement(movementY) {
       this._scrollYOffset += movementY;
@@ -485,6 +486,7 @@ var tempis_timeline = (() => {
         return;
       }
       const scrolledYPosition = yPosition + this._scrollYOffset;
+      context.textAlign = this._isRTL ? "right" : "left";
       for (let groupDrawPlanIndex = 0; groupDrawPlanIndex < this._drawPlan.groupDrawPlans.length; groupDrawPlanIndex++) {
         const groupDrawPlan = this._drawPlan.groupDrawPlans[groupDrawPlanIndex];
         if (groupDrawPlanIndex > 0) {
@@ -499,7 +501,11 @@ var tempis_timeline = (() => {
           context.textBaseline = "top";
           context.fillStyle = "#595959";
           context.beginPath();
-          context.fillText(groupDrawPlan.label, 6, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_VERTICAL_LABEL_MARGIN);
+          if (this._isRTL) {
+            context.fillText(groupDrawPlan.label, context.canvas.clientWidth - DEFAULT_GROUP_LABEL_MARGIN, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN);
+          } else {
+            context.fillText(groupDrawPlan.label, DEFAULT_GROUP_LABEL_MARGIN, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN);
+          }
           context.stroke();
         }
         for (const groupDrawPlanRow of groupDrawPlan.rows) {
@@ -508,6 +514,7 @@ var tempis_timeline = (() => {
           }
         }
       }
+      context.textAlign = "left";
     }
     _drawGroupItem(itemDrawPlan, context, scrolledYPosition) {
       const item = itemDrawPlan.item;
@@ -597,13 +604,18 @@ var tempis_timeline = (() => {
           let endPositionX = 0;
           let pointInTimePositionX = null;
           if (item.end) {
-            startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
-            endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
+            if (this._isRTL) {
+              startPositionX = milliRenderWidth * (rangeToDt.getTime() - item.end.getTime());
+              endPositionX = milliRenderWidth * (rangeToDt.getTime() - item.start.getTime());
+            } else {
+              startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
+              endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
+            }
           } else {
             const itemLabelWidth = context.measureText((_a = item.label) != null ? _a : "?").width + item.style.padding * 2;
-            startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime()) - itemLabelWidth / 2;
-            endPositionX = startPositionX + itemLabelWidth;
-            pointInTimePositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
+            pointInTimePositionX = this._isRTL ? milliRenderWidth * (rangeToDt.getTime() - item.start.getTime()) : milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
+            startPositionX = pointInTimePositionX - itemLabelWidth / 2;
+            endPositionX = pointInTimePositionX + itemLabelWidth / 2;
             if (startPositionX < 0) {
               startPositionX = 0;
               endPositionX = itemLabelWidth;
@@ -623,7 +635,8 @@ var tempis_timeline = (() => {
           };
           let wasItemAddedToExistingRowStack = false;
           for (const rowStack of itemDrawPlanStacks) {
-            if (rowStack.length === 0 || rowStack[rowStack.length - 1].xPositionEnd <= itemDrawPlan.xPositionStart) {
+            const canItemFitInCurrentRow = this._isRTL ? rowStack.length > 0 && rowStack[rowStack.length - 1].xPositionStart >= itemDrawPlan.xPositionEnd : rowStack.length > 0 && rowStack[rowStack.length - 1].xPositionEnd <= itemDrawPlan.xPositionStart;
+            if (rowStack.length === 0 || canItemFitInCurrentRow) {
               rowStack.push(itemDrawPlan);
               wasItemAddedToExistingRowStack = true;
               break;
@@ -646,7 +659,7 @@ var tempis_timeline = (() => {
         if (groupDrawPlan.label) {
           const groupLabelMetrics = context.measureText(groupDrawPlan.label);
           positionY += groupLabelMetrics.actualBoundingBoxAscent + groupLabelMetrics.actualBoundingBoxDescent;
-          positionY += 2 * DEFAULT_GROUP_VERTICAL_LABEL_MARGIN;
+          positionY += 2 * DEFAULT_GROUP_LABEL_MARGIN;
         }
         positionY += DEFAULT_GROUP_MARGIN;
         for (const itemRow of groupDrawPlan.rows) {
@@ -1931,7 +1944,7 @@ var tempis_timeline = (() => {
       this._font = new TimelineFont((_a = this._options.style) == null ? void 0 : _a.font);
       this._dateFormatter = new DateFormatter();
       this._dataSet = new TimelineDataSet(this._options);
-      this._dataView = new TimelineDataView(this._dataSet);
+      this._dataView = new TimelineDataView(this._dataSet, this._isRTL);
       this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._isRTL, this._options.range);
       this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._isRTL, this._options.legend);
       this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._options.tooltip);
