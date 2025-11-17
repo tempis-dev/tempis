@@ -79,15 +79,37 @@ var tempis_timeline = (() => {
       context.fillText(text, x2, y);
       return;
     }
-    if (ellipsisWidth > maxWidth)
+    if (ellipsisWidth > maxWidth) {
       return;
-    context.save();
-    context.beginPath();
-    context.rect(x2, y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
-    context.clip();
-    context.fillText(text, x2, y);
-    context.restore();
-    context.fillText(ellipsis, x2 + maxWidth - ellipsisWidth, y);
+    }
+    const textAlign = context.textAlign || "left";
+    if (textAlign === "left" || textAlign === "center") {
+      const leftX = textAlign === "left" ? x2 : textAlign === "center" ? x2 - maxWidth / 2 : x2;
+      context.save();
+      context.beginPath();
+      context.rect(leftX, y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
+      context.clip();
+      context.fillText(text, x2, y);
+      context.restore();
+      context.textAlign = "right";
+      context.fillText(ellipsis, leftX + maxWidth, y);
+      context.textAlign = textAlign;
+      return;
+    }
+    if (textAlign === "right") {
+      const rightX = x2;
+      const clipLeftX = rightX - (maxWidth - ellipsisWidth);
+      context.save();
+      context.beginPath();
+      context.rect(clipLeftX, y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
+      context.clip();
+      context.fillText(text, x2, y);
+      context.restore();
+      context.textAlign = "right";
+      context.fillText(ellipsis, clipLeftX, y);
+      context.textAlign = textAlign;
+      return;
+    }
   }
   function defaults(...sources) {
     if (sources.length === 0)
@@ -570,8 +592,8 @@ var tempis_timeline = (() => {
         context.stroke();
       }
       if (item.label) {
-        const labelStartPositionX = Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
-        const maxLabelWidth = Math.max(0, Math.ceil(itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX));
+        const labelStartPositionX = this._isRTL ? Math.floor(Math.min(context.canvas.clientWidth - itemPadding, itemDrawPlan.xPositionEnd - itemPadding)) : Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
+        const maxLabelWidth = this._isRTL ? Math.max(0, Math.ceil(labelStartPositionX - (itemDrawPlan.xPositionStart + itemPadding))) : Math.max(0, Math.ceil(itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX));
         if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
           context.textBaseline = "middle";
           context.fillStyle = itemFontColor;

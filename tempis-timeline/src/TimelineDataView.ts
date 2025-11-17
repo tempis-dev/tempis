@@ -349,10 +349,15 @@ export class TimelineDataView {
         // Draw the item label (if there is one).
         if (item.label) {
             // Calculate the actual x position of the label, we should attempt to keep this in the bounds of the view.
-            const labelStartPositionX = Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
+            // If rendering right-to-left then we will be rendering the label to the right of the item, otherwise the left.
+            const labelStartPositionX = this._isRTL ? 
+                Math.floor(Math.min(context.canvas.clientWidth - itemPadding, itemDrawPlan.xPositionEnd - itemPadding)) :
+                Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
 
             // Calculate the max item label width.
-            const maxLabelWidth = Math.max(0, Math.ceil((itemDrawPlan.xPositionEnd - itemPadding) - labelStartPositionX));
+            const maxLabelWidth = this._isRTL ? 
+                Math.max(0, Math.ceil(labelStartPositionX - (itemDrawPlan.xPositionStart + itemPadding))) :
+                Math.max(0, Math.ceil((itemDrawPlan.xPositionEnd - itemPadding) - labelStartPositionX));
 
             // Render the text label, but only if we have enough space to do so.
             if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
