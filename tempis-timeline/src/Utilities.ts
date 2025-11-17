@@ -98,8 +98,6 @@ export function drawClippedText(context: CanvasRenderingContext2D, text: string,
         return;
     }
 
-    const ellipsis = "...";
-    const ellipsisWidth = context.measureText(ellipsis).width;
     const textWidth = context.measureText(text).width;
 
     // If the text already fits then just draw it normally.
@@ -108,58 +106,44 @@ export function drawClippedText(context: CanvasRenderingContext2D, text: string,
         return;
     }
 
+    const ellipsis = "...";
+    const ellipsisWidth = context.measureText(ellipsis).width;
+
     // If the ellipsis alone doesn't fit, skip drawing.
     if (ellipsisWidth > maxWidth) {
         return;
     }
 
-    // TODO Tidy following logic.
-
     // Grab the text alignment for the canvas context as this will influence how we render our text.
     const textAlign = context.textAlign || "left";
 
-    // Are we rendering left-to-right?
-    if (textAlign === "left" || textAlign === "center") {
-        // Compute LEFT boundary
-        const leftX = textAlign === "left" ? x :
-                      textAlign === "center" ? x - maxWidth / 2 :
-                      x;
-
+    // Are we rendering right-to-left?
+    if (textAlign === "right") {
         context.save();
         context.beginPath();
-        context.rect(leftX, y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
+        context.rect(x - (maxWidth - ellipsisWidth), y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
         context.clip();
         context.fillText(text, x, y);
         context.restore();
 
-        // Ellipsis on the RIGHT
+        // Draw the ellipsis to the left of the text.
         context.textAlign = "right";
-        context.fillText(ellipsis, leftX + maxWidth, y);
-        context.textAlign = textAlign;
-        return;
-    }
-
-    // Are we rendering right-to-left?
-    if (textAlign === "right") {
-        // Compute RIGHT boundary (where the text ends)
-        const rightX = x;
-
-        // In RTL, we want to keep the *end* (right side) and clip the *start* (left side)
-        const clipLeftX = rightX - (maxWidth - ellipsisWidth);
-
+        context.fillText(ellipsis, x - (maxWidth - ellipsisWidth), y);
+    } else {
         context.save();
         context.beginPath();
-        context.rect(clipLeftX, y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
+        context.rect(x, y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
         context.clip();
-        context.fillText(text, x, y);  // will draw full text, clipped from LEFT
+        context.fillText(text, x, y);
         context.restore();
 
-        // Draw ellipsis on the LEFT
+        // Draw the ellipsis to the right of the text.
         context.textAlign = "right";
-        context.fillText(ellipsis, clipLeftX, y);
-        context.textAlign = textAlign;
-        return;
+        context.fillText(ellipsis, x + maxWidth, y);
     }
+
+    // Reapply the original text alignment.
+    context.textAlign = textAlign;
 }
 
 /**

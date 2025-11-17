@@ -72,44 +72,37 @@ var tempis_timeline = (() => {
     if (!text) {
       return;
     }
-    const ellipsis = "...";
-    const ellipsisWidth = context.measureText(ellipsis).width;
     const textWidth = context.measureText(text).width;
     if (textWidth <= maxWidth) {
       context.fillText(text, x2, y);
       return;
     }
+    const ellipsis = "...";
+    const ellipsisWidth = context.measureText(ellipsis).width;
     if (ellipsisWidth > maxWidth) {
       return;
     }
     const textAlign = context.textAlign || "left";
-    if (textAlign === "left" || textAlign === "center") {
-      const leftX = textAlign === "left" ? x2 : textAlign === "center" ? x2 - maxWidth / 2 : x2;
-      context.save();
-      context.beginPath();
-      context.rect(leftX, y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
-      context.clip();
-      context.fillText(text, x2, y);
-      context.restore();
-      context.textAlign = "right";
-      context.fillText(ellipsis, leftX + maxWidth, y);
-      context.textAlign = textAlign;
-      return;
-    }
     if (textAlign === "right") {
-      const rightX = x2;
-      const clipLeftX = rightX - (maxWidth - ellipsisWidth);
       context.save();
       context.beginPath();
-      context.rect(clipLeftX, y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
+      context.rect(x2 - (maxWidth - ellipsisWidth), y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
       context.clip();
       context.fillText(text, x2, y);
       context.restore();
       context.textAlign = "right";
-      context.fillText(ellipsis, clipLeftX, y);
-      context.textAlign = textAlign;
-      return;
+      context.fillText(ellipsis, x2 - (maxWidth - ellipsisWidth), y);
+    } else {
+      context.save();
+      context.beginPath();
+      context.rect(x2, y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
+      context.clip();
+      context.fillText(text, x2, y);
+      context.restore();
+      context.textAlign = "right";
+      context.fillText(ellipsis, x2 + maxWidth, y);
     }
+    context.textAlign = textAlign;
   }
   function defaults(...sources) {
     if (sources.length === 0)
