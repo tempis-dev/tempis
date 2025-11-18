@@ -586,7 +586,7 @@ var tempis_timeline = (() => {
       }
       if (item.label) {
         const labelStartPositionX = this._isRTL ? Math.floor(Math.min(context.canvas.clientWidth - itemPadding, itemDrawPlan.xPositionEnd - itemPadding)) : Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
-        const maxLabelWidth = this._isRTL ? Math.max(0, Math.ceil(labelStartPositionX - (itemDrawPlan.xPositionStart + itemPadding))) : Math.max(0, Math.ceil(itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX));
+        const maxLabelWidth = this._isRTL ? Math.max(0, Math.ceil(labelStartPositionX - (itemDrawPlan.xPositionStart + itemPadding)) + 1) : Math.max(0, Math.ceil(itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX));
         if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
           context.textBaseline = "middle";
           context.fillStyle = itemFontColor;

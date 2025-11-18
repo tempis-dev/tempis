@@ -356,7 +356,7 @@ export class TimelineDataView {
 
             // Calculate the max item label width.
             const maxLabelWidth = this._isRTL ? 
-                Math.max(0, Math.ceil(labelStartPositionX - (itemDrawPlan.xPositionStart + itemPadding))) :
+                Math.max(0, Math.ceil(labelStartPositionX - (itemDrawPlan.xPositionStart + itemPadding)) + 1) :
                 Math.max(0, Math.ceil((itemDrawPlan.xPositionEnd - itemPadding) - labelStartPositionX));
 
             // Render the text label, but only if we have enough space to do so.
