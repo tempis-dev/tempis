@@ -822,7 +822,7 @@ var tempis_timeline = (() => {
       if (this._options.fixed || !isNullOrUndefined((_a = this._options.zoom) == null ? void 0 : _a.enabled) && ((_b = this._options.zoom) == null ? void 0 : _b.enabled) === false) {
         return;
       }
-      const targetPositionMillis = this._fromDt.getTime() + targetPositionX / this._canvas.clientWidth * (this._toDt.getTime() - this._fromDt.getTime());
+      const targetPositionMillis = this._isRTL ? this._fromDt.getTime() + (this._canvas.clientWidth - targetPositionX) / this._canvas.clientWidth * (this._toDt.getTime() - this._fromDt.getTime()) : this._fromDt.getTime() + targetPositionX / this._canvas.clientWidth * (this._toDt.getTime() - this._fromDt.getTime());
       const zoomFactor = 1 - clamp(amount, -1, 1) * -0.1;
       let targetFrom = targetPositionMillis - (targetPositionMillis - this._fromDt.getTime()) * zoomFactor;
       let targetTo = targetPositionMillis + (this._toDt.getTime() - targetPositionMillis) * zoomFactor;

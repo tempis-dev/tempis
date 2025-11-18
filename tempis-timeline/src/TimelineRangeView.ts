@@ -222,9 +222,11 @@ export class TimelineRangeView {
             return;
         }
 
-        // Work out the target position in milliseconds.
-        // This is the position on the canvas that we want to zoom around.
-        const targetPositionMillis = this._fromDt.getTime() + (targetPositionX / this._canvas.clientWidth) * (this._toDt.getTime() - this._fromDt.getTime());
+        // Work out the target position in milliseconds. This is the position on the canvas that we want to zoom around.
+        // If we are rendering right-to-left then we should flip the x position so that it would map to the correct millisecond value.
+        const targetPositionMillis = this._isRTL ?
+            this._fromDt.getTime() + ((this._canvas.clientWidth - targetPositionX) / this._canvas.clientWidth) * (this._toDt.getTime() - this._fromDt.getTime()) :
+            this._fromDt.getTime() + (targetPositionX / this._canvas.clientWidth) * (this._toDt.getTime() - this._fromDt.getTime());
 
         // Calculate the zoom factor based on the amount.
         const zoomFactor = 1 - clamp(amount, -1, 1) * -0.1;
