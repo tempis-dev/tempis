@@ -1183,6 +1183,7 @@ var tempis_timeline = (() => {
       this._activeElement.style.left = `${this._posX}px`;
       this._activeElement.style.top = `${this._posY}px`;
       document.body.appendChild(this._activeElement);
+      this._handleOverflow();
     }
     _handleOverflow() {
       if (!this._activeElement) {

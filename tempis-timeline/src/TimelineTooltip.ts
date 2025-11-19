@@ -174,7 +174,7 @@ export class TimelineTooltip {
         document.body.appendChild(this._activeElement);
 
         // Now that we have added the tooltip to the document we should handle any potential overflow.
-        //this._handleOverflow();
+        this._handleOverflow();
     }
 
     /**
