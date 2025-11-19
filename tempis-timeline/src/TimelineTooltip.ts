@@ -19,6 +19,9 @@ export class TimelineTooltip {
     /** The timeline font. */
     private readonly _font: TimelineFont;
 
+    /** The flag defining whether the timeline is being rendered right-to-left. */
+    private readonly _isRTL: boolean;
+
     /** The tooltip options. */
     private readonly _options: TempisTimelineTooltipOptions;
 
@@ -40,15 +43,17 @@ export class TimelineTooltip {
      * @param canvas The timeline canvas.
      * @param dateFormatter The date formatter.
      * @param font The timeline font.
+     * @param isRTL Whether the timeline is being rendered right-to-left.
      * @param options The tooltip options.
      * @param x The initial tooltip x position.
      * @param y The initial tooltip y position.
      */
-    public constructor(item: TimelineItem, canvas: HTMLCanvasElement, dateFormatter: DateFormatter, font: TimelineFont, options: TempisTimelineTooltipOptions, x: number, y: number) {
+    public constructor(item: TimelineItem, canvas: HTMLCanvasElement, dateFormatter: DateFormatter, font: TimelineFont, isRTL: boolean, options: TempisTimelineTooltipOptions, x: number, y: number) {
         this._item = item;
         this._canvas = canvas;
         this._dateFormatter = dateFormatter;
         this._font = font;
+        this._isRTL = isRTL;
         this._options = options;
         this._posX = x;
         this._posY = y;
@@ -148,10 +153,12 @@ export class TimelineTooltip {
                 color: "#fff",
                 margin: "10px",
                 padding: "0.2em",
-                borderRadius: "5px"
+                borderRadius: "5px",
+                direction: this._isRTL ? "rtl" : "ltr"
             });
 
             // Set the default tooltip content which is a header of the item label as well as the start date for PIT items and start and end date for range items.
+            // TODO Improve the default tooltip content formatting and styling, as well as the rtl support.
             if (this._item.end) {
                 this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
             } else {
@@ -167,7 +174,7 @@ export class TimelineTooltip {
         document.body.appendChild(this._activeElement);
 
         // Now that we have added the tooltip to the document we should handle any potential overflow.
-        this._handleOverflow();
+        //this._handleOverflow();
     }
 
     /**

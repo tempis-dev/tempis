@@ -1100,7 +1100,7 @@ var tempis_timeline = (() => {
   // src/TimelineTooltip.ts
   var DEFAULT_TOOLTIP_DELAY_MS = 500;
   var TimelineTooltip = class {
-    constructor(item, canvas, dateFormatter, font, options, x2, y) {
+    constructor(item, canvas, dateFormatter, font, isRTL, options, x2, y) {
       this._activeElement = null;
       this._activeShowTimer = null;
       this._posX = 0;
@@ -1110,6 +1110,7 @@ var tempis_timeline = (() => {
       this._canvas = canvas;
       this._dateFormatter = dateFormatter;
       this._font = font;
+      this._isRTL = isRTL;
       this._options = options;
       this._posX = x2;
       this._posY = y;
@@ -1170,7 +1171,8 @@ var tempis_timeline = (() => {
           color: "#fff",
           margin: "10px",
           padding: "0.2em",
-          borderRadius: "5px"
+          borderRadius: "5px",
+          direction: this._isRTL ? "rtl" : "ltr"
         });
         if (this._item.end) {
           this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
@@ -1181,7 +1183,6 @@ var tempis_timeline = (() => {
       this._activeElement.style.left = `${this._posX}px`;
       this._activeElement.style.top = `${this._posY}px`;
       document.body.appendChild(this._activeElement);
-      this._handleOverflow();
     }
     _handleOverflow() {
       if (!this._activeElement) {
@@ -1219,12 +1220,13 @@ var tempis_timeline = (() => {
 
   // src/TimelineTooltipView.ts
   var TimelineTooltipView = class {
-    constructor(canvas, dataView, dateFormatter, font, options = {}) {
+    constructor(canvas, dataView, dateFormatter, font, isRTL, options = {}) {
       this._activeTooltip = null;
       this._canvas = canvas;
       this._dataView = dataView;
       this._dateFormatter = dateFormatter;
       this._font = font;
+      this._isRTL = isRTL;
       this._options = options;
       this._createCanvasEventHandlers();
     }
@@ -1276,7 +1278,7 @@ var tempis_timeline = (() => {
           (_b = this._activeTooltip) == null ? void 0 : _b.destroy();
           this._activeTooltip = null;
         }
-        this._activeTooltip = new TimelineTooltip(item, this._canvas, this._dateFormatter, this._font, this._options, event.clientX, event.clientY);
+        this._activeTooltip = new TimelineTooltip(item, this._canvas, this._dateFormatter, this._font, this._isRTL, this._options, event.clientX, event.clientY);
       }
     }
   };
@@ -1962,7 +1964,7 @@ var tempis_timeline = (() => {
       this._dataView = new TimelineDataView(this._dataSet, this._isRTL);
       this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._isRTL, this._options.range);
       this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._isRTL, this._options.legend);
-      this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._options.tooltip);
+      this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._isRTL, this._options.tooltip);
       this._resizeCanvas();
       if (this._isResponsive) {
         this._createCanvasContainerResizeObserver();
