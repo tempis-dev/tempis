@@ -363,7 +363,7 @@ export class TempisTimeline {
      */
     private _resizeCanvas(): void {
         // We should not resize the canvas if the timeline has not been configured to be responsive. 
-        if (this._options.responsive === false) {
+        if (!this._isResponsive) {
             return;
         }
 
@@ -430,6 +430,11 @@ export class TempisTimeline {
 
         // Clear the canvas before doing a fresh draw.
         context.clearRect(0, 0, this._canvas.clientWidth, this._canvas.clientHeight);
+
+        // The default direction for the timeline should ALWAYS be left-to-right.
+        // The canvas will inherit the page direction otherwise which may cause issues with rendering.
+        // If the timeline is rendering right-to-left then the views will handle the text alignment internally based on the `rtl` option.
+        context.direction = "ltr";
 
         // Apply the default font to the canvas context.
         context.font = this._font.font;

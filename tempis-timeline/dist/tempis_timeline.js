@@ -2114,7 +2114,7 @@ var tempis_timeline = (() => {
       }, false);
     }
     _resizeCanvas() {
-      if (this._options.responsive === false) {
+      if (!this._isResponsive) {
         return;
       }
       const canvasContainerElement = this._canvas.parentElement;
@@ -2143,6 +2143,7 @@ var tempis_timeline = (() => {
     _draw() {
       var context = this._canvas.getContext("2d");
       context.clearRect(0, 0, this._canvas.clientWidth, this._canvas.clientHeight);
+      context.direction = "ltr";
       context.font = this._font.font;
       const rangeViewHeight = this._rangeView.calculateRequiredHeight();
       const legendViewHeight = this._legendView.calculateRequiredHeight();
