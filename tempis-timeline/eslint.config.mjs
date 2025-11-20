@@ -15,25 +15,28 @@ const compat = new FlatCompat({
     allConfig: js.configs.all
 });
 
-export default defineConfig([globalIgnores(["**/node_modules", "**/dist"]), {
-    extends: compat.extends(
-        "eslint:recommended",
-        "plugin:@typescript-eslint/recommended",
-        "plugin:prettier/recommended",
-    ),
+export default defineConfig([
+    globalIgnores(["**/node_modules", "**/dist"]),
+    {
+        extends: compat.extends(
+            "eslint:recommended",
+            "plugin:@typescript-eslint/recommended",
+            "plugin:prettier/recommended"
+        ),
 
-    plugins: {
-        "@typescript-eslint": typescriptEslint,
-        prettier,
-    },
+        plugins: {
+            "@typescript-eslint": typescriptEslint,
+            prettier
+        },
 
-    languageOptions: {
-        parser: tsParser,
-        ecmaVersion: "latest",
-        sourceType: "module",
-    },
+        languageOptions: {
+            parser: tsParser,
+            ecmaVersion: "latest",
+            sourceType: "module"
+        },
 
-    rules: {
-        "prettier/prettier": "warn",
-    },
-}]);
+        rules: {
+            "prettier/prettier": "warn"
+        }
+    }
+]);

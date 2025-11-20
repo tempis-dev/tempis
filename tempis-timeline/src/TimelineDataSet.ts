@@ -84,7 +84,7 @@ export class TimelineDataSet {
                 return item;
             }
         }
-        
+
         // We were unable to find the item with the specified identifier in any group.
         return null;
     }
@@ -146,7 +146,7 @@ export class TimelineDataSet {
         for (const category of this._categories) {
             // Is this category the one to focus?
             const isFocusedCategory = category.name === name;
-            
+
             // Update the focused state of the category.
             category.isFocused = isFocusedCategory;
 
@@ -204,7 +204,7 @@ export class TimelineDataSet {
 
         // Then we need to create our actual groupings and item models.
         this._createGroupings(options);
-        
+
         // We have updated the dataset, so any registered update callbacks should be invoked.
         this._invokeUpdateCallbacks();
     }
@@ -261,16 +261,21 @@ export class TimelineDataSet {
             // If the user has not defined a category color then we will grab the next available one from the global color palette.
             categoryStyle.backgroundColor = categoryStyle.backgroundColor ?? getNextPaletteColor.next().value;
 
-            this._categories.push(new TimelineItemCategory(categoryDefinition.name, categoryDefinition.label, categoryStyle));
+            this._categories.push(
+                new TimelineItemCategory(categoryDefinition.name, categoryDefinition.label, categoryStyle)
+            );
 
             categoryNames.push(categoryDefinition.name);
         }
 
         // Update our categories map.
-        this._categoriesMap = this._categories.reduce((map, category) => {
-            map[category.name] = category;
-            return map;
-        }, {} as Record<string, TimelineItemCategory>);
+        this._categoriesMap = this._categories.reduce(
+            (map, category) => {
+                map[category.name] = category;
+                return map;
+            },
+            {} as Record<string, TimelineItemCategory>
+        );
     }
 
     /**
@@ -304,7 +309,9 @@ export class TimelineDataSet {
 
         // Create our item groupings.
         for (const [group, groupItemDefinitions] of Object.entries(itemGroupingMap)) {
-            this._groupings.push(new TimelineItemGrouping(group, this._createGroupingItems(options, groupItemDefinitions)));
+            this._groupings.push(
+                new TimelineItemGrouping(group, this._createGroupingItems(options, groupItemDefinitions))
+            );
         }
 
         // Find the min and max dates of any start/end item dates.
@@ -316,7 +323,10 @@ export class TimelineDataSet {
      * @param options The timeline options.
      * @returns The created item grouping item models.
      */
-    private _createGroupingItems(options: TempisTimelineOptions, itemDefinitions: TempisTimelineItem[]): TimelineItem[] {
+    private _createGroupingItems(
+        options: TempisTimelineOptions,
+        itemDefinitions: TempisTimelineItem[]
+    ): TimelineItem[] {
         return itemDefinitions.map((itemDefinition) => {
             // Attempt to get the category for this item if it is associated with one.
             const category = itemDefinition.category ? this.getCategory(itemDefinition.category) : null;
@@ -326,11 +336,16 @@ export class TimelineDataSet {
             // - The item style defined for the category linked to the item.
             // - The general item style applied to all items via 'options.style.item'.
             // - The application default item styles defined as 'DEFAULT_ITEM_STYLE'.
-            const resolvedItemStyle: TempisTimelineItemStyle = defaults(itemDefinition.style ?? {}, category?.style ?? {}, options.style?.item ?? {}, DEFAULT_ITEM_STYLE)!;
+            const resolvedItemStyle: TempisTimelineItemStyle = defaults(
+                itemDefinition.style ?? {},
+                category?.style ?? {},
+                options.style?.item ?? {},
+                DEFAULT_ITEM_STYLE
+            )!;
 
             return new TimelineItem(itemDefinition, resolvedItemStyle);
         });
-    } 
+    }
 
     /**
      * Find the min and max dates of any start/end item dates.

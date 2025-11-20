@@ -1,34 +1,38 @@
-import { TempisTimelineRangeOptions, TempisTimelineRangePosition, TempisTimelineRangeUnitLabelFormats } from "./TempisTimelineOptions";
-import { TimelineDataSet } from './TimelineDataSet';
+import {
+    TempisTimelineRangeOptions,
+    TempisTimelineRangePosition,
+    TempisTimelineRangeUnitLabelFormats
+} from "./TempisTimelineOptions";
+import { TimelineDataSet } from "./TimelineDataSet";
 import { clamp, isNullOrUndefined, parseDate } from "./Utilities";
-import { DateFormatter } from './DateFormatter';
+import { DateFormatter } from "./DateFormatter";
 
-export type Unit = 'millisecond' | 'second' | 'minute' | 'hour' | 'day' | 'month' | 'year' | 'none';
+export type Unit = "millisecond" | "second" | "minute" | "hour" | "day" | "month" | "year" | "none";
 
-export type UnitAndStep = { unit: Unit, step: number };
+export type UnitAndStep = { unit: Unit; step: number };
 
-export type UnitAndFactor = { unit: Unit, factor: number };
+export type UnitAndFactor = { unit: Unit; factor: number };
 
-export type RangeTick = { xPosition: number, date: Date };
+export type RangeTick = { xPosition: number; date: Date };
 
 const DEFAULT_MINOR_UNIT_LABEL_FORMATS: TempisTimelineRangeUnitLabelFormats = {
-    millisecond: 'SSS',
-    second: 'HH:mm:ss',
-    minute: 'HH:mm',
-    hour: 'HH:mm',
-    day: 'D',
-    month: 'MMM',
-    year: 'YYYY'
-}
+    millisecond: "SSS",
+    second: "HH:mm:ss",
+    minute: "HH:mm",
+    hour: "HH:mm",
+    day: "D",
+    month: "MMM",
+    year: "YYYY"
+};
 
 const DEFAULT_MAJOR_UNIT_LABEL_FORMATS: TempisTimelineRangeUnitLabelFormats = {
-    second: 'D MMMM HH:mm:ss',
-    minute: 'D MMMM HH:mm',
-    hour: 'ddd D MMMM HH:mm',
-    day: 'ddd D MMMM',
-    month: 'MMMM YYYY',
-    year: 'YYYY'
-}
+    second: "D MMMM HH:mm:ss",
+    minute: "D MMMM HH:mm",
+    hour: "ddd D MMMM HH:mm",
+    day: "ddd D MMMM",
+    month: "MMMM YYYY",
+    year: "YYYY"
+};
 
 /** The default amount of padding to use for unit labels. */
 const DEFAULT_UNIT_LABEL_PADDING: number = 4;
@@ -68,10 +72,10 @@ export class TimelineRangeView {
     private _maxDate: Date = new Date(8640000000000000);
 
     /** The current minor tick unit and step. */
-    private _minorTickUnitAndStep: UnitAndStep = { unit: 'year', step: 2 };
+    private _minorTickUnitAndStep: UnitAndStep = { unit: "year", step: 2 };
 
     /** The current major tick unit and step. */
-    private _majorTickUnitAndStep: UnitAndStep = { unit: 'year', step: 10 };
+    private _majorTickUnitAndStep: UnitAndStep = { unit: "year", step: 10 };
 
     /** The calculated minor unit tick dates for the current range and canvas width. */
     private _minorUnitTicks: RangeTick[] = [];
@@ -87,9 +91,15 @@ export class TimelineRangeView {
      * @param isRTL Whether the timeline is being rendered right-to-left.
      * @param options The timeline range options.
      */
-    public constructor(canvas: HTMLCanvasElement, dataSet: TimelineDataSet, dateFormatter: DateFormatter, isRTL: boolean, options: TempisTimelineRangeOptions = {}) {
+    public constructor(
+        canvas: HTMLCanvasElement,
+        dataSet: TimelineDataSet,
+        dateFormatter: DateFormatter,
+        isRTL: boolean,
+        options: TempisTimelineRangeOptions = {}
+    ) {
         this._canvas = canvas;
-        this._dataSet = dataSet
+        this._dataSet = dataSet;
         this._dateFormatter = dateFormatter;
         this._isRTL = isRTL;
         this._options = options;
@@ -141,8 +151,8 @@ export class TimelineRangeView {
         // To get around this we should pad the time out by some arbitrary amount either side of the date.
         // TODO For now we can just add a minute either side, but we should probably make this configurable.
         if (this._fromDt.getTime() === this._toDt.getTime()) {
-            this._setFromTime(this._fromDt.getTime() - (60 * 1000));
-            this._setToTime(this._toDt.getTime() + (60 * 1000));
+            this._setFromTime(this._fromDt.getTime() - 60 * 1000);
+            this._setToTime(this._toDt.getTime() + 60 * 1000);
         }
 
         // Our range has changed so we will need to recalculate our minor unit ticks.
@@ -160,8 +170,8 @@ export class TimelineRangeView {
         // TODO This needs to handle cases where the date exceeds the min/max.
 
         // Calculate the new from and to dates based on the specified date.
-        this._fromDt.setTime(date.getTime() - (currentRangeLength / 2));
-        this._toDt.setTime(date.getTime() + (currentRangeLength / 2));
+        this._fromDt.setTime(date.getTime() - currentRangeLength / 2);
+        this._toDt.setTime(date.getTime() + currentRangeLength / 2);
 
         // Our range has changed so we will need to recalculate our minor unit ticks.
         this.calculateMinorAndMajorUnitTicks();
@@ -184,8 +194,8 @@ export class TimelineRangeView {
         const rangeXMillisValue = currentRangeLength / this._canvas.clientWidth;
 
         // Calculate the new from and to times based on the current range and the movement value.
-        const targetFrom = this._fromDt.getTime() + (rangeXMillisValue * movementX);
-        const targetTo = this._toDt.getTime() + (rangeXMillisValue * movementX);
+        const targetFrom = this._fromDt.getTime() + rangeXMillisValue * movementX;
+        const targetTo = this._toDt.getTime() + rangeXMillisValue * movementX;
 
         // Get the millis range between the min and max range values.
         const minMaxRange = this._maxDate.getTime() - this._minDate.getTime();
@@ -218,15 +228,21 @@ export class TimelineRangeView {
      */
     public zoomRange(amount: number, targetPositionX: number): void {
         // We should not zoom if the range is fixed or zooming is explicitly disabled.
-        if (this._options.fixed || (!isNullOrUndefined(this._options.zoom?.enabled) && this._options.zoom?.enabled === false)) {
+        if (
+            this._options.fixed ||
+            (!isNullOrUndefined(this._options.zoom?.enabled) && this._options.zoom?.enabled === false)
+        ) {
             return;
         }
 
         // Work out the target position in milliseconds. This is the position on the canvas that we want to zoom around.
         // If we are rendering right-to-left then we should flip the x position so that it would map to the correct millisecond value.
-        const targetPositionMillis = this._isRTL ?
-            this._fromDt.getTime() + ((this._canvas.clientWidth - targetPositionX) / this._canvas.clientWidth) * (this._toDt.getTime() - this._fromDt.getTime()) :
-            this._fromDt.getTime() + (targetPositionX / this._canvas.clientWidth) * (this._toDt.getTime() - this._fromDt.getTime());
+        const targetPositionMillis = this._isRTL
+            ? this._fromDt.getTime() +
+              ((this._canvas.clientWidth - targetPositionX) / this._canvas.clientWidth) *
+                  (this._toDt.getTime() - this._fromDt.getTime())
+            : this._fromDt.getTime() +
+              (targetPositionX / this._canvas.clientWidth) * (this._toDt.getTime() - this._fromDt.getTime());
 
         // Calculate the zoom factor based on the amount.
         const zoomFactor = 1 - clamp(amount, -1, 1) * -0.1;
@@ -241,7 +257,7 @@ export class TimelineRangeView {
         // Clamp the new zoom range to the zoom min and max if they are defined.
         const clampedRange = clamp(targetRange, this._options.zoom?.min, this._options.zoom?.max);
 
-        // If the clamped range is different to the calculated one (the range is outside the zoom min/max bounds) then we need to calculate the new clamped from/to dates. 
+        // If the clamped range is different to the calculated one (the range is outside the zoom min/max bounds) then we need to calculate the new clamped from/to dates.
         if (targetRange != clampedRange) {
             targetFrom = targetPositionMillis - (targetPositionMillis - targetFrom) * (clampedRange / targetRange);
             targetTo = targetPositionMillis + (targetTo - targetPositionMillis) * (clampedRange / targetRange);
@@ -285,7 +301,7 @@ export class TimelineRangeView {
      */
     public calculateRequiredHeight(): number {
         // Grab the canvas context.
-        var context = this._canvas.getContext('2d')!;
+        const context = this._canvas.getContext("2d")!;
 
         // Apply the font that will be used to the render the labels.
         // TODO This should be set from some default or the configured font. Can use context save/reset to apply it.
@@ -294,9 +310,12 @@ export class TimelineRangeView {
         const unitLabelTextMetrics = context.measureText("Fri 13 April 1990");
 
         // The height of this view will be the height of our minor and major unit labels as well as our unit labels vertical padding.
-        return (DEFAULT_UNIT_LABEL_PADDING * 4) + ((unitLabelTextMetrics.actualBoundingBoxAscent + unitLabelTextMetrics.actualBoundingBoxDescent) * 2);
+        return (
+            DEFAULT_UNIT_LABEL_PADDING * 4 +
+            (unitLabelTextMetrics.actualBoundingBoxAscent + unitLabelTextMetrics.actualBoundingBoxDescent) * 2
+        );
     }
-    
+
     /**
      * Calculate the major and minor unit ticks dates and x positions for the current date range and canvas width.
      */
@@ -306,7 +325,10 @@ export class TimelineRangeView {
         const majorTargetTickCount = Math.floor(this._canvas.clientWidth / 320);
 
         // Find a sensible minor and major unit and step based on the target tick counts.
-        const { minor: minorUnitAndStep, major: majorUnitAndStep } = this._findSensibleUnitsAndSteps(minorTargetTickCount, majorTargetTickCount);
+        const { minor: minorUnitAndStep, major: majorUnitAndStep } = this._findSensibleUnitsAndSteps(
+            minorTargetTickCount,
+            majorTargetTickCount
+        );
 
         this._minorTickUnitAndStep = minorUnitAndStep;
         this._majorTickUnitAndStep = majorUnitAndStep;
@@ -325,10 +347,10 @@ export class TimelineRangeView {
             return {
                 date: tickDate,
                 // If we are rendering right-to-left then the ticks should start from the right of the timeline.
-                xPosition: this._isRTL ? 
-                    this._canvas.clientWidth - (milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())) :
-                    milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
-            }
+                xPosition: this._isRTL
+                    ? this._canvas.clientWidth - milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
+                    : milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
+            };
         });
 
         // Convert our major unit tick dates into tick objects representing the date and the x position of that date on the canvas.
@@ -336,10 +358,10 @@ export class TimelineRangeView {
             return {
                 date: tickDate,
                 // If we are rendering right-to-left then the ticks should start from the right of the timeline.
-                xPosition: this._isRTL ?
-                    this._canvas.clientWidth - (milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())) :
-                    milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
-            }
+                xPosition: this._isRTL
+                    ? this._canvas.clientWidth - milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
+                    : milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
+            };
         });
     }
 
@@ -357,8 +379,8 @@ export class TimelineRangeView {
         context.clearRect(0, yPosition, context.canvas.clientWidth, rangeContainerHeight);
 
         // The vertical position of our minor and major ticks will depend on the position of the range bar.
-        const minorTicksYPosition = position === "top" ? yPosition + (rangeContainerHeight / 2) : yPosition;
-        const majorTicksYPosition = position === "top" ? yPosition : yPosition + (rangeContainerHeight / 2);
+        const minorTicksYPosition = position === "top" ? yPosition + rangeContainerHeight / 2 : yPosition;
+        const majorTicksYPosition = position === "top" ? yPosition : yPosition + rangeContainerHeight / 2;
 
         // Draw our minor unit ticks.
         for (const { date, xPosition } of this._minorUnitTicks) {
@@ -370,12 +392,16 @@ export class TimelineRangeView {
                 context.setLineDash([3, 3]); /* dashes are 5px and spaces are 3px */
                 context.beginPath();
                 context.moveTo(xPosition, minorTicksYPosition);
-                context.lineTo(xPosition, minorTicksYPosition + (rangeContainerHeight / 2));
+                context.lineTo(xPosition, minorTicksYPosition + rangeContainerHeight / 2);
                 context.stroke();
             }
 
             // Create the formatted date label for this minor tick.
-            const minorTickLabel = this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS);
+            const minorTickLabel = this._formatDate(
+                date,
+                this._minorTickUnitAndStep.unit,
+                DEFAULT_MINOR_UNIT_LABEL_FORMATS
+            );
 
             // Draw the minor date/time label text.
             context.textBaseline = "alphabetic";
@@ -386,13 +412,13 @@ export class TimelineRangeView {
                 context.fillText(
                     minorTickLabel,
                     xPosition - DEFAULT_UNIT_LABEL_PADDING - context.measureText(minorTickLabel).width,
-                    (minorTicksYPosition + (rangeContainerHeight / 2)) - DEFAULT_UNIT_LABEL_PADDING
+                    minorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING
                 );
             } else {
                 context.fillText(
                     minorTickLabel,
                     xPosition + DEFAULT_UNIT_LABEL_PADDING,
-                    (minorTicksYPosition + (rangeContainerHeight / 2)) - DEFAULT_UNIT_LABEL_PADDING
+                    minorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING
                 );
             }
             context.stroke();
@@ -412,43 +438,52 @@ export class TimelineRangeView {
             const nextMajorTick = this._majorUnitTicks[tickIndex + 1];
 
             // Is this tick the for the first major tick? If so the label for it will need to be sticky.
-            const isStickyLabel = date.getTime() <= this._fromDt.getTime() && nextMajorTick && nextMajorTick.date.getTime() > this._fromDt.getTime();
+            const isStickyLabel =
+                date.getTime() <= this._fromDt.getTime() &&
+                nextMajorTick &&
+                nextMajorTick.date.getTime() > this._fromDt.getTime();
 
             // Draw the actual tick but only if this label isn't the sticky one or if it is right at the edge of the canvas.
             if (!isStickyLabel && xPosition > 0 && xPosition < context.canvas.clientWidth) {
                 context.lineWidth = 2;
                 context.lineCap = "round";
-                context.setLineDash([])
+                context.setLineDash([]);
                 context.beginPath();
                 context.moveTo(xPosition, majorTicksYPosition + 3);
-                context.lineTo(xPosition, majorTicksYPosition + (rangeContainerHeight / 2) - 3);
+                context.lineTo(xPosition, majorTicksYPosition + rangeContainerHeight / 2 - 3);
                 context.stroke();
             }
 
             // Create the formatted date label for this major tick.
-            const majorTickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
+            const majorTickLabel = this._formatDate(
+                date,
+                this._majorTickUnitAndStep.unit,
+                DEFAULT_MAJOR_UNIT_LABEL_FORMATS
+            );
 
             // Determine the default major label x position.
             // If we are right-to-left then the label should be rendered to the left of the tick, otherwise the right.
             let labelXPosition = this._isRTL
                 ? xPosition - DEFAULT_UNIT_LABEL_PADDING - context.measureText(majorTickLabel).width
                 : xPosition + DEFAULT_UNIT_LABEL_PADDING;
-            
+
             // If our label is sticky then it should always be drawn inside the visible area as the earliest major tick.
             // Our sticky label should also be pushed out of the way by the next major tick label as we don't want overlaps.
             if (isStickyLabel) {
                 // Calculate the width of the label, plus a smidge for a little gap between the label and the tick.
                 const labelWidth = context.measureText(majorTickLabel).width + DEFAULT_UNIT_LABEL_PADDING;
-                
+
                 if (nextMajorTick) {
                     if (this._isRTL) {
-                        labelXPosition = nextMajorTick.xPosition <= (context.canvas.clientWidth - labelWidth) ?
-                            context.canvas.clientWidth - labelWidth : 
-                            nextMajorTick.xPosition + DEFAULT_UNIT_LABEL_PADDING;
+                        labelXPosition =
+                            nextMajorTick.xPosition <= context.canvas.clientWidth - labelWidth
+                                ? context.canvas.clientWidth - labelWidth
+                                : nextMajorTick.xPosition + DEFAULT_UNIT_LABEL_PADDING;
                     } else {
-                        labelXPosition = nextMajorTick.xPosition >= labelWidth ?
-                            DEFAULT_UNIT_LABEL_PADDING :
-                            nextMajorTick.xPosition - labelWidth;
+                        labelXPosition =
+                            nextMajorTick.xPosition >= labelWidth
+                                ? DEFAULT_UNIT_LABEL_PADDING
+                                : nextMajorTick.xPosition - labelWidth;
                     }
                 }
             }
@@ -458,7 +493,11 @@ export class TimelineRangeView {
             context.textBaseline = "alphabetic";
             context.fillStyle = "#595959";
             context.beginPath();
-            context.fillText(majorTickLabel, labelXPosition, (majorTicksYPosition + (rangeContainerHeight / 2)) - DEFAULT_UNIT_LABEL_PADDING);
+            context.fillText(
+                majorTickLabel,
+                labelXPosition,
+                majorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING
+            );
             context.stroke();
         }
     }
@@ -468,13 +507,16 @@ export class TimelineRangeView {
      * @param minorTargetTickCount The number of minor ticks to aim for
      * @returns An object containing the minor and major unit and step.
      */
-    private _findSensibleUnitsAndSteps(minorTargetTickCount: number, majorTargetTickCount: number): { minor: UnitAndStep, major: UnitAndStep } {
+    private _findSensibleUnitsAndSteps(
+        minorTargetTickCount: number,
+        majorTargetTickCount: number
+    ): { minor: UnitAndStep; major: UnitAndStep } {
         // A function to get the best unit and step based on the target tick count based on the provided units and their factors.
         const getBestUnitAndStep = (units: UnitAndFactor[], targetTickCount: number): UnitAndStep => {
             // Get the millis difference between the two dates.
             const millisDiff = this._toDt.getTime() - this._fromDt.getTime();
 
-            const unitTickCounts: { unit: Unit, ticks: number, step: number }[] = [];
+            const unitTickCounts: { unit: Unit; ticks: number; step: number }[] = [];
 
             units.forEach(({ unit, factor }) => {
                 const viableStepValues: number[] = [];
@@ -497,13 +539,19 @@ export class TimelineRangeView {
                 }
 
                 viableStepValues.forEach((step) => {
-                    unitTickCounts.push({ unit, ticks: (millisDiff / factor) / step, step })
+                    unitTickCounts.push({
+                        unit,
+                        ticks: millisDiff / factor / step,
+                        step
+                    });
                 });
             });
 
             // Sort the unit tick counts by how close they are to the target tick count.
             unitTickCounts.sort((a, b) => {
-                return Math.abs(a.ticks - Math.max(1, targetTickCount)) - Math.abs(b.ticks - Math.max(1, targetTickCount));
+                return (
+                    Math.abs(a.ticks - Math.max(1, targetTickCount)) - Math.abs(b.ticks - Math.max(1, targetTickCount))
+                );
             });
 
             return { unit: unitTickCounts[0].unit, step: unitTickCounts[0].step };
@@ -511,48 +559,87 @@ export class TimelineRangeView {
 
         // We will always start by working out the minor unit first and the major unit will be based on that.
         // We also want a minimum of 1 for the minor target tick count, so we will clamp it to 1.
-        const minorUnitAndStep = getBestUnitAndStep([
-            { unit: 'millisecond', factor: 1 },
-            { unit: 'second', factor: 1000 },
-            { unit: 'minute', factor: 60 * 1000 },
-            { unit: 'hour', factor: 60 * 60 * 1000 },
-            { unit: 'day', factor: 24 * 60 * 60 * 1000 },
-            { unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 },
-            { unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 }
-        ], minorTargetTickCount);
+        const minorUnitAndStep = getBestUnitAndStep(
+            [
+                { unit: "millisecond", factor: 1 },
+                { unit: "second", factor: 1000 },
+                { unit: "minute", factor: 60 * 1000 },
+                { unit: "hour", factor: 60 * 60 * 1000 },
+                { unit: "day", factor: 24 * 60 * 60 * 1000 },
+                { unit: "month", factor: 30 * 24 * 60 * 60 * 1000 },
+                { unit: "year", factor: 365 * 24 * 60 * 60 * 1000 }
+            ],
+            minorTargetTickCount
+        );
 
         const majorUnitsAndFactors: UnitAndFactor[] = [];
 
         // The units available for the major unit will depend on the minor unit.
         if (minorUnitAndStep.unit === "millisecond") {
-            majorUnitsAndFactors.push({ unit: 'second', factor: 1000 });
-            majorUnitsAndFactors.push({ unit: 'minute', factor: 60 * 1000 });
-            majorUnitsAndFactors.push({ unit: 'hour', factor: 60 * 60 * 1000 });
-            majorUnitsAndFactors.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
-            majorUnitsAndFactors.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
-            majorUnitsAndFactors.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: "second", factor: 1000 });
+            majorUnitsAndFactors.push({ unit: "minute", factor: 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: "hour", factor: 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({
+                unit: "month",
+                factor: 30 * 24 * 60 * 60 * 1000
+            });
+            majorUnitsAndFactors.push({
+                unit: "year",
+                factor: 365 * 24 * 60 * 60 * 1000
+            });
         } else if (minorUnitAndStep.unit === "second") {
-            majorUnitsAndFactors.push({ unit: 'minute', factor: 60 * 1000 });
-            majorUnitsAndFactors.push({ unit: 'hour', factor: 60 * 60 * 1000 });
-            majorUnitsAndFactors.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
-            majorUnitsAndFactors.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
-            majorUnitsAndFactors.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: "minute", factor: 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: "hour", factor: 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({
+                unit: "month",
+                factor: 30 * 24 * 60 * 60 * 1000
+            });
+            majorUnitsAndFactors.push({
+                unit: "year",
+                factor: 365 * 24 * 60 * 60 * 1000
+            });
         } else if (minorUnitAndStep.unit === "minute") {
-            majorUnitsAndFactors.push({ unit: 'hour', factor: 60 * 60 * 1000 });
-            majorUnitsAndFactors.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
-            majorUnitsAndFactors.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
-            majorUnitsAndFactors.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: "hour", factor: 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({
+                unit: "month",
+                factor: 30 * 24 * 60 * 60 * 1000
+            });
+            majorUnitsAndFactors.push({
+                unit: "year",
+                factor: 365 * 24 * 60 * 60 * 1000
+            });
         } else if (minorUnitAndStep.unit === "hour") {
-            majorUnitsAndFactors.push({ unit: 'day', factor: 24 * 60 * 60 * 1000 });
-            majorUnitsAndFactors.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
-            majorUnitsAndFactors.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({
+                unit: "month",
+                factor: 30 * 24 * 60 * 60 * 1000
+            });
+            majorUnitsAndFactors.push({
+                unit: "year",
+                factor: 365 * 24 * 60 * 60 * 1000
+            });
         } else if (minorUnitAndStep.unit === "day") {
-            majorUnitsAndFactors.push({ unit: 'month', factor: 30 * 24 * 60 * 60 * 1000 });
-            majorUnitsAndFactors.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({
+                unit: "month",
+                factor: 30 * 24 * 60 * 60 * 1000
+            });
+            majorUnitsAndFactors.push({
+                unit: "year",
+                factor: 365 * 24 * 60 * 60 * 1000
+            });
         } else if (minorUnitAndStep.unit === "month") {
-            majorUnitsAndFactors.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({
+                unit: "year",
+                factor: 365 * 24 * 60 * 60 * 1000
+            });
         } else if (minorUnitAndStep.unit === "year") {
-            majorUnitsAndFactors.push({ unit: 'year', factor: 365 * 24 * 60 * 60 * 1000 });
+            majorUnitsAndFactors.push({
+                unit: "year",
+                factor: 365 * 24 * 60 * 60 * 1000
+            });
         } else {
             throw new Error(`unknown minor unit: ${minorUnitAndStep.unit}`);
         }
@@ -560,7 +647,7 @@ export class TimelineRangeView {
         return {
             minor: minorUnitAndStep,
             major: getBestUnitAndStep(majorUnitsAndFactors, majorTargetTickCount)
-        }
+        };
     }
 
     /**
@@ -575,21 +662,34 @@ export class TimelineRangeView {
         // We want to strip the date from the next unit up so that the ticks always start from the next unit up.
         if (unitAndStep.unit === "year" || unitAndStep.unit === "month") {
             currentDate = new Date(this._fromDt.getFullYear(), 0);
-        }
-        else if (unitAndStep.unit === "day") {
+        } else if (unitAndStep.unit === "day") {
             currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth());
-        }
-        else if (unitAndStep.unit === "hour") {
+        } else if (unitAndStep.unit === "hour") {
             currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate());
-        }
-        else if (unitAndStep.unit === "minute") {
-            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours());
-        }
-        else if (unitAndStep.unit === "second") {
-            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes());
-        }
-        else if (unitAndStep.unit === "millisecond") {
-            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds());
+        } else if (unitAndStep.unit === "minute") {
+            currentDate = new Date(
+                this._fromDt.getFullYear(),
+                this._fromDt.getMonth(),
+                this._fromDt.getDate(),
+                this._fromDt.getHours()
+            );
+        } else if (unitAndStep.unit === "second") {
+            currentDate = new Date(
+                this._fromDt.getFullYear(),
+                this._fromDt.getMonth(),
+                this._fromDt.getDate(),
+                this._fromDt.getHours(),
+                this._fromDt.getMinutes()
+            );
+        } else if (unitAndStep.unit === "millisecond") {
+            currentDate = new Date(
+                this._fromDt.getFullYear(),
+                this._fromDt.getMonth(),
+                this._fromDt.getDate(),
+                this._fromDt.getHours(),
+                this._fromDt.getMinutes(),
+                this._fromDt.getSeconds()
+            );
         } else {
             throw new Error(`unknown unit: ${unitAndStep.unit}`);
         }
@@ -604,7 +704,7 @@ export class TimelineRangeView {
                 case "year":
                     currentDate.setFullYear(currentDate.getFullYear() + unitAndStep.step);
                     break;
-                
+
                 case "month":
                     currentDate.setMonth(currentDate.getMonth() + unitAndStep.step);
                     break;
@@ -658,8 +758,12 @@ export class TimelineRangeView {
         // TODO Validate that the options are valid, e.g. min is before max, etc.
 
         // Set the minimum and maximum range dates based on the options provided.
-        this._minDate = isNullOrUndefined(this._options.min) ? new Date(-8640000000000000) : parseDate(this._options.min!);
-        this._maxDate = isNullOrUndefined(this._options.max) ? new Date(8640000000000000) : parseDate(this._options.max!);
+        this._minDate = isNullOrUndefined(this._options.min)
+            ? new Date(-8640000000000000)
+            : parseDate(this._options.min!);
+        this._maxDate = isNullOrUndefined(this._options.max)
+            ? new Date(8640000000000000)
+            : parseDate(this._options.max!);
 
         // We should attempt to reapply the current range now that we have updated the range min/max.
         this.setRange(this.fromDt, this.toDt);

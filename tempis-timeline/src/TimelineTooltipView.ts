@@ -39,7 +39,14 @@ export class TimelineTooltipView {
      * @param isRTL Whether the timeline is being rendered right-to-left.
      * @param options The tooltip options.
      */
-    public constructor(canvas: HTMLCanvasElement, dataView: TimelineDataView, dateFormatter: DateFormatter, font: TimelineFont, isRTL: boolean, options: TempisTimelineTooltipOptions = {}) {
+    public constructor(
+        canvas: HTMLCanvasElement,
+        dataView: TimelineDataView,
+        dateFormatter: DateFormatter,
+        font: TimelineFont,
+        isRTL: boolean,
+        options: TempisTimelineTooltipOptions = {}
+    ) {
         this._canvas = canvas;
         this._dataView = dataView;
         this._dateFormatter = dateFormatter;
@@ -59,7 +66,7 @@ export class TimelineTooltipView {
         let isPointerDown = false;
 
         // Handle the pointer down event.
-        this._canvas.addEventListener('pointerdown', () => {
+        this._canvas.addEventListener("pointerdown", () => {
             isPointerDown = true;
 
             // Clicking on the canvas should kill any active or pending tooltip.
@@ -68,7 +75,7 @@ export class TimelineTooltipView {
         });
 
         // Handle the pointer down event.
-        this._canvas.addEventListener('pointerup', (event) => {
+        this._canvas.addEventListener("pointerup", (event) => {
             isPointerDown = false;
 
             // Attempt to create a tooltip for the position of the pointer up event.
@@ -76,7 +83,7 @@ export class TimelineTooltipView {
         });
 
         // Handle the pointer being moved on the canvas.
-        this._canvas.addEventListener('pointermove', (event) => {
+        this._canvas.addEventListener("pointermove", (event) => {
             // There is nothing to do if our pointer is currently down as we don't want tooltips showing if we are dragging/selecting.
             if (isPointerDown) {
                 return;
@@ -87,25 +94,25 @@ export class TimelineTooltipView {
         });
 
         // Add a handler for the cursor moving off of the canvas to clear up any active tooltip.
-        this._canvas.addEventListener('pointerout', (event) => {
+        this._canvas.addEventListener("pointerout", (event) => {
             this._activeTooltip?.destroy();
             this._activeTooltip = null;
         });
     }
 
     /**
-     * Attempt to create a tooltip at the position defined by the event. 
+     * Attempt to create a tooltip at the position defined by the event.
      * @param event The event that triggered the tooltip creation.
      */
     private _createTooltip(event: PointerEvent | MouseEvent): void {
         // A function that gets the position on the canvas for the mouse event or pointer event.
         const getMouseOrPointerPosition = (event: PointerEvent | MouseEvent) => {
-            var rect = this._canvas.getBoundingClientRect();
+            const rect = this._canvas.getBoundingClientRect();
             return {
-                x: (event.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
-                y: (event.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
+                x: ((event.clientX - rect.left) / (rect.right - rect.left)) * this._canvas.clientWidth,
+                y: ((event.clientY - rect.top) / (rect.bottom - rect.top)) * this._canvas.clientHeight
             };
-        }
+        };
 
         // There is nothing to do if tooltips are not enabled.
         if (!isNullOrUndefined(this._options.enabled) && !this._options.enabled) {
@@ -130,7 +137,16 @@ export class TimelineTooltipView {
             }
 
             // Create the tooltip.
-            this._activeTooltip = new TimelineTooltip(item, this._canvas, this._dateFormatter, this._font, this._isRTL, this._options, event.clientX, event.clientY);
+            this._activeTooltip = new TimelineTooltip(
+                item,
+                this._canvas,
+                this._dateFormatter,
+                this._font,
+                this._isRTL,
+                this._options,
+                event.clientX,
+                event.clientY
+            );
         }
     }
 }

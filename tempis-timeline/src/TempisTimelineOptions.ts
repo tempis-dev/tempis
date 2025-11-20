@@ -21,7 +21,7 @@ export interface TempisTimelineOptions {
 
     /** The timeline tooltip options. */
     tooltip?: TempisTimelineTooltipOptions;
-    
+
     /** The timeline style options. */
     style?: TempisTimelineStyleOptions;
 
@@ -43,8 +43,8 @@ export interface TempisTimelineOptions {
 
     onItemDoubleClick?(id: string | number): void;
 
-    onSelectionChange?(changes: SelectionChangeEvent[]): void; 
-};
+    onSelectionChange?(changes: SelectionChangeEvent[]): void;
+}
 
 /**
  * Defines how items in a timeline can be selected.
@@ -146,16 +146,16 @@ export interface TempisTimelineItemStyle {
 
     /** The border radius. */
     borderRadius?: number;
-};
+}
 
 export type TempisTimelineRangeUnitLabelFormats = {
-    millisecond?: string,
-    second?: string,
-    minute?: string,
-    hour?: string,
-    day?: string,
-    month?: string,
-    year?: string
+    millisecond?: string;
+    second?: string;
+    minute?: string;
+    hour?: string;
+    day?: string;
+    month?: string;
+    year?: string;
 };
 
 export interface TempisTimelineRangeUnitOptions {
@@ -164,7 +164,7 @@ export interface TempisTimelineRangeUnitOptions {
 
     /** The range unit label formats. */
     formats?: TempisTimelineRangeUnitLabelFormats;
-};
+}
 
 export type TempisTimelineRangePosition = "top" | "bottom" | "both" | "none";
 
@@ -195,7 +195,7 @@ export interface TempisTimelineRangeOptions {
 
     /** The timeline range zoom options. */
     zoom?: TempisTimelineRangeZoomOptions;
-};
+}
 
 export interface TempisTimelineRangeZoomOptions {
     /** Whether zooming is enabled. */
@@ -206,7 +206,7 @@ export interface TempisTimelineRangeZoomOptions {
 
     /** The maximum range that can be zoomed to in milliseconds. */
     max?: number;
-};
+}
 
 export type TempisTimelineLegendPosition = "top" | "bottom" | "none";
 
@@ -263,7 +263,7 @@ export interface TempisTimelineItem {
 
     /** A flag defining whether the item is selected. */
     selected?: boolean;
-};
+}
 
 export interface TempisTimelineCategory {
     /** The category name, correlating to the 'category' property of items. */
@@ -274,4 +274,4 @@ export interface TempisTimelineCategory {
 
     /** The style to apply to items in this category. The backgroundColor property will be applied as the legend key color. */
     style?: TempisTimelineItemStyle;
-};
+}

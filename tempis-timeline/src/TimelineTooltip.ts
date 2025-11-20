@@ -4,7 +4,7 @@ import { TimelineFont } from "./TimelineFont";
 import { TimelineItem } from "./TimelineItem";
 
 /** The default tooltip delay in millis. */
-const DEFAULT_TOOLTIP_DELAY_MS = 500; 
+const DEFAULT_TOOLTIP_DELAY_MS = 500;
 
 export class TimelineTooltip {
     /** The item that the tooltip is being shown for. */
@@ -48,7 +48,16 @@ export class TimelineTooltip {
      * @param x The initial tooltip x position.
      * @param y The initial tooltip y position.
      */
-    public constructor(item: TimelineItem, canvas: HTMLCanvasElement, dateFormatter: DateFormatter, font: TimelineFont, isRTL: boolean, options: TempisTimelineTooltipOptions, x: number, y: number) {
+    public constructor(
+        item: TimelineItem,
+        canvas: HTMLCanvasElement,
+        dateFormatter: DateFormatter,
+        font: TimelineFont,
+        isRTL: boolean,
+        options: TempisTimelineTooltipOptions,
+        x: number,
+        y: number
+    ) {
         this._item = item;
         this._canvas = canvas;
         this._dateFormatter = dateFormatter;
@@ -74,8 +83,8 @@ export class TimelineTooltip {
 
     /**
      * Set the tooltip position.
-     * @param x 
-     * @param y 
+     * @param x
+     * @param y
      */
     public setPosition(x: number, y: number) {
         this._posX = x;
@@ -84,7 +93,7 @@ export class TimelineTooltip {
         if (!this._activeElement) {
             return;
         }
-        
+
         this._activeElement.style.left = `${x}px`;
         this._activeElement.style.top = `${y}px`;
 
@@ -120,8 +129,8 @@ export class TimelineTooltip {
         }
 
         // Create the tooltip element.
-        this._activeElement = document.createElement('div');
-        this._activeElement.classList.add('tempis-timeline-tooltip');
+        this._activeElement = document.createElement("div");
+        this._activeElement.classList.add("tempis-timeline-tooltip");
 
         // Apply the default styles for the tooltip element.
         Object.assign(this._activeElement.style, {
@@ -144,7 +153,9 @@ export class TimelineTooltip {
                 // The tooltip content is a string that we will assume is valid html.
                 this._activeElement.innerHTML = customTooltipContent;
             } else {
-                throw new Error("The value returned from the tooltip template function was not a string or HTMLElement");
+                throw new Error(
+                    "The value returned from the tooltip template function was not a string or HTMLElement"
+                );
             }
         } else {
             // Apply the default styles for the default tooltip element.
@@ -192,7 +203,14 @@ export class TimelineTooltip {
             return;
         }
 
-        let boundingRect: { left: number, top: number, width: number, height: number, right: number, bottom: number };
+        let boundingRect: {
+            left: number;
+            top: number;
+            width: number;
+            height: number;
+            right: number;
+            bottom: number;
+        };
 
         switch (this._options.overflowBehavior) {
             case "none":
@@ -221,9 +239,9 @@ export class TimelineTooltip {
         // Get the tooltip rect.
         const tooltipRect = this._activeElement.getBoundingClientRect();
 
-        // Determine the x/y translation values we would need to potentially flip the tooltip to keep it in the defined bounds. 
-        const translateX = (this._posX + tooltipRect.width) >= boundingRect.right ? "-100%" : "0px";
-        const translateY = (this._posY + tooltipRect.height) >= boundingRect.bottom ? "-100%" : "0px";
+        // Determine the x/y translation values we would need to potentially flip the tooltip to keep it in the defined bounds.
+        const translateX = this._posX + tooltipRect.width >= boundingRect.right ? "-100%" : "0px";
+        const translateY = this._posY + tooltipRect.height >= boundingRect.bottom ? "-100%" : "0px";
 
         // Apply the transform to the tooltip.
         this._activeElement.style.transform = `translate(${translateX}, ${translateY})`;
