@@ -138,7 +138,7 @@ export class TimelineDataView {
         this._drawMinorUnitBars(context, range.minorTicks, yPosition, this._lastDrawHeight);
 
         // Draw our groups and items!
-        this._drawGroups(context, yPosition, maxHeight);
+        this._drawGroups(context, yPosition);
 
         // Set the y position from where this view was last drawn.
         // This will be used to help align absolute canvas pointer positions with data view elements.
@@ -216,9 +216,8 @@ export class TimelineDataView {
      * Draw the groups and items based on the view draw plan.
      * @param context The canvas context.
      * @param yPosition The y position of the top of the view.
-     * @param maxHeight The max height that this view can take on the canvas.
      */
-    private _drawGroups(context: CanvasRenderingContext2D, yPosition: number, maxHeight: number): void {
+    private _drawGroups(context: CanvasRenderingContext2D, yPosition: number): void {
         // There is nothing to do if we have no draw plan.
         if (!this._drawPlan) {
             return;

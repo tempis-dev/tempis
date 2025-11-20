@@ -748,7 +748,7 @@ export class TimelineRangeView {
      */
     private _formatDate(date: Date, unit: Unit, labelFormats: TempisTimelineRangeUnitLabelFormats): string {
         // TODO We should be checking the range options for a non-default label format for this unit.
-        return this._dateFormatter.format(date, (labelFormats as any)[unit]);
+        return this._dateFormatter.format(date, labelFormats[unit as keyof TempisTimelineRangeUnitLabelFormats]);
     }
 
     /**

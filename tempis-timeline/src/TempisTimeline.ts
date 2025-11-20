@@ -639,7 +639,7 @@ export class TempisTimeline {
         }
 
         // Invoke the 'onItemClick' callback if defined, passing the identifier of the clicked item.
-        this._options.onItemClick && this._options.onItemClick(item.id);
+        this._options.onItemClick?.(item.id);
     }
 
     /**
@@ -648,6 +648,6 @@ export class TempisTimeline {
      */
     private _onItemDoubleClicked(item: TimelineItem): void {
         // Invoke the 'onItemDoubleClick' callback if defined, passing the identifier of the double-clicked item.
-        this._options.onItemDoubleClick && this._options.onItemDoubleClick(item.id);
+        this._options.onItemDoubleClick?.(item.id);
     }
 }

@@ -3,7 +3,7 @@
  * @param value The value to check.
  * @returns Whether the given value is null or undefined.
  */
-export function isNullOrUndefined(value: any): boolean {
+export function isNullOrUndefined(value: unknown): value is null | undefined {
     return value === null || value === undefined;
 }
 

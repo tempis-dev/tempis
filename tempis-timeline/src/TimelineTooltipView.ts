@@ -94,7 +94,7 @@ export class TimelineTooltipView {
         });
 
         // Add a handler for the cursor moving off of the canvas to clear up any active tooltip.
-        this._canvas.addEventListener("pointerout", (event) => {
+        this._canvas.addEventListener("pointerout", () => {
             this._activeTooltip?.destroy();
             this._activeTooltip = null;
         });
