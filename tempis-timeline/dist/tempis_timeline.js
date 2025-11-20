@@ -86,7 +86,12 @@ var tempis_timeline = (() => {
     if (textAlign === "right") {
       context.save();
       context.beginPath();
-      context.rect(x2 - (maxWidth - ellipsisWidth), y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
+      context.rect(
+        x2 - (maxWidth - ellipsisWidth),
+        y - parseInt(context.font),
+        maxWidth - ellipsisWidth,
+        parseInt(context.font) * 2
+      );
       context.clip();
       context.fillText(text, x2, y);
       context.restore();
@@ -374,13 +379,18 @@ var tempis_timeline = (() => {
         }
         const categoryStyle = (_b = categoryDefinition.style) != null ? _b : {};
         categoryStyle.backgroundColor = (_c = categoryStyle.backgroundColor) != null ? _c : getNextPaletteColor.next().value;
-        this._categories.push(new TimelineItemCategory(categoryDefinition.name, categoryDefinition.label, categoryStyle));
+        this._categories.push(
+          new TimelineItemCategory(categoryDefinition.name, categoryDefinition.label, categoryStyle)
+        );
         categoryNames.push(categoryDefinition.name);
       }
-      this._categoriesMap = this._categories.reduce((map, category) => {
-        map[category.name] = category;
-        return map;
-      }, {});
+      this._categoriesMap = this._categories.reduce(
+        (map, category) => {
+          map[category.name] = category;
+          return map;
+        },
+        {}
+      );
     }
     _createGroupings(options) {
       var _a, _b;
@@ -396,7 +406,9 @@ var tempis_timeline = (() => {
         group.push(itemDefinition);
       }
       for (const [group, groupItemDefinitions] of Object.entries(itemGroupingMap)) {
-        this._groupings.push(new TimelineItemGrouping(group, this._createGroupingItems(options, groupItemDefinitions)));
+        this._groupings.push(
+          new TimelineItemGrouping(group, this._createGroupingItems(options, groupItemDefinitions))
+        );
       }
       this._findMinAndMaxDates();
     }
@@ -404,7 +416,12 @@ var tempis_timeline = (() => {
       return itemDefinitions.map((itemDefinition) => {
         var _a, _b, _c, _d;
         const category = itemDefinition.category ? this.getCategory(itemDefinition.category) : null;
-        const resolvedItemStyle = defaults((_a = itemDefinition.style) != null ? _a : {}, (_b = category == null ? void 0 : category.style) != null ? _b : {}, (_d = (_c = options.style) == null ? void 0 : _c.item) != null ? _d : {}, DEFAULT_ITEM_STYLE);
+        const resolvedItemStyle = defaults(
+          (_a = itemDefinition.style) != null ? _a : {},
+          (_b = category == null ? void 0 : category.style) != null ? _b : {},
+          (_d = (_c = options.style) == null ? void 0 : _c.item) != null ? _d : {},
+          DEFAULT_ITEM_STYLE
+        );
         return new TimelineItem(itemDefinition, resolvedItemStyle);
       });
     }
@@ -462,7 +479,7 @@ var tempis_timeline = (() => {
       this._lastDrawHeight = fillVertically ? maxHeight : Math.min(this._drawPlan.height, maxHeight);
       context.clearRect(0, yPosition, context.canvas.width, this._lastDrawHeight);
       this._drawMinorUnitBars(context, range.minorTicks, yPosition, this._lastDrawHeight);
-      this._drawGroups(context, yPosition, maxHeight);
+      this._drawGroups(context, yPosition);
       this._lastDrawYPosition = yPosition;
       return this._lastDrawHeight;
     }
@@ -496,7 +513,7 @@ var tempis_timeline = (() => {
       context.stroke();
       context.setLineDash([]);
     }
-    _drawGroups(context, yPosition, maxHeight) {
+    _drawGroups(context, yPosition) {
       if (!this._drawPlan) {
         return;
       }
@@ -517,9 +534,17 @@ var tempis_timeline = (() => {
           context.fillStyle = "#595959";
           context.beginPath();
           if (this._isRTL) {
-            context.fillText(groupDrawPlan.label, context.canvas.clientWidth - DEFAULT_GROUP_LABEL_MARGIN, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN);
+            context.fillText(
+              groupDrawPlan.label,
+              context.canvas.clientWidth - DEFAULT_GROUP_LABEL_MARGIN,
+              scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN
+            );
           } else {
-            context.fillText(groupDrawPlan.label, DEFAULT_GROUP_LABEL_MARGIN, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN);
+            context.fillText(
+              groupDrawPlan.label,
+              DEFAULT_GROUP_LABEL_MARGIN,
+              scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN
+            );
           }
           context.stroke();
         }
@@ -555,7 +580,13 @@ var tempis_timeline = (() => {
         context.shadowOffsetY = 0;
         context.fillStyle = "rgba(0, 0, 0, 1)";
         context.beginPath();
-        context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, itemBorderRadius);
+        context.roundRect(
+          itemDrawPlan.xPositionStart,
+          scrolledYPosition + itemDrawPlan.yPositionStart,
+          itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart,
+          itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart,
+          itemBorderRadius
+        );
         context.fill();
         context.shadowColor = "transparent";
       }
@@ -564,28 +595,54 @@ var tempis_timeline = (() => {
         context.fillStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
         context.strokeStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
         const itemMarkerConnectorPath = new Path2D();
-        itemMarkerConnectorPath.moveTo(Math.max(itemDrawPlan.xPositionStart, itemDrawPlan.xPointInTimePosition - 20), scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
-        itemMarkerConnectorPath.lineTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionEnd + 6);
-        itemMarkerConnectorPath.lineTo(Math.min(itemDrawPlan.xPositionEnd, itemDrawPlan.xPointInTimePosition + 20), scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
+        itemMarkerConnectorPath.moveTo(
+          Math.max(itemDrawPlan.xPositionStart, itemDrawPlan.xPointInTimePosition - 20),
+          scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2
+        );
+        itemMarkerConnectorPath.lineTo(
+          itemDrawPlan.xPointInTimePosition,
+          scrolledYPosition + itemDrawPlan.yPositionEnd + 6
+        );
+        itemMarkerConnectorPath.lineTo(
+          Math.min(itemDrawPlan.xPositionEnd, itemDrawPlan.xPointInTimePosition + 20),
+          scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2
+        );
         context.fill(itemMarkerConnectorPath);
         context.beginPath();
-        context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2);
+        context.moveTo(
+          itemDrawPlan.xPointInTimePosition,
+          scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2
+        );
         context.lineTo(itemDrawPlan.xPointInTimePosition, 1e4);
         context.stroke();
       }
       context.fillStyle = itemBackgroundColor;
       context.beginPath();
-      context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, itemBorderRadius);
+      context.roundRect(
+        itemDrawPlan.xPositionStart,
+        scrolledYPosition + itemDrawPlan.yPositionStart,
+        itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart,
+        itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart,
+        itemBorderRadius
+      );
       context.fill();
       if (itemBorderThickness && itemBorderColor) {
         context.strokeStyle = itemBorderColor;
         context.lineWidth = itemBorderThickness;
         context.beginPath();
-        context.roundRect(itemDrawPlan.xPositionStart + context.lineWidth / 2, scrolledYPosition + itemDrawPlan.yPositionStart + context.lineWidth / 2, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - context.lineWidth, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - +context.lineWidth, itemBorderRadius);
+        context.roundRect(
+          itemDrawPlan.xPositionStart + context.lineWidth / 2,
+          scrolledYPosition + itemDrawPlan.yPositionStart + context.lineWidth / 2,
+          itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - context.lineWidth,
+          itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - +context.lineWidth,
+          itemBorderRadius
+        );
         context.stroke();
       }
       if (item.label) {
-        const labelStartPositionX = this._isRTL ? Math.floor(Math.min(context.canvas.clientWidth - itemPadding, itemDrawPlan.xPositionEnd - itemPadding)) : Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
+        const labelStartPositionX = this._isRTL ? Math.floor(
+          Math.min(context.canvas.clientWidth - itemPadding, itemDrawPlan.xPositionEnd - itemPadding)
+        ) : Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
         const maxLabelWidth = this._isRTL ? Math.max(0, Math.ceil(labelStartPositionX - (itemDrawPlan.xPositionStart + itemPadding)) + 1) : Math.max(0, Math.ceil(itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX));
         if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
           context.textBaseline = "middle";
@@ -850,14 +907,17 @@ var tempis_timeline = (() => {
       this.setRange(new Date(0), new Date(41024448e5));
     }
     calculateRequiredHeight() {
-      var context = this._canvas.getContext("2d");
+      const context = this._canvas.getContext("2d");
       const unitLabelTextMetrics = context.measureText("Fri 13 April 1990");
       return DEFAULT_UNIT_LABEL_PADDING * 4 + (unitLabelTextMetrics.actualBoundingBoxAscent + unitLabelTextMetrics.actualBoundingBoxDescent) * 2;
     }
     calculateMinorAndMajorUnitTicks() {
       const minorTargetTickCount = Math.floor(this._canvas.clientWidth / 120);
       const majorTargetTickCount = Math.floor(this._canvas.clientWidth / 320);
-      const { minor: minorUnitAndStep, major: majorUnitAndStep } = this._findSensibleUnitsAndSteps(minorTargetTickCount, majorTargetTickCount);
+      const { minor: minorUnitAndStep, major: majorUnitAndStep } = this._findSensibleUnitsAndSteps(
+        minorTargetTickCount,
+        majorTargetTickCount
+      );
       this._minorTickUnitAndStep = minorUnitAndStep;
       this._majorTickUnitAndStep = majorUnitAndStep;
       const minorTickDates = this._getTickDates(this._minorTickUnitAndStep);
@@ -891,7 +951,11 @@ var tempis_timeline = (() => {
           context.lineTo(xPosition, minorTicksYPosition + rangeContainerHeight / 2);
           context.stroke();
         }
-        const minorTickLabel = this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS);
+        const minorTickLabel = this._formatDate(
+          date,
+          this._minorTickUnitAndStep.unit,
+          DEFAULT_MINOR_UNIT_LABEL_FORMATS
+        );
         context.textBaseline = "alphabetic";
         context.fillStyle = "#595959";
         context.beginPath();
@@ -926,7 +990,11 @@ var tempis_timeline = (() => {
           context.lineTo(xPosition, majorTicksYPosition + rangeContainerHeight / 2 - 3);
           context.stroke();
         }
-        const majorTickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
+        const majorTickLabel = this._formatDate(
+          date,
+          this._majorTickUnitAndStep.unit,
+          DEFAULT_MAJOR_UNIT_LABEL_FORMATS
+        );
         let labelXPosition = this._isRTL ? xPosition - DEFAULT_UNIT_LABEL_PADDING - context.measureText(majorTickLabel).width : xPosition + DEFAULT_UNIT_LABEL_PADDING;
         if (isStickyLabel) {
           const labelWidth = context.measureText(majorTickLabel).width + DEFAULT_UNIT_LABEL_PADDING;
@@ -942,7 +1010,11 @@ var tempis_timeline = (() => {
         context.textBaseline = "alphabetic";
         context.fillStyle = "#595959";
         context.beginPath();
-        context.fillText(majorTickLabel, labelXPosition, majorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING);
+        context.fillText(
+          majorTickLabel,
+          labelXPosition,
+          majorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING
+        );
         context.stroke();
       }
     }
@@ -968,7 +1040,11 @@ var tempis_timeline = (() => {
             viableStepValues.push(1, 2, 5, 10, 20, 50, 100, 500);
           }
           viableStepValues.forEach((step) => {
-            unitTickCounts.push({ unit, ticks: millisDiff / factor / step, step });
+            unitTickCounts.push({
+              unit,
+              ticks: millisDiff / factor / step,
+              step
+            });
           });
         });
         unitTickCounts.sort((a2, b) => {
@@ -976,45 +1052,84 @@ var tempis_timeline = (() => {
         });
         return { unit: unitTickCounts[0].unit, step: unitTickCounts[0].step };
       };
-      const minorUnitAndStep = getBestUnitAndStep([
-        { unit: "millisecond", factor: 1 },
-        { unit: "second", factor: 1e3 },
-        { unit: "minute", factor: 60 * 1e3 },
-        { unit: "hour", factor: 60 * 60 * 1e3 },
-        { unit: "day", factor: 24 * 60 * 60 * 1e3 },
-        { unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 },
-        { unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 }
-      ], minorTargetTickCount);
+      const minorUnitAndStep = getBestUnitAndStep(
+        [
+          { unit: "millisecond", factor: 1 },
+          { unit: "second", factor: 1e3 },
+          { unit: "minute", factor: 60 * 1e3 },
+          { unit: "hour", factor: 60 * 60 * 1e3 },
+          { unit: "day", factor: 24 * 60 * 60 * 1e3 },
+          { unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 },
+          { unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 }
+        ],
+        minorTargetTickCount
+      );
       const majorUnitsAndFactors = [];
       if (minorUnitAndStep.unit === "millisecond") {
         majorUnitsAndFactors.push({ unit: "second", factor: 1e3 });
         majorUnitsAndFactors.push({ unit: "minute", factor: 60 * 1e3 });
         majorUnitsAndFactors.push({ unit: "hour", factor: 60 * 60 * 1e3 });
         majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({
+          unit: "month",
+          factor: 30 * 24 * 60 * 60 * 1e3
+        });
+        majorUnitsAndFactors.push({
+          unit: "year",
+          factor: 365 * 24 * 60 * 60 * 1e3
+        });
       } else if (minorUnitAndStep.unit === "second") {
         majorUnitsAndFactors.push({ unit: "minute", factor: 60 * 1e3 });
         majorUnitsAndFactors.push({ unit: "hour", factor: 60 * 60 * 1e3 });
         majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({
+          unit: "month",
+          factor: 30 * 24 * 60 * 60 * 1e3
+        });
+        majorUnitsAndFactors.push({
+          unit: "year",
+          factor: 365 * 24 * 60 * 60 * 1e3
+        });
       } else if (minorUnitAndStep.unit === "minute") {
         majorUnitsAndFactors.push({ unit: "hour", factor: 60 * 60 * 1e3 });
         majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({
+          unit: "month",
+          factor: 30 * 24 * 60 * 60 * 1e3
+        });
+        majorUnitsAndFactors.push({
+          unit: "year",
+          factor: 365 * 24 * 60 * 60 * 1e3
+        });
       } else if (minorUnitAndStep.unit === "hour") {
         majorUnitsAndFactors.push({ unit: "day", factor: 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({
+          unit: "month",
+          factor: 30 * 24 * 60 * 60 * 1e3
+        });
+        majorUnitsAndFactors.push({
+          unit: "year",
+          factor: 365 * 24 * 60 * 60 * 1e3
+        });
       } else if (minorUnitAndStep.unit === "day") {
-        majorUnitsAndFactors.push({ unit: "month", factor: 30 * 24 * 60 * 60 * 1e3 });
-        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({
+          unit: "month",
+          factor: 30 * 24 * 60 * 60 * 1e3
+        });
+        majorUnitsAndFactors.push({
+          unit: "year",
+          factor: 365 * 24 * 60 * 60 * 1e3
+        });
       } else if (minorUnitAndStep.unit === "month") {
-        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({
+          unit: "year",
+          factor: 365 * 24 * 60 * 60 * 1e3
+        });
       } else if (minorUnitAndStep.unit === "year") {
-        majorUnitsAndFactors.push({ unit: "year", factor: 365 * 24 * 60 * 60 * 1e3 });
+        majorUnitsAndFactors.push({
+          unit: "year",
+          factor: 365 * 24 * 60 * 60 * 1e3
+        });
       } else {
         throw new Error(`unknown minor unit: ${minorUnitAndStep.unit}`);
       }
@@ -1032,11 +1147,29 @@ var tempis_timeline = (() => {
       } else if (unitAndStep.unit === "hour") {
         currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate());
       } else if (unitAndStep.unit === "minute") {
-        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours());
+        currentDate = new Date(
+          this._fromDt.getFullYear(),
+          this._fromDt.getMonth(),
+          this._fromDt.getDate(),
+          this._fromDt.getHours()
+        );
       } else if (unitAndStep.unit === "second") {
-        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes());
+        currentDate = new Date(
+          this._fromDt.getFullYear(),
+          this._fromDt.getMonth(),
+          this._fromDt.getDate(),
+          this._fromDt.getHours(),
+          this._fromDt.getMinutes()
+        );
       } else if (unitAndStep.unit === "millisecond") {
-        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate(), this._fromDt.getHours(), this._fromDt.getMinutes(), this._fromDt.getSeconds());
+        currentDate = new Date(
+          this._fromDt.getFullYear(),
+          this._fromDt.getMonth(),
+          this._fromDt.getDate(),
+          this._fromDt.getHours(),
+          this._fromDt.getMinutes(),
+          this._fromDt.getSeconds()
+        );
       } else {
         throw new Error(`unknown unit: ${unitAndStep.unit}`);
       }
@@ -1163,7 +1296,9 @@ var tempis_timeline = (() => {
         } else if (typeof customTooltipContent === "string") {
           this._activeElement.innerHTML = customTooltipContent;
         } else {
-          throw new Error("The value returned from the tooltip template function was not a string or HTMLElement");
+          throw new Error(
+            "The value returned from the tooltip template function was not a string or HTMLElement"
+          );
         }
       } else {
         Object.assign(this._activeElement.style, {
@@ -1249,7 +1384,7 @@ var tempis_timeline = (() => {
         }
         this._createTooltip(event);
       });
-      this._canvas.addEventListener("pointerout", (event) => {
+      this._canvas.addEventListener("pointerout", () => {
         var _a;
         (_a = this._activeTooltip) == null ? void 0 : _a.destroy();
         this._activeTooltip = null;
@@ -1258,7 +1393,7 @@ var tempis_timeline = (() => {
     _createTooltip(event) {
       var _a, _b;
       const getMouseOrPointerPosition = (event2) => {
-        var rect = this._canvas.getBoundingClientRect();
+        const rect = this._canvas.getBoundingClientRect();
         return {
           x: (event2.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
           y: (event2.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
@@ -1279,7 +1414,16 @@ var tempis_timeline = (() => {
           (_b = this._activeTooltip) == null ? void 0 : _b.destroy();
           this._activeTooltip = null;
         }
-        this._activeTooltip = new TimelineTooltip(item, this._canvas, this._dateFormatter, this._font, this._isRTL, this._options, event.clientX, event.clientY);
+        this._activeTooltip = new TimelineTooltip(
+          item,
+          this._canvas,
+          this._dateFormatter,
+          this._font,
+          this._isRTL,
+          this._options,
+          event.clientX,
+          event.clientY
+        );
       }
     }
   };
@@ -1324,7 +1468,7 @@ var tempis_timeline = (() => {
     }
     calculateRequiredHeight() {
       var _a, _b;
-      var context = this._canvas.getContext("2d");
+      const context = this._canvas.getContext("2d");
       this._createViewDrawPlan(context);
       return (_b = (_a = this._drawPlan) == null ? void 0 : _a.height) != null ? _b : 0;
     }
@@ -1355,7 +1499,10 @@ var tempis_timeline = (() => {
         context.beginPath();
         if (this._isRTL) {
           context.roundRect(
-            Math.min(categoryDrawPlan.xPositionEnd - this.itemPadding - categoryDrawPlan.markerSize, this._drawPlan.width - categoryDrawPlan.markerSize - DEFAULT_LEGEND_PADDING),
+            Math.min(
+              categoryDrawPlan.xPositionEnd - this.itemPadding - categoryDrawPlan.markerSize,
+              this._drawPlan.width - categoryDrawPlan.markerSize - DEFAULT_LEGEND_PADDING
+            ),
             categoryDrawPlan.yPositionStart + this.itemPadding + yPosition,
             categoryDrawPlan.markerSize,
             categoryDrawPlan.markerSize,
@@ -1463,7 +1610,7 @@ var tempis_timeline = (() => {
     }
     _createCanvasEventHandlers() {
       const getMouseOrPointerPosition = (event) => {
-        var rect = this._canvas.getBoundingClientRect();
+        const rect = this._canvas.getBoundingClientRect();
         return {
           x: (event.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
           y: (event.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
@@ -1515,13 +1662,13 @@ var tempis_timeline = (() => {
         }
         this._dataSet.unfocusCategories();
       });
-      this._canvas.addEventListener("pointerup", (event) => {
+      this._canvas.addEventListener("pointerup", () => {
         isPointerDown = false;
       });
-      this._canvas.addEventListener("pointerout", (event) => {
+      this._canvas.addEventListener("pointerout", () => {
         this._dataSet.unfocusCategories();
       });
-      this._canvas.addEventListener("wheel", (event) => {
+      this._canvas.addEventListener("wheel", () => {
         this._dataSet.unfocusCategories();
       });
     }
@@ -1963,9 +2110,22 @@ var tempis_timeline = (() => {
       this._dateFormatter = new DateFormatter();
       this._dataSet = new TimelineDataSet(this._options);
       this._dataView = new TimelineDataView(this._dataSet, this._isRTL);
-      this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._isRTL, this._options.range);
+      this._rangeView = new TimelineRangeView(
+        this._canvas,
+        this._dataSet,
+        this._dateFormatter,
+        this._isRTL,
+        this._options.range
+      );
       this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._isRTL, this._options.legend);
-      this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._isRTL, this._options.tooltip);
+      this._tooltipView = new TimelineTooltipView(
+        this._canvas,
+        this._dataView,
+        this._dateFormatter,
+        this._font,
+        this._isRTL,
+        this._options.tooltip
+      );
       this._resizeCanvas();
       if (this._isResponsive) {
         this._createCanvasContainerResizeObserver();
@@ -2057,7 +2217,7 @@ var tempis_timeline = (() => {
       let startX = 0;
       let startY = 0;
       const getMouseOrPointerPosition = (event) => {
-        var rect = this._canvas.getBoundingClientRect();
+        const rect = this._canvas.getBoundingClientRect();
         return {
           x: (event.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
           y: (event.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
@@ -2106,12 +2266,16 @@ var tempis_timeline = (() => {
         this._rangeView.zoomRange(event.deltaY, getMouseOrPointerPosition(event).x);
         this._draw();
       });
-      this._canvas.addEventListener("dblclick", (evt) => {
-        const clickedItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(evt));
-        if (clickedItem) {
-          this._onItemDoubleClicked(clickedItem);
-        }
-      }, false);
+      this._canvas.addEventListener(
+        "dblclick",
+        (evt) => {
+          const clickedItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(evt));
+          if (clickedItem) {
+            this._onItemDoubleClicked(clickedItem);
+          }
+        },
+        false
+      );
     }
     _resizeCanvas() {
       if (!this._isResponsive) {
@@ -2137,11 +2301,13 @@ var tempis_timeline = (() => {
       this._canvas.height = this._canvas.offsetHeight * dpr;
       canvasContext.scale(dpr, dpr);
       if (originalCanvasWidth !== this._canvas.offsetWidth || originalCanvasHeight !== this._canvas.offsetHeight) {
-        console.warn("tempis-timeline: Canvas layout changed after setting inner width/height. Define canvas CSS width/height to prevent layout issues.");
+        console.warn(
+          "tempis-timeline: Canvas layout changed after setting inner width/height. Define canvas CSS width/height to prevent layout issues."
+        );
       }
     }
     _draw() {
-      var context = this._canvas.getContext("2d");
+      const context = this._canvas.getContext("2d");
       context.clearRect(0, 0, this._canvas.clientWidth, this._canvas.clientHeight);
       context.direction = "ltr";
       context.font = this._font.font;
@@ -2174,7 +2340,13 @@ var tempis_timeline = (() => {
       context.beginPath();
       context.rect(0, renderOffsetY, this._canvas.clientWidth, dataViewMaxHeight);
       context.clip();
-      renderOffsetY += this._dataView.draw(context, this._rangeView, renderOffsetY, dataViewMaxHeight, !!this._options.fillVertically);
+      renderOffsetY += this._dataView.draw(
+        context,
+        this._rangeView,
+        renderOffsetY,
+        dataViewMaxHeight,
+        !!this._options.fillVertically
+      );
       context.restore();
       if (["bottom", "both"].includes(this._rangeView.position)) {
         this._rangeView.draw(context, renderOffsetY, "bottom");
@@ -2201,12 +2373,16 @@ var tempis_timeline = (() => {
       }
     }
     _onItemClicked(item) {
+      var _a, _b;
       const isItemInitiallySelected = item.isSelected;
       if (this._selectionMode === "single") {
         const selectedItems = this._dataSet.getSelectedItems();
         const itemsToDeselect = selectedItems.filter((selectedItem) => selectedItem.id !== item.id);
         if (this._options.onSelectionChange) {
-          const selectionChangeEvents = itemsToDeselect.map((item2) => ({ id: item2.id, selected: false }));
+          const selectionChangeEvents = itemsToDeselect.map((item2) => ({
+            id: item2.id,
+            selected: false
+          }));
           if (!isItemInitiallySelected) {
             selectionChangeEvents.push({ id: item.id, selected: true });
           }
@@ -2228,10 +2404,11 @@ var tempis_timeline = (() => {
           this._draw();
         }
       }
-      this._options.onItemClick && this._options.onItemClick(item.id);
+      (_b = (_a = this._options).onItemClick) == null ? void 0 : _b.call(_a, item.id);
     }
     _onItemDoubleClicked(item) {
-      this._options.onItemDoubleClick && this._options.onItemDoubleClick(item.id);
+      var _a, _b;
+      (_b = (_a = this._options).onItemDoubleClick) == null ? void 0 : _b.call(_a, item.id);
     }
   };
   return __toCommonJS(src_exports);
