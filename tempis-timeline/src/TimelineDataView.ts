@@ -86,7 +86,7 @@ export class TimelineDataView {
 
     /** The current data view draw plan. */
     private _drawPlan: DataViewDrawPlan | null = null;
-    
+
     /**
      * Creates a new instance of the TimelineDataView class.
      * @param dataSet The timeline dataset model.
@@ -98,7 +98,7 @@ export class TimelineDataView {
     }
 
     /**
-     * Scroll the y offset of the view by the specified amount. 
+     * Scroll the y offset of the view by the specified amount.
      * @param movementY The y offset amount.
      */
     public scrollByYMovement(movementY: number): void {
@@ -114,7 +114,13 @@ export class TimelineDataView {
      * @param maxHeight The max height that we can draw the data view before it must start scrolling.
      * @param fillVertically Whether the timeline data view should fill the vertical space available to it.
      */
-    public draw(context: CanvasRenderingContext2D, range: TimelineRangeView, yPosition: number, maxHeight: number, fillVertically: boolean): number {
+    public draw(
+        context: CanvasRenderingContext2D,
+        range: TimelineRangeView,
+        yPosition: number,
+        maxHeight: number,
+        fillVertically: boolean
+    ): number {
         // We should create our plan for drawing the groups and items of the view. This will also give us exactly how much space would be required to do so.
         this._drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
 
@@ -132,7 +138,7 @@ export class TimelineDataView {
         this._drawMinorUnitBars(context, range.minorTicks, yPosition, this._lastDrawHeight);
 
         // Draw our groups and items!
-        this._drawGroups(context, yPosition, maxHeight);
+        this._drawGroups(context, yPosition);
 
         // Set the y position from where this view was last drawn.
         // This will be used to help align absolute canvas pointer positions with data view elements.
@@ -147,22 +153,26 @@ export class TimelineDataView {
      * @param point The point at which to get the item.
      * @returns The item at the specified point, or null if there is no item at that point.
      */
-    public getItemAtPoint(point: { x: number; y: number; }): TimelineItem | null {
+    public getItemAtPoint(point: { x: number; y: number }): TimelineItem | null {
         // There is nothing to do if we have no draw plan.
         if (!this._drawPlan) {
             return null;
         }
 
         // Do not get items for points that overflow the vertical constraints of the data view.
-        if (point.y < this._lastDrawYPosition || point.y > (this._lastDrawYPosition + this._lastDrawHeight)) {
+        if (point.y < this._lastDrawYPosition || point.y > this._lastDrawYPosition + this._lastDrawHeight) {
             return null;
         }
 
         // Iterate over each group and each item in the group to see if the point is within the bounds of the item.
         for (const groupDrawPlan of this._drawPlan.groupDrawPlans) {
             for (const itemDrawPlan of groupDrawPlan.rows.flat()) {
-                if (point.x >= itemDrawPlan.xPositionStart && point.x <= itemDrawPlan.xPositionEnd 
-                    && point.y >= (itemDrawPlan.yPositionStart + this._scrollYOffset + this._lastDrawYPosition) && point.y <= (itemDrawPlan.yPositionEnd + this._scrollYOffset + this._lastDrawYPosition)) {
+                if (
+                    point.x >= itemDrawPlan.xPositionStart &&
+                    point.x <= itemDrawPlan.xPositionEnd &&
+                    point.y >= itemDrawPlan.yPositionStart + this._scrollYOffset + this._lastDrawYPosition &&
+                    point.y <= itemDrawPlan.yPositionEnd + this._scrollYOffset + this._lastDrawYPosition
+                ) {
                     return itemDrawPlan.item;
                 }
             }
@@ -175,10 +185,15 @@ export class TimelineDataView {
     /**
      * Draw a vertical bar for every minor unit tick.
      * @param context
-     * @param rangeMinorTicks 
-     * @param height 
+     * @param rangeMinorTicks
+     * @param height
      */
-    private _drawMinorUnitBars(context: CanvasRenderingContext2D, rangeMinorTicks: RangeTick[], yPosition: number, height: number): void {
+    private _drawMinorUnitBars(
+        context: CanvasRenderingContext2D,
+        rangeMinorTicks: RangeTick[],
+        yPosition: number,
+        height: number
+    ): void {
         context.lineWidth = 1;
         context.strokeStyle = "#c2c2c2";
         context.setLineDash([3, 3]); /* dashes are 5px and spaces are 3px */
@@ -201,9 +216,8 @@ export class TimelineDataView {
      * Draw the groups and items based on the view draw plan.
      * @param context The canvas context.
      * @param yPosition The y position of the top of the view.
-     * @param maxHeight The max height that this view can take on the canvas.
      */
-    private _drawGroups(context: CanvasRenderingContext2D, yPosition: number, maxHeight: number): void {
+    private _drawGroups(context: CanvasRenderingContext2D, yPosition: number): void {
         // There is nothing to do if we have no draw plan.
         if (!this._drawPlan) {
             return;
@@ -215,7 +229,11 @@ export class TimelineDataView {
         context.textAlign = this._isRTL ? "right" : "left";
 
         // Draw each group.
-        for (let groupDrawPlanIndex = 0; groupDrawPlanIndex < this._drawPlan.groupDrawPlans.length; groupDrawPlanIndex++) {
+        for (
+            let groupDrawPlanIndex = 0;
+            groupDrawPlanIndex < this._drawPlan.groupDrawPlans.length;
+            groupDrawPlanIndex++
+        ) {
             const groupDrawPlan = this._drawPlan.groupDrawPlans[groupDrawPlanIndex];
 
             // If this is not our first group then we should draw a group separator line.
@@ -235,9 +253,17 @@ export class TimelineDataView {
                 context.beginPath();
                 // If rendering right-to-left then the group labels will be rendered to the right of the canvas, otherwise left.
                 if (this._isRTL) {
-                    context.fillText(groupDrawPlan.label, context.canvas.clientWidth - DEFAULT_GROUP_LABEL_MARGIN, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN);
+                    context.fillText(
+                        groupDrawPlan.label,
+                        context.canvas.clientWidth - DEFAULT_GROUP_LABEL_MARGIN,
+                        scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN
+                    );
                 } else {
-                    context.fillText(groupDrawPlan.label, DEFAULT_GROUP_LABEL_MARGIN, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN);
+                    context.fillText(
+                        groupDrawPlan.label,
+                        DEFAULT_GROUP_LABEL_MARGIN,
+                        scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN
+                    );
                 }
                 context.stroke();
             }
@@ -262,7 +288,11 @@ export class TimelineDataView {
      * @param context The canvas context.
      * @param scrolledYPosition The y position of the top of the view, taking into account the current scroll offset.
      */
-    private _drawGroupItem(itemDrawPlan: DataViewItemDrawPlan, context: CanvasRenderingContext2D, scrolledYPosition: number) {
+    private _drawGroupItem(
+        itemDrawPlan: DataViewItemDrawPlan,
+        context: CanvasRenderingContext2D,
+        scrolledYPosition: number
+    ) {
         // Get the item and the item category (if it is associated with a category).
         const item = itemDrawPlan.item;
         const itemCategory = item.category ? this._dataSet.getCategory(item.category) : null;
@@ -276,11 +306,11 @@ export class TimelineDataView {
         let itemBorderColor = item.style.borderColor;
 
         // If the item is too small to be rendered then we should just skip it to improve performance.
-        if ((itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart) < 1) {
+        if (itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart < 1) {
             return;
         }
 
-        // If a category is being focused, but this item doesn't belong to that category, then render it with the unfocused item background and font colour. 
+        // If a category is being focused, but this item doesn't belong to that category, then render it with the unfocused item background and font colour.
         // TODO This should eventually just use a lighter version of item.style.backgroundColor! based on the result of some function.
         if (this._dataSet.focusedCategory && !this._dataSet.focusedCategory.isDisabled && !itemCategory?.isFocused) {
             itemBackgroundColor = UNFOCUSED_ITEM_BACKGROUND_COLOUR;
@@ -298,7 +328,13 @@ export class TimelineDataView {
 
             context.fillStyle = "rgba(0, 0, 0, 1)";
             context.beginPath();
-            context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, itemBorderRadius);
+            context.roundRect(
+                itemDrawPlan.xPositionStart,
+                scrolledYPosition + itemDrawPlan.yPositionStart,
+                itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart,
+                itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart,
+                itemBorderRadius
+            );
             context.fill();
 
             context.shadowColor = "transparent";
@@ -312,20 +348,38 @@ export class TimelineDataView {
 
             // The color we use to draw the downward marker line and the little downward triangle should be:
             // - The item background color if no border is being drawn.
-            // - The item border color if an item border is being drawn. 
+            // - The item border color if an item border is being drawn.
             context.fillStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
             context.strokeStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
 
             // We need to draw a little downward triangle to join the item and the marker line.
             const itemMarkerConnectorPath = new Path2D();
-            itemMarkerConnectorPath.moveTo(Math.max(itemDrawPlan.xPositionStart, itemDrawPlan.xPointInTimePosition - 20), scrolledYPosition + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
-            itemMarkerConnectorPath.lineTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionEnd + 6);
-            itemMarkerConnectorPath.lineTo(Math.min(itemDrawPlan.xPositionEnd, itemDrawPlan.xPointInTimePosition + 20), scrolledYPosition + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
+            itemMarkerConnectorPath.moveTo(
+                Math.max(itemDrawPlan.xPositionStart, itemDrawPlan.xPointInTimePosition - 20),
+                scrolledYPosition +
+                    itemDrawPlan.yPositionStart +
+                    (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2
+            );
+            itemMarkerConnectorPath.lineTo(
+                itemDrawPlan.xPointInTimePosition,
+                scrolledYPosition + itemDrawPlan.yPositionEnd + 6
+            );
+            itemMarkerConnectorPath.lineTo(
+                Math.min(itemDrawPlan.xPositionEnd, itemDrawPlan.xPointInTimePosition + 20),
+                scrolledYPosition +
+                    itemDrawPlan.yPositionStart +
+                    (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2
+            );
             context.fill(itemMarkerConnectorPath);
 
             // Draw the actual marker line.
             context.beginPath();
-            context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2));
+            context.moveTo(
+                itemDrawPlan.xPointInTimePosition,
+                scrolledYPosition +
+                    itemDrawPlan.yPositionStart +
+                    (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2
+            );
             // TODO Work out the height of the view and use that to draw the line to the bottom of the view instead of using a dumb value of 10000.
             context.lineTo(itemDrawPlan.xPointInTimePosition, 10000);
             context.stroke();
@@ -334,7 +388,13 @@ export class TimelineDataView {
         // Draw the item range rectangle.
         context.fillStyle = itemBackgroundColor;
         context.beginPath();
-        context.roundRect(itemDrawPlan.xPositionStart, scrolledYPosition + itemDrawPlan.yPositionStart, itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart, itemBorderRadius);
+        context.roundRect(
+            itemDrawPlan.xPositionStart,
+            scrolledYPosition + itemDrawPlan.yPositionStart,
+            itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart,
+            itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart,
+            itemBorderRadius
+        );
         context.fill();
 
         // Draw the item border if a border thickness and border color are configured.
@@ -342,7 +402,13 @@ export class TimelineDataView {
             context.strokeStyle = itemBorderColor;
             context.lineWidth = itemBorderThickness;
             context.beginPath();
-            context.roundRect(itemDrawPlan.xPositionStart + (context.lineWidth / 2), scrolledYPosition + itemDrawPlan.yPositionStart + (context.lineWidth / 2), itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - context.lineWidth, itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - +context.lineWidth, itemBorderRadius);
+            context.roundRect(
+                itemDrawPlan.xPositionStart + context.lineWidth / 2,
+                scrolledYPosition + itemDrawPlan.yPositionStart + context.lineWidth / 2,
+                itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - context.lineWidth,
+                itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - +context.lineWidth,
+                itemBorderRadius
+            );
             context.stroke();
         }
 
@@ -350,26 +416,31 @@ export class TimelineDataView {
         if (item.label) {
             // Calculate the actual x position of the label, we should attempt to keep this in the bounds of the view.
             // If rendering right-to-left then we will be rendering the label to the right of the item, otherwise the left.
-            const labelStartPositionX = this._isRTL ? 
-                Math.floor(Math.min(context.canvas.clientWidth - itemPadding, itemDrawPlan.xPositionEnd - itemPadding)) :
-                Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
+            const labelStartPositionX = this._isRTL
+                ? Math.floor(
+                      Math.min(context.canvas.clientWidth - itemPadding, itemDrawPlan.xPositionEnd - itemPadding)
+                  )
+                : Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
 
             // Calculate the max item label width.
-            const maxLabelWidth = this._isRTL ? 
-                Math.max(0, Math.ceil(labelStartPositionX - (itemDrawPlan.xPositionStart + itemPadding)) + 1) :
-                Math.max(0, Math.ceil((itemDrawPlan.xPositionEnd - itemPadding) - labelStartPositionX));
+            const maxLabelWidth = this._isRTL
+                ? Math.max(0, Math.ceil(labelStartPositionX - (itemDrawPlan.xPositionStart + itemPadding)) + 1)
+                : Math.max(0, Math.ceil(itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX));
 
             // Render the text label, but only if we have enough space to do so.
             if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
                 context.textBaseline = "middle";
                 context.fillStyle = itemFontColor;
-      
+
                 // Draw the item label, but clip it if there is not enough available horizontal space to do so.
                 drawClippedText(
-                    context, 
-                    item.label, 
+                    context,
+                    item.label,
                     labelStartPositionX,
-                    (itemDrawPlan.yPositionStart + ((itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2) + 1) + scrolledYPosition,
+                    itemDrawPlan.yPositionStart +
+                        (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 +
+                        1 +
+                        scrolledYPosition,
                     maxLabelWidth
                 );
             }
@@ -383,7 +454,11 @@ export class TimelineDataView {
      * @param rangeToDt The range to date.
      * @returns A draw plan for the view.
      */
-    private _createViewDrawPlan(context: CanvasRenderingContext2D, rangeFromDt: Date, rangeToDt: Date): DataViewDrawPlan {
+    private _createViewDrawPlan(
+        context: CanvasRenderingContext2D,
+        rangeFromDt: Date,
+        rangeToDt: Date
+    ): DataViewDrawPlan {
         // Create an array to store all of our group draw plans.
         const groupDrawPlans: DataViewGroupDrawPlan[] = [];
 
@@ -418,7 +493,7 @@ export class TimelineDataView {
 
                 // Figure out the xPositionStart and xPositionEnd of the current item. Whether the item is a range or PIT will influence this.
                 if (item.end) {
-                    // This is a range item, the start and end positions of our x axis will always be derived from the start and end date. 
+                    // This is a range item, the start and end positions of our x axis will always be derived from the start and end date.
                     // If rendering right-to-left then we need to flip the start/end positions.
                     if (this._isRTL) {
                         startPositionX = milliRenderWidth * (rangeToDt.getTime() - item.end.getTime());
@@ -431,18 +506,18 @@ export class TimelineDataView {
                     // This is a PIT item, the start and end positions of our x axis will be derived from the width of the label and the start date.
                     // TODO Determine what to do when we have PIT item with no label.
                     // TODO Set the context font to be whatever we will be using to render the actual item label.
-                    const itemLabelWidth = context.measureText(item.label ?? "?").width + (item.style.padding! * 2);
+                    const itemLabelWidth = context.measureText(item.label ?? "?").width + item.style.padding! * 2;
 
                     // The point in time position should always be the start date regardless of the position or width of the PIT item box.
                     // If rendering right-to-left then we will need to calculate this from the right of the canvas rather than the left.
-                    pointInTimePositionX = this._isRTL ?
-                        milliRenderWidth * (rangeToDt.getTime() - item.start.getTime()) :
-                        milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
+                    pointInTimePositionX = this._isRTL
+                        ? milliRenderWidth * (rangeToDt.getTime() - item.start.getTime())
+                        : milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
 
                     // Let's set the start and end x position to be equidistant from the actual point in time that this item is for.
                     // The point in time position should always be the start date regardless of the position or width of the PIT item box.
-                    startPositionX = pointInTimePositionX - (itemLabelWidth / 2);
-                    endPositionX = pointInTimePositionX + (itemLabelWidth / 2);
+                    startPositionX = pointInTimePositionX - itemLabelWidth / 2;
+                    endPositionX = pointInTimePositionX + itemLabelWidth / 2;
 
                     // We may have to shift this item so that it is actually in the bounds of the range view.
                     if (startPositionX < 0) {
@@ -476,9 +551,11 @@ export class TimelineDataView {
                 // Look for an existing row to place this item in. It may not fit in any due to overlaps.
                 for (const rowStack of itemDrawPlanStacks) {
                     // Check whether the current item can fit at the end of the current row.
-                    const canItemFitInCurrentRow = this._isRTL ?
-                        rowStack.length > 0 && rowStack[rowStack.length - 1].xPositionStart >= itemDrawPlan.xPositionEnd :
-                        rowStack.length > 0 && rowStack[rowStack.length - 1].xPositionEnd <= itemDrawPlan.xPositionStart;
+                    const canItemFitInCurrentRow = this._isRTL
+                        ? rowStack.length > 0 &&
+                          rowStack[rowStack.length - 1].xPositionStart >= itemDrawPlan.xPositionEnd
+                        : rowStack.length > 0 &&
+                          rowStack[rowStack.length - 1].xPositionEnd <= itemDrawPlan.xPositionStart;
 
                     if (rowStack.length === 0 || canItemFitInCurrentRow) {
                         // The current item will fit nicely into the current row.
@@ -517,10 +594,10 @@ export class TimelineDataView {
                 const groupLabelMetrics = context.measureText(groupDrawPlan.label);
 
                 // Add the vertical space required to draw the label.
-                positionY += (groupLabelMetrics.actualBoundingBoxAscent + groupLabelMetrics.actualBoundingBoxDescent);
+                positionY += groupLabelMetrics.actualBoundingBoxAscent + groupLabelMetrics.actualBoundingBoxDescent;
 
                 // Add a smidge of vertical padding for below and above the label.
-                positionY += (2 * DEFAULT_GROUP_LABEL_MARGIN);
+                positionY += 2 * DEFAULT_GROUP_LABEL_MARGIN;
             }
 
             // We want to stick a little bit of a margin at the top of the group, but below the label
@@ -535,7 +612,8 @@ export class TimelineDataView {
                 for (const itemDrawPlan of itemRow) {
                     // We should calculate the height of the item, this will be based on the height of an example label and any item padding.
                     const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Label");
-                    const itemHeight = (actualBoundingBoxAscent + actualBoundingBoxDescent) + (itemDrawPlan.item.style.padding! * 2);
+                    const itemHeight =
+                        actualBoundingBoxAscent + actualBoundingBoxDescent + itemDrawPlan.item.style.padding! * 2;
 
                     itemDrawPlan.yPositionStart = positionY;
                     itemDrawPlan.yPositionEnd = positionY + itemHeight;

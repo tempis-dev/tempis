@@ -1,4 +1,3 @@
-
 /**
  * The default global color palette.
  */

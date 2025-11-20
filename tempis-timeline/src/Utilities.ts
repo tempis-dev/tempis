@@ -3,8 +3,8 @@
  * @param value The value to check.
  * @returns Whether the given value is null or undefined.
  */
-export function isNullOrUndefined(value: any): boolean {
-    return value === null || value === undefined;  
+export function isNullOrUndefined(value: unknown): value is null | undefined {
+    return value === null || value === undefined;
 }
 
 /**
@@ -13,7 +13,7 @@ export function isNullOrUndefined(value: any): boolean {
  * @returns Whether a value is a valid JavaScript Date object.
  */
 export function isValidDate(value: unknown): value is Date {
-  return value instanceof Date && !isNaN(value.getTime());
+    return value instanceof Date && !isNaN(value.getTime());
 }
 
 /**
@@ -92,7 +92,13 @@ export function doDateRangesOverlap(aStart: Date, aEnd: Date, bStart: Date, bEnd
  * @param {number} y The y-coordinate where the text baseline is drawn.
  * @param {number} maxWidth The maximum allowed width for the text (including the ellipsis).
  */
-export function drawClippedText(context: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number) {
+export function drawClippedText(
+    context: CanvasRenderingContext2D,
+    text: string,
+    x: number,
+    y: number,
+    maxWidth: number
+) {
     // There is nothing to do if we have no text to draw.
     if (!text) {
         return;
@@ -121,7 +127,12 @@ export function drawClippedText(context: CanvasRenderingContext2D, text: string,
     if (textAlign === "right") {
         context.save();
         context.beginPath();
-        context.rect(x - (maxWidth - ellipsisWidth), y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
+        context.rect(
+            x - (maxWidth - ellipsisWidth),
+            y - parseInt(context.font),
+            maxWidth - ellipsisWidth,
+            parseInt(context.font) * 2
+        );
         context.clip();
         context.fillText(text, x, y);
         context.restore();
@@ -147,20 +158,20 @@ export function drawClippedText(context: CanvasRenderingContext2D, text: string,
 }
 
 /**
- * Merges multiple source objects into the first one, assigning default values 
+ * Merges multiple source objects into the first one, assigning default values
  * for properties that are `null` or `undefined` in the target.
  *
- * The function iterates over each source (from left to right) and copies any 
- * property that does not already exist (i.e., is `null` or `undefined`) on 
- * the target. The target is the first object in the argument list and is 
+ * The function iterates over each source (from left to right) and copies any
+ * property that does not already exist (i.e., is `null` or `undefined`) on
+ * the target. The target is the first object in the argument list and is
  * mutated in place.
  *
  * @template T - The object type of all source objects.
- * @param {...Partial<T>[]} sources - One or more partial objects to merge. 
+ * @param {...Partial<T>[]} sources - One or more partial objects to merge.
  *   - The first object acts as the target to receive defaults.
  *   - Subsequent objects provide default values.
  *
- * @returns {Partial<T> | undefined} 
+ * @returns {Partial<T> | undefined}
  * Returns the target object with defaults applied, or `undefined` if no sources are provided.
  *
  * @example
@@ -170,7 +181,7 @@ export function drawClippedText(context: CanvasRenderingContext2D, text: string,
  *
  * // Only fills missing fields in 'a' (since 'name' is already set)
  * const result = defaults(a, b, c);
- * console.log(result); 
+ * console.log(result);
  * // → { name: "Alice", age: 25, country: "USA" }
  *
  * @note
@@ -178,21 +189,21 @@ export function drawClippedText(context: CanvasRenderingContext2D, text: string,
  * - Only `null` or `undefined` properties are replaced; falsy values like `0` or `""` are preserved.
  */
 export function defaults<T extends object>(...sources: Partial<T>[]): Partial<T> | undefined {
-  if (sources.length === 0) return undefined;
+    if (sources.length === 0) return undefined;
 
-  const target = sources[0] as Partial<T>;
+    const target = sources[0] as Partial<T>;
 
-  for (let i = 1; i < sources.length; i++) {
-    const source = sources[i];
-    if (!source) continue;
+    for (let i = 1; i < sources.length; i++) {
+        const source = sources[i];
+        if (!source) continue;
 
-    Object.keys(source).forEach(key => {
-      const typedKey = key as keyof T;
-      if (target[typedKey] == null) {
-        target[typedKey] = source[typedKey]!;
-      }
-    });
-  }
+        Object.keys(source).forEach((key) => {
+            const typedKey = key as keyof T;
+            if (target[typedKey] == null) {
+                target[typedKey] = source[typedKey]!;
+            }
+        });
+    }
 
-  return target;
+    return target;
 }

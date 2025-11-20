@@ -55,9 +55,22 @@ export class TempisTimeline {
 
         this._dataSet = new TimelineDataSet(this._options);
         this._dataView = new TimelineDataView(this._dataSet, this._isRTL);
-        this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._isRTL, this._options.range);
+        this._rangeView = new TimelineRangeView(
+            this._canvas,
+            this._dataSet,
+            this._dateFormatter,
+            this._isRTL,
+            this._options.range
+        );
         this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._isRTL, this._options.legend);
-        this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._isRTL, this._options.tooltip);
+        this._tooltipView = new TimelineTooltipView(
+            this._canvas,
+            this._dataView,
+            this._dateFormatter,
+            this._font,
+            this._isRTL,
+            this._options.tooltip
+        );
 
         // Do our initial canvas resize.
         this._resizeCanvas();
@@ -65,7 +78,7 @@ export class TempisTimeline {
         // Is our timeline going to be responsive?
         if (this._isResponsive) {
             // We should set up a resize observer to keep our canvas dimensions inline with that of its parent element if the timeline is responsive.
-           this._createCanvasContainerResizeObserver();
+            this._createCanvasContainerResizeObserver();
         } else {
             // We still need to apply our DPR scaling to our canvas if we aren't rendering responsively.
             this._applyCanvasDPRScaling();
@@ -112,7 +125,7 @@ export class TempisTimeline {
         // Update the timeline options with the new items.
         this._options.items = items;
 
-        // Update the dataset with options object containing the updated items. 
+        // Update the dataset with options object containing the updated items.
         this._dataSet.update(this._options);
 
         // Redraw the timeline to reflect the updated items.
@@ -123,10 +136,10 @@ export class TempisTimeline {
      * Focuses the timeline on a specific item, date, or range.
      * @param options The options to focus the timeline on, if not defined, the timeline will focus on the full range of items.
      */
-    public focus(options?: { 
-        id?: number | string, 
-        date?: string | number | Date, 
-        range?: [string | number | Date, string | number | Date]
+    public focus(options?: {
+        id?: number | string;
+        date?: string | number | Date;
+        range?: [string | number | Date, string | number | Date];
     }): void {
         if (!options) {
             // No options were defined, so we will just set the range to the min and max dates of the dataset if they are defined.
@@ -173,7 +186,7 @@ export class TempisTimeline {
      * Redraw the timeline.
      */
     public redraw(): void {
-        // Our canvas size or window scaling may have changed, so we should reapply the canvas DPR scaling. 
+        // Our canvas size or window scaling may have changed, so we should reapply the canvas DPR scaling.
         this._applyCanvasDPRScaling();
 
         // Our canvas size or window scaling may have changed, we will need to recalculate the ticks for our range.
@@ -204,7 +217,7 @@ export class TempisTimeline {
             return targetElement;
         }
 
-        throw new Error("whatcha doing this isn't a valid value!") 
+        throw new Error("whatcha doing this isn't a valid value!");
     }
 
     /**
@@ -250,16 +263,16 @@ export class TempisTimeline {
 
         // A function that gets the position on the canvas for the mouse event or pointer event.
         const getMouseOrPointerPosition = (event: PointerEvent | MouseEvent) => {
-            var rect = this._canvas.getBoundingClientRect();
+            const rect = this._canvas.getBoundingClientRect();
             return {
-                x: (event.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
-                y: (event.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
+                x: ((event.clientX - rect.left) / (rect.right - rect.left)) * this._canvas.clientWidth,
+                y: ((event.clientY - rect.top) / (rect.bottom - rect.top)) * this._canvas.clientHeight
             };
-        }
+        };
 
         // Handle the pointer down event to start dragging.
         // We will use pointer events to handle both mouse and touch events.
-        this._canvas.addEventListener('pointerdown', (event) => {
+        this._canvas.addEventListener("pointerdown", (event) => {
             isPointerDown = true;
 
             // Get the mouse position on the canvas so that we can calculate the movement later.
@@ -272,7 +285,7 @@ export class TempisTimeline {
 
         // Handle pointer move events to drag the timeline.
         // We will use pointer events to handle both mouse and touch events.
-        this._canvas.addEventListener('pointermove', (event) => {
+        this._canvas.addEventListener("pointermove", (event) => {
             // There is nothing to do if the pointer is not currently down.
             if (!isPointerDown) {
                 return;
@@ -294,10 +307,10 @@ export class TempisTimeline {
 
         // Handle pointer up events to stop dragging.
         // We will use pointer events to handle both mouse and touch events.
-        this._canvas.addEventListener('pointerup', (event) => {
+        this._canvas.addEventListener("pointerup", (event) => {
             // There is nothing to do if the pointer is not currently down.
             if (!isPointerDown) {
-                return
+                return;
             }
 
             isPointerDown = false;
@@ -330,12 +343,12 @@ export class TempisTimeline {
 
         // Handle pointer cancel events to stop dragging.
         // This is used to handle cases where the pointer is cancelled (e.g. touch events)
-        this._canvas.addEventListener('pointercancel', () => {
+        this._canvas.addEventListener("pointercancel", () => {
             isPointerDown = false;
         });
 
         // Handle mouse wheel events for zooming the range view.
-        this._canvas.addEventListener('wheel', (event) => {
+        this._canvas.addEventListener("wheel", (event) => {
             // Prevent default scrolling behavior, we want the timeline to handle it instead.
             event.preventDefault();
 
@@ -347,22 +360,26 @@ export class TempisTimeline {
         });
 
         // Handle any double mouse click events for data view items.
-        this._canvas.addEventListener('dblclick', (evt) => {
-            // Try to get the item at the double-clicked position.
-            const clickedItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(evt));
+        this._canvas.addEventListener(
+            "dblclick",
+            (evt) => {
+                // Try to get the item at the double-clicked position.
+                const clickedItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(evt));
 
-            // If we have a clicked item, we will invoke the double-click handler.
-            if (clickedItem) {
-                this._onItemDoubleClicked(clickedItem);
-            }
-        }, false);
+                // If we have a clicked item, we will invoke the double-click handler.
+                if (clickedItem) {
+                    this._onItemDoubleClicked(clickedItem);
+                }
+            },
+            false
+        );
     }
 
     /**
      * Resize the canvas to match the size of its parent element if the timeline is configured to be responsive.
      */
     private _resizeCanvas(): void {
-        // We should not resize the canvas if the timeline has not been configured to be responsive. 
+        // We should not resize the canvas if the timeline has not been configured to be responsive.
         if (!this._isResponsive) {
             return;
         }
@@ -405,7 +422,7 @@ export class TempisTimeline {
         const originalCanvasHeight = this._canvas.offsetHeight;
 
         // Get the device pixel ratio from the window, or default to 1.
-        const dpr = window.devicePixelRatio || 1; 
+        const dpr = window.devicePixelRatio || 1;
 
         // Set the "physical" size of the canvas, this is the number of pixels that the canvas has.
         this._canvas.width = this._canvas.offsetWidth * dpr;
@@ -417,7 +434,9 @@ export class TempisTimeline {
         // If the CSS size of the canvas changed as a result of us setting the internal width/height then we should let
         // the user know that they need to define a width and height for their canvas in order to avoid layout issues.
         if (originalCanvasWidth !== this._canvas.offsetWidth || originalCanvasHeight !== this._canvas.offsetHeight) {
-            console.warn("tempis-timeline: Canvas layout changed after setting inner width/height. Define canvas CSS width/height to prevent layout issues.");
+            console.warn(
+                "tempis-timeline: Canvas layout changed after setting inner width/height. Define canvas CSS width/height to prevent layout issues."
+            );
         }
     }
 
@@ -426,7 +445,7 @@ export class TempisTimeline {
      */
     private _draw(): void {
         // Grab the canvas context.
-        var context = this._canvas.getContext('2d')!;
+        const context = this._canvas.getContext("2d")!;
 
         // Clear the canvas before doing a fresh draw.
         context.clearRect(0, 0, this._canvas.clientWidth, this._canvas.clientHeight);
@@ -446,7 +465,7 @@ export class TempisTimeline {
         const legendViewHeight = this._legendView.calculateRequiredHeight();
 
         // Set the default y position of the data view which would render the data view form the top of the canvas.
-        // This will be corrected for if a range and/or legend will be rendered above the data view. 
+        // This will be corrected for if a range and/or legend will be rendered above the data view.
         let dataViewYPosition = 0;
 
         // If we are drawing a legend view above the data view then offset the data view y position by the calculated height of the legend view.
@@ -481,7 +500,7 @@ export class TempisTimeline {
          * 5. Legend view (if configured 'bottom')
          */
 
-        // We are going to render our stacked legend/range/data views so we need to keep track of the overall y render offset position. 
+        // We are going to render our stacked legend/range/data views so we need to keep track of the overall y render offset position.
         let renderOffsetY = 0;
 
         // The first thing to render would be a top legend bar (if configured to do so).
@@ -505,7 +524,13 @@ export class TempisTimeline {
 
         // Render the data view.
         // The result of this is the resulting data view height which we should add to the total render height.
-        renderOffsetY += this._dataView.draw(context, this._rangeView, renderOffsetY, dataViewMaxHeight, !!this._options.fillVertically);
+        renderOffsetY += this._dataView.draw(
+            context,
+            this._rangeView,
+            renderOffsetY,
+            dataViewMaxHeight,
+            !!this._options.fillVertically
+        );
 
         // Restore the original render context, this will bin the clipping rect we put in place to restrict the data view render.
         context.restore();
@@ -522,7 +547,7 @@ export class TempisTimeline {
             renderOffsetY += legendViewHeight;
         }
 
-        // Clear the canvas from below the bottom of the bottom range view or bottom of the timeline or the bottom of the legend. 
+        // Clear the canvas from below the bottom of the bottom range view or bottom of the timeline or the bottom of the legend.
         context.clearRect(0, renderOffsetY, this._canvas.clientWidth, this._canvas.clientHeight - renderOffsetY);
     }
 
@@ -546,7 +571,7 @@ export class TempisTimeline {
             }
         } else {
             // This is uncontrolled selection, so we will deselect all items.
-            selectedItems.forEach((item) => item.isSelected = false);
+            selectedItems.forEach((item) => (item.isSelected = false));
 
             // We manually update the selection state of the items so we need to redraw.
             this._draw();
@@ -559,7 +584,7 @@ export class TempisTimeline {
      */
     private _onItemClicked(item: TimelineItem): void {
         const isItemInitiallySelected = item.isSelected;
-        
+
         // Update item selection if we need to.
         if (this._selectionMode === "single") {
             // Get all items that are currently selected (we would only expect one at the most in this mode).
@@ -570,7 +595,10 @@ export class TempisTimeline {
 
             // Is selection controlled or uncontrolled?
             if (this._options.onSelectionChange) {
-                const selectionChangeEvents: SelectionChangeEvent[] = itemsToDeselect.map((item) => ({ id: item.id, selected: false }));
+                const selectionChangeEvents: SelectionChangeEvent[] = itemsToDeselect.map((item) => ({
+                    id: item.id,
+                    selected: false
+                }));
 
                 // If the item was not initially selected, we need to add it to the list of selection change events.
                 if (!isItemInitiallySelected) {
@@ -585,7 +613,7 @@ export class TempisTimeline {
             } else {
                 // Deselect all selected items that are not the clicked item.
                 // We will not deselect the clicked item if it was already selected.
-                itemsToDeselect.forEach((selectedItem) => selectedItem.isSelected = false);
+                itemsToDeselect.forEach((selectedItem) => (selectedItem.isSelected = false));
 
                 // Ensure that the clicked item is selected.
                 item.isSelected = true;
@@ -608,11 +636,10 @@ export class TempisTimeline {
                 // We manually updated the selection state of the items so we need to redraw.
                 this._draw();
             }
-
         }
 
         // Invoke the 'onItemClick' callback if defined, passing the identifier of the clicked item.
-        this._options.onItemClick && this._options.onItemClick(item.id);
+        this._options.onItemClick?.(item.id);
     }
 
     /**
@@ -621,6 +648,6 @@ export class TempisTimeline {
      */
     private _onItemDoubleClicked(item: TimelineItem): void {
         // Invoke the 'onItemDoubleClick' callback if defined, passing the identifier of the double-clicked item.
-        this._options.onItemDoubleClick && this._options.onItemDoubleClick(item.id);
+        this._options.onItemDoubleClick?.(item.id);
     }
 }

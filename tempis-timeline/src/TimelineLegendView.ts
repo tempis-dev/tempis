@@ -1,4 +1,9 @@
-import { TempisTimelineAlignment, TempisTimelineLegendOptions, TempisTimelineLegendPosition, TempisTimelineMarkerStyle } from "./TempisTimelineOptions";
+import {
+    TempisTimelineAlignment,
+    TempisTimelineLegendOptions,
+    TempisTimelineLegendPosition,
+    TempisTimelineMarkerStyle
+} from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineItemCategory } from "./TimelineItemCategory";
 import { drawClippedText, isNullOrUndefined } from "./Utilities";
@@ -70,7 +75,12 @@ export class TimelineLegendView {
      * @param isRTL Whether the timeline is being rendered right-to-left.
      * @param options The timeline legend options.
      */
-    public constructor(canvas: HTMLCanvasElement, dataSet: TimelineDataSet, isRTL: boolean, options: TempisTimelineLegendOptions = {}) {
+    public constructor(
+        canvas: HTMLCanvasElement,
+        dataSet: TimelineDataSet,
+        isRTL: boolean,
+        options: TempisTimelineLegendOptions = {}
+    ) {
         this._canvas = canvas;
         this._dataSet = dataSet;
         this._isRTL = isRTL;
@@ -127,7 +137,7 @@ export class TimelineLegendView {
      */
     public calculateRequiredHeight(): number {
         // Grab the canvas context.
-        var context = this._canvas.getContext('2d')!;
+        const context = this._canvas.getContext("2d")!;
 
         // We need to create a draw plan for this view, without one we cannot determine the height of this view.
         this._createViewDrawPlan(context);
@@ -182,9 +192,12 @@ export class TimelineLegendView {
             // If right-to-left then the marker will be drawn to the right of the label.
             if (this._isRTL) {
                 context.roundRect(
-                    Math.min(categoryDrawPlan.xPositionEnd - this.itemPadding - categoryDrawPlan.markerSize, this._drawPlan.width - categoryDrawPlan.markerSize - DEFAULT_LEGEND_PADDING), 
-                    categoryDrawPlan.yPositionStart + this.itemPadding + yPosition, 
-                    categoryDrawPlan.markerSize, 
+                    Math.min(
+                        categoryDrawPlan.xPositionEnd - this.itemPadding - categoryDrawPlan.markerSize,
+                        this._drawPlan.width - categoryDrawPlan.markerSize - DEFAULT_LEGEND_PADDING
+                    ),
+                    categoryDrawPlan.yPositionStart + this.itemPadding + yPosition,
+                    categoryDrawPlan.markerSize,
                     categoryDrawPlan.markerSize,
                     markerRadius
                 );
@@ -198,26 +211,39 @@ export class TimelineLegendView {
                 );
             }
             context.fill();
-            
+
             // Draw the category label clipped to the available legend view width.
             context.fillStyle = "#595959";
             context.textBaseline = "middle";
             // If right-to-left then the label will be drawn to the left of the marker.
             if (this._isRTL) {
                 drawClippedText(
-                    context, 
+                    context,
                     categoryDrawPlan.category.label,
-                    categoryDrawPlan.xPositionStart + this.itemPadding, 
-                    categoryDrawPlan.yPositionStart + (categoryDrawPlan.height / 2) + yPosition,
-                    this._drawPlan.width - (categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
+                    categoryDrawPlan.xPositionStart + this.itemPadding,
+                    categoryDrawPlan.yPositionStart + categoryDrawPlan.height / 2 + yPosition,
+                    this._drawPlan.width -
+                        (categoryDrawPlan.xPositionStart +
+                            this.itemPadding +
+                            categoryDrawPlan.markerSize +
+                            categoryDrawPlan.markerLabelGap) -
+                        DEFAULT_LEGEND_PADDING
                 );
             } else {
                 drawClippedText(
-                    context, 
+                    context,
                     categoryDrawPlan.category.label,
-                    categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap, 
-                    categoryDrawPlan.yPositionStart + (categoryDrawPlan.height / 2) + yPosition,
-                    this._drawPlan.width - (categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
+                    categoryDrawPlan.xPositionStart +
+                        this.itemPadding +
+                        categoryDrawPlan.markerSize +
+                        categoryDrawPlan.markerLabelGap,
+                    categoryDrawPlan.yPositionStart + categoryDrawPlan.height / 2 + yPosition,
+                    this._drawPlan.width -
+                        (categoryDrawPlan.xPositionStart +
+                            this.itemPadding +
+                            categoryDrawPlan.markerSize +
+                            categoryDrawPlan.markerLabelGap) -
+                        DEFAULT_LEGEND_PADDING
                 );
             }
 
@@ -241,7 +267,13 @@ export class TimelineLegendView {
             return;
         }
 
-        type SizedElement = { category: TimelineItemCategory, width: number; height: number; labelHeight: number; markerLabelGap: number; };
+        type SizedElement = {
+            category: TimelineItemCategory;
+            width: number;
+            height: number;
+            labelHeight: number;
+            markerLabelGap: number;
+        };
 
         // Create an array to hold the sized legend elements.
         const elements: SizedElement[] = [];
@@ -249,10 +281,10 @@ export class TimelineLegendView {
         // Calculate the label height to use for every category (to be consistent) and the item height.
         const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Category Label");
         const labelHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
-        const itemHeight = labelHeight + (this.itemPadding * 2);
+        const itemHeight = labelHeight + this.itemPadding * 2;
 
         // Calculate the gap between the colour marker and the label, this should be derived from the text size.
-        const markerLabelGap = labelHeight / 2; 
+        const markerLabelGap = labelHeight / 2;
 
         // Create a legend element for each category with it's drawn width and height.
         for (const category of this._dataSet.categories) {
@@ -264,9 +296,9 @@ export class TimelineLegendView {
             // Measure the category name text dimensions to get the width of the label.
             const { width } = context.measureText(category.label);
 
-            elements.push({ 
-                category, 
-                width: width + markerLabelGap + labelHeight + (this.itemPadding * 2), 
+            elements.push({
+                category,
+                width: width + markerLabelGap + labelHeight + this.itemPadding * 2,
                 height: itemHeight,
                 labelHeight,
                 markerLabelGap
@@ -274,7 +306,7 @@ export class TimelineLegendView {
         }
 
         // Figure out the available width of the legend excluding the padding.
-        const availableWidth = context.canvas.clientWidth - (DEFAULT_LEGEND_PADDING * 2);
+        const availableWidth = context.canvas.clientWidth - DEFAULT_LEGEND_PADDING * 2;
 
         // Make a 2D array to represent the rows of legend elements.
         const elementRows: SizedElement[][] = [[]];
@@ -285,7 +317,10 @@ export class TimelineLegendView {
             // If adding this element would exceed the available width, start a new row.
             // If this item would be the only one in the row and is still wider than the view then it should still get its own row and overflow.
             // If the canvas width is not wide enough to show an item (probably has a long label or canvas is narrow) then we should show a label ellipses at draw.
-            if (currentElementRowWidth + element.width > availableWidth && elementRows[elementRows.length - 1].length > 0) {
+            if (
+                currentElementRowWidth + element.width > availableWidth &&
+                elementRows[elementRows.length - 1].length > 0
+            ) {
                 elementRows.push([]);
                 currentElementRowWidth = 0;
             }
@@ -312,9 +347,9 @@ export class TimelineLegendView {
             // We need to apply an initial x offset if we aren't aligning the items with the start of the container.
             if (this.alignment === "start") {
                 // In right-to-left, "start" means align to the right edge, otherwise the left edge.
-                currentXPosition =  this._isRTL ? Math.max(0, availableWidth - rowTotalWidth) : 0;
+                currentXPosition = this._isRTL ? Math.max(0, availableWidth - rowTotalWidth) : 0;
             } else if (this.alignment === "center") {
-                currentXPosition = Math.max(0, (availableWidth / 2) - (rowTotalWidth / 2));
+                currentXPosition = Math.max(0, availableWidth / 2 - rowTotalWidth / 2);
             } else if (this.alignment === "end") {
                 // In right-to-left, "end" means align to the left edge, otherwise the right edge.
                 currentXPosition = this._isRTL ? 0 : Math.max(0, availableWidth - rowTotalWidth);
@@ -329,19 +364,19 @@ export class TimelineLegendView {
                     markerLabelGap: element.markerLabelGap,
                     xPositionStart: currentXPosition + DEFAULT_LEGEND_PADDING,
                     xPositionEnd: currentXPosition + element.width + DEFAULT_LEGEND_PADDING,
-                    yPositionStart: (rowIndex * element.height) + DEFAULT_LEGEND_PADDING,
-                    yPositionEnd: (rowIndex * element.height) + element.height + DEFAULT_LEGEND_PADDING,
+                    yPositionStart: rowIndex * element.height + DEFAULT_LEGEND_PADDING,
+                    yPositionEnd: rowIndex * element.height + element.height + DEFAULT_LEGEND_PADDING,
                     width: element.width,
                     height: element.height
                 });
-                
+
                 currentXPosition += element.width;
             }
         }
 
         // Set the draw plan.
         this._drawPlan = {
-            height: (itemHeight * elementRows.length) + (DEFAULT_LEGEND_PADDING * 2),
+            height: itemHeight * elementRows.length + DEFAULT_LEGEND_PADDING * 2,
             width: context.canvas.clientWidth,
             categoryDrawPlans
         };
@@ -353,12 +388,12 @@ export class TimelineLegendView {
     private _createCanvasEventHandlers() {
         // A function that gets the position on the canvas for the mouse event or pointer event.
         const getMouseOrPointerPosition = (event: PointerEvent | MouseEvent) => {
-            var rect = this._canvas.getBoundingClientRect();
+            const rect = this._canvas.getBoundingClientRect();
             return {
-                x: (event.clientX - rect.left) / (rect.right - rect.left) * this._canvas.clientWidth,
-                y: (event.clientY - rect.top) / (rect.bottom - rect.top) * this._canvas.clientHeight
+                x: ((event.clientX - rect.left) / (rect.right - rect.left)) * this._canvas.clientWidth,
+                y: ((event.clientY - rect.top) / (rect.bottom - rect.top)) * this._canvas.clientHeight
             };
-        }
+        };
 
         // TODO Throttle the pointer move handler, we don't need it every move.
 
@@ -366,7 +401,7 @@ export class TimelineLegendView {
         let isPointerDown = false;
 
         // Handle the pointer move event.
-        this._canvas.addEventListener('pointermove', (event) => {
+        this._canvas.addEventListener("pointermove", (event) => {
             // There is nothing to do if we have no draw plan as we have no rendered categories.
             if (!this._drawPlan) {
                 return null;
@@ -380,12 +415,15 @@ export class TimelineLegendView {
             // We don't want to toggle the focus of any categories if the user is just dragging over the legend view.
             if (isPointerDown) {
                 return;
-            } 
+            }
 
             const pointerPosition = getMouseOrPointerPosition(event);
 
             // Do not get items for points that overflow the vertical constraints of the data view.
-            if (pointerPosition.y < this._lastDrawYPosition || pointerPosition.y > (this._lastDrawYPosition + this._drawPlan.height)) {
+            if (
+                pointerPosition.y < this._lastDrawYPosition ||
+                pointerPosition.y > this._lastDrawYPosition + this._drawPlan.height
+            ) {
                 // Ensure that we are not leaving any categories focused.
                 this._dataSet.unfocusCategories();
                 return null;
@@ -403,7 +441,7 @@ export class TimelineLegendView {
         });
 
         // Handle the pointer down event.
-        this._canvas.addEventListener('pointerdown', (event) => {
+        this._canvas.addEventListener("pointerdown", (event) => {
             isPointerDown = true;
 
             // There is nothing to do if we have no draw plan as we have no rendered categories.
@@ -419,7 +457,10 @@ export class TimelineLegendView {
             const pointerPosition = getMouseOrPointerPosition(event);
 
             // There is also nothing to do if the pointer event happened outside the bounds of this view.
-            if (pointerPosition.y < this._lastDrawYPosition || pointerPosition.y > (this._lastDrawYPosition + this._drawPlan.height)) {
+            if (
+                pointerPosition.y < this._lastDrawYPosition ||
+                pointerPosition.y > this._lastDrawYPosition + this._drawPlan.height
+            ) {
                 return null;
             }
 
@@ -442,18 +483,18 @@ export class TimelineLegendView {
         });
 
         // Handle the pointer down event.
-        this._canvas.addEventListener('pointerup', (event) => {
+        this._canvas.addEventListener("pointerup", () => {
             isPointerDown = false;
         });
 
         // Handle the pointer leaving the canvas.
-        this._canvas.addEventListener('pointerout', (event) => {
+        this._canvas.addEventListener("pointerout", () => {
             // Ensure that we don't leave any categories focused when our pointer leaves the canvas.
             this._dataSet.unfocusCategories();
         });
 
         // Handle the wheel event.
-        this._canvas.addEventListener('wheel', (event) => {
+        this._canvas.addEventListener("wheel", () => {
             // Scrolling the wheel can update the position of the legend when `options.fillVertically` is not set.
             // This could potentially move our cursor off of a category we were focusing on and even move us onto another.
             // Clear any focused category....just in case.
@@ -466,21 +507,25 @@ export class TimelineLegendView {
      * @param point The point at which to get the legend category.
      * @returns The item at the specified point, or null if there is no item at that point.
      */
-    private _getCategoryAtPoint(point: { x: number; y: number; }): TimelineItemCategory | null {
+    private _getCategoryAtPoint(point: { x: number; y: number }): TimelineItemCategory | null {
         // There is nothing to do if we have no draw plan as we have no rendered categories.
         if (!this._drawPlan) {
             return null;
         }
 
         // Do not get items for points that overflow the vertical constraints of the legend view.
-        if (point.y < this._lastDrawYPosition || point.y > (this._lastDrawYPosition + this._drawPlan.height)) {
+        if (point.y < this._lastDrawYPosition || point.y > this._lastDrawYPosition + this._drawPlan.height) {
             return null;
         }
 
         // Iterate over each category in the legend to see if the point is within the bounds of the category.
         for (const categoryDrawPlan of this._drawPlan.categoryDrawPlans) {
-            if (point.x >= categoryDrawPlan.xPositionStart && point.x <= categoryDrawPlan.xPositionEnd 
-                && point.y >= (categoryDrawPlan.yPositionStart + this._lastDrawYPosition) && point.y <= (categoryDrawPlan.yPositionEnd + this._lastDrawYPosition)) {
+            if (
+                point.x >= categoryDrawPlan.xPositionStart &&
+                point.x <= categoryDrawPlan.xPositionEnd &&
+                point.y >= categoryDrawPlan.yPositionStart + this._lastDrawYPosition &&
+                point.y <= categoryDrawPlan.yPositionEnd + this._lastDrawYPosition
+            ) {
                 return categoryDrawPlan.category;
             }
         }
