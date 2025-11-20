@@ -43,6 +43,9 @@ export class TimelineRangeView {
     /** The date formatter. */
     private readonly _dateFormatter: DateFormatter;
 
+    /** The flag defining whether the timeline is being rendered right-to-left. */
+    private readonly _isRTL: boolean;
+
     /** The timeline range options. */
     private readonly _options: TempisTimelineRangeOptions;
 
@@ -81,12 +84,14 @@ export class TimelineRangeView {
      * @param canvas The canvas.
      * @param dataSet The timeline dataset model.
      * @param dateFormatter The date formatter.
+     * @param isRTL Whether the timeline is being rendered right-to-left.
      * @param options The timeline range options.
      */
-    public constructor(canvas: HTMLCanvasElement, dataSet: TimelineDataSet, dateFormatter: DateFormatter, options: TempisTimelineRangeOptions = {}) {
+    public constructor(canvas: HTMLCanvasElement, dataSet: TimelineDataSet, dateFormatter: DateFormatter, isRTL: boolean, options: TempisTimelineRangeOptions = {}) {
         this._canvas = canvas;
         this._dataSet = dataSet
         this._dateFormatter = dateFormatter;
+        this._isRTL = isRTL;
         this._options = options;
 
         // Parse the range options.
@@ -217,9 +222,11 @@ export class TimelineRangeView {
             return;
         }
 
-        // Work out the target position in milliseconds.
-        // This is the position on the canvas that we want to zoom around.
-        const targetPositionMillis = this._fromDt.getTime() + (targetPositionX / this._canvas.clientWidth) * (this._toDt.getTime() - this._fromDt.getTime());
+        // Work out the target position in milliseconds. This is the position on the canvas that we want to zoom around.
+        // If we are rendering right-to-left then we should flip the x position so that it would map to the correct millisecond value.
+        const targetPositionMillis = this._isRTL ?
+            this._fromDt.getTime() + ((this._canvas.clientWidth - targetPositionX) / this._canvas.clientWidth) * (this._toDt.getTime() - this._fromDt.getTime()) :
+            this._fromDt.getTime() + (targetPositionX / this._canvas.clientWidth) * (this._toDt.getTime() - this._fromDt.getTime());
 
         // Calculate the zoom factor based on the amount.
         const zoomFactor = 1 - clamp(amount, -1, 1) * -0.1;
@@ -317,7 +324,10 @@ export class TimelineRangeView {
         this._minorUnitTicks = minorTickDates.map((tickDate) => {
             return {
                 date: tickDate,
-                xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
+                // If we are rendering right-to-left then the ticks should start from the right of the timeline.
+                xPosition: this._isRTL ? 
+                    this._canvas.clientWidth - (milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())) :
+                    milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
             }
         });
 
@@ -325,7 +335,10 @@ export class TimelineRangeView {
         this._majorUnitTicks = majorTickDates.map((tickDate) => {
             return {
                 date: tickDate,
-                xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
+                // If we are rendering right-to-left then the ticks should start from the right of the timeline.
+                xPosition: this._isRTL ?
+                    this._canvas.clientWidth - (milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())) :
+                    milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
             }
         });
     }
@@ -361,11 +374,27 @@ export class TimelineRangeView {
                 context.stroke();
             }
 
+            // Create the formatted date label for this minor tick.
+            const minorTickLabel = this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS);
+
             // Draw the minor date/time label text.
             context.textBaseline = "alphabetic";
             context.fillStyle = "#595959";
             context.beginPath();
-            context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, (minorTicksYPosition + (rangeContainerHeight / 2)) - DEFAULT_UNIT_LABEL_PADDING);
+            // If we are rendering right-to-left then the label should be rendered to the left of the tick, otherwise the right.
+            if (this._isRTL) {
+                context.fillText(
+                    minorTickLabel,
+                    xPosition - DEFAULT_UNIT_LABEL_PADDING - context.measureText(minorTickLabel).width,
+                    (minorTicksYPosition + (rangeContainerHeight / 2)) - DEFAULT_UNIT_LABEL_PADDING
+                );
+            } else {
+                context.fillText(
+                    minorTickLabel,
+                    xPosition + DEFAULT_UNIT_LABEL_PADDING,
+                    (minorTicksYPosition + (rangeContainerHeight / 2)) - DEFAULT_UNIT_LABEL_PADDING
+                );
+            }
             context.stroke();
         }
 
@@ -376,10 +405,14 @@ export class TimelineRangeView {
 
         // Draw our major unit ticks.
         for (let tickIndex = 0; tickIndex < this._majorUnitTicks.length; tickIndex++) {
+            // Grab the date and the x position of the current major tick.
             const { date, xPosition } = this._majorUnitTicks[tickIndex];
 
-            // Is this tick the for the first major tick? If so it will need to be sticky.
-            const isStickyLabel = date.getTime() <= this._fromDt.getTime();
+            // Grab the next major tick, if there is one.
+            const nextMajorTick = this._majorUnitTicks[tickIndex + 1];
+
+            // Is this tick the for the first major tick? If so the label for it will need to be sticky.
+            const isStickyLabel = date.getTime() <= this._fromDt.getTime() && nextMajorTick && nextMajorTick.date.getTime() > this._fromDt.getTime();
 
             // Draw the actual tick but only if this label isn't the sticky one or if it is right at the edge of the canvas.
             if (!isStickyLabel && xPosition > 0 && xPosition < context.canvas.clientWidth) {
@@ -392,21 +425,32 @@ export class TimelineRangeView {
                 context.stroke();
             }
 
-            // Get the tick label.
-            const tickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
+            // Create the formatted date label for this major tick.
+            const majorTickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
 
-            let labelXPosition = xPosition + DEFAULT_UNIT_LABEL_PADDING;
+            // Determine the default major label x position.
+            // If we are right-to-left then the label should be rendered to the left of the tick, otherwise the right.
+            let labelXPosition = this._isRTL
+                ? xPosition - DEFAULT_UNIT_LABEL_PADDING - context.measureText(majorTickLabel).width
+                : xPosition + DEFAULT_UNIT_LABEL_PADDING;
             
-            // If our label is sticky then it should always be drawn inside the visible as the earliest major tick.
+            // If our label is sticky then it should always be drawn inside the visible area as the earliest major tick.
             // Our sticky label should also be pushed out of the way by the next major tick label as we don't want overlaps.
             if (isStickyLabel) {
-                // Calculate the width of the label, plus the smidge at the start.
-                const labelWidth = context.measureText(tickLabel).width + DEFAULT_UNIT_LABEL_PADDING;
-
-                // Grab the position of the next tick label, we need this to work out how much to offset our sticky label by (if at all)
-                const nextTickXPosition = this._majorUnitTicks[tickIndex + 1].xPosition;
-
-                labelXPosition = nextTickXPosition > labelWidth ? DEFAULT_UNIT_LABEL_PADDING : nextTickXPosition - labelWidth;
+                // Calculate the width of the label, plus a smidge for a little gap between the label and the tick.
+                const labelWidth = context.measureText(majorTickLabel).width + DEFAULT_UNIT_LABEL_PADDING;
+                
+                if (nextMajorTick) {
+                    if (this._isRTL) {
+                        labelXPosition = nextMajorTick.xPosition <= (context.canvas.clientWidth - labelWidth) ?
+                            context.canvas.clientWidth - labelWidth : 
+                            nextMajorTick.xPosition + DEFAULT_UNIT_LABEL_PADDING;
+                    } else {
+                        labelXPosition = nextMajorTick.xPosition >= labelWidth ?
+                            DEFAULT_UNIT_LABEL_PADDING :
+                            nextMajorTick.xPosition - labelWidth;
+                    }
+                }
             }
 
             // Draw the major date/time label text.
@@ -414,7 +458,7 @@ export class TimelineRangeView {
             context.textBaseline = "alphabetic";
             context.fillStyle = "#595959";
             context.beginPath();
-            context.fillText(tickLabel, labelXPosition, (majorTicksYPosition + (rangeContainerHeight / 2)) - DEFAULT_UNIT_LABEL_PADDING);
+            context.fillText(majorTickLabel, labelXPosition, (majorTicksYPosition + (rangeContainerHeight / 2)) - DEFAULT_UNIT_LABEL_PADDING);
             context.stroke();
         }
     }

@@ -47,8 +47,8 @@ export interface DataViewItemDrawPlan {
     yPositionEnd: number;
 }
 
-/** The default amount of vertical margin to use for group labels. */
-const DEFAULT_GROUP_VERTICAL_LABEL_MARGIN: number = 6;
+/** The default amount of margin to use for group labels. */
+const DEFAULT_GROUP_LABEL_MARGIN: number = 6;
 
 /** The default amount of vertical margin to use for items. */
 const DEFAULT_ITEM_VERTICAL_MARGIN: number = 4;
@@ -72,6 +72,9 @@ export class TimelineDataView {
     /** The underlying dataset model. */
     private readonly _dataSet: TimelineDataSet;
 
+    /** The flag defining whether the timeline is being rendered right-to-left. */
+    private readonly _isRTL: boolean;
+
     /** The current scroll Y offset. */
     private _scrollYOffset: number = 0;
 
@@ -87,9 +90,11 @@ export class TimelineDataView {
     /**
      * Creates a new instance of the TimelineDataView class.
      * @param dataSet The timeline dataset model.
+     * @param isRTL Whether the timeline is being rendered right-to-left.
      */
-    public constructor(dataSet: TimelineDataSet) {
+    public constructor(dataSet: TimelineDataSet, isRTL: boolean) {
         this._dataSet = dataSet;
+        this._isRTL = isRTL;
     }
 
     /**
@@ -199,11 +204,15 @@ export class TimelineDataView {
      * @param maxHeight The max height that this view can take on the canvas.
      */
     private _drawGroups(context: CanvasRenderingContext2D, yPosition: number, maxHeight: number): void {
+        // There is nothing to do if we have no draw plan.
         if (!this._drawPlan) {
             return;
         }
 
         const scrolledYPosition = yPosition + this._scrollYOffset;
+
+        // Set the text align based on whether we are rendering right-to-left.
+        context.textAlign = this._isRTL ? "right" : "left";
 
         // Draw each group.
         for (let groupDrawPlanIndex = 0; groupDrawPlanIndex < this._drawPlan.groupDrawPlans.length; groupDrawPlanIndex++) {
@@ -224,7 +233,12 @@ export class TimelineDataView {
                 context.textBaseline = "top";
                 context.fillStyle = "#595959";
                 context.beginPath();
-                context.fillText(groupDrawPlan.label, 6, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_VERTICAL_LABEL_MARGIN);
+                // If rendering right-to-left then the group labels will be rendered to the right of the canvas, otherwise left.
+                if (this._isRTL) {
+                    context.fillText(groupDrawPlan.label, context.canvas.clientWidth - DEFAULT_GROUP_LABEL_MARGIN, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN);
+                } else {
+                    context.fillText(groupDrawPlan.label, DEFAULT_GROUP_LABEL_MARGIN, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN);
+                }
                 context.stroke();
             }
 
@@ -237,6 +251,9 @@ export class TimelineDataView {
                 }
             }
         }
+
+        // Always revert the canvas text align to be left.
+        context.textAlign = "left";
     }
 
     /**
@@ -332,10 +349,15 @@ export class TimelineDataView {
         // Draw the item label (if there is one).
         if (item.label) {
             // Calculate the actual x position of the label, we should attempt to keep this in the bounds of the view.
-            const labelStartPositionX = Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
+            // If rendering right-to-left then we will be rendering the label to the right of the item, otherwise the left.
+            const labelStartPositionX = this._isRTL ? 
+                Math.floor(Math.min(context.canvas.clientWidth - itemPadding, itemDrawPlan.xPositionEnd - itemPadding)) :
+                Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
 
             // Calculate the max item label width.
-            const maxLabelWidth = Math.max(0, Math.ceil((itemDrawPlan.xPositionEnd - itemPadding) - labelStartPositionX));
+            const maxLabelWidth = this._isRTL ? 
+                Math.max(0, Math.ceil(labelStartPositionX - (itemDrawPlan.xPositionStart + itemPadding)) + 1) :
+                Math.max(0, Math.ceil((itemDrawPlan.xPositionEnd - itemPadding) - labelStartPositionX));
 
             // Render the text label, but only if we have enough space to do so.
             if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
@@ -397,20 +419,30 @@ export class TimelineDataView {
                 // Figure out the xPositionStart and xPositionEnd of the current item. Whether the item is a range or PIT will influence this.
                 if (item.end) {
                     // This is a range item, the start and end positions of our x axis will always be derived from the start and end date. 
-                    startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
-                    endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
+                    // If rendering right-to-left then we need to flip the start/end positions.
+                    if (this._isRTL) {
+                        startPositionX = milliRenderWidth * (rangeToDt.getTime() - item.end.getTime());
+                        endPositionX = milliRenderWidth * (rangeToDt.getTime() - item.start.getTime());
+                    } else {
+                        startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
+                        endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
+                    }
                 } else {
                     // This is a PIT item, the start and end positions of our x axis will be derived from the width of the label and the start date.
                     // TODO Determine what to do when we have PIT item with no label.
                     // TODO Set the context font to be whatever we will be using to render the actual item label.
                     const itemLabelWidth = context.measureText(item.label ?? "?").width + (item.style.padding! * 2);
 
-                    // Let's set the start and end x position to be equidistant from the actual point in time that this item is for.
-                    startPositionX = (milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime())) - (itemLabelWidth / 2);
-                    endPositionX = startPositionX + itemLabelWidth;
-
                     // The point in time position should always be the start date regardless of the position or width of the PIT item box.
-                    pointInTimePositionX = (milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime()));
+                    // If rendering right-to-left then we will need to calculate this from the right of the canvas rather than the left.
+                    pointInTimePositionX = this._isRTL ?
+                        milliRenderWidth * (rangeToDt.getTime() - item.start.getTime()) :
+                        milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
+
+                    // Let's set the start and end x position to be equidistant from the actual point in time that this item is for.
+                    // The point in time position should always be the start date regardless of the position or width of the PIT item box.
+                    startPositionX = pointInTimePositionX - (itemLabelWidth / 2);
+                    endPositionX = pointInTimePositionX + (itemLabelWidth / 2);
 
                     // We may have to shift this item so that it is actually in the bounds of the range view.
                     if (startPositionX < 0) {
@@ -443,7 +475,12 @@ export class TimelineDataView {
 
                 // Look for an existing row to place this item in. It may not fit in any due to overlaps.
                 for (const rowStack of itemDrawPlanStacks) {
-                    if (rowStack.length === 0 || rowStack[rowStack.length - 1].xPositionEnd <= itemDrawPlan.xPositionStart) {
+                    // Check whether the current item can fit at the end of the current row.
+                    const canItemFitInCurrentRow = this._isRTL ?
+                        rowStack.length > 0 && rowStack[rowStack.length - 1].xPositionStart >= itemDrawPlan.xPositionEnd :
+                        rowStack.length > 0 && rowStack[rowStack.length - 1].xPositionEnd <= itemDrawPlan.xPositionStart;
+
+                    if (rowStack.length === 0 || canItemFitInCurrentRow) {
                         // The current item will fit nicely into the current row.
                         rowStack.push(itemDrawPlan);
 
@@ -483,7 +520,7 @@ export class TimelineDataView {
                 positionY += (groupLabelMetrics.actualBoundingBoxAscent + groupLabelMetrics.actualBoundingBoxDescent);
 
                 // Add a smidge of vertical padding for below and above the label.
-                positionY += (2 * DEFAULT_GROUP_VERTICAL_LABEL_MARGIN);
+                positionY += (2 * DEFAULT_GROUP_LABEL_MARGIN);
             }
 
             // We want to stick a little bit of a margin at the top of the group, but below the label

@@ -54,10 +54,10 @@ export class TempisTimeline {
         this._dateFormatter = new DateFormatter();
 
         this._dataSet = new TimelineDataSet(this._options);
-        this._dataView = new TimelineDataView(this._dataSet);
-        this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._options.range);
-        this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._options.legend);
-        this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._options.tooltip);
+        this._dataView = new TimelineDataView(this._dataSet, this._isRTL);
+        this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._isRTL, this._options.range);
+        this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._isRTL, this._options.legend);
+        this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._isRTL, this._options.tooltip);
 
         // Do our initial canvas resize.
         this._resizeCanvas();
@@ -89,6 +89,11 @@ export class TempisTimeline {
     /** Gets whether the timeline is rendering responsively. */
     private get _isResponsive(): boolean {
         return this._options.responsive ?? false;
+    }
+
+    /** Gets whether the timeline is rendering right-to-left. */
+    private get _isRTL(): boolean {
+        return this._options.rtl ?? false;
     }
 
     /**
@@ -275,7 +280,8 @@ export class TempisTimeline {
 
             // Use movementX for range scrolling.
             if (Math.abs(event.movementX) >= 1) {
-                this._rangeView.moveRange(-event.movementX);
+                // If right-to-left then dragging right is moving the range forward in time, otherwise backwards.
+                this._rangeView.moveRange(this._isRTL ? event.movementX : -event.movementX);
             }
 
             // Use movementY for data view scrolling.
@@ -357,7 +363,7 @@ export class TempisTimeline {
      */
     private _resizeCanvas(): void {
         // We should not resize the canvas if the timeline has not been configured to be responsive. 
-        if (this._options.responsive === false) {
+        if (!this._isResponsive) {
             return;
         }
 
@@ -424,6 +430,11 @@ export class TempisTimeline {
 
         // Clear the canvas before doing a fresh draw.
         context.clearRect(0, 0, this._canvas.clientWidth, this._canvas.clientHeight);
+
+        // The default direction for the timeline should ALWAYS be left-to-right.
+        // The canvas will inherit the page direction otherwise which may cause issues with rendering.
+        // If the timeline is rendering right-to-left then the views will handle the text alignment internally based on the `rtl` option.
+        context.direction = "ltr";
 
         // Apply the default font to the canvas context.
         context.font = this._font.font;

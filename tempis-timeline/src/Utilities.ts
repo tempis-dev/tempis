@@ -98,8 +98,6 @@ export function drawClippedText(context: CanvasRenderingContext2D, text: string,
         return;
     }
 
-    const ellipsis = "...";
-    const ellipsisWidth = context.measureText(ellipsis).width;
     const textWidth = context.measureText(text).width;
 
     // If the text already fits then just draw it normally.
@@ -108,25 +106,44 @@ export function drawClippedText(context: CanvasRenderingContext2D, text: string,
         return;
     }
 
-    // If the ellipsis alone doesn't fit, skip drawing
-    if (ellipsisWidth > maxWidth) return;
+    const ellipsis = "...";
+    const ellipsisWidth = context.measureText(ellipsis).width;
 
-    // Save context state
-    context.save();
+    // If the ellipsis alone doesn't fit, skip drawing.
+    if (ellipsisWidth > maxWidth) {
+        return;
+    }
 
-    // Define clipping region (leave space for the ellipsis)
-    context.beginPath();
-    context.rect(x, y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
-    context.clip();
+    // Grab the text alignment for the canvas context as this will influence how we render our text.
+    const textAlign = context.textAlign || "left";
 
-    // Draw the full text — will be visually clipped
-    context.fillText(text, x, y);
+    // Are we rendering right-to-left?
+    if (textAlign === "right") {
+        context.save();
+        context.beginPath();
+        context.rect(x - (maxWidth - ellipsisWidth), y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
+        context.clip();
+        context.fillText(text, x, y);
+        context.restore();
 
-    // Restore clipping
-    context.restore();
+        // Draw the ellipsis to the left of the text.
+        context.textAlign = "right";
+        context.fillText(ellipsis, x - (maxWidth - ellipsisWidth), y);
+    } else {
+        context.save();
+        context.beginPath();
+        context.rect(x, y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
+        context.clip();
+        context.fillText(text, x, y);
+        context.restore();
 
-    // Draw ellipsis at the end
-    context.fillText(ellipsis, x + maxWidth - ellipsisWidth, y);
+        // Draw the ellipsis to the right of the text.
+        context.textAlign = "right";
+        context.fillText(ellipsis, x + maxWidth, y);
+    }
+
+    // Reapply the original text alignment.
+    context.textAlign = textAlign;
 }
 
 /**

@@ -72,22 +72,37 @@ var tempis_timeline = (() => {
     if (!text) {
       return;
     }
-    const ellipsis = "...";
-    const ellipsisWidth = context.measureText(ellipsis).width;
     const textWidth = context.measureText(text).width;
     if (textWidth <= maxWidth) {
       context.fillText(text, x2, y);
       return;
     }
-    if (ellipsisWidth > maxWidth)
+    const ellipsis = "...";
+    const ellipsisWidth = context.measureText(ellipsis).width;
+    if (ellipsisWidth > maxWidth) {
       return;
-    context.save();
-    context.beginPath();
-    context.rect(x2, y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
-    context.clip();
-    context.fillText(text, x2, y);
-    context.restore();
-    context.fillText(ellipsis, x2 + maxWidth - ellipsisWidth, y);
+    }
+    const textAlign = context.textAlign || "left";
+    if (textAlign === "right") {
+      context.save();
+      context.beginPath();
+      context.rect(x2 - (maxWidth - ellipsisWidth), y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
+      context.clip();
+      context.fillText(text, x2, y);
+      context.restore();
+      context.textAlign = "right";
+      context.fillText(ellipsis, x2 - (maxWidth - ellipsisWidth), y);
+    } else {
+      context.save();
+      context.beginPath();
+      context.rect(x2, y - parseInt(context.font), maxWidth - ellipsisWidth, parseInt(context.font) * 2);
+      context.clip();
+      context.fillText(text, x2, y);
+      context.restore();
+      context.textAlign = "right";
+      context.fillText(ellipsis, x2 + maxWidth, y);
+    }
+    context.textAlign = textAlign;
   }
   function defaults(...sources) {
     if (sources.length === 0)
@@ -423,19 +438,20 @@ var tempis_timeline = (() => {
   };
 
   // src/TimelineDataView.ts
-  var DEFAULT_GROUP_VERTICAL_LABEL_MARGIN = 6;
+  var DEFAULT_GROUP_LABEL_MARGIN = 6;
   var DEFAULT_ITEM_VERTICAL_MARGIN = 4;
   var DEFAULT_GROUP_MARGIN = 8;
   var MINIMUM_RENDERED_LABEL_WIDTH = 5;
   var UNFOCUSED_ITEM_BACKGROUND_COLOUR = "#d6d6d6ff";
   var UNFOCUSED_ITEM_FONT_COLOUR = "#ffffffff";
   var TimelineDataView = class {
-    constructor(dataSet) {
+    constructor(dataSet, isRTL) {
       this._scrollYOffset = 0;
       this._lastDrawYPosition = 0;
       this._lastDrawHeight = 0;
       this._drawPlan = null;
       this._dataSet = dataSet;
+      this._isRTL = isRTL;
     }
     scrollByYMovement(movementY) {
       this._scrollYOffset += movementY;
@@ -485,6 +501,7 @@ var tempis_timeline = (() => {
         return;
       }
       const scrolledYPosition = yPosition + this._scrollYOffset;
+      context.textAlign = this._isRTL ? "right" : "left";
       for (let groupDrawPlanIndex = 0; groupDrawPlanIndex < this._drawPlan.groupDrawPlans.length; groupDrawPlanIndex++) {
         const groupDrawPlan = this._drawPlan.groupDrawPlans[groupDrawPlanIndex];
         if (groupDrawPlanIndex > 0) {
@@ -499,7 +516,11 @@ var tempis_timeline = (() => {
           context.textBaseline = "top";
           context.fillStyle = "#595959";
           context.beginPath();
-          context.fillText(groupDrawPlan.label, 6, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_VERTICAL_LABEL_MARGIN);
+          if (this._isRTL) {
+            context.fillText(groupDrawPlan.label, context.canvas.clientWidth - DEFAULT_GROUP_LABEL_MARGIN, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN);
+          } else {
+            context.fillText(groupDrawPlan.label, DEFAULT_GROUP_LABEL_MARGIN, scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN);
+          }
           context.stroke();
         }
         for (const groupDrawPlanRow of groupDrawPlan.rows) {
@@ -508,6 +529,7 @@ var tempis_timeline = (() => {
           }
         }
       }
+      context.textAlign = "left";
     }
     _drawGroupItem(itemDrawPlan, context, scrolledYPosition) {
       const item = itemDrawPlan.item;
@@ -563,8 +585,8 @@ var tempis_timeline = (() => {
         context.stroke();
       }
       if (item.label) {
-        const labelStartPositionX = Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
-        const maxLabelWidth = Math.max(0, Math.ceil(itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX));
+        const labelStartPositionX = this._isRTL ? Math.floor(Math.min(context.canvas.clientWidth - itemPadding, itemDrawPlan.xPositionEnd - itemPadding)) : Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
+        const maxLabelWidth = this._isRTL ? Math.max(0, Math.ceil(labelStartPositionX - (itemDrawPlan.xPositionStart + itemPadding)) + 1) : Math.max(0, Math.ceil(itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX));
         if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
           context.textBaseline = "middle";
           context.fillStyle = itemFontColor;
@@ -597,13 +619,18 @@ var tempis_timeline = (() => {
           let endPositionX = 0;
           let pointInTimePositionX = null;
           if (item.end) {
-            startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
-            endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
+            if (this._isRTL) {
+              startPositionX = milliRenderWidth * (rangeToDt.getTime() - item.end.getTime());
+              endPositionX = milliRenderWidth * (rangeToDt.getTime() - item.start.getTime());
+            } else {
+              startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
+              endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
+            }
           } else {
             const itemLabelWidth = context.measureText((_a = item.label) != null ? _a : "?").width + item.style.padding * 2;
-            startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime()) - itemLabelWidth / 2;
-            endPositionX = startPositionX + itemLabelWidth;
-            pointInTimePositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
+            pointInTimePositionX = this._isRTL ? milliRenderWidth * (rangeToDt.getTime() - item.start.getTime()) : milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
+            startPositionX = pointInTimePositionX - itemLabelWidth / 2;
+            endPositionX = pointInTimePositionX + itemLabelWidth / 2;
             if (startPositionX < 0) {
               startPositionX = 0;
               endPositionX = itemLabelWidth;
@@ -623,7 +650,8 @@ var tempis_timeline = (() => {
           };
           let wasItemAddedToExistingRowStack = false;
           for (const rowStack of itemDrawPlanStacks) {
-            if (rowStack.length === 0 || rowStack[rowStack.length - 1].xPositionEnd <= itemDrawPlan.xPositionStart) {
+            const canItemFitInCurrentRow = this._isRTL ? rowStack.length > 0 && rowStack[rowStack.length - 1].xPositionStart >= itemDrawPlan.xPositionEnd : rowStack.length > 0 && rowStack[rowStack.length - 1].xPositionEnd <= itemDrawPlan.xPositionStart;
+            if (rowStack.length === 0 || canItemFitInCurrentRow) {
               rowStack.push(itemDrawPlan);
               wasItemAddedToExistingRowStack = true;
               break;
@@ -646,7 +674,7 @@ var tempis_timeline = (() => {
         if (groupDrawPlan.label) {
           const groupLabelMetrics = context.measureText(groupDrawPlan.label);
           positionY += groupLabelMetrics.actualBoundingBoxAscent + groupLabelMetrics.actualBoundingBoxDescent;
-          positionY += 2 * DEFAULT_GROUP_VERTICAL_LABEL_MARGIN;
+          positionY += 2 * DEFAULT_GROUP_LABEL_MARGIN;
         }
         positionY += DEFAULT_GROUP_MARGIN;
         for (const itemRow of groupDrawPlan.rows) {
@@ -724,7 +752,7 @@ var tempis_timeline = (() => {
   };
   var DEFAULT_UNIT_LABEL_PADDING = 4;
   var TimelineRangeView = class {
-    constructor(canvas, dataSet, dateFormatter, options = {}) {
+    constructor(canvas, dataSet, dateFormatter, isRTL, options = {}) {
       this._fromDt = new Date();
       this._toDt = new Date(this._fromDt.getTime() + 31556952e4);
       this._minDate = new Date(-864e13);
@@ -736,6 +764,7 @@ var tempis_timeline = (() => {
       this._canvas = canvas;
       this._dataSet = dataSet;
       this._dateFormatter = dateFormatter;
+      this._isRTL = isRTL;
       this._options = options;
       this._parseOptions();
     }
@@ -793,7 +822,7 @@ var tempis_timeline = (() => {
       if (this._options.fixed || !isNullOrUndefined((_a = this._options.zoom) == null ? void 0 : _a.enabled) && ((_b = this._options.zoom) == null ? void 0 : _b.enabled) === false) {
         return;
       }
-      const targetPositionMillis = this._fromDt.getTime() + targetPositionX / this._canvas.clientWidth * (this._toDt.getTime() - this._fromDt.getTime());
+      const targetPositionMillis = this._isRTL ? this._fromDt.getTime() + (this._canvas.clientWidth - targetPositionX) / this._canvas.clientWidth * (this._toDt.getTime() - this._fromDt.getTime()) : this._fromDt.getTime() + targetPositionX / this._canvas.clientWidth * (this._toDt.getTime() - this._fromDt.getTime());
       const zoomFactor = 1 - clamp(amount, -1, 1) * -0.1;
       let targetFrom = targetPositionMillis - (targetPositionMillis - this._fromDt.getTime()) * zoomFactor;
       let targetTo = targetPositionMillis + (this._toDt.getTime() - targetPositionMillis) * zoomFactor;
@@ -837,13 +866,13 @@ var tempis_timeline = (() => {
       this._minorUnitTicks = minorTickDates.map((tickDate) => {
         return {
           date: tickDate,
-          xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
+          xPosition: this._isRTL ? this._canvas.clientWidth - milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime()) : milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
         };
       });
       this._majorUnitTicks = majorTickDates.map((tickDate) => {
         return {
           date: tickDate,
-          xPosition: milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
+          xPosition: this._isRTL ? this._canvas.clientWidth - milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime()) : milliRenderWidth * (tickDate.getTime() - this._fromDt.getTime())
         };
       });
     }
@@ -862,10 +891,23 @@ var tempis_timeline = (() => {
           context.lineTo(xPosition, minorTicksYPosition + rangeContainerHeight / 2);
           context.stroke();
         }
+        const minorTickLabel = this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS);
         context.textBaseline = "alphabetic";
         context.fillStyle = "#595959";
         context.beginPath();
-        context.fillText(this._formatDate(date, this._minorTickUnitAndStep.unit, DEFAULT_MINOR_UNIT_LABEL_FORMATS), xPosition + DEFAULT_UNIT_LABEL_PADDING, minorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING);
+        if (this._isRTL) {
+          context.fillText(
+            minorTickLabel,
+            xPosition - DEFAULT_UNIT_LABEL_PADDING - context.measureText(minorTickLabel).width,
+            minorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING
+          );
+        } else {
+          context.fillText(
+            minorTickLabel,
+            xPosition + DEFAULT_UNIT_LABEL_PADDING,
+            minorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING
+          );
+        }
         context.stroke();
       }
       if (this._minorTickUnitAndStep.unit === "year") {
@@ -873,7 +915,8 @@ var tempis_timeline = (() => {
       }
       for (let tickIndex = 0; tickIndex < this._majorUnitTicks.length; tickIndex++) {
         const { date, xPosition } = this._majorUnitTicks[tickIndex];
-        const isStickyLabel = date.getTime() <= this._fromDt.getTime();
+        const nextMajorTick = this._majorUnitTicks[tickIndex + 1];
+        const isStickyLabel = date.getTime() <= this._fromDt.getTime() && nextMajorTick && nextMajorTick.date.getTime() > this._fromDt.getTime();
         if (!isStickyLabel && xPosition > 0 && xPosition < context.canvas.clientWidth) {
           context.lineWidth = 2;
           context.lineCap = "round";
@@ -883,18 +926,23 @@ var tempis_timeline = (() => {
           context.lineTo(xPosition, majorTicksYPosition + rangeContainerHeight / 2 - 3);
           context.stroke();
         }
-        const tickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
-        let labelXPosition = xPosition + DEFAULT_UNIT_LABEL_PADDING;
+        const majorTickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, DEFAULT_MAJOR_UNIT_LABEL_FORMATS);
+        let labelXPosition = this._isRTL ? xPosition - DEFAULT_UNIT_LABEL_PADDING - context.measureText(majorTickLabel).width : xPosition + DEFAULT_UNIT_LABEL_PADDING;
         if (isStickyLabel) {
-          const labelWidth = context.measureText(tickLabel).width + DEFAULT_UNIT_LABEL_PADDING;
-          const nextTickXPosition = this._majorUnitTicks[tickIndex + 1].xPosition;
-          labelXPosition = nextTickXPosition > labelWidth ? DEFAULT_UNIT_LABEL_PADDING : nextTickXPosition - labelWidth;
+          const labelWidth = context.measureText(majorTickLabel).width + DEFAULT_UNIT_LABEL_PADDING;
+          if (nextMajorTick) {
+            if (this._isRTL) {
+              labelXPosition = nextMajorTick.xPosition <= context.canvas.clientWidth - labelWidth ? context.canvas.clientWidth - labelWidth : nextMajorTick.xPosition + DEFAULT_UNIT_LABEL_PADDING;
+            } else {
+              labelXPosition = nextMajorTick.xPosition >= labelWidth ? DEFAULT_UNIT_LABEL_PADDING : nextMajorTick.xPosition - labelWidth;
+            }
+          }
         }
         context.lineWidth = 0.5;
         context.textBaseline = "alphabetic";
         context.fillStyle = "#595959";
         context.beginPath();
-        context.fillText(tickLabel, labelXPosition, majorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING);
+        context.fillText(majorTickLabel, labelXPosition, majorTicksYPosition + rangeContainerHeight / 2 - DEFAULT_UNIT_LABEL_PADDING);
         context.stroke();
       }
     }
@@ -1052,7 +1100,7 @@ var tempis_timeline = (() => {
   // src/TimelineTooltip.ts
   var DEFAULT_TOOLTIP_DELAY_MS = 500;
   var TimelineTooltip = class {
-    constructor(item, canvas, dateFormatter, font, options, x2, y) {
+    constructor(item, canvas, dateFormatter, font, isRTL, options, x2, y) {
       this._activeElement = null;
       this._activeShowTimer = null;
       this._posX = 0;
@@ -1062,6 +1110,7 @@ var tempis_timeline = (() => {
       this._canvas = canvas;
       this._dateFormatter = dateFormatter;
       this._font = font;
+      this._isRTL = isRTL;
       this._options = options;
       this._posX = x2;
       this._posY = y;
@@ -1122,7 +1171,8 @@ var tempis_timeline = (() => {
           color: "#fff",
           margin: "10px",
           padding: "0.2em",
-          borderRadius: "5px"
+          borderRadius: "5px",
+          direction: this._isRTL ? "rtl" : "ltr"
         });
         if (this._item.end) {
           this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
@@ -1171,12 +1221,13 @@ var tempis_timeline = (() => {
 
   // src/TimelineTooltipView.ts
   var TimelineTooltipView = class {
-    constructor(canvas, dataView, dateFormatter, font, options = {}) {
+    constructor(canvas, dataView, dateFormatter, font, isRTL, options = {}) {
       this._activeTooltip = null;
       this._canvas = canvas;
       this._dataView = dataView;
       this._dateFormatter = dateFormatter;
       this._font = font;
+      this._isRTL = isRTL;
       this._options = options;
       this._createCanvasEventHandlers();
     }
@@ -1228,7 +1279,7 @@ var tempis_timeline = (() => {
           (_b = this._activeTooltip) == null ? void 0 : _b.destroy();
           this._activeTooltip = null;
         }
-        this._activeTooltip = new TimelineTooltip(item, this._canvas, this._dateFormatter, this._font, this._options, event.clientX, event.clientY);
+        this._activeTooltip = new TimelineTooltip(item, this._canvas, this._dateFormatter, this._font, this._isRTL, this._options, event.clientX, event.clientY);
       }
     }
   };
@@ -1238,11 +1289,12 @@ var tempis_timeline = (() => {
   var DEFAULT_LEGEND_PADDING = 8;
   var DISABLED_CATEGORY_ALPHA = 0.4;
   var TimelineLegendView = class {
-    constructor(canvas, dataSet, options = {}) {
+    constructor(canvas, dataSet, isRTL, options = {}) {
       this._drawPlan = null;
       this._lastDrawYPosition = 0;
       this._canvas = canvas;
       this._dataSet = dataSet;
+      this._isRTL = isRTL;
       this._options = options;
       this._createCanvasEventHandlers();
     }
@@ -1301,17 +1353,43 @@ var tempis_timeline = (() => {
         }
         context.fillStyle = categoryDrawPlan.category.style.backgroundColor;
         context.beginPath();
-        context.roundRect(categoryDrawPlan.xPositionStart + this.itemPadding, categoryDrawPlan.yPositionStart + this.itemPadding + yPosition, categoryDrawPlan.markerSize, categoryDrawPlan.markerSize, markerRadius);
+        if (this._isRTL) {
+          context.roundRect(
+            Math.min(categoryDrawPlan.xPositionEnd - this.itemPadding - categoryDrawPlan.markerSize, this._drawPlan.width - categoryDrawPlan.markerSize - DEFAULT_LEGEND_PADDING),
+            categoryDrawPlan.yPositionStart + this.itemPadding + yPosition,
+            categoryDrawPlan.markerSize,
+            categoryDrawPlan.markerSize,
+            markerRadius
+          );
+        } else {
+          context.roundRect(
+            categoryDrawPlan.xPositionStart + this.itemPadding,
+            categoryDrawPlan.yPositionStart + this.itemPadding + yPosition,
+            categoryDrawPlan.markerSize,
+            categoryDrawPlan.markerSize,
+            markerRadius
+          );
+        }
         context.fill();
         context.fillStyle = "#595959";
         context.textBaseline = "middle";
-        drawClippedText(
-          context,
-          categoryDrawPlan.category.label,
-          categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap,
-          categoryDrawPlan.yPositionStart + categoryDrawPlan.height / 2 + yPosition,
-          this._drawPlan.width - (categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
-        );
+        if (this._isRTL) {
+          drawClippedText(
+            context,
+            categoryDrawPlan.category.label,
+            categoryDrawPlan.xPositionStart + this.itemPadding,
+            categoryDrawPlan.yPositionStart + categoryDrawPlan.height / 2 + yPosition,
+            this._drawPlan.width - (categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
+          );
+        } else {
+          drawClippedText(
+            context,
+            categoryDrawPlan.category.label,
+            categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap,
+            categoryDrawPlan.yPositionStart + categoryDrawPlan.height / 2 + yPosition,
+            this._drawPlan.width - (categoryDrawPlan.xPositionStart + this.itemPadding + categoryDrawPlan.markerSize + categoryDrawPlan.markerLabelGap) - DEFAULT_LEGEND_PADDING
+          );
+        }
         context.globalAlpha = 1;
       }
       this._lastDrawYPosition = yPosition;
@@ -1355,12 +1433,14 @@ var tempis_timeline = (() => {
         const rowIndex = elementRows.indexOf(elementRow);
         const rowTotalWidth = elementRow.reduce((previous, current) => previous + current.width, 0);
         let currentXPosition = 0;
-        if (this.alignment === "center") {
+        if (this.alignment === "start") {
+          currentXPosition = this._isRTL ? Math.max(0, availableWidth - rowTotalWidth) : 0;
+        } else if (this.alignment === "center") {
           currentXPosition = Math.max(0, availableWidth / 2 - rowTotalWidth / 2);
         } else if (this.alignment === "end") {
-          currentXPosition = Math.max(0, availableWidth - rowTotalWidth);
+          currentXPosition = this._isRTL ? 0 : Math.max(0, availableWidth - rowTotalWidth);
         }
-        for (const element of elementRow) {
+        for (const element of this._isRTL ? elementRow.slice().reverse() : elementRow) {
           categoryDrawPlans.push({
             category: element.category,
             markerSize: element.labelHeight,
@@ -1882,10 +1962,10 @@ var tempis_timeline = (() => {
       this._font = new TimelineFont((_a = this._options.style) == null ? void 0 : _a.font);
       this._dateFormatter = new DateFormatter();
       this._dataSet = new TimelineDataSet(this._options);
-      this._dataView = new TimelineDataView(this._dataSet);
-      this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._options.range);
-      this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._options.legend);
-      this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._options.tooltip);
+      this._dataView = new TimelineDataView(this._dataSet, this._isRTL);
+      this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._dateFormatter, this._isRTL, this._options.range);
+      this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._isRTL, this._options.legend);
+      this._tooltipView = new TimelineTooltipView(this._canvas, this._dataView, this._dateFormatter, this._font, this._isRTL, this._options.tooltip);
       this._resizeCanvas();
       if (this._isResponsive) {
         this._createCanvasContainerResizeObserver();
@@ -1903,6 +1983,10 @@ var tempis_timeline = (() => {
     get _isResponsive() {
       var _a;
       return (_a = this._options.responsive) != null ? _a : false;
+    }
+    get _isRTL() {
+      var _a;
+      return (_a = this._options.rtl) != null ? _a : false;
     }
     getSelection() {
       return this._dataSet.getSelectedItems().map((item) => item.id);
@@ -1990,7 +2074,7 @@ var tempis_timeline = (() => {
           return;
         }
         if (Math.abs(event.movementX) >= 1) {
-          this._rangeView.moveRange(-event.movementX);
+          this._rangeView.moveRange(this._isRTL ? event.movementX : -event.movementX);
         }
         if (Math.abs(event.movementY) >= 1) {
           this._dataView.scrollByYMovement(event.movementY);
@@ -2030,7 +2114,7 @@ var tempis_timeline = (() => {
       }, false);
     }
     _resizeCanvas() {
-      if (this._options.responsive === false) {
+      if (!this._isResponsive) {
         return;
       }
       const canvasContainerElement = this._canvas.parentElement;
@@ -2059,6 +2143,7 @@ var tempis_timeline = (() => {
     _draw() {
       var context = this._canvas.getContext("2d");
       context.clearRect(0, 0, this._canvas.clientWidth, this._canvas.clientHeight);
+      context.direction = "ltr";
       context.font = this._font.font;
       const rangeViewHeight = this._rangeView.calculateRequiredHeight();
       const legendViewHeight = this._legendView.calculateRequiredHeight();
