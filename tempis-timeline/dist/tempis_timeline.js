@@ -613,7 +613,7 @@ var tempis_timeline = (() => {
           itemDrawPlan.xPointInTimePosition,
           scrolledYPosition + itemDrawPlan.yPositionStart + (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2
         );
-        context.lineTo(itemDrawPlan.xPointInTimePosition, 1e4);
+        context.lineTo(itemDrawPlan.xPointInTimePosition, context.canvas.clientHeight);
         context.stroke();
       }
       context.fillStyle = itemBackgroundColor;
@@ -2148,6 +2148,10 @@ var tempis_timeline = (() => {
       var _a;
       return (_a = this._options.rtl) != null ? _a : false;
     }
+    get _verticalFillMode() {
+      var _a;
+      return (_a = this._options.verticalFill) != null ? _a : "content";
+    }
     getSelection() {
       return this._dataSet.getSelectedItems().map((item) => item.id);
     }
@@ -2344,8 +2348,8 @@ var tempis_timeline = (() => {
         context,
         this._rangeView,
         renderOffsetY,
-        dataViewMaxHeight,
-        !!this._options.fillVertically
+        this._verticalFillMode === "grow-canvas" ? Number.MAX_SAFE_INTEGER : dataViewMaxHeight,
+        this._verticalFillMode === "fill-canvas"
       );
       context.restore();
       if (["bottom", "both"].includes(this._rangeView.position)) {
@@ -2357,6 +2361,11 @@ var tempis_timeline = (() => {
         renderOffsetY += legendViewHeight;
       }
       context.clearRect(0, renderOffsetY, this._canvas.clientWidth, this._canvas.clientHeight - renderOffsetY);
+      if (this._verticalFillMode === "grow-canvas" && this._canvas.clientHeight !== renderOffsetY) {
+        this._canvas.style.height = renderOffsetY + "px";
+        this._applyCanvasDPRScaling();
+        this._draw();
+      }
     }
     _onCanvasClicked() {
       if (this._selectionMode === "none") {

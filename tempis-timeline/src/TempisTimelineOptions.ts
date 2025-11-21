@@ -7,8 +7,13 @@ export interface TempisTimelineOptions {
     /** Whether the canvas should resize to match the dimensions of its parent container. */
     responsive?: boolean;
 
-    /** Whether the timeline should fill the vertical space of the canvas. */
-    fillVertically?: boolean;
+    /**
+     * The vertical fill mode which defines how the timeline should fill the vertical space. Defaults to `"content"`
+     * - `"content"` – The timeline height is determined purely by its content and will only take up as much vertical space as required to render all visible items.
+     * - `"fill-canvas"` – The timeline expands to fill the available vertical space of the canvas.
+     * - `"grow-canvas"`– The timeline grows the canvas element itself to match the required content height.
+     */
+    verticalFill?: TempisTimelineVerticalFillMode;
 
     /** Whether the timeline and any default tooltips should be rendered right-to-left. */
     rtl?: boolean;
@@ -32,7 +37,7 @@ export interface TempisTimelineOptions {
     items: TempisTimelineItem[];
 
     /**
-     * Defines how items in a timeline can be selected. Defaults to `"none"`.
+     * The item selection mode which defines how items in the timeline can be selected. Defaults to `"none"`.
      * - `"none"` – No items can be selected (view-only mode).
      * - `"single"` – Only one item can be selected at a time. Selecting a new item clears the previous selection.
      * - `"multi"`– Multiple items can be selected at once. Each item can be toggled independently.
@@ -45,6 +50,14 @@ export interface TempisTimelineOptions {
 
     onSelectionChange?(changes: SelectionChangeEvent[]): void;
 }
+
+/**
+ * Defines how the timeline should fill the vertical space.
+ * - `"content"` – The timeline height is determined purely by its content and will only take up as much vertical space as required to render all visible items.
+ * - `"fill-canvas"` – The timeline expands to fill the available vertical space of the canvas.
+ * - `"grow-canvas"`– The timeline grows the canvas element itself to match the required content height.
+ */
+export type TempisTimelineVerticalFillMode = "content" | "fill-canvas" | "grow-canvas";
 
 /**
  * Defines how items in a timeline can be selected.

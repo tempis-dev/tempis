@@ -1,4 +1,4 @@
-import { TempisTimelineItem, TempisTimelineItemSelectionMode, TempisTimelineOptions } from "./TempisTimelineOptions";
+import { TempisTimelineItem, TempisTimelineItemSelectionMode, TempisTimelineOptions, TempisTimelineVerticalFillMode } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineDataView } from "./TimelineDataView";
 import { TimelineFont } from "./TimelineFont";
@@ -107,6 +107,11 @@ export class TempisTimeline {
     /** Gets whether the timeline is rendering right-to-left. */
     private get _isRTL(): boolean {
         return this._options.rtl ?? false;
+    }
+
+    /** Gets the vertical fill mode. */
+    private get _verticalFillMode(): TempisTimelineVerticalFillMode {
+        return this._options.verticalFill ?? "content";
     }
 
     /**
@@ -528,8 +533,9 @@ export class TempisTimeline {
             context,
             this._rangeView,
             renderOffsetY,
-            dataViewMaxHeight,
-            !!this._options.fillVertically
+            // For "grow-canvas" vertical fill mode we just give the data view a massive height to render into so that it can render all items safely.
+            this._verticalFillMode === "grow-canvas" ? Number.MAX_SAFE_INTEGER : dataViewMaxHeight,
+            this._verticalFillMode === "fill-canvas"
         );
 
         // Restore the original render context, this will bin the clipping rect we put in place to restrict the data view render.
@@ -549,6 +555,19 @@ export class TempisTimeline {
 
         // Clear the canvas from below the bottom of the bottom range view or bottom of the timeline or the bottom of the legend.
         context.clearRect(0, renderOffsetY, this._canvas.clientWidth, this._canvas.clientHeight - renderOffsetY);
+
+        // If we are in "grow-canvas" vertical fill mode then we need to check if the canvas height needs to be
+        // updated to match the total render offset height calculated in the first pass and the timeline then redrawn.
+        if (this._verticalFillMode === "grow-canvas" && this._canvas.clientHeight !== renderOffsetY) {
+            // The canvas height needs to be updated to match the total render height of the first pass.
+            this._canvas.style.height = renderOffsetY + "px";
+
+            // The canvas height has changed so we need to reapply the DPR scaling.
+            this._applyCanvasDPRScaling();
+
+            // Redraw the timeline now that the canvas size has changed to match the height of the first pass.
+            this._draw();
+        }
     }
 
     /**
