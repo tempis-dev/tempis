@@ -8,7 +8,7 @@ The options object passed when creating an instance of TempisTimeline.
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `responsive` | `boolean` | `false` | Whether the canvas should resize to match the dimensions of its parent container. |
-| `fillVertically` | `boolean` | `false` | Whether the timeline should fill the vertical space of the canvas. |
+| `verticalFill` | `TempisTimelineVerticalFillMode` | `"content"` | Defines how the timeline should fill the vertical space. |
 | `rtl` | `boolean` | `false` | Whether the timeline and any default tooltips should be rendered right-to-left. |
 | `range` | `TempisTimelineRangeOptions` | — | Timeline range configuration including start, end, min/max, zoom, units, and position. |
 | `legend` | `TempisTimelineLegendOptions` | — | Configuration for the timeline legend including position, alignment, and item options. |
@@ -20,6 +20,15 @@ The options object passed when creating an instance of TempisTimeline.
 | `onItemClick` | `(id: string \| number) => void` | — | Callback function triggered when an item is clicked. |
 | `onItemDoubleClick` | `(id: string \| number) => void` | — | Callback function triggered when an item is double-clicked. |
 | `onSelectionChange` | `(changes: SelectionChangeEvent[]) => void` | — | Callback function triggered when item selection changes. |
+
+## TempisTimelineVerticalFillMode
+Defines how the timeline should fill the vertical space.
+
+| Value | Description |
+|------|-------------|
+| `content` | The timeline height is determined purely by its content and will only take up as much vertical space as required to render all visible. |
+| `fill-canvas` | The timeline expands to fill the available vertical space of the canvas. |
+| `grow-canvas` | The timeline grows the canvas element itself to match the required content height. |
 
 ## TempisTimelineItemSelectionMode
 Defines how items in a timeline can be selected.

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Right-To-Left</title>
+  <title>Vertical Fill</title>
   <script src="../dist/tempis_timeline.js"></script>
 </head>
 <style>
@@ -25,117 +25,89 @@
   // Create our timeline options.
   const timelineOptions = {
     responsive: true,
-    rtl: true,
+    verticalFill: "grow-canvas",
     range: {
-      position: "bottom",
-      start: new Date("Jan 23 2025 00:00:00 GMT+0000"),
-      end: new Date("Jan 25 2025 00:00:00 GMT+0000"),
+      position: "bottom"
     },
-    legend: {
-      position: "bottom",
-      alignment: "start"
+    font: {
+      size: 14
     },
-    style: {
-      font: {
-        size: 14
-      }
-    },
-     categories: [
-      {
-        name: "cat-1",
-        label: "קטגוריה 1",
-      },
-      {
-        name: "cat-2",
-        label: "קטגוריה 2",
-      },
-      {
-        name: "cat-3",
-        label: "קטגוריה 3",
-      },
-      {
-        name: "cat-4",
-        label: "קטגוריה 4",
-      }
-    ],
     items: [
       { 
         id: 0,
-        label: "יָשֵׁן",
+        label: "sleeping",
         start: new Date("Thu Jan 23 2025 00:00:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 08:30:00 GMT+0000"),
-        grouping: "היום שלי",
-        category: "cat-1"
+        grouping: "Nik's Day"
       },
       { 
         id: 1,
-        label: "עובד",
+        label: "working",
         start: new Date("Thu Jan 23 2025 09:00:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 17:00:00 GMT+0000"),
-        grouping: "היום שלי"
+        grouping: "Nik's Day"
       },
       { 
         id: 2,
-        label: "אֲכִילָה",
+        label: "eating",
         start: new Date("Thu Jan 23 2025 17:15:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 18:00:00 GMT+0000"),
-        grouping: "היום שלי"
+        grouping: "Nik's Day"
       },
       { 
         id: 3,
-        label: "משחק",
+        label: "playing",
         start: new Date("Thu Jan 23 2025 18:30:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 21:00:00 GMT+0000"),
-        grouping: "היום שלי",
-        category: "cat-2"
+        grouping: "Nik's Day"
       },
       { 
         id: 4,
-        label: "יָשֵׁן",
+        label: "sleeping",
         start: new Date("Thu Jan 23 2025 21:10:00 GMT+0000"),
         end: new Date("Thu Jan 24 2025 00:00:00 GMT+0000"),
-        grouping: "היום שלי"
+        grouping: "Nik's Day"
       },
       { 
         id: 5,
-        label: "נַחֲרָנִי",
+        label: "snoring",
         start: new Date("Thu Jan 23 2025 02:30:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 07:30:00 GMT+0000"),
-        grouping: "היום שלי"
+        grouping: "Nik's Day"
       },
       { 
         id: 6,
-        label: "כאבה חזק מאוד בבוהן",
+        label: "Stubbed Toe, like, really bad",
         start: new Date("Thu Jan 23 2025 11:32:30 GMT+0000"),
-        grouping: "יום האישה"
+        grouping: "Becky's Day"
       },
       { 
         id: 7,
-        label: "יָשֵׁן",
+        label: "sleeping",
         start: new Date("Thu Jan 23 2025 00:00:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 11:30:00 GMT+0000"),
-        grouping: "יום הכלבים"
+        grouping: "Tilly's Day"
       },
       { 
         id: 8,
-        label: "הֲרָחָה",
+        label: "sniffing",
         start: new Date("Thu Jan 23 2025 11:35:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 13:45:00 GMT+0000"),
-        grouping: "יום הכלבים"
+        grouping: "Tilly's Day"
       },
       { 
         id: 9,
-        label: "אֲכִילָה",
+        label: "eating",
         start: new Date("Thu Jan 23 2025 13:05:00 GMT+0000"),
         end: new Date("Thu Jan 23 2025 13:45:00 GMT+0000"),
-        grouping: "יום הכלבים"
+        grouping: "Tilly's Day"
       },
       { 
         id: 10,
-        label: "יָשֵׁן",
+        label: "sleeping",
         start: new Date("Thu Jan 23 2025 14:00:00 GMT+0000"),
         end: new Date("Thu Jan 24 2025 00:00:00 GMT+0000"),
-        grouping: "יום הכלבים"
+        grouping: "Tilly's Day"
       },
     ]
   };
