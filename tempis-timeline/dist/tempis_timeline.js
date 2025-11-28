@@ -771,7 +771,6 @@ var tempis_timeline = (() => {
       };
     }
   };
-  TimelineDataView._minimumHeight = 50;
 
   // src/TimelineFont.ts
   var TIMELINE_FONT_DEFAULT_SIZE = 14;

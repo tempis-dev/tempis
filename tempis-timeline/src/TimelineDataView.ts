@@ -67,9 +67,6 @@ const UNFOCUSED_ITEM_BACKGROUND_COLOUR = "#d6d6d6ff";
 const UNFOCUSED_ITEM_FONT_COLOUR = "#ffffffff";
 
 export class TimelineDataView {
-    /** The minimum height of the data view. */
-    private static _minimumHeight: number = 50;
-
     /** The underlying dataset model. */
     private readonly _dataSet: TimelineDataSet;
 
