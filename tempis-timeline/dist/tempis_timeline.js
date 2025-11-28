@@ -454,6 +454,21 @@ var tempis_timeline = (() => {
     }
   };
 
+  // src/TimelineBand.ts
+  var TimelineBand = class {
+    constructor(definition) {
+      this._definition = definition;
+      this._start = parseDate(definition.start);
+      this._end = definition.end ? parseDate(definition.end) : null;
+    }
+    get start() {
+      return this._start;
+    }
+    get end() {
+      return this._end;
+    }
+  };
+
   // src/TimelineDataView.ts
   var DEFAULT_GROUP_LABEL_MARGIN = 6;
   var DEFAULT_ITEM_VERTICAL_MARGIN = 4;
@@ -2103,7 +2118,7 @@ var tempis_timeline = (() => {
   var TempisTimeline = class {
     constructor(context, options) {
       this._canvasContainerResizeObserver = null;
-      var _a;
+      var _a, _b;
       this._options = options;
       this._canvas = this._getCanvas(context);
       this._font = new TimelineFont((_a = this._options.style) == null ? void 0 : _a.font);
@@ -2126,6 +2141,7 @@ var tempis_timeline = (() => {
         this._isRTL,
         this._options.tooltip
       );
+      this._bands = ((_b = this._options.bands) != null ? _b : []).map((definition) => new TimelineBand(definition));
       this._resizeCanvas();
       if (this._isResponsive) {
         this._createCanvasContainerResizeObserver();
@@ -2151,10 +2167,6 @@ var tempis_timeline = (() => {
     get _verticalFillMode() {
       var _a;
       return (_a = this._options.verticalFill) != null ? _a : "content";
-    }
-    get _bands() {
-      var _a;
-      return (_a = this._options.bands) != null ? _a : [];
     }
     getSelection() {
       return this._dataSet.getSelectedItems().map((item) => item.id);

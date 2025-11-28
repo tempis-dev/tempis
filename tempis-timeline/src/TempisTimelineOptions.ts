@@ -305,7 +305,7 @@ export interface TempisTimelineBand {
     /** The band start date as a date string, number of millis or Date object. */
     start: string | number | Date;
 
-    /** The band end date (if the band is a marker) as a date string, number of millis or Date object. */
+    /** The band end date as a date string, number of millis or Date object. */
     end?: string | number | Date;
 
     /** The colour of the band. */

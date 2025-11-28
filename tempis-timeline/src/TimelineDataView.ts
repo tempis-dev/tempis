@@ -1,5 +1,5 @@
-import { TempisTimelineBand } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
+import { TimelineBand } from "./TimelineBand";
 import { TimelineItem } from "./TimelineItem";
 import { RangeTick } from "./TimelineRangeView";
 import { clamp, drawClippedText } from "./Utilities";
@@ -123,7 +123,7 @@ export class TimelineDataView {
         fromDt: Date,
         toDt: Date,
         minorTicks: RangeTick[],
-        bands: TempisTimelineBand[],
+        bands: TimelineBand[],
         yPosition: number,
         maxHeight: number,
         fillVertically: boolean

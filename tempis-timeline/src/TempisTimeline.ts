@@ -1,5 +1,6 @@
-import { TempisTimelineBand, TempisTimelineItem, TempisTimelineItemSelectionMode, TempisTimelineOptions, TempisTimelineVerticalFillMode } from "./TempisTimelineOptions";
+import { TempisTimelineItem, TempisTimelineItemSelectionMode, TempisTimelineOptions, TempisTimelineVerticalFillMode } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
+import { TimelineBand } from "./TimelineBand";
 import { TimelineDataView } from "./TimelineDataView";
 import { TimelineFont } from "./TimelineFont";
 import { TimelineItem } from "./TimelineItem";
@@ -19,6 +20,9 @@ export class TempisTimeline {
 
     /** The timeline dataset. */
     private readonly _dataSet: TimelineDataSet;
+
+    /** The timeline bands. */
+    private readonly _bands: TimelineBand[];
 
     /** The timeline data view. */
     private readonly _dataView: TimelineDataView;
@@ -72,6 +76,9 @@ export class TempisTimeline {
             this._options.tooltip
         );
 
+        // Create the timeline bands.
+        this._bands = (this._options.bands ?? []).map((definition) => new TimelineBand(definition));
+
         // Do our initial canvas resize.
         this._resizeCanvas();
 
@@ -112,11 +119,6 @@ export class TempisTimeline {
     /** Gets the vertical fill mode. */
     private get _verticalFillMode(): TempisTimelineVerticalFillMode {
         return this._options.verticalFill ?? "content";
-    }
-
-    /** Gets the timeline bands. */
-    private get _bands(): TempisTimelineBand[] {
-        return this._options.bands ?? [];
     }
 
     /**
