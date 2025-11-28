@@ -1,4 +1,4 @@
-import { TempisTimelineItem, TempisTimelineItemSelectionMode, TempisTimelineOptions, TempisTimelineVerticalFillMode } from "./TempisTimelineOptions";
+import { TempisTimelineBand, TempisTimelineItem, TempisTimelineItemSelectionMode, TempisTimelineOptions, TempisTimelineVerticalFillMode } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineDataView } from "./TimelineDataView";
 import { TimelineFont } from "./TimelineFont";
@@ -112,6 +112,11 @@ export class TempisTimeline {
     /** Gets the vertical fill mode. */
     private get _verticalFillMode(): TempisTimelineVerticalFillMode {
         return this._options.verticalFill ?? "content";
+    }
+
+    /** Gets the timeline bands. */
+    private get _bands(): TempisTimelineBand[] {
+        return this._options.bands ?? [];
     }
 
     /**
@@ -531,7 +536,10 @@ export class TempisTimeline {
         // The result of this is the resulting data view height which we should add to the total render height.
         renderOffsetY += this._dataView.draw(
             context,
-            this._rangeView,
+            this._rangeView.fromDt,
+            this._rangeView.toDt,
+            this._rangeView.minorTicks,
+            this._bands,
             renderOffsetY,
             // For "grow-canvas" vertical fill mode we just give the data view a massive height to render into so that it can render all items safely.
             this._verticalFillMode === "grow-canvas" ? Number.MAX_SAFE_INTEGER : dataViewMaxHeight,

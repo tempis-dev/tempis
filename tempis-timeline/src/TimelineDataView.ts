@@ -1,6 +1,7 @@
+import { TempisTimelineBand } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineItem } from "./TimelineItem";
-import { RangeTick, TimelineRangeView } from "./TimelineRangeView";
+import { RangeTick } from "./TimelineRangeView";
 import { clamp, drawClippedText } from "./Utilities";
 
 export interface DataViewDrawPlan {
@@ -109,20 +110,26 @@ export class TimelineDataView {
     /**
      * Draw the timeline data view onto the canvas.
      * @param context The canvas 2D context.
-     * @param range The timeline range view.
+     * @param fromDt The range from date.
+     * @param toDt The range to date.
+     * @param minorTicks The minor ticks to render onto the data view.
+     * @param bands The bands to render onto the data view.
      * @param yPosition The y position from where to start drawing the view.
      * @param maxHeight The max height that we can draw the data view before it must start scrolling.
      * @param fillVertically Whether the timeline data view should fill the vertical space available to it.
      */
     public draw(
         context: CanvasRenderingContext2D,
-        range: TimelineRangeView,
+        fromDt: Date,
+        toDt: Date,
+        minorTicks: RangeTick[],
+        bands: TempisTimelineBand[],
         yPosition: number,
         maxHeight: number,
         fillVertically: boolean
     ): number {
         // We should create our plan for drawing the groups and items of the view. This will also give us exactly how much space would be required to do so.
-        this._drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
+        this._drawPlan = this._createViewDrawPlan(context, fromDt, toDt);
 
         // We should clamp our scroll offset to the allowed values now that we know the height required to render all groups.
         this._scrollYOffset = clamp(this._scrollYOffset, Math.min(0, maxHeight - this._drawPlan.height), 0);
@@ -135,7 +142,7 @@ export class TimelineDataView {
         context.clearRect(0, yPosition, context.canvas.width, this._lastDrawHeight);
 
         // TODO Draw minor unit tick bars IF configured.
-        this._drawMinorUnitBars(context, range.minorTicks, yPosition, this._lastDrawHeight);
+        this._drawMinorUnitBars(context, minorTicks, yPosition, this._lastDrawHeight);
 
         // Draw our groups and items!
         this._drawGroups(context, yPosition);

@@ -473,12 +473,12 @@ var tempis_timeline = (() => {
     scrollByYMovement(movementY) {
       this._scrollYOffset += movementY;
     }
-    draw(context, range, yPosition, maxHeight, fillVertically) {
-      this._drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
+    draw(context, fromDt, toDt, minorTicks, bands, yPosition, maxHeight, fillVertically) {
+      this._drawPlan = this._createViewDrawPlan(context, fromDt, toDt);
       this._scrollYOffset = clamp(this._scrollYOffset, Math.min(0, maxHeight - this._drawPlan.height), 0);
       this._lastDrawHeight = fillVertically ? maxHeight : Math.min(this._drawPlan.height, maxHeight);
       context.clearRect(0, yPosition, context.canvas.width, this._lastDrawHeight);
-      this._drawMinorUnitBars(context, range.minorTicks, yPosition, this._lastDrawHeight);
+      this._drawMinorUnitBars(context, minorTicks, yPosition, this._lastDrawHeight);
       this._drawGroups(context, yPosition);
       this._lastDrawYPosition = yPosition;
       return this._lastDrawHeight;
@@ -2152,6 +2152,10 @@ var tempis_timeline = (() => {
       var _a;
       return (_a = this._options.verticalFill) != null ? _a : "content";
     }
+    get _bands() {
+      var _a;
+      return (_a = this._options.bands) != null ? _a : [];
+    }
     getSelection() {
       return this._dataSet.getSelectedItems().map((item) => item.id);
     }
@@ -2346,7 +2350,10 @@ var tempis_timeline = (() => {
       context.clip();
       renderOffsetY += this._dataView.draw(
         context,
-        this._rangeView,
+        this._rangeView.fromDt,
+        this._rangeView.toDt,
+        this._rangeView.minorTicks,
+        this._bands,
         renderOffsetY,
         this._verticalFillMode === "grow-canvas" ? Number.MAX_SAFE_INTEGER : dataViewMaxHeight,
         this._verticalFillMode === "fill-canvas"
