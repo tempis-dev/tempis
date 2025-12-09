@@ -2,7 +2,7 @@ import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineBand } from "./TimelineBand";
 import { TimelineItem } from "./TimelineItem";
 import { RangeTick } from "./TimelineRangeView";
-import { clamp, drawClippedText } from "./Utilities";
+import { clamp, doDateRangesOverlap, drawClippedText } from "./Utilities";
 
 export interface DataViewDrawPlan {
     /** The height that is required to draw all groups and items within the specified date range. */
@@ -138,7 +138,11 @@ export class TimelineDataView {
         // Clear the data view area.
         context.clearRect(0, yPosition, context.canvas.width, this._lastDrawHeight);
 
-        // TODO Draw minor unit tick bars IF configured.
+        // Draw any configured timeline bands first.
+        this._drawBands(context, bands, fromDt, toDt, yPosition, this._lastDrawHeight);
+
+        // Draw minor unit tick bars.
+        // TODO Only do this is configured.
         this._drawMinorUnitBars(context, minorTicks, yPosition, this._lastDrawHeight);
 
         // Draw our groups and items!
@@ -187,10 +191,66 @@ export class TimelineDataView {
     }
 
     /**
+     * Draw a vertical band for every timeline band model.
+     * @param context The canvas context.
+     * @param bands The timeline band models.
+     * @param rangeFromDt The range from date.
+     * @param rangeToDt The range to date.
+     * @param yPosition The y position of the top of the view.
+     * @param height The available height of the view.
+     */
+    private _drawBands(
+        context: CanvasRenderingContext2D,
+        bands: TimelineBand[],
+        rangeFromDt: Date,
+        rangeToDt: Date,
+        yPosition: number,
+        height: number
+    ): void {
+        // Calculate the width of one millisecond as it would be rendered on the canvas.
+        const milliRenderWidth = context.canvas.clientWidth / (rangeToDt.getTime() - rangeFromDt.getTime());
+
+        for (const band of bands) {
+            // Is this band a range or is it a PIT?
+            if (band.end) {
+                // Don't bother drawing this band if it doesn't overlap the current range.
+                if (!doDateRangesOverlap(band.start, band.end, rangeFromDt, rangeToDt)) {
+                    continue;
+                }
+
+                // Calculate the start/end canvas x position of this band based on the current range and whether we are rendering right-to-left.
+                const xPositionStart = this._isRTL ?
+                    milliRenderWidth * (rangeToDt.getTime() - band.end.getTime()) :
+                    milliRenderWidth * (band.start.getTime() - rangeFromDt.getTime());
+                const xPositionEnd = this._isRTL ?
+                    milliRenderWidth * (rangeToDt.getTime() - band.start.getTime()) :
+                    milliRenderWidth * (band.end.getTime() - rangeFromDt.getTime());
+
+                // Draw the band rectangle to the canvas.
+                context.fillStyle = band.style.color!;
+                context.globalAlpha = band.style.opacity!;
+                context.beginPath();
+                context.rect(xPositionStart, yPosition, xPositionEnd - xPositionStart, height);
+                context.fill();
+
+                // TODO Draw the left/right borders if they are defined. 
+            } else {
+                // TODO Draw vertical line instead.
+                // TODO Try to use the border colour, but fall back to the band colour.
+                // TODO Try to use the border thickness, but fall back to some sensible default.
+            }
+        }
+
+        // Reset the canvas context alpha.
+        context.globalAlpha = 1;
+    }
+
+    /**
      * Draw a vertical bar for every minor unit tick.
-     * @param context
-     * @param rangeMinorTicks
-     * @param height
+     * @param context The canvas context.
+     * @param rangeMinorTicks The range minor ticks.
+     * @param yPosition The y position of the top of the view.
+     * @param height The available height of the view.
      */
     private _drawMinorUnitBars(
         context: CanvasRenderingContext2D,

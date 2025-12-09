@@ -457,7 +457,7 @@ var tempis_timeline = (() => {
   // src/TimelineBand.ts
   var DEFAULT_BAND_STYLE = {
     color: "#3b2680ff",
-    opacity: 0.6
+    opacity: 0.4
   };
   var TimelineBand = class {
     constructor(definition) {
@@ -502,6 +502,7 @@ var tempis_timeline = (() => {
       this._scrollYOffset = clamp(this._scrollYOffset, Math.min(0, maxHeight - this._drawPlan.height), 0);
       this._lastDrawHeight = fillVertically ? maxHeight : Math.min(this._drawPlan.height, maxHeight);
       context.clearRect(0, yPosition, context.canvas.width, this._lastDrawHeight);
+      this._drawBands(context, bands, fromDt, toDt, yPosition, this._lastDrawHeight);
       this._drawMinorUnitBars(context, minorTicks, yPosition, this._lastDrawHeight);
       this._drawGroups(context, yPosition);
       this._lastDrawYPosition = yPosition;
@@ -522,6 +523,25 @@ var tempis_timeline = (() => {
         }
       }
       return null;
+    }
+    _drawBands(context, bands, rangeFromDt, rangeToDt, yPosition, height) {
+      const milliRenderWidth = context.canvas.clientWidth / (rangeToDt.getTime() - rangeFromDt.getTime());
+      for (const band of bands) {
+        if (band.end) {
+          if (!doDateRangesOverlap(band.start, band.end, rangeFromDt, rangeToDt)) {
+            continue;
+          }
+          const xPositionStart = this._isRTL ? milliRenderWidth * (rangeToDt.getTime() - band.end.getTime()) : milliRenderWidth * (band.start.getTime() - rangeFromDt.getTime());
+          const xPositionEnd = this._isRTL ? milliRenderWidth * (rangeToDt.getTime() - band.start.getTime()) : milliRenderWidth * (band.end.getTime() - rangeFromDt.getTime());
+          context.fillStyle = band.style.color;
+          context.globalAlpha = band.style.opacity;
+          context.beginPath();
+          context.rect(xPositionStart, yPosition, xPositionEnd - xPositionStart, height);
+          context.fill();
+        } else {
+        }
+      }
+      context.globalAlpha = 1;
     }
     _drawMinorUnitBars(context, rangeMinorTicks, yPosition, height) {
       context.lineWidth = 1;
