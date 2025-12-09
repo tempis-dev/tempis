@@ -308,6 +308,14 @@ export interface TempisTimelineBand {
     /** The band end date as a date string, number of millis or Date object. */
     end?: string | number | Date;
 
+    /** The band style. */
+    style?: TempisTimelineBandStyle;
+}
+
+/**
+ * The style options for a timeline band.
+ */
+export interface TempisTimelineBandStyle {
     /** The colour of the band. */
     color?: string;
 

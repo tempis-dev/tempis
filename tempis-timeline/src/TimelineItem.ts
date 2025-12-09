@@ -5,7 +5,7 @@ import { parseDate } from "./Utilities";
  * The default item style.
  */
 export const DEFAULT_ITEM_STYLE: TempisTimelineItemStyle = {
-    backgroundColor: "#1a006eff",
+    backgroundColor: "#3b2680ff",
     fontColor: "#FFFFFF",
     padding: 10,
     borderRadius: 5

@@ -1,5 +1,13 @@
-import { TempisTimelineBand } from "./TempisTimelineOptions";
-import { parseDate } from "./Utilities";
+import { TempisTimelineBand, TempisTimelineBandStyle } from "./TempisTimelineOptions";
+import { defaults, parseDate } from "./Utilities";
+
+/**
+ * The default band style.
+ */
+export const DEFAULT_BAND_STYLE: TempisTimelineBandStyle = {
+    color: "#3b2680ff", 
+    opacity: 0.6
+};
 
 /**
  * Represents a band in the timeline.
@@ -8,6 +16,7 @@ export class TimelineBand {
     private readonly _definition: TempisTimelineBand; 
     private readonly _start: Date;
     private readonly _end: Date | null;
+    private readonly _style: TempisTimelineBandStyle;
 
     /**
      * Creates a new instance of the TimelineBand class.
@@ -17,6 +26,7 @@ export class TimelineBand {
         this._definition = definition;
         this._start = parseDate(definition.start);
         this._end = definition.end ? parseDate(definition.end) : null;
+        this._style = defaults(definition.style ?? {}, DEFAULT_BAND_STYLE)!;
     }
 
     /** Gets the start date of the band. */
@@ -29,5 +39,8 @@ export class TimelineBand {
         return this._end;
     }
 
-    // TODO Add band style properties.
+    /** Gets the band style. */
+    public get style(): TempisTimelineBandStyle {
+        return this._style;
+    }
 }

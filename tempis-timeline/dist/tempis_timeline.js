@@ -216,7 +216,7 @@ var tempis_timeline = (() => {
 
   // src/TimelineItem.ts
   var DEFAULT_ITEM_STYLE = {
-    backgroundColor: "#1a006eff",
+    backgroundColor: "#3b2680ff",
     fontColor: "#FFFFFF",
     padding: 10,
     borderRadius: 5
@@ -455,17 +455,26 @@ var tempis_timeline = (() => {
   };
 
   // src/TimelineBand.ts
+  var DEFAULT_BAND_STYLE = {
+    color: "#3b2680ff",
+    opacity: 0.6
+  };
   var TimelineBand = class {
     constructor(definition) {
+      var _a;
       this._definition = definition;
       this._start = parseDate(definition.start);
       this._end = definition.end ? parseDate(definition.end) : null;
+      this._style = defaults((_a = definition.style) != null ? _a : {}, DEFAULT_BAND_STYLE);
     }
     get start() {
       return this._start;
     }
     get end() {
       return this._end;
+    }
+    get style() {
+      return this._style;
     }
   };
 
