@@ -1,7 +1,8 @@
 import { TimelineDataSet } from "./TimelineDataSet";
+import { TimelineBand } from "./TimelineBand";
 import { TimelineItem } from "./TimelineItem";
-import { RangeTick, TimelineRangeView } from "./TimelineRangeView";
-import { clamp, drawClippedText } from "./Utilities";
+import { RangeTick } from "./TimelineRangeView";
+import { clamp, doDateRangesOverlap, drawClippedText } from "./Utilities";
 
 export interface DataViewDrawPlan {
     /** The height that is required to draw all groups and items within the specified date range. */
@@ -66,9 +67,6 @@ const UNFOCUSED_ITEM_BACKGROUND_COLOUR = "#d6d6d6ff";
 const UNFOCUSED_ITEM_FONT_COLOUR = "#ffffffff";
 
 export class TimelineDataView {
-    /** The minimum height of the data view. */
-    private static _minimumHeight: number = 50;
-
     /** The underlying dataset model. */
     private readonly _dataSet: TimelineDataSet;
 
@@ -109,20 +107,26 @@ export class TimelineDataView {
     /**
      * Draw the timeline data view onto the canvas.
      * @param context The canvas 2D context.
-     * @param range The timeline range view.
+     * @param fromDt The range from date.
+     * @param toDt The range to date.
+     * @param minorTicks The minor ticks to render onto the data view.
+     * @param bands The bands to render onto the data view.
      * @param yPosition The y position from where to start drawing the view.
      * @param maxHeight The max height that we can draw the data view before it must start scrolling.
      * @param fillVertically Whether the timeline data view should fill the vertical space available to it.
      */
     public draw(
         context: CanvasRenderingContext2D,
-        range: TimelineRangeView,
+        fromDt: Date,
+        toDt: Date,
+        minorTicks: RangeTick[],
+        bands: TimelineBand[],
         yPosition: number,
         maxHeight: number,
         fillVertically: boolean
     ): number {
         // We should create our plan for drawing the groups and items of the view. This will also give us exactly how much space would be required to do so.
-        this._drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
+        this._drawPlan = this._createViewDrawPlan(context, fromDt, toDt);
 
         // We should clamp our scroll offset to the allowed values now that we know the height required to render all groups.
         this._scrollYOffset = clamp(this._scrollYOffset, Math.min(0, maxHeight - this._drawPlan.height), 0);
@@ -134,8 +138,12 @@ export class TimelineDataView {
         // Clear the data view area.
         context.clearRect(0, yPosition, context.canvas.width, this._lastDrawHeight);
 
-        // TODO Draw minor unit tick bars IF configured.
-        this._drawMinorUnitBars(context, range.minorTicks, yPosition, this._lastDrawHeight);
+        // Draw any configured timeline bands first.
+        this._drawBands(context, bands, fromDt, toDt, yPosition, this._lastDrawHeight);
+
+        // Draw minor unit tick bars.
+        // TODO Only do this is configured.
+        this._drawMinorUnitBars(context, minorTicks, yPosition, this._lastDrawHeight);
 
         // Draw our groups and items!
         this._drawGroups(context, yPosition);
@@ -183,10 +191,66 @@ export class TimelineDataView {
     }
 
     /**
+     * Draw a vertical band for every timeline band model.
+     * @param context The canvas context.
+     * @param bands The timeline band models.
+     * @param rangeFromDt The range from date.
+     * @param rangeToDt The range to date.
+     * @param yPosition The y position of the top of the view.
+     * @param height The available height of the view.
+     */
+    private _drawBands(
+        context: CanvasRenderingContext2D,
+        bands: TimelineBand[],
+        rangeFromDt: Date,
+        rangeToDt: Date,
+        yPosition: number,
+        height: number
+    ): void {
+        // Calculate the width of one millisecond as it would be rendered on the canvas.
+        const milliRenderWidth = context.canvas.clientWidth / (rangeToDt.getTime() - rangeFromDt.getTime());
+
+        for (const band of bands) {
+            // Is this band a range or is it a PIT?
+            if (band.end) {
+                // Don't bother drawing this band if it doesn't overlap the current range.
+                if (!doDateRangesOverlap(band.start, band.end, rangeFromDt, rangeToDt)) {
+                    continue;
+                }
+
+                // Calculate the start/end canvas x position of this band based on the current range and whether we are rendering right-to-left.
+                const xPositionStart = this._isRTL ?
+                    milliRenderWidth * (rangeToDt.getTime() - band.end.getTime()) :
+                    milliRenderWidth * (band.start.getTime() - rangeFromDt.getTime());
+                const xPositionEnd = this._isRTL ?
+                    milliRenderWidth * (rangeToDt.getTime() - band.start.getTime()) :
+                    milliRenderWidth * (band.end.getTime() - rangeFromDt.getTime());
+
+                // Draw the band rectangle to the canvas.
+                context.fillStyle = band.style.color!;
+                context.globalAlpha = band.style.opacity!;
+                context.beginPath();
+                context.rect(xPositionStart, yPosition, xPositionEnd - xPositionStart, height);
+                context.fill();
+
+                // TODO Draw the left/right borders if they are defined. 
+            } else {
+                // TODO Draw vertical line instead.
+                // TODO Try to use the border colour, but fall back to the band colour.
+                // TODO Try to use the border thickness, but fall back to some sensible default.
+            }
+        }
+
+        // Reset the canvas context alpha.
+        context.globalAlpha = 1;
+    }
+
+    /**
      * Draw a vertical bar for every minor unit tick.
-     * @param context
-     * @param rangeMinorTicks
-     * @param height
+     * @param context The canvas context.
+     * @param rangeMinorTicks The range minor ticks.
+     * @param yPosition The y position of the top of the view.
+     * @param height The available height of the view.
      */
     private _drawMinorUnitBars(
         context: CanvasRenderingContext2D,

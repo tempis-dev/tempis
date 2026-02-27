@@ -33,6 +33,9 @@ export interface TempisTimelineOptions {
     /** The timeline item categories. */
     categories?: TempisTimelineCategory[];
 
+    /** The timeline bands. */
+    bands?: TempisTimelineBand[];
+
     /** The items to display on the timeline. */
     items: TempisTimelineItem[];
 
@@ -252,6 +255,9 @@ export interface TempisTimelineLegendOptions {
     item?: TempisTimelineLegendItemOptions;
 }
 
+/**
+ * The options for a timeline item.
+ */
 export interface TempisTimelineItem {
     /** The item identifier. */
     id: string | number;
@@ -278,6 +284,9 @@ export interface TempisTimelineItem {
     selected?: boolean;
 }
 
+/**
+ * The options for a timeline category.
+ */
 export interface TempisTimelineCategory {
     /** The category name, correlating to the 'category' property of items. */
     name: string;
@@ -287,4 +296,35 @@ export interface TempisTimelineCategory {
 
     /** The style to apply to items in this category. The backgroundColor property will be applied as the legend key color. */
     style?: TempisTimelineItemStyle;
+}
+
+/**
+ * The options for a timeline band.
+ */
+export interface TempisTimelineBand {
+    /** The band start date as a date string, number of millis or Date object. */
+    start: string | number | Date;
+
+    /** The band end date as a date string, number of millis or Date object. */
+    end?: string | number | Date;
+
+    /** The band style. */
+    style?: TempisTimelineBandStyle;
+}
+
+/**
+ * The style options for a timeline band.
+ */
+export interface TempisTimelineBandStyle {
+    /** The colour of the band. */
+    color?: string;
+
+    /** The border color. */
+    borderColor?: string;
+
+    /** The border thickness. */
+    borderThickness?: number;
+
+    /** The band opacity. */
+    opacity?: number;
 }

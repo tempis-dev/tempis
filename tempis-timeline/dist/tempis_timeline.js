@@ -216,7 +216,7 @@ var tempis_timeline = (() => {
 
   // src/TimelineItem.ts
   var DEFAULT_ITEM_STYLE = {
-    backgroundColor: "#1a006eff",
+    backgroundColor: "#3b2680ff",
     fontColor: "#FFFFFF",
     padding: 10,
     borderRadius: 5
@@ -454,6 +454,30 @@ var tempis_timeline = (() => {
     }
   };
 
+  // src/TimelineBand.ts
+  var DEFAULT_BAND_STYLE = {
+    color: "#3b2680ff",
+    opacity: 0.4
+  };
+  var TimelineBand = class {
+    constructor(definition) {
+      var _a;
+      this._definition = definition;
+      this._start = parseDate(definition.start);
+      this._end = definition.end ? parseDate(definition.end) : null;
+      this._style = defaults((_a = definition.style) != null ? _a : {}, DEFAULT_BAND_STYLE);
+    }
+    get start() {
+      return this._start;
+    }
+    get end() {
+      return this._end;
+    }
+    get style() {
+      return this._style;
+    }
+  };
+
   // src/TimelineDataView.ts
   var DEFAULT_GROUP_LABEL_MARGIN = 6;
   var DEFAULT_ITEM_VERTICAL_MARGIN = 4;
@@ -473,12 +497,13 @@ var tempis_timeline = (() => {
     scrollByYMovement(movementY) {
       this._scrollYOffset += movementY;
     }
-    draw(context, range, yPosition, maxHeight, fillVertically) {
-      this._drawPlan = this._createViewDrawPlan(context, range.fromDt, range.toDt);
+    draw(context, fromDt, toDt, minorTicks, bands, yPosition, maxHeight, fillVertically) {
+      this._drawPlan = this._createViewDrawPlan(context, fromDt, toDt);
       this._scrollYOffset = clamp(this._scrollYOffset, Math.min(0, maxHeight - this._drawPlan.height), 0);
       this._lastDrawHeight = fillVertically ? maxHeight : Math.min(this._drawPlan.height, maxHeight);
       context.clearRect(0, yPosition, context.canvas.width, this._lastDrawHeight);
-      this._drawMinorUnitBars(context, range.minorTicks, yPosition, this._lastDrawHeight);
+      this._drawBands(context, bands, fromDt, toDt, yPosition, this._lastDrawHeight);
+      this._drawMinorUnitBars(context, minorTicks, yPosition, this._lastDrawHeight);
       this._drawGroups(context, yPosition);
       this._lastDrawYPosition = yPosition;
       return this._lastDrawHeight;
@@ -498,6 +523,25 @@ var tempis_timeline = (() => {
         }
       }
       return null;
+    }
+    _drawBands(context, bands, rangeFromDt, rangeToDt, yPosition, height) {
+      const milliRenderWidth = context.canvas.clientWidth / (rangeToDt.getTime() - rangeFromDt.getTime());
+      for (const band of bands) {
+        if (band.end) {
+          if (!doDateRangesOverlap(band.start, band.end, rangeFromDt, rangeToDt)) {
+            continue;
+          }
+          const xPositionStart = this._isRTL ? milliRenderWidth * (rangeToDt.getTime() - band.end.getTime()) : milliRenderWidth * (band.start.getTime() - rangeFromDt.getTime());
+          const xPositionEnd = this._isRTL ? milliRenderWidth * (rangeToDt.getTime() - band.start.getTime()) : milliRenderWidth * (band.end.getTime() - rangeFromDt.getTime());
+          context.fillStyle = band.style.color;
+          context.globalAlpha = band.style.opacity;
+          context.beginPath();
+          context.rect(xPositionStart, yPosition, xPositionEnd - xPositionStart, height);
+          context.fill();
+        } else {
+        }
+      }
+      context.globalAlpha = 1;
     }
     _drawMinorUnitBars(context, rangeMinorTicks, yPosition, height) {
       context.lineWidth = 1;
@@ -756,7 +800,6 @@ var tempis_timeline = (() => {
       };
     }
   };
-  TimelineDataView._minimumHeight = 50;
 
   // src/TimelineFont.ts
   var TIMELINE_FONT_DEFAULT_SIZE = 14;
@@ -2103,7 +2146,7 @@ var tempis_timeline = (() => {
   var TempisTimeline = class {
     constructor(context, options) {
       this._canvasContainerResizeObserver = null;
-      var _a;
+      var _a, _b;
       this._options = options;
       this._canvas = this._getCanvas(context);
       this._font = new TimelineFont((_a = this._options.style) == null ? void 0 : _a.font);
@@ -2126,6 +2169,7 @@ var tempis_timeline = (() => {
         this._isRTL,
         this._options.tooltip
       );
+      this._bands = ((_b = this._options.bands) != null ? _b : []).map((definition) => new TimelineBand(definition));
       this._resizeCanvas();
       if (this._isResponsive) {
         this._createCanvasContainerResizeObserver();
@@ -2346,7 +2390,10 @@ var tempis_timeline = (() => {
       context.clip();
       renderOffsetY += this._dataView.draw(
         context,
-        this._rangeView,
+        this._rangeView.fromDt,
+        this._rangeView.toDt,
+        this._rangeView.minorTicks,
+        this._bands,
         renderOffsetY,
         this._verticalFillMode === "grow-canvas" ? Number.MAX_SAFE_INTEGER : dataViewMaxHeight,
         this._verticalFillMode === "fill-canvas"

@@ -1,5 +1,6 @@
 import { TempisTimelineItem, TempisTimelineItemSelectionMode, TempisTimelineOptions, TempisTimelineVerticalFillMode } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
+import { TimelineBand } from "./TimelineBand";
 import { TimelineDataView } from "./TimelineDataView";
 import { TimelineFont } from "./TimelineFont";
 import { TimelineItem } from "./TimelineItem";
@@ -19,6 +20,9 @@ export class TempisTimeline {
 
     /** The timeline dataset. */
     private readonly _dataSet: TimelineDataSet;
+
+    /** The timeline bands. */
+    private readonly _bands: TimelineBand[];
 
     /** The timeline data view. */
     private readonly _dataView: TimelineDataView;
@@ -71,6 +75,9 @@ export class TempisTimeline {
             this._isRTL,
             this._options.tooltip
         );
+
+        // Create the timeline bands.
+        this._bands = (this._options.bands ?? []).map((definition) => new TimelineBand(definition));
 
         // Do our initial canvas resize.
         this._resizeCanvas();
@@ -531,7 +538,10 @@ export class TempisTimeline {
         // The result of this is the resulting data view height which we should add to the total render height.
         renderOffsetY += this._dataView.draw(
             context,
-            this._rangeView,
+            this._rangeView.fromDt,
+            this._rangeView.toDt,
+            this._rangeView.minorTicks,
+            this._bands,
             renderOffsetY,
             // For "grow-canvas" vertical fill mode we just give the data view a massive height to render into so that it can render all items safely.
             this._verticalFillMode === "grow-canvas" ? Number.MAX_SAFE_INTEGER : dataViewMaxHeight,
