@@ -1,4 +1,3 @@
-import { DateFormatter } from "./DateFormatter";
 import { TempisTimelineTooltipOptions } from "./TempisTimelineOptions";
 import { TimelineDataView } from "./TimelineDataView";
 import { TimelineFont } from "./TimelineFont";
@@ -14,9 +13,6 @@ export class TimelineTooltipView {
 
     /** The timeline data view. */
     private readonly _dataView: TimelineDataView;
-
-    /** The date formatter. */
-    private readonly _dateFormatter: DateFormatter;
 
     /** The timeline font. */
     private readonly _font: TimelineFont;
@@ -34,7 +30,6 @@ export class TimelineTooltipView {
      * Creates a new instance of the TimelineTooltipView class.
      * @param canvas The timeline canvas.
      * @param dataView The timeline data view.
-     * @param dateFormatter The date formatter.
      * @param font The timeline font.
      * @param isRTL Whether the timeline is being rendered right-to-left.
      * @param options The tooltip options.
@@ -42,14 +37,12 @@ export class TimelineTooltipView {
     public constructor(
         canvas: HTMLCanvasElement,
         dataView: TimelineDataView,
-        dateFormatter: DateFormatter,
         font: TimelineFont,
         isRTL: boolean,
         options: TempisTimelineTooltipOptions = {}
     ) {
         this._canvas = canvas;
         this._dataView = dataView;
-        this._dateFormatter = dateFormatter;
         this._font = font;
         this._isRTL = isRTL;
         this._options = options;
@@ -140,7 +133,6 @@ export class TimelineTooltipView {
             this._activeTooltip = new TimelineTooltip(
                 item,
                 this._canvas,
-                this._dateFormatter,
                 this._font,
                 this._isRTL,
                 this._options,

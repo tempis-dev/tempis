@@ -5,7 +5,7 @@ import {
 } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { clamp, isNullOrUndefined, parseDate } from "./Utilities";
-import { DateFormatter } from "./DateFormatter";
+import { AdapterRegistry } from "./AdapterRegistry";
 
 export type Unit = "millisecond" | "second" | "minute" | "hour" | "day" | "month" | "year" | "none";
 
@@ -43,9 +43,6 @@ export class TimelineRangeView {
 
     /** The underlying dataset model. */
     private readonly _dataSet: TimelineDataSet;
-
-    /** The date formatter. */
-    private readonly _dateFormatter: DateFormatter;
 
     /** The flag defining whether the timeline is being rendered right-to-left. */
     private readonly _isRTL: boolean;
@@ -87,20 +84,17 @@ export class TimelineRangeView {
      * Creates a new instance of the TimelineRangeView class.
      * @param canvas The canvas.
      * @param dataSet The timeline dataset model.
-     * @param dateFormatter The date formatter.
      * @param isRTL Whether the timeline is being rendered right-to-left.
      * @param options The timeline range options.
      */
     public constructor(
         canvas: HTMLCanvasElement,
         dataSet: TimelineDataSet,
-        dateFormatter: DateFormatter,
         isRTL: boolean,
         options: TempisTimelineRangeOptions = {}
     ) {
         this._canvas = canvas;
         this._dataSet = dataSet;
-        this._dateFormatter = dateFormatter;
         this._isRTL = isRTL;
         this._options = options;
 
@@ -656,84 +650,41 @@ export class TimelineRangeView {
      * @returns An array of dates representing the tick dates.
      */
     private _getTickDates(unitAndStep: UnitAndStep): Date[] {
-        let currentDate;
-
-        // We need to strip unit values from the from date so that we can start at the beginning of the unit.
-        // We want to strip the date from the next unit up so that the ticks always start from the next unit up.
+        const dateAdapter = AdapterRegistry.get();
+        
+        // Get the starting timestamp by snapping to the appropriate unit boundary
+        let currentTimestamp: number;
+        
+        // We need to snap to the beginning of the next unit up so ticks always start from that boundary
         if (unitAndStep.unit === "year" || unitAndStep.unit === "month") {
-            currentDate = new Date(this._fromDt.getFullYear(), 0);
+            // Snap to start of year
+            currentTimestamp = dateAdapter.startOf(this._fromDt.getTime(), "year");
         } else if (unitAndStep.unit === "day") {
-            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth());
+            // Snap to start of month
+            currentTimestamp = dateAdapter.startOf(this._fromDt.getTime(), "month");
         } else if (unitAndStep.unit === "hour") {
-            currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate());
+            // Snap to start of day
+            currentTimestamp = dateAdapter.startOf(this._fromDt.getTime(), "day");
         } else if (unitAndStep.unit === "minute") {
-            currentDate = new Date(
-                this._fromDt.getFullYear(),
-                this._fromDt.getMonth(),
-                this._fromDt.getDate(),
-                this._fromDt.getHours()
-            );
+            // Snap to start of hour
+            currentTimestamp = dateAdapter.startOf(this._fromDt.getTime(), "hour");
         } else if (unitAndStep.unit === "second") {
-            currentDate = new Date(
-                this._fromDt.getFullYear(),
-                this._fromDt.getMonth(),
-                this._fromDt.getDate(),
-                this._fromDt.getHours(),
-                this._fromDt.getMinutes()
-            );
+            // Snap to start of minute
+            currentTimestamp = dateAdapter.startOf(this._fromDt.getTime(), "minute");
         } else if (unitAndStep.unit === "millisecond") {
-            currentDate = new Date(
-                this._fromDt.getFullYear(),
-                this._fromDt.getMonth(),
-                this._fromDt.getDate(),
-                this._fromDt.getHours(),
-                this._fromDt.getMinutes(),
-                this._fromDt.getSeconds()
-            );
+            // Snap to start of second
+            currentTimestamp = dateAdapter.startOf(this._fromDt.getTime(), "second");
         } else {
             throw new Error(`unknown unit: ${unitAndStep.unit}`);
         }
 
-        const minorTickDates: Date[] = [currentDate];
+        const minorTickDates: Date[] = [new Date(currentTimestamp)];
+        const toTimestamp = this._toDt.getTime();
 
-        // This should give an array of tick dates with the first and last being outside the from/to range (wont be rendered)
-        while (currentDate.getTime() < this._toDt.getTime()) {
-            currentDate = new Date(currentDate.getTime());
-
-            switch (unitAndStep.unit) {
-                case "year":
-                    currentDate.setFullYear(currentDate.getFullYear() + unitAndStep.step);
-                    break;
-
-                case "month":
-                    currentDate.setMonth(currentDate.getMonth() + unitAndStep.step);
-                    break;
-
-                case "day":
-                    currentDate.setDate(currentDate.getDate() + unitAndStep.step);
-                    break;
-
-                case "hour":
-                    currentDate.setHours(currentDate.getHours() + unitAndStep.step);
-                    break;
-
-                case "minute":
-                    currentDate.setMinutes(currentDate.getMinutes() + unitAndStep.step);
-                    break;
-
-                case "second":
-                    currentDate.setSeconds(currentDate.getSeconds() + unitAndStep.step);
-                    break;
-
-                case "millisecond":
-                    currentDate.setMilliseconds(currentDate.getMilliseconds() + unitAndStep.step);
-                    break;
-
-                default:
-                    throw new Error(`unknown unit: ${unitAndStep.unit}`);
-            }
-
-            minorTickDates.push(currentDate);
+        // Generate tick dates by adding the step amount until we exceed the to date
+        while (currentTimestamp < toTimestamp) {
+            currentTimestamp = dateAdapter.add(currentTimestamp, unitAndStep.unit, unitAndStep.step);
+            minorTickDates.push(new Date(currentTimestamp));
         }
 
         return minorTickDates;
@@ -747,8 +698,9 @@ export class TimelineRangeView {
      * @returns The given date as a string, using the label format for the specified unit.
      */
     private _formatDate(date: Date, unit: Unit, labelFormats: TempisTimelineRangeUnitLabelFormats): string {
-        // TODO We should be checking the range options for a non-default label format for this unit.
-        return this._dateFormatter.format(date, labelFormats[unit as keyof TempisTimelineRangeUnitLabelFormats]);
+        const dateAdapter = AdapterRegistry.get();
+        const pattern = labelFormats[unit as keyof TempisTimelineRangeUnitLabelFormats] ?? "D MMMM HH:mm:ss";
+        return dateAdapter.format(date.getTime(), pattern);
     }
 
     /**
