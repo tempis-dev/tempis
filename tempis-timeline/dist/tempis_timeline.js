@@ -1946,6 +1946,7 @@ var tempis_timeline = (() => {
     constructor(canvas, dataSet, isRTL, options = {}) {
       this._drawPlan = null;
       this._lastDrawYPosition = 0;
+      this._hoverDelayTimer = null;
       this._canvas = canvas;
       this._dataSet = dataSet;
       this._isRTL = isRTL;
@@ -2139,18 +2140,33 @@ var tempis_timeline = (() => {
         }
         const pointerPosition = getMouseOrPointerPosition(event);
         if (pointerPosition.y < this._lastDrawYPosition || pointerPosition.y > this._lastDrawYPosition + this._drawPlan.height) {
+          if (this._hoverDelayTimer !== null) {
+            clearTimeout(this._hoverDelayTimer);
+            this._hoverDelayTimer = null;
+          }
           this._dataSet.unfocusCategories();
           return null;
         }
         const targetCategory = this._getCategoryAtPoint(pointerPosition);
-        if (targetCategory) {
-          this._dataSet.focusCategory(targetCategory.name);
-        } else {
-          this._dataSet.unfocusCategories();
+        if (this._hoverDelayTimer !== null) {
+          clearTimeout(this._hoverDelayTimer);
+          this._hoverDelayTimer = null;
         }
+        this._hoverDelayTimer = window.setTimeout(() => {
+          if (targetCategory) {
+            this._dataSet.focusCategory(targetCategory.name);
+          } else {
+            this._dataSet.unfocusCategories();
+          }
+          this._hoverDelayTimer = null;
+        }, 150);
       });
       this._canvas.addEventListener("pointerdown", (event) => {
         isPointerDown = true;
+        if (this._hoverDelayTimer !== null) {
+          clearTimeout(this._hoverDelayTimer);
+          this._hoverDelayTimer = null;
+        }
         if (!this._drawPlan) {
           return null;
         }
@@ -2176,6 +2192,10 @@ var tempis_timeline = (() => {
         isPointerDown = false;
       });
       this._canvas.addEventListener("pointerout", () => {
+        if (this._hoverDelayTimer !== null) {
+          clearTimeout(this._hoverDelayTimer);
+          this._hoverDelayTimer = null;
+        }
         this._dataSet.unfocusCategories();
       });
       this._canvas.addEventListener("wheel", () => {
