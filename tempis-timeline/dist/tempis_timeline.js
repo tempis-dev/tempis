@@ -24,6 +24,525 @@ var tempis_timeline = (() => {
     TempisTimeline: () => TempisTimeline
   });
 
+  // node_modules/date-format-parse/es/util.js
+  function isDate(value) {
+    return value instanceof Date || Object.prototype.toString.call(value) === "[object Date]";
+  }
+  function toDate(value) {
+    if (isDate(value)) {
+      return new Date(value.getTime());
+    }
+    if (value == null) {
+      return new Date(NaN);
+    }
+    return new Date(value);
+  }
+  function isValidDate(value) {
+    return isDate(value) && !isNaN(value.getTime());
+  }
+  function startOfWeek(value) {
+    var firstDayOfWeek = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : 0;
+    if (!(firstDayOfWeek >= 0 && firstDayOfWeek <= 6)) {
+      throw new RangeError("weekStartsOn must be between 0 and 6");
+    }
+    var date = toDate(value);
+    var day = date.getDay();
+    var diff = (day + 7 - firstDayOfWeek) % 7;
+    date.setDate(date.getDate() - diff);
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }
+  function startOfWeekYear(value) {
+    var _ref = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {}, _ref$firstDayOfWeek = _ref.firstDayOfWeek, firstDayOfWeek = _ref$firstDayOfWeek === void 0 ? 0 : _ref$firstDayOfWeek, _ref$firstWeekContain = _ref.firstWeekContainsDate, firstWeekContainsDate = _ref$firstWeekContain === void 0 ? 1 : _ref$firstWeekContain;
+    if (!(firstWeekContainsDate >= 1 && firstWeekContainsDate <= 7)) {
+      throw new RangeError("firstWeekContainsDate must be between 1 and 7");
+    }
+    var date = toDate(value);
+    var year = date.getFullYear();
+    var firstDateOfFirstWeek = new Date(0);
+    for (var i = year + 1; i >= year - 1; i--) {
+      firstDateOfFirstWeek.setFullYear(i, 0, firstWeekContainsDate);
+      firstDateOfFirstWeek.setHours(0, 0, 0, 0);
+      firstDateOfFirstWeek = startOfWeek(firstDateOfFirstWeek, firstDayOfWeek);
+      if (date.getTime() >= firstDateOfFirstWeek.getTime()) {
+        break;
+      }
+    }
+    return firstDateOfFirstWeek;
+  }
+  function getWeek(value) {
+    var _ref2 = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {}, _ref2$firstDayOfWeek = _ref2.firstDayOfWeek, firstDayOfWeek = _ref2$firstDayOfWeek === void 0 ? 0 : _ref2$firstDayOfWeek, _ref2$firstWeekContai = _ref2.firstWeekContainsDate, firstWeekContainsDate = _ref2$firstWeekContai === void 0 ? 1 : _ref2$firstWeekContai;
+    var date = toDate(value);
+    var firstDateOfThisWeek = startOfWeek(date, firstDayOfWeek);
+    var firstDateOfFirstWeek = startOfWeekYear(date, {
+      firstDayOfWeek,
+      firstWeekContainsDate
+    });
+    var diff = firstDateOfThisWeek.getTime() - firstDateOfFirstWeek.getTime();
+    return Math.round(diff / (7 * 24 * 3600 * 1e3)) + 1;
+  }
+
+  // node_modules/date-format-parse/es/locale/en.js
+  var locale = {
+    months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    monthsShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    weekdays: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+    weekdaysShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    weekdaysMin: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+    firstDayOfWeek: 0,
+    firstWeekContainsDate: 1
+  };
+  var en_default = locale;
+
+  // node_modules/date-format-parse/es/format.js
+  var REGEX_FORMAT = /\[([^\]]+)]|YYYY|YY?|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|m{1,2}|s{1,2}|Z{1,2}|S{1,3}|w{1,2}|x|X|a|A/g;
+  function pad(val) {
+    var len = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : 2;
+    var output = "".concat(Math.abs(val));
+    var sign = val < 0 ? "-" : "";
+    while (output.length < len) {
+      output = "0".concat(output);
+    }
+    return sign + output;
+  }
+  function getOffset(date) {
+    return Math.round(date.getTimezoneOffset() / 15) * 15;
+  }
+  function formatTimezone(offset) {
+    var delimeter = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : "";
+    var sign = offset > 0 ? "-" : "+";
+    var absOffset = Math.abs(offset);
+    var hours = Math.floor(absOffset / 60);
+    var minutes = absOffset % 60;
+    return sign + pad(hours, 2) + delimeter + pad(minutes, 2);
+  }
+  var meridiem = function meridiem2(h2, _, isLowercase) {
+    var word = h2 < 12 ? "AM" : "PM";
+    return isLowercase ? word.toLocaleLowerCase() : word;
+  };
+  var formatFlags = {
+    Y: function Y(date) {
+      var y = date.getFullYear();
+      return y <= 9999 ? "".concat(y) : "+".concat(y);
+    },
+    YY: function YY(date) {
+      return pad(date.getFullYear(), 4).substr(2);
+    },
+    YYYY: function YYYY(date) {
+      return pad(date.getFullYear(), 4);
+    },
+    M: function M(date) {
+      return date.getMonth() + 1;
+    },
+    MM: function MM(date) {
+      return pad(date.getMonth() + 1, 2);
+    },
+    MMM: function MMM(date, locale2) {
+      return locale2.monthsShort[date.getMonth()];
+    },
+    MMMM: function MMMM(date, locale2) {
+      return locale2.months[date.getMonth()];
+    },
+    D: function D(date) {
+      return date.getDate();
+    },
+    DD: function DD(date) {
+      return pad(date.getDate(), 2);
+    },
+    H: function H(date) {
+      return date.getHours();
+    },
+    HH: function HH(date) {
+      return pad(date.getHours(), 2);
+    },
+    h: function h(date) {
+      var hours = date.getHours();
+      if (hours === 0) {
+        return 12;
+      }
+      if (hours > 12) {
+        return hours % 12;
+      }
+      return hours;
+    },
+    hh: function hh() {
+      var hours = formatFlags.h.apply(formatFlags, arguments);
+      return pad(hours, 2);
+    },
+    m: function m(date) {
+      return date.getMinutes();
+    },
+    mm: function mm(date) {
+      return pad(date.getMinutes(), 2);
+    },
+    s: function s(date) {
+      return date.getSeconds();
+    },
+    ss: function ss(date) {
+      return pad(date.getSeconds(), 2);
+    },
+    S: function S(date) {
+      return Math.floor(date.getMilliseconds() / 100);
+    },
+    SS: function SS(date) {
+      return pad(Math.floor(date.getMilliseconds() / 10), 2);
+    },
+    SSS: function SSS(date) {
+      return pad(date.getMilliseconds(), 3);
+    },
+    d: function d(date) {
+      return date.getDay();
+    },
+    dd: function dd(date, locale2) {
+      return locale2.weekdaysMin[date.getDay()];
+    },
+    ddd: function ddd(date, locale2) {
+      return locale2.weekdaysShort[date.getDay()];
+    },
+    dddd: function dddd(date, locale2) {
+      return locale2.weekdays[date.getDay()];
+    },
+    A: function A(date, locale2) {
+      var meridiemFunc = locale2.meridiem || meridiem;
+      return meridiemFunc(date.getHours(), date.getMinutes(), false);
+    },
+    a: function a(date, locale2) {
+      var meridiemFunc = locale2.meridiem || meridiem;
+      return meridiemFunc(date.getHours(), date.getMinutes(), true);
+    },
+    Z: function Z(date) {
+      return formatTimezone(getOffset(date), ":");
+    },
+    ZZ: function ZZ(date) {
+      return formatTimezone(getOffset(date));
+    },
+    X: function X(date) {
+      return Math.floor(date.getTime() / 1e3);
+    },
+    x: function x(date) {
+      return date.getTime();
+    },
+    w: function w(date, locale2) {
+      return getWeek(date, {
+        firstDayOfWeek: locale2.firstDayOfWeek,
+        firstWeekContainsDate: locale2.firstWeekContainsDate
+      });
+    },
+    ww: function ww(date, locale2) {
+      return pad(formatFlags.w(date, locale2), 2);
+    }
+  };
+  function format(val, str) {
+    var options = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : {};
+    var formatStr = str ? String(str) : "YYYY-MM-DDTHH:mm:ss.SSSZ";
+    var date = toDate(val);
+    if (!isValidDate(date)) {
+      return "Invalid Date";
+    }
+    var locale2 = options.locale || en_default;
+    return formatStr.replace(REGEX_FORMAT, function(match, p1) {
+      if (p1) {
+        return p1;
+      }
+      if (typeof formatFlags[match] === "function") {
+        return "".concat(formatFlags[match](date, locale2));
+      }
+      return match;
+    });
+  }
+
+  // node_modules/date-format-parse/es/parse.js
+  function _slicedToArray(arr, i) {
+    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
+  }
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance");
+  }
+  function _iterableToArrayLimit(arr, i) {
+    if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
+      return;
+    }
+    var _arr = [];
+    var _n = true;
+    var _d = false;
+    var _e = void 0;
+    try {
+      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+        _arr.push(_s.value);
+        if (i && _arr.length === i)
+          break;
+      }
+    } catch (err) {
+      _d = true;
+      _e = err;
+    } finally {
+      try {
+        if (!_n && _i["return"] != null)
+          _i["return"]();
+      } finally {
+        if (_d)
+          throw _e;
+      }
+    }
+    return _arr;
+  }
+  function _arrayWithHoles(arr) {
+    if (Array.isArray(arr))
+      return arr;
+  }
+  function _defineProperty(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, { value, enumerable: true, configurable: true, writable: true });
+    } else {
+      obj[key] = value;
+    }
+    return obj;
+  }
+  var match1 = /\d/;
+  var match2 = /\d\d/;
+  var match3 = /\d{3}/;
+  var match4 = /\d{4}/;
+  var match1to2 = /\d\d?/;
+  var matchShortOffset = /[+-]\d\d:?\d\d/;
+  var matchSigned = /[+-]?\d+/;
+  var matchTimestamp = /[+-]?\d+(\.\d{1,3})?/;
+  var YEAR = "year";
+  var MONTH = "month";
+  var DAY = "day";
+  var HOUR = "hour";
+  var MINUTE = "minute";
+  var SECOND = "second";
+  var MILLISECOND = "millisecond";
+  var parseFlags = {};
+  var addParseFlag = function addParseFlag2(token, regex, callback) {
+    var tokens = Array.isArray(token) ? token : [token];
+    var func;
+    if (typeof callback === "string") {
+      func = function func2(input) {
+        var value = parseInt(input, 10);
+        return _defineProperty({}, callback, value);
+      };
+    } else {
+      func = callback;
+    }
+    tokens.forEach(function(key) {
+      parseFlags[key] = [regex, func];
+    });
+  };
+  var escapeStringRegExp = function escapeStringRegExp2(str) {
+    return str.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&");
+  };
+  var matchWordRegExp = function matchWordRegExp2(localeKey) {
+    return function(locale2) {
+      var array = locale2[localeKey];
+      if (!Array.isArray(array)) {
+        throw new Error("Locale[".concat(localeKey, "] need an array"));
+      }
+      return new RegExp(array.map(escapeStringRegExp).join("|"));
+    };
+  };
+  var matchWordCallback = function matchWordCallback2(localeKey, key) {
+    return function(input, locale2) {
+      var array = locale2[localeKey];
+      if (!Array.isArray(array)) {
+        throw new Error("Locale[".concat(localeKey, "] need an array"));
+      }
+      var index = array.indexOf(input);
+      if (index < 0) {
+        throw new Error("Invalid Word");
+      }
+      return _defineProperty({}, key, index);
+    };
+  };
+  addParseFlag("Y", matchSigned, YEAR);
+  addParseFlag("YY", match2, function(input) {
+    var year = new Date().getFullYear();
+    var cent = Math.floor(year / 100);
+    var value = parseInt(input, 10);
+    value = (value > 68 ? cent - 1 : cent) * 100 + value;
+    return _defineProperty({}, YEAR, value);
+  });
+  addParseFlag("YYYY", match4, YEAR);
+  addParseFlag("M", match1to2, function(input) {
+    return _defineProperty({}, MONTH, parseInt(input, 10) - 1);
+  });
+  addParseFlag("MM", match2, function(input) {
+    return _defineProperty({}, MONTH, parseInt(input, 10) - 1);
+  });
+  addParseFlag("MMM", matchWordRegExp("monthsShort"), matchWordCallback("monthsShort", MONTH));
+  addParseFlag("MMMM", matchWordRegExp("months"), matchWordCallback("months", MONTH));
+  addParseFlag("D", match1to2, DAY);
+  addParseFlag("DD", match2, DAY);
+  addParseFlag(["H", "h"], match1to2, HOUR);
+  addParseFlag(["HH", "hh"], match2, HOUR);
+  addParseFlag("m", match1to2, MINUTE);
+  addParseFlag("mm", match2, MINUTE);
+  addParseFlag("s", match1to2, SECOND);
+  addParseFlag("ss", match2, SECOND);
+  addParseFlag("S", match1, function(input) {
+    return _defineProperty({}, MILLISECOND, parseInt(input, 10) * 100);
+  });
+  addParseFlag("SS", match2, function(input) {
+    return _defineProperty({}, MILLISECOND, parseInt(input, 10) * 10);
+  });
+  addParseFlag("SSS", match3, MILLISECOND);
+  function matchMeridiem(locale2) {
+    return locale2.meridiemParse || /[ap]\.?m?\.?/i;
+  }
+  function defaultIsPM(input) {
+    return "".concat(input).toLowerCase().charAt(0) === "p";
+  }
+  addParseFlag(["A", "a"], matchMeridiem, function(input, locale2) {
+    var isPM = typeof locale2.isPM === "function" ? locale2.isPM(input) : defaultIsPM(input);
+    return {
+      isPM
+    };
+  });
+  function offsetFromString(str) {
+    var _ref8 = str.match(/([+-]|\d\d)/g) || ["-", "0", "0"], _ref9 = _slicedToArray(_ref8, 3), symbol = _ref9[0], hour = _ref9[1], minute = _ref9[2];
+    var minutes = parseInt(hour, 10) * 60 + parseInt(minute, 10);
+    if (minutes === 0) {
+      return 0;
+    }
+    return symbol === "+" ? -minutes : +minutes;
+  }
+  addParseFlag(["Z", "ZZ"], matchShortOffset, function(input) {
+    return {
+      offset: offsetFromString(input)
+    };
+  });
+  addParseFlag("x", matchSigned, function(input) {
+    return {
+      date: new Date(parseInt(input, 10))
+    };
+  });
+  addParseFlag("X", matchTimestamp, function(input) {
+    return {
+      date: new Date(parseFloat(input) * 1e3)
+    };
+  });
+  addParseFlag("d", match1, "weekday");
+  addParseFlag("dd", matchWordRegExp("weekdaysMin"), matchWordCallback("weekdaysMin", "weekday"));
+  addParseFlag("ddd", matchWordRegExp("weekdaysShort"), matchWordCallback("weekdaysShort", "weekday"));
+  addParseFlag("dddd", matchWordRegExp("weekdays"), matchWordCallback("weekdays", "weekday"));
+  addParseFlag("w", match1to2, "week");
+  addParseFlag("ww", match2, "week");
+
+  // src/NativeDateAdapter.ts
+  var NativeDateAdapter = class {
+    parse(input) {
+      if (input == null) {
+        return null;
+      }
+      if (typeof input === "number") {
+        return isNaN(input) ? null : input;
+      }
+      if (input instanceof Date) {
+        const timestamp = input.getTime();
+        return isNaN(timestamp) ? null : timestamp;
+      }
+      if (typeof input === "string") {
+        const date = new Date(input);
+        const timestamp = date.getTime();
+        return isNaN(timestamp) ? null : timestamp;
+      }
+      return null;
+    }
+    startOf(instant, unit) {
+      const date = new Date(instant);
+      switch (unit) {
+        case "year":
+          date.setMonth(0, 1);
+          date.setHours(0, 0, 0, 0);
+          break;
+        case "month":
+          date.setDate(1);
+          date.setHours(0, 0, 0, 0);
+          break;
+        case "week":
+          const day = date.getDay();
+          date.setDate(date.getDate() - day);
+          date.setHours(0, 0, 0, 0);
+          break;
+        case "day":
+          date.setHours(0, 0, 0, 0);
+          break;
+        case "hour":
+          date.setMinutes(0, 0, 0);
+          break;
+        case "minute":
+          date.setSeconds(0, 0);
+          break;
+        case "second":
+          date.setMilliseconds(0);
+          break;
+        case "millisecond":
+          return instant;
+        default:
+          throw new Error(`Unknown time unit: ${unit}`);
+      }
+      return date.getTime();
+    }
+    add(instant, unit, amount) {
+      const date = new Date(instant);
+      switch (unit) {
+        case "year":
+          date.setFullYear(date.getFullYear() + amount);
+          break;
+        case "month":
+          date.setMonth(date.getMonth() + amount);
+          break;
+        case "week":
+          date.setDate(date.getDate() + amount * 7);
+          break;
+        case "day":
+          date.setDate(date.getDate() + amount);
+          break;
+        case "hour":
+          date.setHours(date.getHours() + amount);
+          break;
+        case "minute":
+          date.setMinutes(date.getMinutes() + amount);
+          break;
+        case "second":
+          date.setSeconds(date.getSeconds() + amount);
+          break;
+        case "millisecond":
+          return instant + amount;
+        default:
+          throw new Error(`Unknown time unit: ${unit}`);
+      }
+      return date.getTime();
+    }
+    format(instant, pattern) {
+      const date = new Date(instant);
+      return format(date, pattern != null ? pattern : "D MMMM HH:mm:ss");
+    }
+  };
+
+  // src/AdapterRegistry.ts
+  var _AdapterRegistry = class {
+    static register(adapter) {
+      if (!adapter || typeof adapter.parse !== "function" || typeof adapter.startOf !== "function" || typeof adapter.add !== "function" || typeof adapter.format !== "function") {
+        throw new Error(
+          "Invalid adapter: must implement parse, startOf, add, and format methods. See TimelineDateAdapter interface documentation."
+        );
+      }
+      _AdapterRegistry.adapter = adapter;
+    }
+    static get() {
+      if (!_AdapterRegistry.adapter) {
+        _AdapterRegistry.adapter = new NativeDateAdapter();
+      }
+      return _AdapterRegistry.adapter;
+    }
+    static reset() {
+      _AdapterRegistry.adapter = null;
+    }
+  };
+  var AdapterRegistry = _AdapterRegistry;
+  AdapterRegistry.adapter = null;
+
   // src/Utilities.ts
   function isNullOrUndefined(value) {
     return value === null || value === void 0;
@@ -32,23 +551,12 @@ var tempis_timeline = (() => {
     if (!input) {
       throw new Error("Cannot parse input as date as it is not defined");
     }
-    if (input instanceof Date) {
-      if (isNaN(input.getTime())) {
-        throw new Error(`Date is not valid`);
-      }
-      return input;
-    } else if (typeof input === "string") {
-      if (isNaN(Date.parse(input))) {
-        throw new Error(`Cannot parse input string '${input}' as date as it is not a valid date`);
-      }
-      return new Date(input);
-    } else if (typeof input === "number") {
-      if (isNaN(Date.parse(`${input}`))) {
-        throw new Error(`Cannot parse input string '${input}' as date as it is not a valid date`);
-      }
-      return new Date(`${input}`);
+    const dateAdapter = AdapterRegistry.get();
+    const timestamp = dateAdapter.parse(input);
+    if (timestamp === null) {
+      throw new Error(`Cannot parse input '${input}' as date - invalid format`);
     }
-    throw new Error(`Cannot parse input '${input}' as date`);
+    return new Date(timestamp);
   }
   function clamp(value, min, max) {
     if (min !== void 0 && value < min) {
@@ -852,7 +1360,7 @@ var tempis_timeline = (() => {
   };
   var DEFAULT_UNIT_LABEL_PADDING = 4;
   var TimelineRangeView = class {
-    constructor(canvas, dataSet, dateFormatter, isRTL, options = {}) {
+    constructor(canvas, dataSet, isRTL, options = {}) {
       this._fromDt = new Date();
       this._toDt = new Date(this._fromDt.getTime() + 31556952e4);
       this._minDate = new Date(-864e13);
@@ -863,7 +1371,6 @@ var tempis_timeline = (() => {
       this._majorUnitTicks = [];
       this._canvas = canvas;
       this._dataSet = dataSet;
-      this._dateFormatter = dateFormatter;
       this._isRTL = isRTL;
       this._options = options;
       this._parseOptions();
@@ -1182,74 +1689,36 @@ var tempis_timeline = (() => {
       };
     }
     _getTickDates(unitAndStep) {
-      let currentDate;
+      const dateAdapter = AdapterRegistry.get();
+      let currentTimestamp;
       if (unitAndStep.unit === "year" || unitAndStep.unit === "month") {
-        currentDate = new Date(this._fromDt.getFullYear(), 0);
+        currentTimestamp = dateAdapter.startOf(this._fromDt.getTime(), "year");
       } else if (unitAndStep.unit === "day") {
-        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth());
+        currentTimestamp = dateAdapter.startOf(this._fromDt.getTime(), "month");
       } else if (unitAndStep.unit === "hour") {
-        currentDate = new Date(this._fromDt.getFullYear(), this._fromDt.getMonth(), this._fromDt.getDate());
+        currentTimestamp = dateAdapter.startOf(this._fromDt.getTime(), "day");
       } else if (unitAndStep.unit === "minute") {
-        currentDate = new Date(
-          this._fromDt.getFullYear(),
-          this._fromDt.getMonth(),
-          this._fromDt.getDate(),
-          this._fromDt.getHours()
-        );
+        currentTimestamp = dateAdapter.startOf(this._fromDt.getTime(), "hour");
       } else if (unitAndStep.unit === "second") {
-        currentDate = new Date(
-          this._fromDt.getFullYear(),
-          this._fromDt.getMonth(),
-          this._fromDt.getDate(),
-          this._fromDt.getHours(),
-          this._fromDt.getMinutes()
-        );
+        currentTimestamp = dateAdapter.startOf(this._fromDt.getTime(), "minute");
       } else if (unitAndStep.unit === "millisecond") {
-        currentDate = new Date(
-          this._fromDt.getFullYear(),
-          this._fromDt.getMonth(),
-          this._fromDt.getDate(),
-          this._fromDt.getHours(),
-          this._fromDt.getMinutes(),
-          this._fromDt.getSeconds()
-        );
+        currentTimestamp = dateAdapter.startOf(this._fromDt.getTime(), "second");
       } else {
         throw new Error(`unknown unit: ${unitAndStep.unit}`);
       }
-      const minorTickDates = [currentDate];
-      while (currentDate.getTime() < this._toDt.getTime()) {
-        currentDate = new Date(currentDate.getTime());
-        switch (unitAndStep.unit) {
-          case "year":
-            currentDate.setFullYear(currentDate.getFullYear() + unitAndStep.step);
-            break;
-          case "month":
-            currentDate.setMonth(currentDate.getMonth() + unitAndStep.step);
-            break;
-          case "day":
-            currentDate.setDate(currentDate.getDate() + unitAndStep.step);
-            break;
-          case "hour":
-            currentDate.setHours(currentDate.getHours() + unitAndStep.step);
-            break;
-          case "minute":
-            currentDate.setMinutes(currentDate.getMinutes() + unitAndStep.step);
-            break;
-          case "second":
-            currentDate.setSeconds(currentDate.getSeconds() + unitAndStep.step);
-            break;
-          case "millisecond":
-            currentDate.setMilliseconds(currentDate.getMilliseconds() + unitAndStep.step);
-            break;
-          default:
-            throw new Error(`unknown unit: ${unitAndStep.unit}`);
-        }
-        minorTickDates.push(currentDate);
+      const minorTickDates = [new Date(currentTimestamp)];
+      const toTimestamp = this._toDt.getTime();
+      while (currentTimestamp < toTimestamp) {
+        currentTimestamp = dateAdapter.add(currentTimestamp, unitAndStep.unit, unitAndStep.step);
+        minorTickDates.push(new Date(currentTimestamp));
       }
       return minorTickDates;
     }
     _formatDate(date, unit, labelFormats) {
-      return this._dateFormatter.format(date, labelFormats[unit]);
+      var _a;
+      const dateAdapter = AdapterRegistry.get();
+      const pattern = (_a = labelFormats[unit]) != null ? _a : "D MMMM HH:mm:ss";
+      return dateAdapter.format(date.getTime(), pattern);
     }
     _parseOptions() {
       this._minDate = isNullOrUndefined(this._options.min) ? new Date(-864e13) : parseDate(this._options.min);
@@ -1276,7 +1745,7 @@ var tempis_timeline = (() => {
   // src/TimelineTooltip.ts
   var DEFAULT_TOOLTIP_DELAY_MS = 500;
   var TimelineTooltip = class {
-    constructor(item, canvas, dateFormatter, font, isRTL, options, x2, y) {
+    constructor(item, canvas, font, isRTL, options, x2, y) {
       this._activeElement = null;
       this._activeShowTimer = null;
       this._posX = 0;
@@ -1284,7 +1753,6 @@ var tempis_timeline = (() => {
       var _a;
       this._item = item;
       this._canvas = canvas;
-      this._dateFormatter = dateFormatter;
       this._font = font;
       this._isRTL = isRTL;
       this._options = options;
@@ -1352,10 +1820,11 @@ var tempis_timeline = (() => {
           borderRadius: "5px",
           direction: this._isRTL ? "rtl" : "ltr"
         });
+        const dateAdapter = AdapterRegistry.get();
         if (this._item.end) {
-          this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
+          this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${dateAdapter.format(this._item.start.getTime(), "D MMMM HH:mm:ss")} - ${dateAdapter.format(this._item.end.getTime(), "D MMMM HH:mm:ss")}</p>`;
         } else {
-          this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)}</p>`;
+          this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${dateAdapter.format(this._item.start.getTime(), "D MMMM HH:mm:ss")}</p>`;
         }
       }
       this._activeElement.style.left = `${this._posX}px`;
@@ -1399,11 +1868,10 @@ var tempis_timeline = (() => {
 
   // src/TimelineTooltipView.ts
   var TimelineTooltipView = class {
-    constructor(canvas, dataView, dateFormatter, font, isRTL, options = {}) {
+    constructor(canvas, dataView, font, isRTL, options = {}) {
       this._activeTooltip = null;
       this._canvas = canvas;
       this._dataView = dataView;
-      this._dateFormatter = dateFormatter;
       this._font = font;
       this._isRTL = isRTL;
       this._options = options;
@@ -1460,7 +1928,6 @@ var tempis_timeline = (() => {
         this._activeTooltip = new TimelineTooltip(
           item,
           this._canvas,
-          this._dateFormatter,
           this._font,
           this._isRTL,
           this._options,
@@ -1731,417 +2198,6 @@ var tempis_timeline = (() => {
     }
   };
 
-  // node_modules/date-format-parse/es/util.js
-  function isDate(value) {
-    return value instanceof Date || Object.prototype.toString.call(value) === "[object Date]";
-  }
-  function toDate(value) {
-    if (isDate(value)) {
-      return new Date(value.getTime());
-    }
-    if (value == null) {
-      return new Date(NaN);
-    }
-    return new Date(value);
-  }
-  function isValidDate(value) {
-    return isDate(value) && !isNaN(value.getTime());
-  }
-  function startOfWeek(value) {
-    var firstDayOfWeek = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : 0;
-    if (!(firstDayOfWeek >= 0 && firstDayOfWeek <= 6)) {
-      throw new RangeError("weekStartsOn must be between 0 and 6");
-    }
-    var date = toDate(value);
-    var day = date.getDay();
-    var diff = (day + 7 - firstDayOfWeek) % 7;
-    date.setDate(date.getDate() - diff);
-    date.setHours(0, 0, 0, 0);
-    return date;
-  }
-  function startOfWeekYear(value) {
-    var _ref = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {}, _ref$firstDayOfWeek = _ref.firstDayOfWeek, firstDayOfWeek = _ref$firstDayOfWeek === void 0 ? 0 : _ref$firstDayOfWeek, _ref$firstWeekContain = _ref.firstWeekContainsDate, firstWeekContainsDate = _ref$firstWeekContain === void 0 ? 1 : _ref$firstWeekContain;
-    if (!(firstWeekContainsDate >= 1 && firstWeekContainsDate <= 7)) {
-      throw new RangeError("firstWeekContainsDate must be between 1 and 7");
-    }
-    var date = toDate(value);
-    var year = date.getFullYear();
-    var firstDateOfFirstWeek = new Date(0);
-    for (var i = year + 1; i >= year - 1; i--) {
-      firstDateOfFirstWeek.setFullYear(i, 0, firstWeekContainsDate);
-      firstDateOfFirstWeek.setHours(0, 0, 0, 0);
-      firstDateOfFirstWeek = startOfWeek(firstDateOfFirstWeek, firstDayOfWeek);
-      if (date.getTime() >= firstDateOfFirstWeek.getTime()) {
-        break;
-      }
-    }
-    return firstDateOfFirstWeek;
-  }
-  function getWeek(value) {
-    var _ref2 = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {}, _ref2$firstDayOfWeek = _ref2.firstDayOfWeek, firstDayOfWeek = _ref2$firstDayOfWeek === void 0 ? 0 : _ref2$firstDayOfWeek, _ref2$firstWeekContai = _ref2.firstWeekContainsDate, firstWeekContainsDate = _ref2$firstWeekContai === void 0 ? 1 : _ref2$firstWeekContai;
-    var date = toDate(value);
-    var firstDateOfThisWeek = startOfWeek(date, firstDayOfWeek);
-    var firstDateOfFirstWeek = startOfWeekYear(date, {
-      firstDayOfWeek,
-      firstWeekContainsDate
-    });
-    var diff = firstDateOfThisWeek.getTime() - firstDateOfFirstWeek.getTime();
-    return Math.round(diff / (7 * 24 * 3600 * 1e3)) + 1;
-  }
-
-  // node_modules/date-format-parse/es/locale/en.js
-  var locale = {
-    months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-    monthsShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-    weekdays: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-    weekdaysShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-    weekdaysMin: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
-    firstDayOfWeek: 0,
-    firstWeekContainsDate: 1
-  };
-  var en_default = locale;
-
-  // node_modules/date-format-parse/es/format.js
-  var REGEX_FORMAT = /\[([^\]]+)]|YYYY|YY?|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|m{1,2}|s{1,2}|Z{1,2}|S{1,3}|w{1,2}|x|X|a|A/g;
-  function pad(val) {
-    var len = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : 2;
-    var output = "".concat(Math.abs(val));
-    var sign = val < 0 ? "-" : "";
-    while (output.length < len) {
-      output = "0".concat(output);
-    }
-    return sign + output;
-  }
-  function getOffset(date) {
-    return Math.round(date.getTimezoneOffset() / 15) * 15;
-  }
-  function formatTimezone(offset) {
-    var delimeter = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : "";
-    var sign = offset > 0 ? "-" : "+";
-    var absOffset = Math.abs(offset);
-    var hours = Math.floor(absOffset / 60);
-    var minutes = absOffset % 60;
-    return sign + pad(hours, 2) + delimeter + pad(minutes, 2);
-  }
-  var meridiem = function meridiem2(h2, _, isLowercase) {
-    var word = h2 < 12 ? "AM" : "PM";
-    return isLowercase ? word.toLocaleLowerCase() : word;
-  };
-  var formatFlags = {
-    Y: function Y(date) {
-      var y = date.getFullYear();
-      return y <= 9999 ? "".concat(y) : "+".concat(y);
-    },
-    YY: function YY(date) {
-      return pad(date.getFullYear(), 4).substr(2);
-    },
-    YYYY: function YYYY(date) {
-      return pad(date.getFullYear(), 4);
-    },
-    M: function M(date) {
-      return date.getMonth() + 1;
-    },
-    MM: function MM(date) {
-      return pad(date.getMonth() + 1, 2);
-    },
-    MMM: function MMM(date, locale2) {
-      return locale2.monthsShort[date.getMonth()];
-    },
-    MMMM: function MMMM(date, locale2) {
-      return locale2.months[date.getMonth()];
-    },
-    D: function D(date) {
-      return date.getDate();
-    },
-    DD: function DD(date) {
-      return pad(date.getDate(), 2);
-    },
-    H: function H(date) {
-      return date.getHours();
-    },
-    HH: function HH(date) {
-      return pad(date.getHours(), 2);
-    },
-    h: function h(date) {
-      var hours = date.getHours();
-      if (hours === 0) {
-        return 12;
-      }
-      if (hours > 12) {
-        return hours % 12;
-      }
-      return hours;
-    },
-    hh: function hh() {
-      var hours = formatFlags.h.apply(formatFlags, arguments);
-      return pad(hours, 2);
-    },
-    m: function m(date) {
-      return date.getMinutes();
-    },
-    mm: function mm(date) {
-      return pad(date.getMinutes(), 2);
-    },
-    s: function s(date) {
-      return date.getSeconds();
-    },
-    ss: function ss(date) {
-      return pad(date.getSeconds(), 2);
-    },
-    S: function S(date) {
-      return Math.floor(date.getMilliseconds() / 100);
-    },
-    SS: function SS(date) {
-      return pad(Math.floor(date.getMilliseconds() / 10), 2);
-    },
-    SSS: function SSS(date) {
-      return pad(date.getMilliseconds(), 3);
-    },
-    d: function d(date) {
-      return date.getDay();
-    },
-    dd: function dd(date, locale2) {
-      return locale2.weekdaysMin[date.getDay()];
-    },
-    ddd: function ddd(date, locale2) {
-      return locale2.weekdaysShort[date.getDay()];
-    },
-    dddd: function dddd(date, locale2) {
-      return locale2.weekdays[date.getDay()];
-    },
-    A: function A(date, locale2) {
-      var meridiemFunc = locale2.meridiem || meridiem;
-      return meridiemFunc(date.getHours(), date.getMinutes(), false);
-    },
-    a: function a(date, locale2) {
-      var meridiemFunc = locale2.meridiem || meridiem;
-      return meridiemFunc(date.getHours(), date.getMinutes(), true);
-    },
-    Z: function Z(date) {
-      return formatTimezone(getOffset(date), ":");
-    },
-    ZZ: function ZZ(date) {
-      return formatTimezone(getOffset(date));
-    },
-    X: function X(date) {
-      return Math.floor(date.getTime() / 1e3);
-    },
-    x: function x(date) {
-      return date.getTime();
-    },
-    w: function w(date, locale2) {
-      return getWeek(date, {
-        firstDayOfWeek: locale2.firstDayOfWeek,
-        firstWeekContainsDate: locale2.firstWeekContainsDate
-      });
-    },
-    ww: function ww(date, locale2) {
-      return pad(formatFlags.w(date, locale2), 2);
-    }
-  };
-  function format(val, str) {
-    var options = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : {};
-    var formatStr = str ? String(str) : "YYYY-MM-DDTHH:mm:ss.SSSZ";
-    var date = toDate(val);
-    if (!isValidDate(date)) {
-      return "Invalid Date";
-    }
-    var locale2 = options.locale || en_default;
-    return formatStr.replace(REGEX_FORMAT, function(match, p1) {
-      if (p1) {
-        return p1;
-      }
-      if (typeof formatFlags[match] === "function") {
-        return "".concat(formatFlags[match](date, locale2));
-      }
-      return match;
-    });
-  }
-
-  // node_modules/date-format-parse/es/parse.js
-  function _slicedToArray(arr, i) {
-    return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
-  }
-  function _nonIterableRest() {
-    throw new TypeError("Invalid attempt to destructure non-iterable instance");
-  }
-  function _iterableToArrayLimit(arr, i) {
-    if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
-      return;
-    }
-    var _arr = [];
-    var _n = true;
-    var _d = false;
-    var _e = void 0;
-    try {
-      for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-        _arr.push(_s.value);
-        if (i && _arr.length === i)
-          break;
-      }
-    } catch (err) {
-      _d = true;
-      _e = err;
-    } finally {
-      try {
-        if (!_n && _i["return"] != null)
-          _i["return"]();
-      } finally {
-        if (_d)
-          throw _e;
-      }
-    }
-    return _arr;
-  }
-  function _arrayWithHoles(arr) {
-    if (Array.isArray(arr))
-      return arr;
-  }
-  function _defineProperty(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, { value, enumerable: true, configurable: true, writable: true });
-    } else {
-      obj[key] = value;
-    }
-    return obj;
-  }
-  var match1 = /\d/;
-  var match2 = /\d\d/;
-  var match3 = /\d{3}/;
-  var match4 = /\d{4}/;
-  var match1to2 = /\d\d?/;
-  var matchShortOffset = /[+-]\d\d:?\d\d/;
-  var matchSigned = /[+-]?\d+/;
-  var matchTimestamp = /[+-]?\d+(\.\d{1,3})?/;
-  var YEAR = "year";
-  var MONTH = "month";
-  var DAY = "day";
-  var HOUR = "hour";
-  var MINUTE = "minute";
-  var SECOND = "second";
-  var MILLISECOND = "millisecond";
-  var parseFlags = {};
-  var addParseFlag = function addParseFlag2(token, regex, callback) {
-    var tokens = Array.isArray(token) ? token : [token];
-    var func;
-    if (typeof callback === "string") {
-      func = function func2(input) {
-        var value = parseInt(input, 10);
-        return _defineProperty({}, callback, value);
-      };
-    } else {
-      func = callback;
-    }
-    tokens.forEach(function(key) {
-      parseFlags[key] = [regex, func];
-    });
-  };
-  var escapeStringRegExp = function escapeStringRegExp2(str) {
-    return str.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&");
-  };
-  var matchWordRegExp = function matchWordRegExp2(localeKey) {
-    return function(locale2) {
-      var array = locale2[localeKey];
-      if (!Array.isArray(array)) {
-        throw new Error("Locale[".concat(localeKey, "] need an array"));
-      }
-      return new RegExp(array.map(escapeStringRegExp).join("|"));
-    };
-  };
-  var matchWordCallback = function matchWordCallback2(localeKey, key) {
-    return function(input, locale2) {
-      var array = locale2[localeKey];
-      if (!Array.isArray(array)) {
-        throw new Error("Locale[".concat(localeKey, "] need an array"));
-      }
-      var index = array.indexOf(input);
-      if (index < 0) {
-        throw new Error("Invalid Word");
-      }
-      return _defineProperty({}, key, index);
-    };
-  };
-  addParseFlag("Y", matchSigned, YEAR);
-  addParseFlag("YY", match2, function(input) {
-    var year = new Date().getFullYear();
-    var cent = Math.floor(year / 100);
-    var value = parseInt(input, 10);
-    value = (value > 68 ? cent - 1 : cent) * 100 + value;
-    return _defineProperty({}, YEAR, value);
-  });
-  addParseFlag("YYYY", match4, YEAR);
-  addParseFlag("M", match1to2, function(input) {
-    return _defineProperty({}, MONTH, parseInt(input, 10) - 1);
-  });
-  addParseFlag("MM", match2, function(input) {
-    return _defineProperty({}, MONTH, parseInt(input, 10) - 1);
-  });
-  addParseFlag("MMM", matchWordRegExp("monthsShort"), matchWordCallback("monthsShort", MONTH));
-  addParseFlag("MMMM", matchWordRegExp("months"), matchWordCallback("months", MONTH));
-  addParseFlag("D", match1to2, DAY);
-  addParseFlag("DD", match2, DAY);
-  addParseFlag(["H", "h"], match1to2, HOUR);
-  addParseFlag(["HH", "hh"], match2, HOUR);
-  addParseFlag("m", match1to2, MINUTE);
-  addParseFlag("mm", match2, MINUTE);
-  addParseFlag("s", match1to2, SECOND);
-  addParseFlag("ss", match2, SECOND);
-  addParseFlag("S", match1, function(input) {
-    return _defineProperty({}, MILLISECOND, parseInt(input, 10) * 100);
-  });
-  addParseFlag("SS", match2, function(input) {
-    return _defineProperty({}, MILLISECOND, parseInt(input, 10) * 10);
-  });
-  addParseFlag("SSS", match3, MILLISECOND);
-  function matchMeridiem(locale2) {
-    return locale2.meridiemParse || /[ap]\.?m?\.?/i;
-  }
-  function defaultIsPM(input) {
-    return "".concat(input).toLowerCase().charAt(0) === "p";
-  }
-  addParseFlag(["A", "a"], matchMeridiem, function(input, locale2) {
-    var isPM = typeof locale2.isPM === "function" ? locale2.isPM(input) : defaultIsPM(input);
-    return {
-      isPM
-    };
-  });
-  function offsetFromString(str) {
-    var _ref8 = str.match(/([+-]|\d\d)/g) || ["-", "0", "0"], _ref9 = _slicedToArray(_ref8, 3), symbol = _ref9[0], hour = _ref9[1], minute = _ref9[2];
-    var minutes = parseInt(hour, 10) * 60 + parseInt(minute, 10);
-    if (minutes === 0) {
-      return 0;
-    }
-    return symbol === "+" ? -minutes : +minutes;
-  }
-  addParseFlag(["Z", "ZZ"], matchShortOffset, function(input) {
-    return {
-      offset: offsetFromString(input)
-    };
-  });
-  addParseFlag("x", matchSigned, function(input) {
-    return {
-      date: new Date(parseInt(input, 10))
-    };
-  });
-  addParseFlag("X", matchTimestamp, function(input) {
-    return {
-      date: new Date(parseFloat(input) * 1e3)
-    };
-  });
-  addParseFlag("d", match1, "weekday");
-  addParseFlag("dd", matchWordRegExp("weekdaysMin"), matchWordCallback("weekdaysMin", "weekday"));
-  addParseFlag("ddd", matchWordRegExp("weekdaysShort"), matchWordCallback("weekdaysShort", "weekday"));
-  addParseFlag("dddd", matchWordRegExp("weekdays"), matchWordCallback("weekdays", "weekday"));
-  addParseFlag("w", match1to2, "week");
-  addParseFlag("ww", match2, "week");
-
-  // src/DateFormatter.ts
-  var DateFormatter = class {
-    format(date, pattern) {
-      return format(date, pattern != null ? pattern : "D MMMM HH:mm:ss");
-    }
-  };
-
   // src/TempisTimeline.ts
   var TempisTimeline = class {
     constructor(context, options) {
@@ -2150,13 +2206,11 @@ var tempis_timeline = (() => {
       this._options = options;
       this._canvas = this._getCanvas(context);
       this._font = new TimelineFont((_a = this._options.style) == null ? void 0 : _a.font);
-      this._dateFormatter = new DateFormatter();
       this._dataSet = new TimelineDataSet(this._options);
       this._dataView = new TimelineDataView(this._dataSet, this._isRTL);
       this._rangeView = new TimelineRangeView(
         this._canvas,
         this._dataSet,
-        this._dateFormatter,
         this._isRTL,
         this._options.range
       );
@@ -2164,7 +2218,6 @@ var tempis_timeline = (() => {
       this._tooltipView = new TimelineTooltipView(
         this._canvas,
         this._dataView,
-        this._dateFormatter,
         this._font,
         this._isRTL,
         this._options.tooltip
@@ -2179,6 +2232,12 @@ var tempis_timeline = (() => {
       this._createCanvasEventHandlers();
       this._dataSet.registerUpdateCallback(() => this._draw());
       this._draw();
+    }
+    static registerDateAdapter(adapter) {
+      AdapterRegistry.register(adapter);
+    }
+    static getDateAdapter() {
+      return AdapterRegistry.get();
     }
     get _selectionMode() {
       var _a;
