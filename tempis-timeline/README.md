@@ -1,187 +1,381 @@
 # Tempis Timeline
 
+A powerful, flexible, and highly customizable timeline visualization library for JavaScript and TypeScript. Built with performance in mind, Tempis Timeline renders beautiful interactive timelines on HTML5 Canvas.
+
+![Tempis Timeline Banner](./docs/images/banner.png)
+
+## Features
+
+- **Canvas-Based Rendering** - High-performance rendering using HTML5 Canvas for smooth interactions even with thousands of items
+- **Flexible Item Types** - Support for both point-in-time events and range-based items
+- **Interactive Selection** - Single or multi-select modes with customizable callbacks
+- **Rich Categorization** - Organize items with categories and visual groupings
+- **Customizable Styling** - Full control over colors, fonts, borders, and spacing
+- **Responsive Design** - Automatically adapts to container size changes
+- **RTL Support** - Built-in right-to-left language support
+- **Smart Tooltips** - Configurable tooltips with overflow handling and custom templates
+- **Legend System** - Interactive legend with filtering and highlighting
+- **Zoom & Pan** - Smooth zooming and panning with configurable constraints
+- **Date Adapter System** - Pluggable date adapters (native Date, Luxon, etc.)
+- **TypeScript First** - Written in TypeScript with full type definitions
+
+## Screenshots
+
+### Basic Timeline
+![Basic Timeline](./docs/images/basic-timeline.png)
+
+### Multi-Band Timeline
+![Multi-Band Timeline](./docs/images/bands-timeline.png)
+
+### Categorized Items with Legend
+![Categorized Timeline](./docs/images/categories-timeline.png)
+
+## Installation
+
+```bash
+npm install tempis-timeline
+```
+
+```bash
+yarn add tempis-timeline
+```
+
+```bash
+pnpm add tempis-timeline
+```
+
+## Quick Start
+
+```typescript
+import { TempisTimeline } from 'tempis-timeline';
+
+// Create a canvas element
+const canvas = document.getElementById('timeline-canvas') as HTMLCanvasElement;
+
+// Initialize the timeline
+const timeline = new TempisTimeline(canvas, {
+  responsive: true,
+  items: [
+    {
+      id: 1,
+      label: 'Project Kickoff',
+      start: '2024-01-15',
+      category: 'milestone'
+    },
+    {
+      id: 2,
+      label: 'Development Phase',
+      start: '2024-01-20',
+      end: '2024-03-15',
+      category: 'phase'
+    },
+    {
+      id: 3,
+      label: 'Launch',
+      start: '2024-03-20',
+      category: 'milestone'
+    }
+  ],
+  categories: [
+    {
+      name: 'milestone',
+      label: 'Milestones',
+      style: {
+        backgroundColor: '#4CAF50',
+        fontColor: '#ffffff'
+      }
+    },
+    {
+      name: 'phase',
+      label: 'Phases',
+      style: {
+        backgroundColor: '#2196F3',
+        fontColor: '#ffffff'
+      }
+    }
+  ],
+  range: {
+    start: '2024-01-01',
+    end: '2024-12-31'
+  }
+});
+```
+
+## Use Cases
+
+### Project Management
+Track project milestones, phases, and deliverables with visual timelines that help teams stay aligned.
+
+### Historical Timelines
+Create engaging historical visualizations for educational content, museum exhibits, or documentation.
+
+### Resource Planning
+Visualize resource allocation, availability, and scheduling conflicts across teams and projects.
+
+### Event Scheduling
+Display event schedules, conference agendas, or production timelines with clear visual hierarchy.
+
+### System Monitoring
+Show system uptime, downtime periods, and maintenance windows for infrastructure monitoring.
+
+### Data Analysis
+Visualize time-series data, trends, and patterns with interactive exploration capabilities.
+
+## Basic Usage
+
+### Creating a Timeline
+
+```typescript
+const timeline = new TempisTimeline(canvas, options);
+```
+
+### Adding Items Dynamically
+
+```typescript
+timeline.setItems([
+  {
+    id: 'task-1',
+    label: 'Design Phase',
+    start: new Date('2024-01-01'),
+    end: new Date('2024-01-31'),
+    category: 'design'
+  },
+  // ... more items
+]);
+```
+
+### Handling Selection
+
+```typescript
+const timeline = new TempisTimeline(canvas, {
+  selection: 'multi',
+  onSelectionChange: (changes) => {
+    console.log('Selection changed:', changes);
+  },
+  onItemClick: (id) => {
+    console.log('Item clicked:', id);
+  }
+});
+```
+
+### Getting Selected Items
+
+```typescript
+const selectedIds = timeline.getSelection();
+console.log('Currently selected:', selectedIds);
+```
+
+### Focusing on Items
+
+```typescript
+// Focus on all items
+timeline.focus();
+
+// Focus on specific date range
+timeline.focus({
+  start: '2024-01-01',
+  end: '2024-06-30'
+});
+
+// Focus on specific item
+timeline.focus({ itemId: 'task-1' });
+```
+
 ## Configuration
 
-## TempisTimelineOptions
-The options object passed when creating an instance of TempisTimeline.
+### Responsive Timeline
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `responsive` | `boolean` | `false` | Whether the canvas should resize to match the dimensions of its parent container. |
-| `verticalFill` | `TempisTimelineVerticalFillMode` | `"content"` | Defines how the timeline should fill the vertical space. |
-| `rtl` | `boolean` | `false` | Whether the timeline and any default tooltips should be rendered right-to-left. |
-| `range` | `TempisTimelineRangeOptions` | — | Timeline range configuration including start, end, min/max, zoom, units, and position. |
-| `legend` | `TempisTimelineLegendOptions` | — | Configuration for the timeline legend including position, alignment, and item options. |
-| `tooltip` | `TempisTimelineTooltipOptions` | — | Configuration for item tooltips including delay, overflow behavior, and content templates. |
-| `style` | `TempisTimelineStyleOptions` | — | Default style settings for timeline text and items. |
-| `categories` | `TempisTimelineCategory[]` | — | List of item categories, including labels and default styles. |
-| `items` | `TempisTimelineItem[]` | — | Timeline items to display, including labels, dates, styles, and selection state. |
-| `selection` | `TempisTimelineItemSelectionMode` | `"none"` | Defines how timeline items can be selected. |
-| `onItemClick` | `(id: string \| number) => void` | — | Callback function triggered when an item is clicked. |
-| `onItemDoubleClick` | `(id: string \| number) => void` | — | Callback function triggered when an item is double-clicked. |
-| `onSelectionChange` | `(changes: SelectionChangeEvent[]) => void` | — | Callback function triggered when item selection changes. |
+```typescript
+const timeline = new TempisTimeline(canvas, {
+  responsive: true,
+  verticalFill: 'fill-canvas'
+});
+```
 
-## TempisTimelineVerticalFillMode
-Defines how the timeline should fill the vertical space.
+### Custom Styling
 
-| Value | Description |
-|------|-------------|
-| `content` | The timeline height is determined purely by its content and will only take up as much vertical space as required to render all visible. |
-| `fill-canvas` | The timeline expands to fill the available vertical space of the canvas. |
-| `grow-canvas` | The timeline grows the canvas element itself to match the required content height. |
+```typescript
+const timeline = new TempisTimeline(canvas, {
+  style: {
+    font: {
+      family: 'Inter, sans-serif',
+      size: 14,
+      weight: 500
+    },
+    item: {
+      backgroundColor: '#e0e0e0',
+      fontColor: '#333333',
+      borderRadius: 4,
+      padding: 8,
+      borderColor: '#999999',
+      borderThickness: 1
+    }
+  }
+});
+```
 
-## TempisTimelineItemSelectionMode
-Defines how items in a timeline can be selected.
+### Custom Tooltips
 
-| Value | Description |
-|------|-------------|
-| `none` | No items can be selected (view-only mode). |
-| `single` | Only one item can be selected at a time. Selecting a new item clears the previous selection. |
-| `multi` | Multiple items can be selected simultaneously. Each item can be toggled independently. |
+```typescript
+const timeline = new TempisTimeline(canvas, {
+  tooltip: {
+    enabled: true,
+    delay: 300,
+    overflowBehavior: 'viewport',
+    template: (id) => {
+      const item = items.find(i => i.id === id);
+      return `
+        <div class="custom-tooltip">
+          <h3>${item.label}</h3>
+          <p>Start: ${item.start}</p>
+          ${item.end ? `<p>End: ${item.end}</p>` : ''}
+        </div>
+      `;
+    }
+  }
+});
+```
 
-## TempisTimelineTooltipOptions
-The timeline tooltip options.
+### Zoom Configuration
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `enabled` | `boolean` | `true` | Whether tooltips are enabled. |
-| `delay` | `number` | `0` | Tooltip delay in milliseconds. |
-| `overflowBehavior` | `"none" \| "canvas" \| "viewport"` | `none` | How tooltips behave near edges: `none` = may overflow, `canvas` = constrained to canvas, `viewport` = constrained to viewport. |
-| `template` | `(id: string \| number) => HTMLElement \| string \| null` | — | Optional function for custom tooltip content. Returns HTMLElement, string, or null. |
-| `shouldShow` | `(id: string \| number) => boolean` | — | Optional predicate to determine whether to show a tooltip for a specific item. |
+```typescript
+const timeline = new TempisTimeline(canvas, {
+  range: {
+    zoom: {
+      enabled: true,
+      min: 24 * 60 * 60 * 1000, // 1 day
+      max: 365 * 24 * 60 * 60 * 1000 // 1 year
+    }
+  }
+});
+```
 
-## TempisTimelineTooltipOverflowBehavior
-Controls how tooltip positioning behaves when near edges.
+### Legend Configuration
 
-| Value | Description |
-|-------|-------------|
-| `none` | Positioned near the cursor; may overflow viewport or canvas. |
-| `canvas` | Stays within canvas bounds by flipping horizontally/vertically. |
-| `viewport` | Stays within browser viewport by flipping horizontally/vertically. |
+```typescript
+const timeline = new TempisTimeline(canvas, {
+  legend: {
+    position: 'top',
+    alignment: 'center',
+    item: {
+      markerStyle: 'circle',
+      isHighlightOnHover: true,
+      isFilterOnClick: true
+    }
+  }
+});
+```
 
-## TempisTimelineStyleOptions
-The timeline style options.
+## API Reference
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `font` | `TempisTimelineFont` | Default font for timeline text. |
-| `item` | `TempisTimelineItemStyle` | Default style applied to all timeline items unless overridden by item or category styles. |
+### Constructor
 
-## TempisTimelineFont
-The timeline font options.
+```typescript
+new TempisTimeline(canvas: HTMLCanvasElement, options: TempisTimelineOptions)
+```
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `size` | `number` | Font size in pixels. |
-| `family` | `string` | Font family. |
-| `style` | `string` | Font style (e.g., italic). |
-| `weight` | `string \| number` | Font weight (normal, bold, lighter, bolder, or numeric). |
-| `lineHeight` | `number \| string` | Line height. |
+### Methods
 
-## TempisTimelineItemStyle
-The timeline item style options.
+#### `setItems(items: TempisTimelineItem[])`
+Updates the timeline items without changing the visible range.
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `backgroundColor` | `string` | Background color of the item. Used for markers on point-in-time items if no border is defined. |
-| `fontColor` | `string` | Text color for the item label. |
-| `padding` | `number` | Padding inside the item box. |
-| `borderColor` | `string` | Border color. Used for markers of point-in-time items. |
-| `borderThickness` | `number` | Border thickness in pixels. |
-| `borderRadius` | `number` | Border radius in pixels. |
+#### `getSelection(): (string | number)[]`
+Returns an array of currently selected item IDs.
 
+#### `focus(options?: FocusOptions)`
+Focuses the timeline on specific items, dates, or the full range.
 
-## TempisTimelineRangeOptions
-The timeline range options.
+#### `redraw()`
+Manually triggers a redraw of the timeline (useful for non-responsive timelines).
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `fixed` | `boolean` | Whether the timeline range is fixed and cannot be modified via user interaction. |
-| `minorUnit` | `TempisTimelineRangeUnitOptions` | Configuration for minor range units. |
-| `majorUnit` | `TempisTimelineRangeUnitOptions` | Configuration for major range units. |
-| `position` | `"top" \| "bottom" \| "both" \| "none"` | Position of the range bar. |
-| `min` | `string \| number \| Date` | Minimum displayable date. |
-| `max` | `string \| number \| Date` | Maximum displayable date. |
-| `start` | `string \| number \| Date` | Initial start date of the visible range. |
-| `end` | `string \| number \| Date` | Initial end date of the visible range. |
-| `zoom` | `TempisTimelineRangeZoomOptions` | Zoom configuration options. |
+### Events
 
-## TempisTimelineRangeZoomOptions
-The timeline range zoom options.
+- `onItemClick` - Fired when an item is clicked
+- `onItemDoubleClick` - Fired when an item is double-clicked
+- `onSelectionChange` - Fired when selection state changes
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `enabled` | `boolean` | Whether zooming is enabled. |
-| `min` | `number` | Minimum zoom range in milliseconds. |
-| `max` | `number` | Maximum zoom range in milliseconds. |
+## Advanced Features
 
-## TempisTimelineRangeUnitOptions
-The timeline range unit options.
+### Date Adapters
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `font` | `TempisTimelineFont` | Font for range unit labels. |
-| `formats` | `TempisTimelineRangeUnitLabelFormats` | Label formats for units (millisecond, second, minute, hour, day, month, year). |
+Tempis Timeline supports pluggable date adapters for different date libraries:
+
+```typescript
+import { LuxonAdapter } from 'tempis-timeline/adapters/luxon';
+
+const timeline = new TempisTimeline(canvas, {
+  dateAdapter: new LuxonAdapter(),
+  // ... other options
+});
+```
+
+### Item Grouping
+
+```typescript
+const timeline = new TempisTimeline(canvas, {
+  items: [
+    {
+      id: 1,
+      label: 'Task A',
+      start: '2024-01-01',
+      grouping: 'team-1'
+    },
+    {
+      id: 2,
+      label: 'Task B',
+      start: '2024-01-05',
+      grouping: 'team-1'
+    }
+  ]
+});
+```
+
+### RTL Support
+
+```typescript
+const timeline = new TempisTimeline(canvas, {
+  rtl: true
+});
+```
+
+## Browser Support
+
+- Chrome/Edge (latest)
+- Firefox (latest)
+- Safari (latest)
+- Opera (latest)
+
+## Performance Tips
+
+- Use `responsive: false` for static timelines to avoid unnecessary redraws
+- Limit the number of visible items when dealing with large datasets
+- Use `verticalFill: 'content'` for better performance with many items
+- Implement virtual scrolling for extremely large datasets
+
+## Examples
+
+Check out the `/test` directory for complete working examples:
+
+- `basic.html` - Simple timeline setup
+- `categories.html` - Using categories and legend
+- `bands.html` - Multi-band timeline
+- `selection.html` - Selection handling
+- `tooltips.html` - Custom tooltips
+- `styling.html` - Custom styling examples
+- `stress-test.html` - Performance testing
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+ISC
+
+## Support
+
+For issues, questions, or feature requests, please open an issue on GitHub.
 
 ---
 
-## TempisTimelineLegendOptions
-The timeline legend options.
-
-| Option | Type | Description |
-|--------|------|-------------|
-| `position` | `"top" \| "bottom" \| "none"` | Position of the legend relative to the timeline. |
-| `alignment` | `"start" \| "center" \| "end"` | Horizontal alignment of the legend. |
-| `item` | `TempisTimelineLegendItemOptions` | Configuration for individual legend items. |
-
-## TempisTimelineLegendItemOptions
-The timeline legend item options.
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `markerStyle` | `"square" \| "square-rounded" \| "circle"` | `square-rounded` | Marker style for the legend item. |
-| `isHighlightOnHover` | `boolean` | `true` | Whether hovering a legend item highlights corresponding timeline items. |
-| `isFilterOnClick` | `boolean` | `true` | Whether clicking a legend item toggles visibility of related timeline items. |
-| `padding` | `number` | — | Padding applied to the legend item. |
-
----
-
-## TempisTimelineItem
-A range or point-in-time timeline item.
-
-| Option | Type | Description |
-|--------|------|-------------|
-| `id` | `string \| number` | Unique identifier for the item. |
-| `start` | `string \| number \| Date` | Start date/time of the item. |
-| `end` | `string \| number \| Date` | Optional end date/time for range items. |
-| `label` | `string` | Label displayed for the item. |
-| `grouping` | `string` | Optional grouping key for visual grouping. |
-| `category` | `string` | Category name corresponding to `categories`. |
-| `style` | `TempisTimelineItemStyle` | Custom style for the item. |
-| `selected` | `boolean` | Whether the item is initially selected. |
-
----
-
-## TempisTimelineCategory
-A timeline category.
-
-| Option | Type | Description |
-|--------|------|-------------|
-| `name` | `string` | Category identifier used by items. |
-| `label` | `string` | Display label for the category in the legend. |
-| `style` | `TempisTimelineItemStyle` | Default style applied to all items in this category. |
-
-
-## TempisTimeline Methods
-
-#### getSelection()
-Returns an array of selected item identifiers.
-
-#### setItems(items: TempisTimelineItem[])
-Sets the timeline items and redraws the timeline without updating the range.
-
-#### focus(options?: FocusOptions)
-Focuses the timeline on a specific item, date, or range. If no options are defined the timeline will focus on the full range of items.
-
-#### redraw()
-Redraw the timeline. This is primarily used for non-responsive timelines.
+Made with ❤️ by the Tempis Timeline team
