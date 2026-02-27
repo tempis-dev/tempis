@@ -9,7 +9,8 @@ import { TimelineTooltipView } from "./TimelineTooltipView";
 import { TimelineLegendView } from "./TimelineLegendView";
 import { SelectionChangeEvent } from "./Event";
 import { isNullOrUndefined, parseDate } from "./Utilities";
-import { DateFormatter } from "./DateFormatter";
+import { TempisTimelineDateAdapter } from "./TempisTimelineDateAdapter";
+import { AdapterRegistry } from "./AdapterRegistry";
 
 export class TempisTimeline {
     /** The timeline canvas. */
@@ -39,9 +40,6 @@ export class TempisTimeline {
     /** The default timeline font. */
     private readonly _font: TimelineFont;
 
-    /** The date formatter. */
-    private readonly _dateFormatter: DateFormatter;
-
     /** The canvas container resize observer. */
     private _canvasContainerResizeObserver: ResizeObserver | null = null;
 
@@ -55,14 +53,12 @@ export class TempisTimeline {
 
         this._canvas = this._getCanvas(context);
         this._font = new TimelineFont(this._options.style?.font);
-        this._dateFormatter = new DateFormatter();
 
         this._dataSet = new TimelineDataSet(this._options);
         this._dataView = new TimelineDataView(this._dataSet, this._isRTL);
         this._rangeView = new TimelineRangeView(
             this._canvas,
             this._dataSet,
-            this._dateFormatter,
             this._isRTL,
             this._options.range
         );
@@ -70,7 +66,6 @@ export class TempisTimeline {
         this._tooltipView = new TimelineTooltipView(
             this._canvas,
             this._dataView,
-            this._dateFormatter,
             this._font,
             this._isRTL,
             this._options.tooltip
@@ -99,6 +94,25 @@ export class TempisTimeline {
 
         // Do our initial draw.
         this._draw();
+    }
+
+    /**
+     * Register a custom date adapter for the timeline library.
+     * This allows you to use timezone-aware date libraries (like Luxon, date-fns-tz, or Temporal)
+     * instead of the default native Date implementation.
+     * @param adapter The date adapter implementation to use
+     */
+    static registerDateAdapter(adapter: TempisTimelineDateAdapter): void {
+        AdapterRegistry.register(adapter);
+    }
+
+    /**
+     * Get the currently registered date adapter.
+     * If no custom adapter has been registered, returns the default NativeDateAdapter.
+     * @returns The active date adapter instance
+     */
+    static getDateAdapter(): TempisTimelineDateAdapter {
+        return AdapterRegistry.get();
     }
 
     /** Gets the item selection mode. */

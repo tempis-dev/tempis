@@ -1,7 +1,7 @@
-import { DateFormatter } from "./DateFormatter";
 import { TempisTimelineTooltipOptions } from "./TempisTimelineOptions";
 import { TimelineFont } from "./TimelineFont";
 import { TimelineItem } from "./TimelineItem";
+import { AdapterRegistry } from "./AdapterRegistry";
 
 /** The default tooltip delay in millis. */
 const DEFAULT_TOOLTIP_DELAY_MS = 500;
@@ -12,9 +12,6 @@ export class TimelineTooltip {
 
     /** The timeline canvas. */
     private readonly _canvas: HTMLCanvasElement;
-
-    /** The date formatter. */
-    private readonly _dateFormatter: DateFormatter;
 
     /** The timeline font. */
     private readonly _font: TimelineFont;
@@ -41,7 +38,6 @@ export class TimelineTooltip {
      * Creates a new instance of the TimelineTooltip class and shows a tooltip for the given item.
      * @param item The tooltip item.
      * @param canvas The timeline canvas.
-     * @param dateFormatter The date formatter.
      * @param font The timeline font.
      * @param isRTL Whether the timeline is being rendered right-to-left.
      * @param options The tooltip options.
@@ -51,7 +47,6 @@ export class TimelineTooltip {
     public constructor(
         item: TimelineItem,
         canvas: HTMLCanvasElement,
-        dateFormatter: DateFormatter,
         font: TimelineFont,
         isRTL: boolean,
         options: TempisTimelineTooltipOptions,
@@ -60,7 +55,6 @@ export class TimelineTooltip {
     ) {
         this._item = item;
         this._canvas = canvas;
-        this._dateFormatter = dateFormatter;
         this._font = font;
         this._isRTL = isRTL;
         this._options = options;
@@ -168,12 +162,14 @@ export class TimelineTooltip {
                 direction: this._isRTL ? "rtl" : "ltr"
             });
 
+            const dateAdapter = AdapterRegistry.get();
+
             // Set the default tooltip content which is a header of the item label as well as the start date for PIT items and start and end date for range items.
             // TODO Improve the default tooltip content formatting and styling, as well as the rtl support.
             if (this._item.end) {
-                this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)} - ${this._dateFormatter.format(this._item.end)}</p>`;
+                this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${dateAdapter.format(this._item.start.getTime(), "D MMMM HH:mm:ss")} - ${dateAdapter.format(this._item.end.getTime(), "D MMMM HH:mm:ss")}</p>`;
             } else {
-                this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${this._dateFormatter.format(this._item.start)}</p>`;
+                this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${dateAdapter.format(this._item.start.getTime(), "D MMMM HH:mm:ss")}</p>`;
             }
         }
 

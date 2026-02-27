@@ -68,6 +68,9 @@ export class TimelineLegendView {
     /** Gets the y position from where this view was last drawn. */
     private _lastDrawYPosition: number = 0;
 
+    /** Timer for debouncing category hover effects. */
+    private _hoverDelayTimer: number | null = null;
+
     /**
      * Creates a new instance of the TimelineLegendView class.
      * @param canvas The timeline canvas.
@@ -424,6 +427,12 @@ export class TimelineLegendView {
                 pointerPosition.y < this._lastDrawYPosition ||
                 pointerPosition.y > this._lastDrawYPosition + this._drawPlan.height
             ) {
+                // Clear any pending hover timer.
+                if (this._hoverDelayTimer !== null) {
+                    clearTimeout(this._hoverDelayTimer);
+                    this._hoverDelayTimer = null;
+                }
+
                 // Ensure that we are not leaving any categories focused.
                 this._dataSet.unfocusCategories();
                 return null;
@@ -432,17 +441,33 @@ export class TimelineLegendView {
             // Attempt to get the category at the pointer position
             const targetCategory = this._getCategoryAtPoint(pointerPosition);
 
-            // If we have a target category then we should set it as focused, otherwise we are unfocusing all categories.
-            if (targetCategory) {
-                this._dataSet.focusCategory(targetCategory.name);
-            } else {
-                this._dataSet.unfocusCategories();
+            // Clear any existing hover timer.
+            if (this._hoverDelayTimer !== null) {
+                clearTimeout(this._hoverDelayTimer);
+                this._hoverDelayTimer = null;
             }
+
+            // Add a small delay before applying the hover effect.
+            this._hoverDelayTimer = window.setTimeout(() => {
+                // If we have a target category then we should set it as focused, otherwise we are unfocusing all categories.
+                if (targetCategory) {
+                    this._dataSet.focusCategory(targetCategory.name);
+                } else {
+                    this._dataSet.unfocusCategories();
+                }
+                this._hoverDelayTimer = null;
+            }, 150);
         });
 
         // Handle the pointer down event.
         this._canvas.addEventListener("pointerdown", (event) => {
             isPointerDown = true;
+
+            // Clear any pending hover timer.
+            if (this._hoverDelayTimer !== null) {
+                clearTimeout(this._hoverDelayTimer);
+                this._hoverDelayTimer = null;
+            }
 
             // There is nothing to do if we have no draw plan as we have no rendered categories.
             if (!this._drawPlan) {
@@ -489,6 +514,12 @@ export class TimelineLegendView {
 
         // Handle the pointer leaving the canvas.
         this._canvas.addEventListener("pointerout", () => {
+            // Clear any pending hover timer.
+            if (this._hoverDelayTimer !== null) {
+                clearTimeout(this._hoverDelayTimer);
+                this._hoverDelayTimer = null;
+            }
+
             // Ensure that we don't leave any categories focused when our pointer leaves the canvas.
             this._dataSet.unfocusCategories();
         });
