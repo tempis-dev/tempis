@@ -152,10 +152,8 @@ export class TempisTimeline {
         this._options.items = items;
 
         // Update the dataset with options object containing the updated items.
+        // Note: The dataset update will trigger the registered update callback which calls _draw().
         this._dataSet.update(this._options);
-
-        // Redraw the timeline to reflect the updated items.
-        this._draw();
     }
 
     /**

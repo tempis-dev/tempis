@@ -2284,7 +2284,6 @@ var tempis_timeline = (() => {
     setItems(items) {
       this._options.items = items;
       this._dataSet.update(this._options);
-      this._draw();
     }
     focus(options) {
       if (!options) {
