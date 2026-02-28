@@ -473,6 +473,18 @@ export class TempisTimeline {
         // Grab the canvas context.
         const context = this._canvas.getContext("2d")!;
 
+        // In "grow-canvas" mode, we need to calculate the required height BEFORE drawing
+        // to avoid drawing twice (once to measure, once after resizing).
+        if (this._verticalFillMode === "grow-canvas") {
+            const requiredHeight = this._calculateRequiredCanvasHeight(context);
+            
+            // Only resize and reapply DPR scaling if the height actually changed.
+            if (this._canvas.clientHeight !== requiredHeight) {
+                this._canvas.style.height = requiredHeight + "px";
+                this._applyCanvasDPRScaling();
+            }
+        }
+
         // Clear the canvas before doing a fresh draw.
         context.clearRect(0, 0, this._canvas.clientWidth, this._canvas.clientHeight);
 
@@ -579,19 +591,50 @@ export class TempisTimeline {
 
         // Clear the canvas from below the bottom of the bottom range view or bottom of the timeline or the bottom of the legend.
         context.clearRect(0, renderOffsetY, this._canvas.clientWidth, this._canvas.clientHeight - renderOffsetY);
+    }
 
-        // If we are in "grow-canvas" vertical fill mode then we need to check if the canvas height needs to be
-        // updated to match the total render offset height calculated in the first pass and the timeline then redrawn.
-        if (this._verticalFillMode === "grow-canvas" && this._canvas.clientHeight !== renderOffsetY) {
-            // The canvas height needs to be updated to match the total render height of the first pass.
-            this._canvas.style.height = renderOffsetY + "px";
+    /**
+     * Calculate the total required canvas height for "grow-canvas" mode.
+     * This pre-calculates the height needed without actually drawing, preventing the need for a second draw pass.
+     * @param context The canvas 2D context.
+     * @returns The total height required to render all timeline content.
+     */
+    private _calculateRequiredCanvasHeight(context: CanvasRenderingContext2D): number {
+        // Apply the default font to ensure accurate measurements.
+        context.font = this._font.font;
 
-            // The canvas height has changed so we need to reapply the DPR scaling.
-            this._applyCanvasDPRScaling();
+        let totalHeight = 0;
 
-            // Redraw the timeline now that the canvas size has changed to match the height of the first pass.
-            this._draw();
+        // Add height for top legend if configured.
+        if (this._legendView.position === "top") {
+            totalHeight += this._legendView.calculateRequiredHeight();
         }
+
+        // Add height for top range view if configured.
+        if (["top", "both"].includes(this._rangeView.position)) {
+            totalHeight += this._rangeView.calculateRequiredHeight();
+        }
+
+        // Calculate the data view height by creating a draw plan without actually drawing.
+        // The draw plan calculates all layout information including the total height needed.
+        const dataViewDrawPlan = this._dataView.createDrawPlan(
+            context,
+            this._rangeView.fromDt,
+            this._rangeView.toDt
+        );
+        totalHeight += dataViewDrawPlan.height;
+
+        // Add height for bottom range view if configured.
+        if (["bottom", "both"].includes(this._rangeView.position)) {
+            totalHeight += this._rangeView.calculateRequiredHeight();
+        }
+
+        // Add height for bottom legend if configured.
+        if (this._legendView.position === "bottom") {
+            totalHeight += this._legendView.calculateRequiredHeight();
+        }
+
+        return totalHeight;
     }
 
     /**

@@ -1005,6 +1005,9 @@ var tempis_timeline = (() => {
     scrollByYMovement(movementY) {
       this._scrollYOffset += movementY;
     }
+    createDrawPlan(context, fromDt, toDt) {
+      return this._createViewDrawPlan(context, fromDt, toDt);
+    }
     draw(context, fromDt, toDt, minorTicks, bands, yPosition, maxHeight, fillVertically) {
       this._drawPlan = this._createViewDrawPlan(context, fromDt, toDt);
       this._scrollYOffset = clamp(this._scrollYOffset, Math.min(0, maxHeight - this._drawPlan.height), 0);
@@ -2435,6 +2438,13 @@ var tempis_timeline = (() => {
     }
     _draw() {
       const context = this._canvas.getContext("2d");
+      if (this._verticalFillMode === "grow-canvas") {
+        const requiredHeight = this._calculateRequiredCanvasHeight(context);
+        if (this._canvas.clientHeight !== requiredHeight) {
+          this._canvas.style.height = requiredHeight + "px";
+          this._applyCanvasDPRScaling();
+        }
+      }
       context.clearRect(0, 0, this._canvas.clientWidth, this._canvas.clientHeight);
       context.direction = "ltr";
       context.font = this._font.font;
@@ -2487,11 +2497,29 @@ var tempis_timeline = (() => {
         renderOffsetY += legendViewHeight;
       }
       context.clearRect(0, renderOffsetY, this._canvas.clientWidth, this._canvas.clientHeight - renderOffsetY);
-      if (this._verticalFillMode === "grow-canvas" && this._canvas.clientHeight !== renderOffsetY) {
-        this._canvas.style.height = renderOffsetY + "px";
-        this._applyCanvasDPRScaling();
-        this._draw();
+    }
+    _calculateRequiredCanvasHeight(context) {
+      context.font = this._font.font;
+      let totalHeight = 0;
+      if (this._legendView.position === "top") {
+        totalHeight += this._legendView.calculateRequiredHeight();
       }
+      if (["top", "both"].includes(this._rangeView.position)) {
+        totalHeight += this._rangeView.calculateRequiredHeight();
+      }
+      const dataViewDrawPlan = this._dataView.createDrawPlan(
+        context,
+        this._rangeView.fromDt,
+        this._rangeView.toDt
+      );
+      totalHeight += dataViewDrawPlan.height;
+      if (["bottom", "both"].includes(this._rangeView.position)) {
+        totalHeight += this._rangeView.calculateRequiredHeight();
+      }
+      if (this._legendView.position === "bottom") {
+        totalHeight += this._legendView.calculateRequiredHeight();
+      }
+      return totalHeight;
     }
     _onCanvasClicked() {
       if (this._selectionMode === "none") {

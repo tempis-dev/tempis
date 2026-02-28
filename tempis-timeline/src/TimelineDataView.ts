@@ -100,8 +100,23 @@ export class TimelineDataView {
      * @param movementY The y offset amount.
      */
     public scrollByYMovement(movementY: number): void {
-        // this._scrollYOffset = clamp(this._scrollYOffset + movementY, 0, 100 /** TODO This needs to be based on available height and height of all items. */);
         this._scrollYOffset += movementY;
+    }
+
+    /**
+     * Create a draw plan for the view without actually drawing.
+     * This is useful for calculating the required height before rendering.
+     * @param context The canvas 2D context.
+     * @param fromDt The range from date.
+     * @param toDt The range to date.
+     * @returns A draw plan containing layout information including total height.
+     */
+    public createDrawPlan(
+        context: CanvasRenderingContext2D,
+        fromDt: Date,
+        toDt: Date
+    ): DataViewDrawPlan {
+        return this._createViewDrawPlan(context, fromDt, toDt);
     }
 
     /**
