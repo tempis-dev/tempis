@@ -268,6 +268,9 @@ export class TempisTimeline {
             this._canvasContainerResizeObserver = null;
         }
 
+        // Destroy the tooltip view
+        this._tooltipView.destroy();
+
         // Clear the canvas
         const context = this._canvas.getContext("2d");
         if (context) {
