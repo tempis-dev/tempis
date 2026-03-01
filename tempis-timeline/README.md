@@ -214,6 +214,19 @@ const timeline = new TempisTimeline(canvas, {
 });
 ```
 
+### Stack Mode
+
+Control how items are vertically arranged when they overlap:
+
+```typescript
+const timeline = new TempisTimeline(canvas, {
+  stackMode: 'stable' // or 'compact' (default)
+});
+```
+
+- `'compact'` (default) - Items are dynamically stacked based on visible items only. Point-in-time labels are adjusted to fit within canvas bounds. Layout updates when panning. More space-efficient but items may shift vertically.
+- `'stable'` - All items in the dataset are included in the layout. Point-in-time labels are always centered on their timestamp. Layout only recalculates on zoom or data changes. Items maintain stable vertical positions when panning.
+
 ### Custom Tooltips
 
 ```typescript
@@ -288,6 +301,14 @@ Focuses the timeline on specific items, dates, or the full range.
 #### `redraw()`
 Manually triggers a redraw of the timeline (useful for non-responsive timelines).
 
+#### `destroy()`
+Destroys the timeline and cleans up all resources. Removes all event listeners and observers to prevent memory leaks. Call this before removing the timeline from the DOM or when creating a new timeline instance.
+
+```typescript
+// Clean up before removing
+timeline.destroy();
+```
+
 ### Events
 
 - `onItemClick` - Fired when an item is clicked
@@ -348,8 +369,11 @@ const timeline = new TempisTimeline(canvas, {
 ## Performance Tips
 
 - Use `responsive: false` for static timelines to avoid unnecessary redraws
+- Use `stackMode: 'stable'` for better UX when users need to track items across panning operations
+- Use `stackMode: 'compact'` for more space-efficient layouts when vertical space is limited
 - Limit the number of visible items when dealing with large datasets
 - Use `verticalFill: 'content'` for better performance with many items
+- Call `destroy()` when removing timelines to prevent memory leaks
 - Implement virtual scrolling for extremely large datasets
 
 ## Examples
@@ -362,6 +386,7 @@ Check out the `/test` directory for complete working examples:
 - `selection.html` - Selection handling
 - `tooltips.html` - Custom tooltips
 - `styling.html` - Custom styling examples
+- `stack-mode.html` - Stack mode comparison
 - `stress-test.html` - Performance testing
 
 ## Contributing

@@ -217,6 +217,11 @@
     radio.addEventListener('change', (e) => {
       currentMode = e.target.value;
       
+      // Destroy the old timeline to clean up event listeners
+      if (timeline) {
+        timeline.destroy();
+      }
+      
       // Recreate timeline with new stack mode
       timelineOptions.stackMode = currentMode;
       timeline = new tempis_timeline.TempisTimeline("#canvas", timelineOptions);
