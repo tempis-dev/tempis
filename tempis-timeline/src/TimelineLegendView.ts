@@ -71,6 +71,21 @@ export class TimelineLegendView {
     /** Timer for debouncing category hover effects. */
     private _hoverDelayTimer: number | null = null;
 
+    /** The event handler references for cleanup. */
+    private _eventHandlers: {
+        pointermove: ((event: PointerEvent) => void) | null;
+        pointerdown: ((event: PointerEvent) => void) | null;
+        pointerup: (() => void) | null;
+        pointerout: (() => void) | null;
+        wheel: (() => void) | null;
+    } = {
+        pointermove: null,
+        pointerdown: null,
+        pointerup: null,
+        pointerout: null,
+        wheel: null
+    };
+
     /**
      * Creates a new instance of the TimelineLegendView class.
      * @param canvas The timeline canvas.
@@ -147,6 +162,35 @@ export class TimelineLegendView {
 
         // Return the draw plan height if we have one, otherwise just return zero.
         return this._drawPlan?.height ?? 0;
+    }
+
+    /**
+     * Destroy the legend view and clean up all resources.
+     * This removes all event listeners to prevent memory leaks.
+     */
+    public destroy(): void {
+        // Clear any pending hover timer
+        if (this._hoverDelayTimer !== null) {
+            clearTimeout(this._hoverDelayTimer);
+            this._hoverDelayTimer = null;
+        }
+
+        // Remove all event listeners
+        if (this._eventHandlers.pointermove) {
+            this._canvas.removeEventListener("pointermove", this._eventHandlers.pointermove);
+        }
+        if (this._eventHandlers.pointerdown) {
+            this._canvas.removeEventListener("pointerdown", this._eventHandlers.pointerdown);
+        }
+        if (this._eventHandlers.pointerup) {
+            this._canvas.removeEventListener("pointerup", this._eventHandlers.pointerup);
+        }
+        if (this._eventHandlers.pointerout) {
+            this._canvas.removeEventListener("pointerout", this._eventHandlers.pointerout);
+        }
+        if (this._eventHandlers.wheel) {
+            this._canvas.removeEventListener("wheel", this._eventHandlers.wheel);
+        }
     }
 
     /**
@@ -404,7 +448,7 @@ export class TimelineLegendView {
         let isPointerDown = false;
 
         // Handle the pointer move event.
-        this._canvas.addEventListener("pointermove", (event) => {
+        this._eventHandlers.pointermove = (event) => {
             // There is nothing to do if we have no draw plan as we have no rendered categories.
             if (!this._drawPlan) {
                 return null;
@@ -457,10 +501,11 @@ export class TimelineLegendView {
                 }
                 this._hoverDelayTimer = null;
             }, 150);
-        });
+        };
+        this._canvas.addEventListener("pointermove", this._eventHandlers.pointermove);
 
         // Handle the pointer down event.
-        this._canvas.addEventListener("pointerdown", (event) => {
+        this._eventHandlers.pointerdown = (event) => {
             isPointerDown = true;
 
             // Clear any pending hover timer.
@@ -505,15 +550,17 @@ export class TimelineLegendView {
             }
 
             this._dataSet.unfocusCategories();
-        });
+        };
+        this._canvas.addEventListener("pointerdown", this._eventHandlers.pointerdown);
 
-        // Handle the pointer down event.
-        this._canvas.addEventListener("pointerup", () => {
+        // Handle the pointer up event.
+        this._eventHandlers.pointerup = () => {
             isPointerDown = false;
-        });
+        };
+        this._canvas.addEventListener("pointerup", this._eventHandlers.pointerup);
 
         // Handle the pointer leaving the canvas.
-        this._canvas.addEventListener("pointerout", () => {
+        this._eventHandlers.pointerout = () => {
             // Clear any pending hover timer.
             if (this._hoverDelayTimer !== null) {
                 clearTimeout(this._hoverDelayTimer);
@@ -522,15 +569,17 @@ export class TimelineLegendView {
 
             // Ensure that we don't leave any categories focused when our pointer leaves the canvas.
             this._dataSet.unfocusCategories();
-        });
+        };
+        this._canvas.addEventListener("pointerout", this._eventHandlers.pointerout);
 
         // Handle the wheel event.
-        this._canvas.addEventListener("wheel", () => {
+        this._eventHandlers.wheel = () => {
             // Scrolling the wheel can update the position of the legend when `options.fillVertically` is not set.
             // This could potentially move our cursor off of a category we were focusing on and even move us onto another.
             // Clear any focused category....just in case.
             this._dataSet.unfocusCategories();
-        });
+        };
+        this._canvas.addEventListener("wheel", this._eventHandlers.wheel);
     }
 
     /**

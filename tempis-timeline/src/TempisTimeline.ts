@@ -271,6 +271,9 @@ export class TempisTimeline {
         // Destroy the tooltip view
         this._tooltipView.destroy();
 
+        // Destroy the legend view
+        this._legendView.destroy();
+
         // Clear the canvas
         const context = this._canvas.getContext("2d");
         if (context) {
