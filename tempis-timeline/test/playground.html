@@ -103,6 +103,39 @@
     font-family: inherit;
   }
   
+  .control-group input[type="range"] {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #e0e0e0;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  
+  .control-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #2196F3;
+    cursor: pointer;
+  }
+  
+  .control-group input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #2196F3;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .control-group label span {
+    font-weight: 600;
+    color: #2196F3;
+  }
+  
   .control-group input[type="checkbox"] {
     width: 18px;
     height: 18px;
@@ -183,6 +216,24 @@
 </style>
 <body>
   <div class="sidebar">
+    <h3>Data</h3>
+    <div class="control-group">
+      <label>Number of Items</label>
+      <input type="number" id="itemCount" value="100" min="1" max="1000">
+    </div>
+    
+    <div class="control-group">
+      <label>Number of Groups</label>
+      <input type="number" id="groupCount" value="5" min="1" max="10">
+    </div>
+    
+    <div class="control-group">
+      <label>PIT Item Ratio (%)</label>
+      <input type="number" id="pitRatio" value="30" min="0" max="100">
+    </div>
+    
+    <div class="divider"></div>
+    
     <h3>Layout</h3>
     <div class="control-group">
       <label>Stack Mode</label>
@@ -221,6 +272,8 @@
       </div>
     </div>
     
+    <div class="divider"></div>
+    
     <h3>Range</h3>
     <div class="control-group">
       <label>Position</label>
@@ -246,13 +299,15 @@
       </div>
     </div>
     
+    <div class="divider"></div>
+    
     <h3>Legend</h3>
     <div class="control-group">
       <label>Position</label>
       <select id="legendPosition">
         <option value="top">Top</option>
-        <option value="bottom">Bottom</option>
-        <option value="none" selected>None</option>
+        <option value="bottom" selected>Bottom</option>
+        <option value="none">None</option>
       </select>
     </div>
     
@@ -265,6 +320,8 @@
       </select>
     </div>
     
+    <div class="divider"></div>
+    
     <h3>Selection</h3>
     <div class="control-group">
       <label>Mode</label>
@@ -274,6 +331,31 @@
         <option value="multi">Multi</option>
       </select>
     </div>
+    
+    <div class="divider"></div>
+    
+    <h3>Style</h3>
+    <div class="control-group">
+      <label>Font Size: <span id="fontSizeValue">14</span>px</label>
+      <input type="range" id="fontSize" min="8" max="28" value="14" step="1">
+    </div>
+    
+    <div class="control-group">
+      <label>Item Padding: <span id="itemPaddingValue">10</span>px</label>
+      <input type="range" id="itemPadding" min="5" max="25" value="10" step="1">
+    </div>
+    
+    <div class="control-group">
+      <label>Border Radius: <span id="borderRadiusValue">5</span>px</label>
+      <input type="range" id="borderRadius" min="0" max="30" value="5" step="1">
+    </div>
+    
+    <div class="control-group">
+      <label>Border Thickness: <span id="borderThicknessValue">0</span>px</label>
+      <input type="range" id="borderThickness" min="0" max="5" value="0" step="1">
+    </div>
+    
+    <div class="divider"></div>
     
     <h3>Tooltip</h3>
     <div class="control-group">
@@ -290,22 +372,6 @@
         <option value="canvas" selected>Canvas</option>
         <option value="viewport">Viewport</option>
       </select>
-    </div>
-    
-    <h3>Data</h3>
-    <div class="control-group">
-      <label>Number of Items</label>
-      <input type="number" id="itemCount" value="100" min="1" max="1000">
-    </div>
-    
-    <div class="control-group">
-      <label>Number of Groups</label>
-      <input type="number" id="groupCount" value="5" min="1" max="10">
-    </div>
-    
-    <div class="control-group">
-      <label>PIT Item Ratio (%)</label>
-      <input type="number" id="pitRatio" value="30" min="0" max="100">
     </div>
   </div>
   
@@ -367,6 +433,17 @@
       stackMode: document.querySelector('input[name="stackMode"]:checked').value,
       verticalFill: document.getElementById('verticalFill').value,
       selection: document.getElementById('selectionMode').value,
+      style: {
+        font: {
+          size: parseInt(document.getElementById('fontSize').value)
+        },
+        item: {
+          padding: parseInt(document.getElementById('itemPadding').value),
+          borderRadius: parseInt(document.getElementById('borderRadius').value),
+          borderThickness: parseInt(document.getElementById('borderThickness').value) || undefined,
+          borderColor: parseInt(document.getElementById('borderThickness').value) > 0 ? '#333333' : undefined
+        }
+      },
       range: {
         position: document.getElementById('rangePosition').value,
         fixed: document.getElementById('rangeFixed').checked,
@@ -415,6 +492,23 @@
   // Add event listeners to all controls
   document.querySelectorAll('input, select').forEach(control => {
     control.addEventListener('change', regenerateTimeline);
+  });
+
+  // Add input event listeners for range sliders to update value displays in real-time
+  document.getElementById('fontSize').addEventListener('input', (e) => {
+    document.getElementById('fontSizeValue').textContent = e.target.value;
+  });
+  
+  document.getElementById('itemPadding').addEventListener('input', (e) => {
+    document.getElementById('itemPaddingValue').textContent = e.target.value;
+  });
+  
+  document.getElementById('borderRadius').addEventListener('input', (e) => {
+    document.getElementById('borderRadiusValue').textContent = e.target.value;
+  });
+  
+  document.getElementById('borderThickness').addEventListener('input', (e) => {
+    document.getElementById('borderThicknessValue').textContent = e.target.value;
   });
 </script>
 </html>

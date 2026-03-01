@@ -482,7 +482,7 @@ export class TimelineDataView {
             context.beginPath();
             context.moveTo(
                 itemDrawPlan.xPointInTimePosition,
-                scrolledYPosition + itemDrawPlan.yPositionEnd + 6
+                scrolledYPosition + itemDrawPlan.yPositionEnd + 5
             );
             context.lineTo(itemDrawPlan.xPointInTimePosition, context.canvas.clientHeight);
             context.stroke();
