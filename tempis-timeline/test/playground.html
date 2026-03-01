@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Timeline Playground</title>
+  <script src="../dist/tempis_timeline.js"></script>
+</head>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  
+  html {
+    background-color: #f5f5f5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    gap: 20px;
+    height: 100vh;
+  }
+  
+  .sidebar {
+    width: 320px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 20px;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+  }
+  
+  .canvas-container {
+    flex: 1;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    min-height: 0;
+  }
+  
+  h2 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    color: #333;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+  }
+  
+  h3 {
+    margin: 20px 0 10px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .control-group {
+    margin-bottom: 16px;
+  }
+  
+  .control-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #444;
+  }
+  
+  .control-group input[type="number"],
+  .control-group input[type="text"],
+  .control-group select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  
+  .control-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+  
+  .checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .checkbox-wrapper label {
+    margin: 0;
+    cursor: pointer;
+  }
+  
+  .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .radio-option input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+  
+  .radio-option label {
+    margin: 0;
+    font-weight: normal;
+    cursor: pointer;
+  }
+  
+  button {
+    width: 100%;
+    padding: 10px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  button:hover {
+    background: #1976D2;
+  }
+  
+  button:active {
+    background: #0D47A1;
+  }
+  
+  .info-box {
+    background: #e3f2fd;
+    padding: 12px;
+    border-radius: 4px;
+    border-left: 4px solid #2196F3;
+    font-size: 12px;
+    color: #555;
+    margin-top: 20px;
+  }
+  
+  .divider {
+    height: 1px;
+    background: #e0e0e0;
+    margin: 20px 0;
+  }
+</style>
+<body>
+  <div class="sidebar">
+    <h3>Layout</h3>
+    <div class="control-group">
+      <label>Stack Mode</label>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input type="radio" id="stackCompact" name="stackMode" value="compact">
+          <label for="stackCompact">Compact</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" id="stackStable" name="stackMode" value="stable" checked>
+          <label for="stackStable">Stable</label>
+        </div>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <label>Vertical Fill</label>
+      <select id="verticalFill">
+        <option value="content">Content</option>
+        <option value="fill-canvas">Fill Canvas</option>
+        <option value="grow-canvas">Grow Canvas</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="responsive" checked>
+        <label for="responsive">Responsive</label>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="rtl">
+        <label for="rtl">Right-to-Left</label>
+      </div>
+    </div>
+    
+    <h3>Range</h3>
+    <div class="control-group">
+      <label>Position</label>
+      <select id="rangePosition">
+        <option value="top">Top</option>
+        <option value="bottom" selected>Bottom</option>
+        <option value="both">Both</option>
+        <option value="none">None</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="rangeFixed">
+        <label for="rangeFixed">Fixed Range</label>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="zoomEnabled" checked>
+        <label for="zoomEnabled">Zoom Enabled</label>
+      </div>
+    </div>
+    
+    <h3>Legend</h3>
+    <div class="control-group">
+      <label>Position</label>
+      <select id="legendPosition">
+        <option value="top">Top</option>
+        <option value="bottom">Bottom</option>
+        <option value="none" selected>None</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Alignment</label>
+      <select id="legendAlignment">
+        <option value="start">Start</option>
+        <option value="center" selected>Center</option>
+        <option value="end">End</option>
+      </select>
+    </div>
+    
+    <h3>Selection</h3>
+    <div class="control-group">
+      <label>Mode</label>
+      <select id="selectionMode">
+        <option value="none" selected>None</option>
+        <option value="single">Single</option>
+        <option value="multi">Multi</option>
+      </select>
+    </div>
+    
+    <h3>Tooltip</h3>
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="tooltipEnabled" checked>
+        <label for="tooltipEnabled">Enabled</label>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <label>Overflow Behavior</label>
+      <select id="tooltipOverflow">
+        <option value="none">None</option>
+        <option value="canvas" selected>Canvas</option>
+        <option value="viewport">Viewport</option>
+      </select>
+    </div>
+    
+    <h3>Data</h3>
+    <div class="control-group">
+      <label>Number of Items</label>
+      <input type="number" id="itemCount" value="50" min="1" max="1000">
+    </div>
+    
+    <div class="control-group">
+      <label>Number of Groups</label>
+      <input type="number" id="groupCount" value="3" min="1" max="10">
+    </div>
+    
+    <div class="control-group">
+      <label>PIT Item Ratio (%)</label>
+      <input type="number" id="pitRatio" value="30" min="0" max="100">
+    </div>
+  </div>
+  
+  <div class="main-content">
+    <div class="canvas-container">
+      <canvas id="canvas"></canvas>
+    </div>
+  </div>
+</body>
+<script>
+  function getRandomItem(array) {
+    return array[Math.floor(Math.random() * array.length)];
+  }
+
+  function getRandomDatePeriod(startDate, endDate) {
+    const start = startDate.getTime();
+    const end = endDate.getTime();
+    const t1 = start + Math.random() * (end - start);
+    const t2 = start + Math.random() * (end - start);
+    return {
+      start: new Date(Math.min(t1, t2)),
+      end: new Date(Math.max(t1, t2))
+    };
+  }
+
+  function generateItems(itemCount, groupCount, pitRatio) {
+    const minDate = new Date("2024-01-01T00:00:00");
+    const maxDate = new Date("2024-03-01T00:00:00");
+    const categories = ["Category-1", "Category-2", "Category-3", "Category-4", "Category-5"];
+    const groups = Array.from({ length: groupCount }, (_, i) => `Group-${i + 1}`);
+    const items = [];
+
+    for (let i = 0; i < itemCount; i++) {
+      const randomDatePeriod = getRandomDatePeriod(minDate, maxDate);
+      const isPit = Math.random() * 100 < pitRatio;
+
+      items.push({
+        id: i,
+        label: `Item ${i}`,
+        start: randomDatePeriod.start,
+        end: isPit ? undefined : randomDatePeriod.end,
+        category: getRandomItem(categories),
+        grouping: getRandomItem(groups),
+      });
+    }
+
+    return items;
+  }
+
+  function getTimelineOptions() {
+    const itemCount = parseInt(document.getElementById('itemCount').value);
+    const groupCount = parseInt(document.getElementById('groupCount').value);
+    const pitRatio = parseInt(document.getElementById('pitRatio').value);
+    const items = generateItems(itemCount, groupCount, pitRatio);
+
+    return {
+      responsive: document.getElementById('responsive').checked,
+      rtl: document.getElementById('rtl').checked,
+      stackMode: document.querySelector('input[name="stackMode"]:checked').value,
+      verticalFill: document.getElementById('verticalFill').value,
+      selection: document.getElementById('selectionMode').value,
+      range: {
+        position: document.getElementById('rangePosition').value,
+        fixed: document.getElementById('rangeFixed').checked,
+        zoom: {
+          enabled: document.getElementById('zoomEnabled').checked
+        }
+      },
+      legend: {
+        position: document.getElementById('legendPosition').value,
+        alignment: document.getElementById('legendAlignment').value
+      },
+      tooltip: {
+        enabled: document.getElementById('tooltipEnabled').checked,
+        overflowBehavior: document.getElementById('tooltipOverflow').value
+      },
+      categories: [
+        { name: "Category-1", label: "Category 1", style: { backgroundColor: "#4CAF50" } },
+        { name: "Category-2", label: "Category 2", style: { backgroundColor: "#2196F3" } },
+        { name: "Category-3", label: "Category 3", style: { backgroundColor: "#FF9800" } },
+        { name: "Category-4", label: "Category 4", style: { backgroundColor: "#E91E63" } },
+        { name: "Category-5", label: "Category 5", style: { backgroundColor: "#9C27B0" } }
+      ],
+      items
+    };
+  }
+
+  let timeline = null;
+
+  function regenerateTimeline() {
+    // Destroy existing timeline
+    if (timeline) {
+      timeline.destroy();
+    }
+
+    // Create new timeline with current settings
+    const options = getTimelineOptions();
+    timeline = new tempis_timeline.TempisTimeline("#canvas", options);
+    window["timeline"] = timeline;
+    
+    console.log('Timeline regenerated');
+  }
+
+  // Initialize timeline on load
+  regenerateTimeline();
+
+  // Add event listeners to all controls
+  document.querySelectorAll('input, select').forEach(control => {
+    control.addEventListener('change', regenerateTimeline);
+  });
+</script>
+</html>
