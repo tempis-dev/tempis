@@ -26,6 +26,19 @@ export class TimelineTooltipView {
     /** The active tooltip. */
     private _activeTooltip: TimelineTooltip | null = null;
 
+    /** The event handler references for cleanup. */
+    private _eventHandlers: {
+        pointerdown: (() => void) | null;
+        pointerup: ((event: PointerEvent) => void) | null;
+        pointermove: ((event: PointerEvent) => void) | null;
+        pointerout: (() => void) | null;
+    } = {
+        pointerdown: null,
+        pointerup: null,
+        pointermove: null,
+        pointerout: null
+    };
+
     /**
      * Creates a new instance of the TimelineTooltipView class.
      * @param canvas The timeline canvas.
@@ -59,24 +72,26 @@ export class TimelineTooltipView {
         let isPointerDown = false;
 
         // Handle the pointer down event.
-        this._canvas.addEventListener("pointerdown", () => {
+        this._eventHandlers.pointerdown = () => {
             isPointerDown = true;
 
             // Clicking on the canvas should kill any active or pending tooltip.
             this._activeTooltip?.destroy();
             this._activeTooltip = null;
-        });
+        };
+        this._canvas.addEventListener("pointerdown", this._eventHandlers.pointerdown);
 
         // Handle the pointer down event.
-        this._canvas.addEventListener("pointerup", (event) => {
+        this._eventHandlers.pointerup = (event) => {
             isPointerDown = false;
 
             // Attempt to create a tooltip for the position of the pointer up event.
             this._createTooltip(event);
-        });
+        };
+        this._canvas.addEventListener("pointerup", this._eventHandlers.pointerup);
 
         // Handle the pointer being moved on the canvas.
-        this._canvas.addEventListener("pointermove", (event) => {
+        this._eventHandlers.pointermove = (event) => {
             // There is nothing to do if our pointer is currently down as we don't want tooltips showing if we are dragging/selecting.
             if (isPointerDown) {
                 return;
@@ -84,13 +99,39 @@ export class TimelineTooltipView {
 
             // Attempt to create a tooltip for the position the cursor has moved to.
             this._createTooltip(event);
-        });
+        };
+        this._canvas.addEventListener("pointermove", this._eventHandlers.pointermove);
 
         // Add a handler for the cursor moving off of the canvas to clear up any active tooltip.
-        this._canvas.addEventListener("pointerout", () => {
+        this._eventHandlers.pointerout = () => {
             this._activeTooltip?.destroy();
             this._activeTooltip = null;
-        });
+        };
+        this._canvas.addEventListener("pointerout", this._eventHandlers.pointerout);
+    }
+
+    /**
+     * Destroy the tooltip view and clean up all resources.
+     * This removes all event listeners to prevent memory leaks.
+     */
+    public destroy(): void {
+        // Remove all canvas event listeners
+        if (this._eventHandlers.pointerdown) {
+            this._canvas.removeEventListener("pointerdown", this._eventHandlers.pointerdown);
+        }
+        if (this._eventHandlers.pointerup) {
+            this._canvas.removeEventListener("pointerup", this._eventHandlers.pointerup);
+        }
+        if (this._eventHandlers.pointermove) {
+            this._canvas.removeEventListener("pointermove", this._eventHandlers.pointermove);
+        }
+        if (this._eventHandlers.pointerout) {
+            this._canvas.removeEventListener("pointerout", this._eventHandlers.pointerout);
+        }
+
+        // Destroy any active tooltip
+        this._activeTooltip?.destroy();
+        this._activeTooltip = null;
     }
 
     /**

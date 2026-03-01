@@ -1,4 +1,4 @@
-import { TempisTimelineItem, TempisTimelineItemSelectionMode, TempisTimelineOptions, TempisTimelineVerticalFillMode } from "./TempisTimelineOptions";
+import { TempisTimelineItem, TempisTimelineItemSelectionMode, TempisTimelineOptions, TempisTimelineStackMode, TempisTimelineVerticalFillMode } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineBand } from "./TimelineBand";
 import { TimelineDataView } from "./TimelineDataView";
@@ -43,6 +43,23 @@ export class TempisTimeline {
     /** The canvas container resize observer. */
     private _canvasContainerResizeObserver: ResizeObserver | null = null;
 
+    /** The event handler references for cleanup. */
+    private _eventHandlers: {
+        pointerdown: ((event: PointerEvent) => void) | null;
+        pointermove: ((event: PointerEvent) => void) | null;
+        pointerup: ((event: PointerEvent) => void) | null;
+        pointercancel: (() => void) | null;
+        wheel: ((event: WheelEvent) => void) | null;
+        dblclick: ((event: MouseEvent) => void) | null;
+    } = {
+        pointerdown: null,
+        pointermove: null,
+        pointerup: null,
+        pointercancel: null,
+        wheel: null,
+        dblclick: null
+    };
+
     /**
      * Creates a new instance of the TempisTimeline class.
      * @param context The canvas context.
@@ -55,7 +72,7 @@ export class TempisTimeline {
         this._font = new TimelineFont(this._options.style?.font);
 
         this._dataSet = new TimelineDataSet(this._options);
-        this._dataView = new TimelineDataView(this._dataSet, this._isRTL);
+        this._dataView = new TimelineDataView(this._dataSet, this._isRTL, this._options.stackMode ?? 'stable');
         this._rangeView = new TimelineRangeView(
             this._canvas,
             this._dataSet,
@@ -221,6 +238,47 @@ export class TempisTimeline {
     }
 
     /**
+     * Destroy the timeline and clean up all resources.
+     * This removes all event listeners and observers to prevent memory leaks.
+     */
+    public destroy(): void {
+        // Remove all canvas event listeners
+        if (this._eventHandlers.pointerdown) {
+            this._canvas.removeEventListener("pointerdown", this._eventHandlers.pointerdown);
+        }
+        if (this._eventHandlers.pointermove) {
+            this._canvas.removeEventListener("pointermove", this._eventHandlers.pointermove);
+        }
+        if (this._eventHandlers.pointerup) {
+            this._canvas.removeEventListener("pointerup", this._eventHandlers.pointerup);
+        }
+        if (this._eventHandlers.pointercancel) {
+            this._canvas.removeEventListener("pointercancel", this._eventHandlers.pointercancel);
+        }
+        if (this._eventHandlers.wheel) {
+            this._canvas.removeEventListener("wheel", this._eventHandlers.wheel);
+        }
+        if (this._eventHandlers.dblclick) {
+            this._canvas.removeEventListener("dblclick", this._eventHandlers.dblclick);
+        }
+
+        // Disconnect the resize observer if it exists
+        if (this._canvasContainerResizeObserver) {
+            this._canvasContainerResizeObserver.disconnect();
+            this._canvasContainerResizeObserver = null;
+        }
+
+        // Destroy the tooltip view
+        this._tooltipView.destroy();
+
+        // Clear the canvas
+        const context = this._canvas.getContext("2d");
+        if (context) {
+            context.clearRect(0, 0, this._canvas.width, this._canvas.height);
+        }
+    }
+
+    /**
      * Gets a reference to the canvas based on the specified context.
      * @param context The context.
      * @returns A reference to the canvas based on the specified context.
@@ -296,7 +354,7 @@ export class TempisTimeline {
 
         // Handle the pointer down event to start dragging.
         // We will use pointer events to handle both mouse and touch events.
-        this._canvas.addEventListener("pointerdown", (event) => {
+        this._eventHandlers.pointerdown = (event) => {
             isPointerDown = true;
 
             // Get the mouse position on the canvas so that we can calculate the movement later.
@@ -305,11 +363,12 @@ export class TempisTimeline {
 
             // Capture pointer to ensure we get pointerup even if moved outside canvas
             this._canvas.setPointerCapture(event.pointerId);
-        });
+        };
+        this._canvas.addEventListener("pointerdown", this._eventHandlers.pointerdown);
 
         // Handle pointer move events to drag the timeline.
         // We will use pointer events to handle both mouse and touch events.
-        this._canvas.addEventListener("pointermove", (event) => {
+        this._eventHandlers.pointermove = (event) => {
             // There is nothing to do if the pointer is not currently down.
             if (!isPointerDown) {
                 return;
@@ -327,11 +386,12 @@ export class TempisTimeline {
             }
 
             this._draw();
-        });
+        };
+        this._canvas.addEventListener("pointermove", this._eventHandlers.pointermove);
 
         // Handle pointer up events to stop dragging.
         // We will use pointer events to handle both mouse and touch events.
-        this._canvas.addEventListener("pointerup", (event) => {
+        this._eventHandlers.pointerup = (event) => {
             // There is nothing to do if the pointer is not currently down.
             if (!isPointerDown) {
                 return;
@@ -363,16 +423,18 @@ export class TempisTimeline {
 
             // Release pointer capture
             this._canvas.releasePointerCapture(event.pointerId);
-        });
+        };
+        this._canvas.addEventListener("pointerup", this._eventHandlers.pointerup);
 
         // Handle pointer cancel events to stop dragging.
         // This is used to handle cases where the pointer is cancelled (e.g. touch events)
-        this._canvas.addEventListener("pointercancel", () => {
+        this._eventHandlers.pointercancel = () => {
             isPointerDown = false;
-        });
+        };
+        this._canvas.addEventListener("pointercancel", this._eventHandlers.pointercancel);
 
         // Handle mouse wheel events for zooming the range view.
-        this._canvas.addEventListener("wheel", (event) => {
+        this._eventHandlers.wheel = (event) => {
             // Prevent default scrolling behavior, we want the timeline to handle it instead.
             event.preventDefault();
 
@@ -381,22 +443,20 @@ export class TempisTimeline {
 
             // We will want to redraw the timeline after zooming.
             this._draw();
-        });
+        };
+        this._canvas.addEventListener("wheel", this._eventHandlers.wheel);
 
         // Handle any double mouse click events for data view items.
-        this._canvas.addEventListener(
-            "dblclick",
-            (evt) => {
-                // Try to get the item at the double-clicked position.
-                const clickedItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(evt));
+        this._eventHandlers.dblclick = (evt) => {
+            // Try to get the item at the double-clicked position.
+            const clickedItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(evt));
 
-                // If we have a clicked item, we will invoke the double-click handler.
-                if (clickedItem) {
-                    this._onItemDoubleClicked(clickedItem);
-                }
-            },
-            false
-        );
+            // If we have a clicked item, we will invoke the double-click handler.
+            if (clickedItem) {
+                this._onItemDoubleClicked(clickedItem);
+            }
+        };
+        this._canvas.addEventListener("dblclick", this._eventHandlers.dblclick, false);
     }
 
     /**

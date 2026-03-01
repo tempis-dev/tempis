@@ -1,6 +1,7 @@
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineBand } from "./TimelineBand";
 import { TimelineItem } from "./TimelineItem";
+import { TempisTimelineStackMode } from "./TempisTimelineOptions";
 import { RangeTick } from "./TimelineRangeView";
 import { clamp, doDateRangesOverlap, drawClippedText } from "./Utilities";
 
@@ -73,6 +74,9 @@ export class TimelineDataView {
     /** The flag defining whether the timeline is being rendered right-to-left. */
     private readonly _isRTL: boolean;
 
+    /** The stack mode controlling how items are vertically arranged. */
+    private readonly _stackMode: TempisTimelineStackMode;
+
     /** The current scroll Y offset. */
     private _scrollYOffset: number = 0;
 
@@ -85,14 +89,27 @@ export class TimelineDataView {
     /** The current data view draw plan. */
     private _drawPlan: DataViewDrawPlan | null = null;
 
+    /** Cached row structure for stable mode (maps items to row numbers). */
+    private _cachedStableRowStructure: Map<string, Map<TimelineItem, number>> | null = null;
+
+    /** The last zoom level (range in milliseconds) used for stable mode caching. */
+    private _lastZoomRange: number = 0;
+
     /**
      * Creates a new instance of the TimelineDataView class.
      * @param dataSet The timeline dataset model.
      * @param isRTL Whether the timeline is being rendered right-to-left.
+     * @param stackMode The stack mode controlling how items are vertically arranged.
      */
-    public constructor(dataSet: TimelineDataSet, isRTL: boolean) {
+    public constructor(dataSet: TimelineDataSet, isRTL: boolean, stackMode: TempisTimelineStackMode) {
         this._dataSet = dataSet;
         this._isRTL = isRTL;
+        this._stackMode = stackMode;
+
+        // Register a callback to invalidate cached row structure when dataset changes.
+        this._dataSet.registerUpdateCallback(() => {
+            this._cachedStableRowStructure = null;
+        });
     }
 
     /**
@@ -431,6 +448,16 @@ export class TimelineDataView {
             context.fillStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
             context.strokeStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
 
+            // Check if the entire item (box + triangle) is above the visible window
+            // The triangle extends 6 pixels below the item box
+            const itemBottomWithTriangle = scrolledYPosition + itemDrawPlan.yPositionEnd + 6;
+            const isEntirelyAboveVisibleWindow = itemBottomWithTriangle < 0;
+
+            // Use reduced opacity only if the entire item is above the visible window
+            if (isEntirelyAboveVisibleWindow) {
+                context.globalAlpha = 0.3;
+            }
+
             // We need to draw a little downward triangle to join the item and the marker line.
             const itemMarkerConnectorPath = new Path2D();
             itemMarkerConnectorPath.moveTo(
@@ -451,16 +478,16 @@ export class TimelineDataView {
             );
             context.fill(itemMarkerConnectorPath);
 
-            // Draw the actual marker line.
+            // Draw the actual marker line from the item downward to the bottom of the canvas.
             context.beginPath();
-            context.moveTo(
-                itemDrawPlan.xPointInTimePosition,
-                scrolledYPosition +
-                    itemDrawPlan.yPositionStart +
-                    (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2
-            );
+            context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionEnd);
             context.lineTo(itemDrawPlan.xPointInTimePosition, context.canvas.clientHeight);
             context.stroke();
+
+            // Reset opacity if it was changed
+            if (isEntirelyAboveVisibleWindow) {
+                context.globalAlpha = 1.0;
+            }
         }
 
         // Draw the item range rectangle.
@@ -492,47 +519,97 @@ export class TimelineDataView {
 
         // Draw the item label (if there is one).
         if (item.label) {
-            // Calculate the actual x position of the label, we should attempt to keep this in the bounds of the view.
-            // If rendering right-to-left then we will be rendering the label to the right of the item, otherwise the left.
-            const labelStartPositionX = this._isRTL
-                ? Math.floor(
-                      Math.min(context.canvas.clientWidth - itemPadding, itemDrawPlan.xPositionEnd - itemPadding)
-                  )
-                : Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
-
-            // Calculate the max item label width.
-            const maxLabelWidth = this._isRTL
-                ? Math.max(0, Math.ceil(labelStartPositionX - (itemDrawPlan.xPositionStart + itemPadding)) + 1)
-                : Math.max(0, Math.ceil(itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX));
-
-            // Render the text label, but only if we have enough space to do so.
-            if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
+            // For stable mode PIT items, don't truncate labels - let them extend beyond canvas
+            const isPitItem = itemDrawPlan.xPointInTimePosition !== null;
+            const isStableMode = this._stackMode === 'stable';
+            
+            if (isStableMode && isPitItem) {
+                // Stable mode PIT items: render label at full width, centered on the item box
                 context.textBaseline = "middle";
+                context.textAlign = "center";
                 context.fillStyle = itemFontColor;
-
-                // Draw the item label, but clip it if there is not enough available horizontal space to do so.
-                drawClippedText(
-                    context,
+                
+                const labelCenterX = (itemDrawPlan.xPositionStart + itemDrawPlan.xPositionEnd) / 2;
+                
+                context.fillText(
                     item.label,
-                    labelStartPositionX,
+                    labelCenterX,
                     itemDrawPlan.yPositionStart +
                         (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 +
                         1 +
-                        scrolledYPosition,
-                    maxLabelWidth
+                        scrolledYPosition
                 );
+                
+                // Reset text align back to the default for subsequent items
+                context.textAlign = this._isRTL ? "right" : "left";
+            } else {
+                // Compact mode or range items: keep label within bounds and truncate if needed
+                // Calculate the actual x position of the label, we should attempt to keep this in the bounds of the view.
+                // If rendering right-to-left then we will be rendering the label to the right of the item, otherwise the left.
+                const labelStartPositionX = this._isRTL
+                    ? Math.floor(
+                          Math.min(context.canvas.clientWidth - itemPadding, itemDrawPlan.xPositionEnd - itemPadding)
+                      )
+                    : Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
+
+                // Calculate the max item label width.
+                const maxLabelWidth = this._isRTL
+                    ? Math.max(0, Math.ceil(labelStartPositionX - (itemDrawPlan.xPositionStart + itemPadding)) + 1)
+                    : Math.max(0, Math.ceil(itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX));
+
+                // Render the text label, but only if we have enough space to do so.
+                if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
+                    context.textBaseline = "middle";
+                    context.fillStyle = itemFontColor;
+
+                    // Draw the item label, but clip it if there is not enough available horizontal space to do so.
+                    drawClippedText(
+                        context,
+                        item.label,
+                        labelStartPositionX,
+                        itemDrawPlan.yPositionStart +
+                            (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 +
+                            1 +
+                            scrolledYPosition,
+                        maxLabelWidth
+                    );
+                }
             }
         }
     }
 
     /**
      * Create a draw plan for the view.
+     * Delegates to either compact or stable mode based on configuration.
      * @param context The canvas context
      * @param rangeFromDt The range from date.
      * @param rangeToDt The range to date.
      * @returns A draw plan for the view.
      */
     private _createViewDrawPlan(
+        context: CanvasRenderingContext2D,
+        rangeFromDt: Date,
+        rangeToDt: Date
+    ): DataViewDrawPlan {
+        if (this._stackMode === 'stable') {
+            return this._createStableDrawPlan(context, rangeFromDt, rangeToDt);
+        } else {
+            return this._createCompactDrawPlan(context, rangeFromDt, rangeToDt);
+        }
+    }
+
+    /**
+     * Create a draw plan using compact mode (current behavior).
+     * - Only visible items are included in the layout
+     * - PIT labels are adjusted to fit within canvas bounds
+     * - Layout updates on every pan
+     * 
+     * @param context The canvas context
+     * @param rangeFromDt The range from date.
+     * @param rangeToDt The range to date.
+     * @returns A draw plan for the view.
+     */
+    private _createCompactDrawPlan(
         context: CanvasRenderingContext2D,
         rangeFromDt: Date,
         rangeToDt: Date
@@ -718,5 +795,273 @@ export class TimelineDataView {
             width: context.canvas.clientWidth,
             groupDrawPlans
         };
+    }
+
+    /**
+     * Create a draw plan using stable mode.
+     * - ALL items in the dataset are included in the layout
+     * - PIT labels are always centered on their timestamp (not adjusted for canvas bounds)
+     * - Row structure is cached and only recalculated on zoom or data changes
+     * - X positions are recalculated on every draw to support panning
+     * @param context The canvas context
+     * @param rangeFromDt The range from date.
+     * @param rangeToDt The range to date.
+     * @returns A draw plan for the view.
+     */
+    private _createStableDrawPlan(
+        context: CanvasRenderingContext2D,
+        rangeFromDt: Date,
+        rangeToDt: Date
+    ): DataViewDrawPlan {
+        // Calculate the current zoom range.
+        const currentZoomRange = rangeToDt.getTime() - rangeFromDt.getTime();
+        const milliRenderWidth = context.canvas.clientWidth / currentZoomRange;
+
+        // Check if we need to recalculate the row structure.
+        // Row structure is recalculated if zoom changed significantly or cache is empty.
+        const needsRowRecalculation = !this._cachedStableRowStructure || 
+            this._lastZoomRange === 0 ||
+            Math.abs(currentZoomRange - this._lastZoomRange) / this._lastZoomRange > 0.01;
+
+        if (needsRowRecalculation) {
+            // Recalculate row structure
+            this._cachedStableRowStructure = this._calculateStableRowStructure(context, rangeFromDt, rangeToDt);
+            this._lastZoomRange = currentZoomRange;
+        }
+
+        // Now create the draw plan using the cached row structure but with current x positions
+        const groupDrawPlans: DataViewGroupDrawPlan[] = [];
+
+        for (const grouping of this._dataSet.groupings) {
+            // Get the cached row assignments for this grouping
+            const rowAssignments = this._cachedStableRowStructure!.get(grouping.group);
+            if (!rowAssignments || rowAssignments.size === 0) {
+                continue;
+            }
+
+            // Determine the maximum row number from ALL items (not just visible)
+            const maxRow = Math.max(...Array.from(rowAssignments.values()));
+
+            // Create empty row arrays
+            const itemDrawPlanStacks: DataViewItemDrawPlan[][] = Array.from(
+                { length: maxRow + 1 },
+                () => []
+            );
+
+            // Get items in the current visible range (not all items)
+            let itemsInRange = grouping.getItemsInRange(rangeFromDt, rangeToDt);
+
+            // Filter out disabled categories
+            itemsInRange = itemsInRange.filter((item) => {
+                const itemCategory = item.category ? this._dataSet.getCategory(item.category) : null;
+                return !itemCategory?.isDisabled;
+            });
+
+            // Process only VISIBLE items and calculate their current x positions
+            for (const item of itemsInRange) {
+                let startPositionX = 0;
+                let endPositionX = 0;
+                let pointInTimePositionX = null;
+
+                if (item.end) {
+                    // Range item - calculate x position based on current range
+                    if (this._isRTL) {
+                        startPositionX = milliRenderWidth * (rangeToDt.getTime() - item.end.getTime());
+                        endPositionX = milliRenderWidth * (rangeToDt.getTime() - item.start.getTime());
+                    } else {
+                        startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
+                        endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
+                    }
+                } else {
+                    // Point-in-time item - calculate x position based on current range
+                    const itemLabelWidth = context.measureText(item.label ?? "?").width + item.style.padding! * 2;
+
+                    pointInTimePositionX = this._isRTL
+                        ? milliRenderWidth * (rangeToDt.getTime() - item.start.getTime())
+                        : milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
+
+                    // STABLE MODE: Always center the label on the timestamp
+                    startPositionX = pointInTimePositionX - itemLabelWidth / 2;
+                    endPositionX = pointInTimePositionX + itemLabelWidth / 2;
+                }
+
+                const itemDrawPlan: DataViewItemDrawPlan = {
+                    item,
+                    height: 0,
+                    xPositionStart: startPositionX,
+                    xPositionEnd: endPositionX,
+                    yPositionStart: 0,
+                    yPositionEnd: 0,
+                    xPointInTimePosition: pointInTimePositionX
+                };
+
+                // Place the item in its pre-assigned row
+                const assignedRow = rowAssignments.get(item);
+                if (assignedRow !== undefined) {
+                    itemDrawPlanStacks[assignedRow].push(itemDrawPlan);
+                }
+            }
+
+            groupDrawPlans.push({
+                label: grouping.group,
+                rows: itemDrawPlanStacks,
+                yPositionStart: 0,
+                yPositionEnd: 0
+            });
+        }
+
+        // Calculate vertical positions
+        let positionY = 0;
+
+        for (const groupDrawPlan of groupDrawPlans) {
+            groupDrawPlan.yPositionStart = positionY;
+
+            if (groupDrawPlan.label) {
+                const groupLabelMetrics = context.measureText(groupDrawPlan.label);
+                positionY += groupLabelMetrics.actualBoundingBoxAscent + groupLabelMetrics.actualBoundingBoxDescent;
+                positionY += 2 * DEFAULT_GROUP_LABEL_MARGIN;
+            }
+
+            positionY += DEFAULT_GROUP_MARGIN;
+
+            for (const itemRow of groupDrawPlan.rows) {
+                positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
+
+                // Calculate the row height consistently, regardless of whether the row has visible items
+                // Use the maximum item height that could exist in this row to ensure consistent spacing
+                const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Label");
+                let maxItemHeight = actualBoundingBoxAscent + actualBoundingBoxDescent + 10 * 2; // Default padding is 10
+
+                // Set y positions for all visible items in this row
+                for (const itemDrawPlan of itemRow) {
+                    const itemHeight = actualBoundingBoxAscent + actualBoundingBoxDescent + itemDrawPlan.item.style.padding! * 2;
+                    itemDrawPlan.yPositionStart = positionY;
+                    itemDrawPlan.yPositionEnd = positionY + itemHeight;
+                    
+                    // Track the maximum item height in this row
+                    maxItemHeight = Math.max(maxItemHeight, itemHeight);
+                }
+
+                // Always advance by the maximum item height to maintain consistent row spacing
+                positionY += maxItemHeight;
+                positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
+            }
+
+            positionY += DEFAULT_GROUP_MARGIN;
+            groupDrawPlan.yPositionEnd = positionY;
+            positionY += 1;
+        }
+
+        return {
+            height: positionY,
+            width: context.canvas.clientWidth,
+            groupDrawPlans
+        };
+    }
+
+    /**
+     * Calculate the stable row structure for all groupings.
+     * This determines which row each item should be in, based on overlap detection.
+     * The row structure is cached and only recalculated when zoom changes.
+     * @param context The canvas context
+     * @param rangeFromDt The range from date.
+     * @param rangeToDt The range to date.
+     * @returns A map of grouping names to item-row assignments.
+     */
+    private _calculateStableRowStructure(
+        context: CanvasRenderingContext2D,
+        rangeFromDt: Date,
+        rangeToDt: Date
+    ): Map<string, Map<TimelineItem, number>> {
+        const rowStructure = new Map<string, Map<TimelineItem, number>>();
+        const milliRenderWidth = context.canvas.clientWidth / (rangeToDt.getTime() - rangeFromDt.getTime());
+
+        for (const grouping of this._dataSet.groupings) {
+            // Use ALL items in the grouping
+            let allItems = grouping.items;
+
+            // Filter out disabled categories
+            allItems = allItems.filter((item) => {
+                const itemCategory = item.category ? this._dataSet.getCategory(item.category) : null;
+                return !itemCategory?.isDisabled;
+            });
+
+            if (!allItems.length) {
+                continue;
+            }
+
+            const rowAssignments = new Map<TimelineItem, number>();
+            const itemDrawPlanStacks: DataViewItemDrawPlan[][] = [[]];
+
+            // Process all items to determine row assignments
+            for (const item of allItems) {
+                let startPositionX = 0;
+                let endPositionX = 0;
+                let pointInTimePositionX = null;
+
+                if (item.end) {
+                    // Range item
+                    if (this._isRTL) {
+                        startPositionX = milliRenderWidth * (rangeToDt.getTime() - item.end.getTime());
+                        endPositionX = milliRenderWidth * (rangeToDt.getTime() - item.start.getTime());
+                    } else {
+                        startPositionX = milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
+                        endPositionX = milliRenderWidth * (item.end.getTime() - rangeFromDt.getTime());
+                    }
+                } else {
+                    // Point-in-time item
+                    const itemLabelWidth = context.measureText(item.label ?? "?").width + item.style.padding! * 2;
+
+                    pointInTimePositionX = this._isRTL
+                        ? milliRenderWidth * (rangeToDt.getTime() - item.start.getTime())
+                        : milliRenderWidth * (item.start.getTime() - rangeFromDt.getTime());
+
+                    startPositionX = pointInTimePositionX - itemLabelWidth / 2;
+                    endPositionX = pointInTimePositionX + itemLabelWidth / 2;
+                }
+
+                const itemDrawPlan: DataViewItemDrawPlan = {
+                    item,
+                    height: 0,
+                    xPositionStart: startPositionX,
+                    xPositionEnd: endPositionX,
+                    yPositionStart: 0,
+                    yPositionEnd: 0,
+                    xPointInTimePosition: pointInTimePositionX
+                };
+
+                // Find a row for this item
+                let wasItemAddedToExistingRowStack = false;
+                let assignedRowIndex = 0;
+
+                for (let rowIndex = 0; rowIndex < itemDrawPlanStacks.length; rowIndex++) {
+                    const rowStack = itemDrawPlanStacks[rowIndex];
+                    const canItemFitInCurrentRow = this._isRTL
+                        ? rowStack.length > 0 &&
+                          rowStack[rowStack.length - 1].xPositionStart >= itemDrawPlan.xPositionEnd
+                        : rowStack.length > 0 &&
+                          rowStack[rowStack.length - 1].xPositionEnd <= itemDrawPlan.xPositionStart;
+
+                    if (rowStack.length === 0 || canItemFitInCurrentRow) {
+                        rowStack.push(itemDrawPlan);
+                        wasItemAddedToExistingRowStack = true;
+                        assignedRowIndex = rowIndex;
+                        break;
+                    }
+                }
+
+                if (!wasItemAddedToExistingRowStack) {
+                    itemDrawPlanStacks.push([itemDrawPlan]);
+                    assignedRowIndex = itemDrawPlanStacks.length - 1;
+                }
+
+                // Store the row assignment
+                rowAssignments.set(item, assignedRowIndex);
+            }
+
+            rowStructure.set(grouping.group, rowAssignments);
+        }
+
+        return rowStructure;
     }
 }
