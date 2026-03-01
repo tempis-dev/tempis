@@ -480,10 +480,7 @@ export class TimelineDataView {
 
             // Draw the actual marker line from the item downward to the bottom of the canvas.
             context.beginPath();
-            context.moveTo(
-                itemDrawPlan.xPointInTimePosition,
-                scrolledYPosition + itemDrawPlan.yPositionEnd + 5
-            );
+            context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionEnd);
             context.lineTo(itemDrawPlan.xPointInTimePosition, context.canvas.clientHeight);
             context.stroke();
 

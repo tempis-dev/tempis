@@ -421,11 +421,26 @@
     return items;
   }
 
+  let timeline = null;
+  let currentItems = [];
+  let lastDataConfig = { itemCount: 0, groupCount: 0, pitRatio: 0 };
+
   function getTimelineOptions() {
     const itemCount = parseInt(document.getElementById('itemCount').value);
     const groupCount = parseInt(document.getElementById('groupCount').value);
     const pitRatio = parseInt(document.getElementById('pitRatio').value);
-    const items = generateItems(itemCount, groupCount, pitRatio);
+    
+    // Only regenerate items if data configuration changed
+    if (currentItems.length === 0 ||
+        lastDataConfig.itemCount !== itemCount ||
+        lastDataConfig.groupCount !== groupCount ||
+        lastDataConfig.pitRatio !== pitRatio) {
+      currentItems = generateItems(itemCount, groupCount, pitRatio);
+      lastDataConfig = { itemCount, groupCount, pitRatio };
+      console.log('Items regenerated:', itemCount);
+    }
+    
+    const items = currentItems;
 
     return {
       responsive: document.getElementById('responsive').checked,
@@ -469,8 +484,6 @@
       items
     };
   }
-
-  let timeline = null;
 
   function regenerateTimeline() {
     // Destroy existing timeline
