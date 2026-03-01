@@ -40,6 +40,13 @@ export interface TempisTimelineOptions {
     items: TempisTimelineItem[];
 
     /**
+     * The stack mode which defines how items are vertically arranged. Defaults to `"compact"`.
+     * - `"compact"` – Items are dynamically stacked based on visible items only. PIT labels are adjusted to fit within canvas bounds. Layout updates when panning.
+     * - `"stable"` – All items are included in the layout. PIT labels are always centered on their timestamp. Layout only updates on zoom or data changes.
+     */
+    stackMode?: TempisTimelineStackMode;
+
+    /**
      * The item selection mode which defines how items in the timeline can be selected. Defaults to `"none"`.
      * - `"none"` – No items can be selected (view-only mode).
      * - `"single"` – Only one item can be selected at a time. Selecting a new item clears the previous selection.
@@ -61,6 +68,13 @@ export interface TempisTimelineOptions {
  * - `"grow-canvas"`– The timeline grows the canvas element itself to match the required content height.
  */
 export type TempisTimelineVerticalFillMode = "content" | "fill-canvas" | "grow-canvas";
+
+/**
+ * Defines how items are vertically stacked in the timeline.
+ * - `"compact"` – Items are dynamically stacked based on visible items only. More compact but items may shift when panning.
+ * - `"stable"` – All items are included in the layout. Items maintain stable positions when panning.
+ */
+export type TempisTimelineStackMode = "compact" | "stable";
 
 /**
  * Defines how items in a timeline can be selected.

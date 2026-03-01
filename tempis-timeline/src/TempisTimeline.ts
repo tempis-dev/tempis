@@ -1,4 +1,4 @@
-import { TempisTimelineItem, TempisTimelineItemSelectionMode, TempisTimelineOptions, TempisTimelineVerticalFillMode } from "./TempisTimelineOptions";
+import { TempisTimelineItem, TempisTimelineItemSelectionMode, TempisTimelineOptions, TempisTimelineStackMode, TempisTimelineVerticalFillMode } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineBand } from "./TimelineBand";
 import { TimelineDataView } from "./TimelineDataView";
@@ -55,7 +55,7 @@ export class TempisTimeline {
         this._font = new TimelineFont(this._options.style?.font);
 
         this._dataSet = new TimelineDataSet(this._options);
-        this._dataView = new TimelineDataView(this._dataSet, this._isRTL);
+        this._dataView = new TimelineDataView(this._dataSet, this._isRTL, this._options.stackMode ?? 'compact');
         this._rangeView = new TimelineRangeView(
             this._canvas,
             this._dataSet,
