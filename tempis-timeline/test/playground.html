@@ -228,6 +228,11 @@
     </div>
     
     <div class="control-group">
+      <label>Number of Categories</label>
+      <input type="number" id="categoryCount" value="5" min="0" max="20">
+    </div>
+    
+    <div class="control-group">
       <label>PIT Item Ratio (%)</label>
       <input type="number" id="pitRatio" value="30" min="0" max="100">
     </div>
@@ -397,10 +402,23 @@
     };
   }
 
-  function generateItems(itemCount, groupCount, pitRatio) {
+  function generateCategories(categoryCount) {
+    const colors = [
+      "#4CAF50", "#2196F3", "#FF9800", "#E91E63", "#9C27B0",
+      "#00BCD4", "#FFEB3B", "#795548", "#607D8B", "#F44336"
+    ];
+    
+    return Array.from({ length: categoryCount }, (_, i) => ({
+      name: `Category-${i + 1}`,
+      label: `Category ${i + 1}`,
+      style: { backgroundColor: colors[i % colors.length] }
+    }));
+  }
+
+  function generateItems(itemCount, groupCount, categoryCount, pitRatio) {
     const minDate = new Date("2024-01-01T00:00:00");
     const maxDate = new Date("2024-03-01T00:00:00");
-    const categories = ["Category-1", "Category-2", "Category-3", "Category-4", "Category-5"];
+    const categories = Array.from({ length: categoryCount }, (_, i) => `Category-${i + 1}`);
     const groups = Array.from({ length: groupCount }, (_, i) => `Group-${i + 1}`);
     const items = [];
 
@@ -423,20 +441,22 @@
 
   let timeline = null;
   let currentItems = [];
-  let lastDataConfig = { itemCount: 0, groupCount: 0, pitRatio: 0 };
+  let lastDataConfig = { itemCount: 0, groupCount: 0, categoryCount: 0, pitRatio: 0 };
 
   function getTimelineOptions() {
     const itemCount = parseInt(document.getElementById('itemCount').value);
     const groupCount = parseInt(document.getElementById('groupCount').value);
+    const categoryCount = parseInt(document.getElementById('categoryCount').value);
     const pitRatio = parseInt(document.getElementById('pitRatio').value);
     
     // Only regenerate items if data configuration changed
     if (currentItems.length === 0 ||
         lastDataConfig.itemCount !== itemCount ||
         lastDataConfig.groupCount !== groupCount ||
+        lastDataConfig.categoryCount !== categoryCount ||
         lastDataConfig.pitRatio !== pitRatio) {
-      currentItems = generateItems(itemCount, groupCount, pitRatio);
-      lastDataConfig = { itemCount, groupCount, pitRatio };
+      currentItems = generateItems(itemCount, groupCount, categoryCount, pitRatio);
+      lastDataConfig = { itemCount, groupCount, categoryCount, pitRatio };
       console.log('Items regenerated:', itemCount);
     }
     
@@ -474,13 +494,7 @@
         enabled: document.getElementById('tooltipEnabled').checked,
         overflowBehavior: document.getElementById('tooltipOverflow').value
       },
-      categories: [
-        { name: "Category-1", label: "Category 1", style: { backgroundColor: "#4CAF50" } },
-        { name: "Category-2", label: "Category 2", style: { backgroundColor: "#2196F3" } },
-        { name: "Category-3", label: "Category 3", style: { backgroundColor: "#FF9800" } },
-        { name: "Category-4", label: "Category 4", style: { backgroundColor: "#E91E63" } },
-        { name: "Category-5", label: "Category 5", style: { backgroundColor: "#9C27B0" } }
-      ],
+      categories: generateCategories(categoryCount),
       items
     };
   }
