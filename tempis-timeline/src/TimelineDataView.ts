@@ -509,35 +509,61 @@ export class TimelineDataView {
 
         // Draw the item label (if there is one).
         if (item.label) {
-            // Calculate the actual x position of the label, we should attempt to keep this in the bounds of the view.
-            // If rendering right-to-left then we will be rendering the label to the right of the item, otherwise the left.
-            const labelStartPositionX = this._isRTL
-                ? Math.floor(
-                      Math.min(context.canvas.clientWidth - itemPadding, itemDrawPlan.xPositionEnd - itemPadding)
-                  )
-                : Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
-
-            // Calculate the max item label width.
-            const maxLabelWidth = this._isRTL
-                ? Math.max(0, Math.ceil(labelStartPositionX - (itemDrawPlan.xPositionStart + itemPadding)) + 1)
-                : Math.max(0, Math.ceil(itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX));
-
-            // Render the text label, but only if we have enough space to do so.
-            if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
+            // For stable mode PIT items, don't truncate labels - let them extend beyond canvas
+            const isPitItem = itemDrawPlan.xPointInTimePosition !== null;
+            const isStableMode = this._stackMode === 'stable';
+            
+            if (isStableMode && isPitItem) {
+                // Stable mode PIT items: render label at full width, centered on the item box
                 context.textBaseline = "middle";
+                context.textAlign = "center";
                 context.fillStyle = itemFontColor;
-
-                // Draw the item label, but clip it if there is not enough available horizontal space to do so.
-                drawClippedText(
-                    context,
+                
+                const labelCenterX = (itemDrawPlan.xPositionStart + itemDrawPlan.xPositionEnd) / 2;
+                
+                context.fillText(
                     item.label,
-                    labelStartPositionX,
+                    labelCenterX,
                     itemDrawPlan.yPositionStart +
                         (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 +
                         1 +
-                        scrolledYPosition,
-                    maxLabelWidth
+                        scrolledYPosition
                 );
+                
+                // Reset text align back to the default for subsequent items
+                context.textAlign = this._isRTL ? "right" : "left";
+            } else {
+                // Compact mode or range items: keep label within bounds and truncate if needed
+                // Calculate the actual x position of the label, we should attempt to keep this in the bounds of the view.
+                // If rendering right-to-left then we will be rendering the label to the right of the item, otherwise the left.
+                const labelStartPositionX = this._isRTL
+                    ? Math.floor(
+                          Math.min(context.canvas.clientWidth - itemPadding, itemDrawPlan.xPositionEnd - itemPadding)
+                      )
+                    : Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
+
+                // Calculate the max item label width.
+                const maxLabelWidth = this._isRTL
+                    ? Math.max(0, Math.ceil(labelStartPositionX - (itemDrawPlan.xPositionStart + itemPadding)) + 1)
+                    : Math.max(0, Math.ceil(itemDrawPlan.xPositionEnd - itemPadding - labelStartPositionX));
+
+                // Render the text label, but only if we have enough space to do so.
+                if (maxLabelWidth > MINIMUM_RENDERED_LABEL_WIDTH) {
+                    context.textBaseline = "middle";
+                    context.fillStyle = itemFontColor;
+
+                    // Draw the item label, but clip it if there is not enough available horizontal space to do so.
+                    drawClippedText(
+                        context,
+                        item.label,
+                        labelStartPositionX,
+                        itemDrawPlan.yPositionStart +
+                            (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2 +
+                            1 +
+                            scrolledYPosition,
+                        maxLabelWidth
+                    );
+                }
             }
         }
     }
@@ -889,32 +915,25 @@ export class TimelineDataView {
             positionY += DEFAULT_GROUP_MARGIN;
 
             for (const itemRow of groupDrawPlan.rows) {
-                // For stable mode, we need to allocate space even for empty rows
-                // to maintain stable vertical positions
-                if (itemRow.length === 0) {
-                    // Allocate space for an empty row (same height as if it had an item)
-                    const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Label");
-                    const defaultPadding = 8; // Default item padding
-                    const emptyRowHeight = actualBoundingBoxAscent + actualBoundingBoxDescent + defaultPadding * 2;
-                    
-                    positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
-                    positionY += emptyRowHeight;
-                    positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
-                    continue;
-                }
-
                 positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
 
-                for (const itemDrawPlan of itemRow) {
-                    const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Label");
-                    const itemHeight =
-                        actualBoundingBoxAscent + actualBoundingBoxDescent + itemDrawPlan.item.style.padding! * 2;
+                // Calculate the row height consistently, regardless of whether the row has visible items
+                // Use the maximum item height that could exist in this row to ensure consistent spacing
+                const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Label");
+                let maxItemHeight = actualBoundingBoxAscent + actualBoundingBoxDescent + 10 * 2; // Default padding is 10
 
+                // Set y positions for all visible items in this row
+                for (const itemDrawPlan of itemRow) {
+                    const itemHeight = actualBoundingBoxAscent + actualBoundingBoxDescent + itemDrawPlan.item.style.padding! * 2;
                     itemDrawPlan.yPositionStart = positionY;
                     itemDrawPlan.yPositionEnd = positionY + itemHeight;
+                    
+                    // Track the maximum item height in this row
+                    maxItemHeight = Math.max(maxItemHeight, itemHeight);
                 }
 
-                positionY = Math.max(...itemRow.map((itemDrawPlan) => itemDrawPlan.yPositionEnd));
+                // Always advance by the maximum item height to maintain consistent row spacing
+                positionY += maxItemHeight;
                 positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
             }
 

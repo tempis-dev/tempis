@@ -77,16 +77,16 @@
       <p>Choose how items are vertically arranged:</p>
       <div class="radio-group">
         <div class="radio-option">
-          <input type="radio" id="compact" name="stackMode" value="compact" checked>
+          <input type="radio" id="compact" name="stackMode" value="compact">
           <label for="compact">Compact (dynamic layout)</label>
         </div>
         <div class="radio-option">
-          <input type="radio" id="stable" name="stackMode" value="stable">
+          <input type="radio" id="stable" name="stackMode" value="stable" checked>
           <label for="stable">Stable (fixed layout)</label>
         </div>
       </div>
       <div class="mode-description" id="modeDescription">
-        <strong>Compact Mode:</strong> Only visible items are included in layout. PIT labels adjust to fit canvas. Layout updates when panning.
+        <strong>Stable Mode:</strong> ALL items included in layout. PIT labels always centered on timestamp. Layout only updates on zoom/data changes.
       </div>
     </div>
   </div>
@@ -146,7 +146,7 @@
   }
 
   // Track current mode
-  let currentMode = 'compact';
+  let currentMode = 'stable';
 
   // Create our timeline options.
   const timelineOptions = {

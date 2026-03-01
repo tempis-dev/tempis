@@ -96,16 +96,16 @@
       <p>Choose how items are vertically arranged:</p>
       <div class="radio-group">
         <div class="radio-option">
-          <input type="radio" id="compact" name="stackMode" value="compact" checked>
+          <input type="radio" id="compact" name="stackMode" value="compact">
           <label for="compact">Compact (dynamic layout)</label>
         </div>
         <div class="radio-option">
-          <input type="radio" id="stable" name="stackMode" value="stable">
+          <input type="radio" id="stable" name="stackMode" value="stable" checked>
           <label for="stable">Stable (fixed layout)</label>
         </div>
       </div>
       <div class="mode-description" id="modeDescription">
-        <strong>Compact Mode:</strong> Only visible items are included in layout. PIT labels adjust to fit canvas. Layout updates when panning. More space-efficient.
+        <strong>Stable Mode:</strong> ALL items included in layout. PIT labels always centered on timestamp. Layout cached and only updates on zoom/data changes. No shuffling when panning.
       </div>
     </div>
   </div>
@@ -181,8 +181,8 @@
     return items;
   }
 
-  // Create initial timeline with compact mode
-  let currentMode = 'compact';
+  // Create initial timeline with stable mode (default)
+  let currentMode = 'stable';
   const items = generateItems();
 
   const timelineOptions = {
