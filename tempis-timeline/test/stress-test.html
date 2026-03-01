@@ -8,17 +8,91 @@
 <style>
   html {
     background-color: #ebebeb;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+  body {
+    margin: 20px;
+  }
+  .controls {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .control-group {
+    margin-bottom: 15px;
+  }
+  .control-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+  }
+  .control-group p {
+    margin: 5px 0 10px 0;
+    font-size: 14px;
+    color: #666;
+  }
+  .radio-group {
+    display: flex;
+    gap: 20px;
+  }
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .radio-option input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+  .radio-option label {
+    margin: 0;
+    font-weight: normal;
+    cursor: pointer;
   }
   .canvas-container {
     width: 100%;
     height: 600px;
-    resize: both;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     overflow: hidden;
+  }
+  .mode-description {
+    background: #fff3cd;
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-top: 10px;
+    border-left: 4px solid #ffc107;
+    font-size: 14px;
   }
 </style>
 <body>
+  <div class="controls">
+    <div class="control-group">
+      <label>Stack Mode</label>
+      <p>Choose how items are vertically arranged:</p>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input type="radio" id="compact" name="stackMode" value="compact" checked>
+          <label for="compact">Compact (dynamic layout)</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" id="stable" name="stackMode" value="stable">
+          <label for="stable">Stable (fixed layout)</label>
+        </div>
+      </div>
+      <div class="mode-description" id="modeDescription">
+        <strong>Compact Mode:</strong> Only visible items are included in layout. PIT labels adjust to fit canvas. Layout updates when panning.
+      </div>
+    </div>
+  </div>
+
   <div class="canvas-container">
-    <canvas id="canvas">
+    <canvas id="canvas"></canvas>
   </div>
 </body>
 <script>
@@ -71,9 +145,13 @@
     });
   }
 
+  // Track current mode
+  let currentMode = 'compact';
+
   // Create our timeline options.
   const timelineOptions = {
     responsive: true,
+    stackMode: currentMode,
     range: {
       position: "bottom"
     },
@@ -106,6 +184,37 @@
   };
 
   // Create our timeline and stick a reference to it on the window for easy access.
-  window["timeline"] = new tempis_timeline.TempisTimeline("#canvas", timelineOptions);
+  let timeline = new tempis_timeline.TempisTimeline("#canvas", timelineOptions);
+  window["timeline"] = timeline;
+
+  // Update mode description
+  function updateModeDescription(mode) {
+    const description = document.getElementById('modeDescription');
+    if (mode === 'compact') {
+      description.innerHTML = '<strong>Compact Mode:</strong> Only visible items are included in layout. PIT labels adjust to fit canvas. Layout updates when panning.';
+    } else {
+      description.innerHTML = '<strong>Stable Mode:</strong> ALL items included in layout. PIT labels always centered on timestamp. Layout only updates on zoom/data changes.';
+    }
+  }
+
+  // Handle mode changes
+  document.querySelectorAll('input[name="stackMode"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      currentMode = e.target.value;
+      
+      // Destroy the old timeline to clean up event listeners
+      if (timeline) {
+        timeline.destroy();
+      }
+      
+      // Recreate timeline with new stack mode
+      timelineOptions.stackMode = currentMode;
+      timeline = new tempis_timeline.TempisTimeline("#canvas", timelineOptions);
+      window["timeline"] = timeline;
+      
+      updateModeDescription(currentMode);
+      console.log(`Switched to ${currentMode} stack mode with ${items.length} items`);
+    });
+  });
 </script>
 </html>

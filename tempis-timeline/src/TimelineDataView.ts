@@ -797,26 +797,13 @@ export class TimelineDataView {
         const groupDrawPlans: DataViewGroupDrawPlan[] = [];
 
         for (const grouping of this._dataSet.groupings) {
-            // Use ALL items in the grouping
-            let allItems = grouping.items;
-
-            // Filter out disabled categories
-            allItems = allItems.filter((item) => {
-                const itemCategory = item.category ? this._dataSet.getCategory(item.category) : null;
-                return !itemCategory?.isDisabled;
-            });
-
-            if (!allItems.length) {
-                continue;
-            }
-
             // Get the cached row assignments for this grouping
             const rowAssignments = this._cachedStableRowStructure!.get(grouping.group);
-            if (!rowAssignments) {
+            if (!rowAssignments || rowAssignments.size === 0) {
                 continue;
             }
 
-            // Determine the maximum row number
+            // Determine the maximum row number from ALL items (not just visible)
             const maxRow = Math.max(...Array.from(rowAssignments.values()));
 
             // Create empty row arrays
@@ -825,8 +812,17 @@ export class TimelineDataView {
                 () => []
             );
 
-            // Process all items and calculate their current x positions
-            for (const item of allItems) {
+            // Get items in the current visible range (not all items)
+            let itemsInRange = grouping.getItemsInRange(rangeFromDt, rangeToDt);
+
+            // Filter out disabled categories
+            itemsInRange = itemsInRange.filter((item) => {
+                const itemCategory = item.category ? this._dataSet.getCategory(item.category) : null;
+                return !itemCategory?.isDisabled;
+            });
+
+            // Process only VISIBLE items and calculate their current x positions
+            for (const item of itemsInRange) {
                 let startPositionX = 0;
                 let endPositionX = 0;
                 let pointInTimePositionX = null;
@@ -893,8 +889,17 @@ export class TimelineDataView {
             positionY += DEFAULT_GROUP_MARGIN;
 
             for (const itemRow of groupDrawPlan.rows) {
-                // Skip empty rows
+                // For stable mode, we need to allocate space even for empty rows
+                // to maintain stable vertical positions
                 if (itemRow.length === 0) {
+                    // Allocate space for an empty row (same height as if it had an item)
+                    const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Label");
+                    const defaultPadding = 8; // Default item padding
+                    const emptyRowHeight = actualBoundingBoxAscent + actualBoundingBoxDescent + defaultPadding * 2;
+                    
+                    positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
+                    positionY += emptyRowHeight;
+                    positionY += DEFAULT_ITEM_VERTICAL_MARGIN;
                     continue;
                 }
 
