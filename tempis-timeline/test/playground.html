@@ -118,7 +118,7 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: #2196F3;
+    background: #9C27B0;
     cursor: pointer;
   }
   
@@ -126,14 +126,14 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: #2196F3;
+    background: #9C27B0;
     cursor: pointer;
     border: none;
   }
   
   .control-group label span {
     font-weight: 600;
-    color: #2196F3;
+    color: #9C27B0;
   }
   
   .control-group input[type="checkbox"] {
@@ -213,6 +213,83 @@
     background: #e0e0e0;
     margin: 20px 0;
   }
+  
+  .dialog-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .dialog-overlay.active {
+    display: flex;
+  }
+  
+  .dialog {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    padding: 24px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .dialog h2 {
+    margin: 0 0 16px 0;
+    font-size: 20px;
+    color: #333;
+  }
+  
+  .dialog textarea {
+    width: 100%;
+    min-height: 300px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    resize: vertical;
+    margin-bottom: 16px;
+  }
+  
+  .dialog-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+  
+  .dialog-buttons button {
+    width: auto;
+    min-width: 100px;
+  }
+  
+  .dialog-buttons button.secondary {
+    background: #757575;
+  }
+  
+  .dialog-buttons button.secondary:hover {
+    background: #616161;
+  }
+  
+  .error-message {
+    color: #f44336;
+    font-size: 13px;
+    margin-bottom: 12px;
+    display: none;
+  }
+  
+  .error-message.active {
+    display: block;
+  }
 </style>
 <body>
   <div class="sidebar">
@@ -235,6 +312,10 @@
     <div class="control-group">
       <label>PIT Item Ratio (%)</label>
       <input type="number" id="pitRatio" value="30" min="0" max="100">
+    </div>
+    
+    <div class="control-group">
+      <button id="setItemsBtn" style="background: #9C27B0;">Set Items (JSON)</button>
     </div>
     
     <div class="divider"></div>
@@ -383,6 +464,28 @@
   <div class="main-content">
     <div class="canvas-container">
       <canvas id="canvas"></canvas>
+    </div>
+  </div>
+  
+  <!-- Set Items Dialog -->
+  <div class="dialog-overlay" id="setItemsDialog">
+    <div class="dialog">
+      <h2>Set Items (JSON)</h2>
+      <div class="error-message" id="jsonError"></div>
+      <textarea id="itemsJson" placeholder='[
+  {
+    "id": 1,
+    "label": "Item 1",
+    "start": "2024-01-15T10:00:00",
+    "end": "2024-01-20T15:00:00",
+    "category": "Category-1",
+    "grouping": "Group-1"
+  }
+]'></textarea>
+      <div class="dialog-buttons">
+        <button class="secondary" id="cancelSetItems">Cancel</button>
+        <button id="applySetItems" style="background: #9C27B0;">Apply</button>
+      </div>
     </div>
   </div>
 </body>
@@ -536,6 +639,108 @@
   
   document.getElementById('borderThickness').addEventListener('input', (e) => {
     document.getElementById('borderThicknessValue').textContent = e.target.value;
+  });
+
+  // Set Items Dialog handlers
+  const setItemsDialog = document.getElementById('setItemsDialog');
+  const setItemsBtn = document.getElementById('setItemsBtn');
+  const cancelSetItems = document.getElementById('cancelSetItems');
+  const applySetItems = document.getElementById('applySetItems');
+  const itemsJsonTextarea = document.getElementById('itemsJson');
+  const jsonError = document.getElementById('jsonError');
+
+  setItemsBtn.addEventListener('click', () => {
+    setItemsDialog.classList.add('active');
+    jsonError.classList.remove('active');
+    jsonError.textContent = '';
+  });
+
+  cancelSetItems.addEventListener('click', () => {
+    setItemsDialog.classList.remove('active');
+  });
+
+  // Close dialog when clicking outside
+  setItemsDialog.addEventListener('click', (e) => {
+    if (e.target === setItemsDialog) {
+      setItemsDialog.classList.remove('active');
+    }
+  });
+
+  applySetItems.addEventListener('click', () => {
+    try {
+      const itemsJson = itemsJsonTextarea.value.trim();
+      
+      if (!itemsJson) {
+        throw new Error('Please enter JSON data');
+      }
+
+      const items = JSON.parse(itemsJson);
+
+      if (!Array.isArray(items)) {
+        throw new Error('JSON must be an array of items');
+      }
+
+      // Validate items have required fields
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (!item.id && item.id !== 0) {
+          throw new Error(`Item at index ${i} is missing required field: id`);
+        }
+        if (!item.start) {
+          throw new Error(`Item at index ${i} is missing required field: start`);
+        }
+      }
+
+      // Extract unique categories from the items
+      const uniqueCategories = new Set();
+      items.forEach(item => {
+        if (item.category) {
+          uniqueCategories.add(item.category);
+        }
+      });
+
+      // Generate category definitions ONLY for categories found in the JSON items
+      const colors = [
+        "#4CAF50", "#2196F3", "#FF9800", "#E91E63", "#9C27B0",
+        "#00BCD4", "#FFEB3B", "#795548", "#607D8B", "#F44336"
+      ];
+      
+      const categories = Array.from(uniqueCategories).map((catName, i) => ({
+        name: catName,
+        label: catName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        style: { backgroundColor: colors[i % colors.length] }
+      }));
+
+      // Destroy the existing timeline
+      if (timeline) {
+        timeline.destroy();
+      }
+
+      // Get current options (for non-data settings like layout, style, etc.)
+      const options = getTimelineOptions();
+      
+      // Override with custom items and categories from JSON
+      // If no categories in JSON, use empty array (no categories)
+      options.items = items;
+      options.categories = categories;
+      
+      // Create new timeline with custom items
+      timeline = new tempis_timeline.TempisTimeline("#canvas", options);
+      window["timeline"] = timeline;
+      
+      // Update currentItems to prevent regeneration
+      currentItems = items;
+      
+      console.log('Items set successfully:', items.length, 'items with', categories.length, 'categories');
+      
+      // Close the dialog
+      setItemsDialog.classList.remove('active');
+      jsonError.classList.remove('active');
+    } catch (error) {
+      jsonError.textContent = error.message;
+      jsonError.classList.add('active');
+      console.error('Error setting items:', error);
+    }
   });
 </script>
 </html>
