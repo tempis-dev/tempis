@@ -35,6 +35,38 @@
     flex-shrink: 0;
   }
   
+  /* Passive scrollbar - only visible on hover */
+  .sidebar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .sidebar::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 4px;
+  }
+  
+  .sidebar:hover::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+  }
+  
+  .sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Firefox scrollbar styling */
+  .sidebar {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  
+  .sidebar:hover {
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+  
   .main-content {
     flex: 1;
     display: flex;
