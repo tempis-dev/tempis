@@ -448,6 +448,16 @@ export class TimelineDataView {
             context.fillStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
             context.strokeStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
 
+            // Check if the entire item (box + triangle) is above the visible window
+            // The triangle extends 6 pixels below the item box
+            const itemBottomWithTriangle = scrolledYPosition + itemDrawPlan.yPositionEnd + 6;
+            const isEntirelyAboveVisibleWindow = itemBottomWithTriangle < 0;
+
+            // Use reduced opacity only if the entire item is above the visible window
+            if (isEntirelyAboveVisibleWindow) {
+                context.globalAlpha = 0.3;
+            }
+
             // We need to draw a little downward triangle to join the item and the marker line.
             const itemMarkerConnectorPath = new Path2D();
             itemMarkerConnectorPath.moveTo(
@@ -468,16 +478,19 @@ export class TimelineDataView {
             );
             context.fill(itemMarkerConnectorPath);
 
-            // Draw the actual marker line.
+            // Draw the actual marker line from the item downward to the bottom of the canvas.
             context.beginPath();
             context.moveTo(
                 itemDrawPlan.xPointInTimePosition,
-                scrolledYPosition +
-                    itemDrawPlan.yPositionStart +
-                    (itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart) / 2
+                scrolledYPosition + itemDrawPlan.yPositionEnd + 6
             );
             context.lineTo(itemDrawPlan.xPointInTimePosition, context.canvas.clientHeight);
             context.stroke();
+
+            // Reset opacity if it was changed
+            if (isEntirelyAboveVisibleWindow) {
+                context.globalAlpha = 1.0;
+            }
         }
 
         // Draw the item range rectangle.
