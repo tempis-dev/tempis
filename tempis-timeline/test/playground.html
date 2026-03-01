@@ -83,11 +83,17 @@
     
     .main-content {
       width: 100%;
-      padding: 65px 10px 10px 10px;
+      height: 100vh;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
     }
     
     .canvas-container {
+      flex: 1;
+      margin: 65px 10px 10px 10px;
       border-radius: 4px;
+      min-height: 0;
     }
   }
   
