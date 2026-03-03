@@ -95,6 +95,9 @@ export class TimelineDataView {
     /** The last zoom level (range in milliseconds) used for stable mode caching. */
     private _lastZoomRange: number = 0;
 
+    /** The last canvas width used for stable mode caching. */
+    private _lastCanvasWidth: number = 0;
+
     /**
      * Creates a new instance of the TimelineDataView class.
      * @param dataSet The timeline dataset model.
@@ -816,17 +819,20 @@ export class TimelineDataView {
         // Calculate the current zoom range.
         const currentZoomRange = rangeToDt.getTime() - rangeFromDt.getTime();
         const milliRenderWidth = context.canvas.clientWidth / currentZoomRange;
+        const currentCanvasWidth = context.canvas.clientWidth;
 
         // Check if we need to recalculate the row structure.
-        // Row structure is recalculated if zoom changed significantly or cache is empty.
+        // Row structure is recalculated if zoom changed significantly, canvas width changed, or cache is empty.
         const needsRowRecalculation = !this._cachedStableRowStructure || 
             this._lastZoomRange === 0 ||
+            this._lastCanvasWidth !== currentCanvasWidth ||
             Math.abs(currentZoomRange - this._lastZoomRange) / this._lastZoomRange > 0.01;
 
         if (needsRowRecalculation) {
             // Recalculate row structure
             this._cachedStableRowStructure = this._calculateStableRowStructure(context, rangeFromDt, rangeToDt);
             this._lastZoomRange = currentZoomRange;
+            this._lastCanvasWidth = currentCanvasWidth;
         }
 
         // Now create the draw plan using the cached row structure but with current x positions
