@@ -41,7 +41,7 @@ export interface LegendCategoryDrawPlan {
 }
 
 /** The default amount of padding to use for each legend category. */
-const DEFAULT_CATEGORY_PADDING: number = 4;
+const DEFAULT_CATEGORY_GAP: number = 4;
 
 /** The default amount of padding to use for the legend. */
 const DEFAULT_LEGEND_PADDING: number = 8;
@@ -125,28 +125,28 @@ export class TimelineLegendView {
      * Gets the legend item marker style.
      */
     public get itemMarkerStyle(): TempisTimelineMarkerStyle {
-        return this._options.item?.markerStyle ?? "square-rounded";
+        return this._options.markerStyle ?? "square-rounded";
     }
 
     /**
-     * Gets the legend item padding.
+     * Gets the legend item gap.
      */
-    public get itemPadding(): number {
-        return this._options.item?.padding ?? DEFAULT_CATEGORY_PADDING;
+    public get gap(): number {
+        return this._options.gap ?? DEFAULT_CATEGORY_GAP;
     }
 
     /**
      * Gets a flag defining whether to highlight category items in the timeline when the corresponding category is hovered over in the legend.
      */
     public get isHighlightOnHover(): boolean {
-        return this._options.item?.isHighlightOnHover ?? true;
+        return this._options.isHighlightOnHover ?? true;
     }
 
     /**
      * Gets a flag defining whether clicking a category in the legend toggles the visibility of all timeline items belonging to that category.
      */
     public get isFilterOnClick(): boolean {
-        return this._options.item?.isFilterOnClick ?? true;
+        return this._options.isFilterOnClick ?? true;
     }
 
     /**
@@ -240,18 +240,18 @@ export class TimelineLegendView {
             if (this._isRTL) {
                 context.roundRect(
                     Math.min(
-                        categoryDrawPlan.xPositionEnd - this.itemPadding - categoryDrawPlan.markerSize,
+                        categoryDrawPlan.xPositionEnd - this.gap - categoryDrawPlan.markerSize,
                         this._drawPlan.width - categoryDrawPlan.markerSize - DEFAULT_LEGEND_PADDING
                     ),
-                    categoryDrawPlan.yPositionStart + this.itemPadding + yPosition,
+                    categoryDrawPlan.yPositionStart + this.gap + yPosition,
                     categoryDrawPlan.markerSize,
                     categoryDrawPlan.markerSize,
                     markerRadius
                 );
             } else {
                 context.roundRect(
-                    categoryDrawPlan.xPositionStart + this.itemPadding,
-                    categoryDrawPlan.yPositionStart + this.itemPadding + yPosition,
+                    categoryDrawPlan.xPositionStart + this.gap,
+                    categoryDrawPlan.yPositionStart + this.gap + yPosition,
                     categoryDrawPlan.markerSize,
                     categoryDrawPlan.markerSize,
                     markerRadius
@@ -267,11 +267,11 @@ export class TimelineLegendView {
                 drawClippedText(
                     context,
                     categoryDrawPlan.category.label,
-                    categoryDrawPlan.xPositionStart + this.itemPadding,
+                    categoryDrawPlan.xPositionStart + this.gap,
                     categoryDrawPlan.yPositionStart + categoryDrawPlan.height / 2 + yPosition,
                     this._drawPlan.width -
                         (categoryDrawPlan.xPositionStart +
-                            this.itemPadding +
+                            this.gap +
                             categoryDrawPlan.markerSize +
                             categoryDrawPlan.markerLabelGap) -
                         DEFAULT_LEGEND_PADDING
@@ -281,13 +281,13 @@ export class TimelineLegendView {
                     context,
                     categoryDrawPlan.category.label,
                     categoryDrawPlan.xPositionStart +
-                        this.itemPadding +
+                        this.gap +
                         categoryDrawPlan.markerSize +
                         categoryDrawPlan.markerLabelGap,
                     categoryDrawPlan.yPositionStart + categoryDrawPlan.height / 2 + yPosition,
                     this._drawPlan.width -
                         (categoryDrawPlan.xPositionStart +
-                            this.itemPadding +
+                            this.gap +
                             categoryDrawPlan.markerSize +
                             categoryDrawPlan.markerLabelGap) -
                         DEFAULT_LEGEND_PADDING
@@ -328,7 +328,7 @@ export class TimelineLegendView {
         // Calculate the label height to use for every category (to be consistent) and the item height.
         const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText("Category Label");
         const labelHeight = actualBoundingBoxAscent + actualBoundingBoxDescent;
-        const itemHeight = labelHeight + this.itemPadding * 2;
+        const itemHeight = labelHeight + this.gap * 2;
 
         // Calculate the gap between the colour marker and the label, this should be derived from the text size.
         const markerLabelGap = labelHeight / 2;
@@ -345,7 +345,7 @@ export class TimelineLegendView {
 
             elements.push({
                 category,
-                width: width + markerLabelGap + labelHeight + this.itemPadding * 2,
+                width: width + markerLabelGap + labelHeight + this.gap * 2,
                 height: itemHeight,
                 labelHeight,
                 markerLabelGap

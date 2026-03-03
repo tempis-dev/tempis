@@ -268,13 +268,12 @@ const timeline = new TempisTimeline(canvas, {
 ```typescript
 const timeline = new TempisTimeline(canvas, {
   legend: {
-    position: 'top',
-    alignment: 'center',
-    item: {
-      markerStyle: 'circle',
-      isHighlightOnHover: true,
-      isFilterOnClick: true
-    }
+    position: 'bottom',           // 'top' | 'bottom' | 'none'
+    alignment: 'center',          // 'start' | 'center' | 'end'
+    markerStyle: 'square-rounded', // 'square' | 'square-rounded' | 'circle'
+    gap: 6,                       // Gap between legend items
+    isHighlightOnHover: true,     // Highlight items on hover
+    isFilterOnClick: true         // Toggle visibility on click
   }
 });
 ```

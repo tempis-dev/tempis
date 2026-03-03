@@ -526,6 +526,34 @@
       </select>
     </div>
     
+    <div class="control-group">
+      <label>Category Marker Style</label>
+      <select id="legendMarkerStyle">
+        <option value="square">Square</option>
+        <option value="square-rounded" selected>Square Rounded</option>
+        <option value="circle">Circle</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Category Gap: <span id="legendGapValue">6</span>px</label>
+      <input type="range" id="legendGap" min="0" max="20" value="6" step="1">
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="legendHighlightOnHover" checked>
+        <label for="legendHighlightOnHover">Highlight on Category Hover</label>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="legendFilterOnClick" checked>
+        <label for="legendFilterOnClick">Filter on Category Click</label>
+      </div>
+    </div>
+    
     <div class="divider"></div>
     
     <h3>Selection</h3>
@@ -710,7 +738,11 @@
       },
       legend: {
         position: document.getElementById('legendPosition').value,
-        alignment: document.getElementById('legendAlignment').value
+        alignment: document.getElementById('legendAlignment').value,
+        markerStyle: document.getElementById('legendMarkerStyle').value,
+        gap: parseInt(document.getElementById('legendGap').value),
+        isHighlightOnHover: document.getElementById('legendHighlightOnHover').checked,
+        isFilterOnClick: document.getElementById('legendFilterOnClick').checked
       },
       tooltip: {
         enabled: document.getElementById('tooltipEnabled').checked,
@@ -756,6 +788,10 @@
   
   document.getElementById('borderThickness').addEventListener('input', (e) => {
     document.getElementById('borderThicknessValue').textContent = e.target.value;
+  });
+  
+  document.getElementById('legendGap').addEventListener('input', (e) => {
+    document.getElementById('legendGapValue').textContent = e.target.value;
   });
 
   // Set Items Dialog handlers

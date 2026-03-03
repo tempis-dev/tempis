@@ -244,7 +244,13 @@ export type TempisTimelineAlignment = "start" | "center" | "end";
 
 export type TempisTimelineMarkerStyle = "square" | "square-rounded" | "circle";
 
-export interface TempisTimelineLegendItemOptions {
+export interface TempisTimelineLegendOptions {
+    /** The legend position. */
+    position?: TempisTimelineLegendPosition;
+
+    /** The legend horizontal alignment. */
+    alignment?: TempisTimelineAlignment;
+
     /** The legend item marker style. Defaults to `"square-rounded"` */
     markerStyle?: TempisTimelineMarkerStyle;
 
@@ -254,19 +260,8 @@ export interface TempisTimelineLegendItemOptions {
     /** The flag defining whether clicking a category in the legend toggles the visibility of all timeline items belonging to that category. Defaults to `true` */
     isFilterOnClick?: boolean;
 
-    /** The amount of padding to apply to the legend item. */
-    padding?: number;
-}
-
-export interface TempisTimelineLegendOptions {
-    /** The legend position. */
-    position?: TempisTimelineLegendPosition;
-
-    /** The legend horizontal alignment. */
-    alignment?: TempisTimelineAlignment;
-
-    /** The legend item options. */
-    item?: TempisTimelineLegendItemOptions;
+    /** The amount of gap between legend items. */
+    gap?: number;
 }
 
 /**

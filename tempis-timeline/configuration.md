@@ -11,7 +11,7 @@ The options object passed when creating an instance of TempisTimeline.
 | `verticalFill` | `TempisTimelineVerticalFillMode` | `"content"` | Defines how the timeline should fill the vertical space. |
 | `rtl` | `boolean` | `false` | Whether the timeline and any default tooltips should be rendered right-to-left. |
 | `range` | `TempisTimelineRangeOptions` | — | Timeline range configuration including start, end, min/max, zoom, units, and position. |
-| `legend` | `TempisTimelineLegendOptions` | — | Configuration for the timeline legend including position, alignment, and item options. |
+| `legend` | `TempisTimelineLegendOptions` | — | Configuration for the timeline legend including position, alignment, marker style, gap, and interaction behavior. |
 | `tooltip` | `TempisTimelineTooltipOptions` | — | Configuration for item tooltips including delay, overflow behavior, and content templates. |
 | `style` | `TempisTimelineStyleOptions` | — | Default style settings for timeline text and items. |
 | `categories` | `TempisTimelineCategory[]` | — | List of item categories, including labels and default styles. |
@@ -128,21 +128,14 @@ The timeline range unit options.
 ## TempisTimelineLegendOptions
 The timeline legend options.
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `position` | `"top" \| "bottom" \| "none"` | Position of the legend relative to the timeline. |
-| `alignment` | `"start" \| "center" \| "end"` | Horizontal alignment of the legend. |
-| `item` | `TempisTimelineLegendItemOptions` | Configuration for individual legend items. |
-
-## TempisTimelineLegendItemOptions
-The timeline legend item options.
-
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `markerStyle` | `"square" \| "square-rounded" \| "circle"` | `square-rounded` | Marker style for the legend item. |
+| `position` | `"top" \| "bottom" \| "none"` | `"bottom"` | Position of the legend relative to the timeline. |
+| `alignment` | `"start" \| "center" \| "end"` | `"center"` | Horizontal alignment of the legend. |
+| `markerStyle` | `"square" \| "square-rounded" \| "circle"` | `"square-rounded"` | Marker style for legend items. |
+| `gap` | `number` | `6` | Gap between legend items. |
 | `isHighlightOnHover` | `boolean` | `true` | Whether hovering a legend item highlights corresponding timeline items. |
 | `isFilterOnClick` | `boolean` | `true` | Whether clicking a legend item toggles visibility of related timeline items. |
-| `padding` | `number` | — | Padding applied to the legend item. |
 
 ---
 
