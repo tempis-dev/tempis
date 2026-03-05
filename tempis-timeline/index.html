@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tempis Timeline - Test Files</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .test-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .test-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .test-card h2 {
+            color: #667eea;
+            font-size: 1.3em;
+            margin-bottom: 12px;
+        }
+
+        .test-card p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+
+        .featured {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .featured h2 {
+            color: white;
+        }
+
+        .featured p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .test-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .featured {
+                grid-column: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tempis Timeline Test Files</h1>
+        
+        <div class="test-grid">
+            <a href="test/playground.html" class="test-card featured">
+                <h2>🎮 Playground</h2>
+                <p>Interactive testing environment with comprehensive controls for all timeline options. Adjust layout, styling, data, and behavior in real-time.</p>
+            </a>
+
+            <a href="test/basic.html" class="test-card">
+                <h2>Basic</h2>
+                <p>Simple timeline demonstration with basic configuration and sample data.</p>
+            </a>
+
+            <a href="test/bands.html" class="test-card">
+                <h2>Bands</h2>
+                <p>Timeline with custom time bands showing different time unit divisions.</p>
+            </a>
+
+            <a href="test/categories.html" class="test-card">
+                <h2>Categories</h2>
+                <p>Demonstrates item categorization with legend, filtering, and color-coded items.</p>
+            </a>
+
+            <a href="test/downtime.html" class="test-card">
+                <h2>Downtime</h2>
+                <p>Specialized view for tracking system downtime and availability periods.</p>
+            </a>
+
+            <a href="test/focus.html" class="test-card">
+                <h2>Focus</h2>
+                <p>Tests the focus() method for programmatically navigating to specific time ranges.</p>
+            </a>
+
+            <a href="test/fullscreen.html" class="test-card">
+                <h2>Fullscreen</h2>
+                <p>Timeline that fills the entire viewport with fullscreen capabilities.</p>
+            </a>
+
+            <a href="test/ltr.html" class="test-card">
+                <h2>Left-to-Right</h2>
+                <p>Standard left-to-right timeline layout (default direction).</p>
+            </a>
+
+            <a href="test/rtl.html" class="test-card">
+                <h2>Right-to-Left</h2>
+                <p>Right-to-left timeline layout for RTL language support.</p>
+            </a>
+
+            <a href="test/min_max.html" class="test-card">
+                <h2>Min/Max Range</h2>
+                <p>Timeline with constrained minimum and maximum date ranges.</p>
+            </a>
+
+            <a href="test/opc.html" class="test-card">
+                <h2>OPC</h2>
+                <p>Industrial automation timeline example with OPC data visualization.</p>
+            </a>
+
+            <a href="test/selection.html" class="test-card">
+                <h2>Selection</h2>
+                <p>Tests item selection modes: single, multiple, and none.</p>
+            </a>
+
+            <a href="test/set-items.html" class="test-card">
+                <h2>Set Items</h2>
+                <p>Demonstrates dynamically updating timeline items using setItems() method.</p>
+            </a>
+
+            <a href="test/single-item.html" class="test-card">
+                <h2>Single Item</h2>
+                <p>Minimal timeline with a single item for testing edge cases.</p>
+            </a>
+
+            <a href="test/stack-mode.html" class="test-card">
+                <h2>Stack Mode</h2>
+                <p>Compares compact vs stable stack modes for item vertical arrangement.</p>
+            </a>
+
+            <a href="test/static.html" class="test-card">
+                <h2>Static</h2>
+                <p>Non-interactive timeline with fixed range and disabled user controls.</p>
+            </a>
+
+            <a href="test/stress-test.html" class="test-card">
+                <h2>Stress Test</h2>
+                <p>Performance testing with large datasets and many items.</p>
+            </a>
+
+            <a href="test/styling.html" class="test-card">
+                <h2>Styling</h2>
+                <p>Custom styling examples with different colors, fonts, and visual themes.</p>
+            </a>
+
+            <a href="test/tooltips.html" class="test-card">
+                <h2>Tooltips</h2>
+                <p>Interactive tooltips showing item details on hover.</p>
+            </a>
+
+            <a href="test/vertical-fill.html" class="test-card">
+                <h2>Vertical Fill</h2>
+                <p>Tests different vertical fill modes: grow-canvas, scroll, and fixed.</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
