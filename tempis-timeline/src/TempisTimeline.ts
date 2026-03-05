@@ -48,7 +48,7 @@ export class TempisTimeline {
         pointerdown: ((event: PointerEvent) => void) | null;
         pointermove: ((event: PointerEvent) => void) | null;
         pointerup: ((event: PointerEvent) => void) | null;
-        pointercancel: (() => void) | null;
+        pointercancel: ((event: PointerEvent) => void) | null;
         wheel: ((event: WheelEvent) => void) | null;
         dblclick: ((event: MouseEvent) => void) | null;
     } = {
@@ -331,7 +331,6 @@ export class TempisTimeline {
      */
     private _createCanvasEventHandlers() {
         // Prevent default touch gestures like scroll/pinch.
-        // TODO This will prevent pinch zooming on touch devices, we may want to allow this in the future.
         this._canvas.style.touchAction = "none";
 
         // The drag threshold is the minimum distance that the pointer must move before we consider it a drag.
@@ -346,6 +345,10 @@ export class TempisTimeline {
         let startX = 0;
         let startY = 0;
 
+        // Track active pointers for multi-touch gestures (pinch-to-zoom).
+        const activePointers = new Map<number, PointerEvent>();
+        let lastPinchDistance: number | null = null;
+
         // A function that gets the position on the canvas for the mouse event or pointer event.
         const getMouseOrPointerPosition = (event: PointerEvent | MouseEvent) => {
             const rect = this._canvas.getBoundingClientRect();
@@ -355,23 +358,86 @@ export class TempisTimeline {
             };
         };
 
+        // Calculate distance between two pointers for pinch gesture.
+        const getPinchDistance = (pointer1: PointerEvent, pointer2: PointerEvent): number => {
+            const dx = pointer2.clientX - pointer1.clientX;
+            const dy = pointer2.clientY - pointer1.clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        };
+
+        // Get the center point between two pointers for zoom focus.
+        const getPinchCenter = (pointer1: PointerEvent, pointer2: PointerEvent) => {
+            const rect = this._canvas.getBoundingClientRect();
+            const centerX = (pointer1.clientX + pointer2.clientX) / 2;
+            const centerY = (pointer1.clientY + pointer2.clientY) / 2;
+            return {
+                x: ((centerX - rect.left) / (rect.right - rect.left)) * this._canvas.clientWidth,
+                y: ((centerY - rect.top) / (rect.bottom - rect.top)) * this._canvas.clientHeight
+            };
+        };
+
         // Handle the pointer down event to start dragging.
         // We will use pointer events to handle both mouse and touch events.
         this._eventHandlers.pointerdown = (event) => {
-            isPointerDown = true;
+            // Track this pointer for multi-touch gestures.
+            activePointers.set(event.pointerId, event);
 
-            // Get the mouse position on the canvas so that we can calculate the movement later.
-            startX = event.clientX;
-            startY = event.clientY;
+            // If we have exactly 2 pointers, we're starting a pinch gesture.
+            if (activePointers.size === 2) {
+                const pointers = Array.from(activePointers.values());
+                lastPinchDistance = getPinchDistance(pointers[0], pointers[1]);
+                isPointerDown = false; // Disable panning during pinch
+                return;
+            }
 
-            // Capture pointer to ensure we get pointerup even if moved outside canvas
-            this._canvas.setPointerCapture(event.pointerId);
+            // Single pointer - start panning.
+            if (activePointers.size === 1) {
+                isPointerDown = true;
+
+                // Get the mouse position on the canvas so that we can calculate the movement later.
+                startX = event.clientX;
+                startY = event.clientY;
+
+                // Capture pointer to ensure we get pointerup even if moved outside canvas
+                this._canvas.setPointerCapture(event.pointerId);
+            }
         };
         this._canvas.addEventListener("pointerdown", this._eventHandlers.pointerdown);
 
         // Handle pointer move events to drag the timeline.
         // We will use pointer events to handle both mouse and touch events.
         this._eventHandlers.pointermove = (event) => {
+            // Update the pointer position in our tracking map.
+            if (activePointers.has(event.pointerId)) {
+                activePointers.set(event.pointerId, event);
+            }
+
+            // Handle pinch-to-zoom with 2 pointers.
+            if (activePointers.size === 2) {
+                const pointers = Array.from(activePointers.values());
+                const currentDistance = getPinchDistance(pointers[0], pointers[1]);
+
+                if (lastPinchDistance !== null) {
+                    // Calculate zoom delta based on pinch distance change.
+                    const distanceChange = currentDistance - lastPinchDistance;
+                    
+                    // Convert distance change to zoom delta (negative = zoom in, positive = zoom out).
+                    // Reduced sensitivity for smoother pinch-to-zoom on touch devices.
+                    const zoomDelta = -distanceChange * 0.1;
+
+                    // Get the center point between the two touches for zoom focus.
+                    const center = getPinchCenter(pointers[0], pointers[1]);
+
+                    // Apply zoom at the pinch center point.
+                    this._rangeView.zoomRange(zoomDelta, center.x);
+                    this._draw();
+                }
+
+                lastPinchDistance = currentDistance;
+                return;
+            }
+
+            // Single pointer panning.
             // There is nothing to do if the pointer is not currently down.
             if (!isPointerDown) {
                 return;
@@ -395,6 +461,23 @@ export class TempisTimeline {
         // Handle pointer up events to stop dragging.
         // We will use pointer events to handle both mouse and touch events.
         this._eventHandlers.pointerup = (event) => {
+            // Remove this pointer from tracking.
+            activePointers.delete(event.pointerId);
+
+            // If we're ending a pinch gesture, reset pinch state.
+            if (activePointers.size < 2) {
+                lastPinchDistance = null;
+            }
+
+            // If we still have one pointer down after this release, restart panning.
+            if (activePointers.size === 1) {
+                const remainingPointer = Array.from(activePointers.values())[0];
+                isPointerDown = true;
+                startX = remainingPointer.clientX;
+                startY = remainingPointer.clientY;
+                return;
+            }
+
             // There is nothing to do if the pointer is not currently down.
             if (!isPointerDown) {
                 return;
@@ -431,7 +514,15 @@ export class TempisTimeline {
 
         // Handle pointer cancel events to stop dragging.
         // This is used to handle cases where the pointer is cancelled (e.g. touch events)
-        this._eventHandlers.pointercancel = () => {
+        this._eventHandlers.pointercancel = (event) => {
+            // Remove this pointer from tracking.
+            activePointers.delete(event.pointerId);
+            
+            // Reset pinch state if we have fewer than 2 pointers.
+            if (activePointers.size < 2) {
+                lastPinchDistance = null;
+            }
+            
             isPointerDown = false;
         };
         this._canvas.addEventListener("pointercancel", this._eventHandlers.pointercancel);
