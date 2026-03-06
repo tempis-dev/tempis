@@ -421,15 +421,18 @@ export class TempisTimeline {
                     // Calculate zoom delta based on pinch distance change.
                     const distanceChange = currentDistance - lastPinchDistance;
                     
+                    // Get pinch sensitivity from options (default 0.1).
+                    const pinchSensitivity = this._options.range?.zoom?.pinchSensitivity ?? 1.0;
+                    
                     // Convert distance change to zoom delta (negative = zoom in, positive = zoom out).
-                    // Reduced sensitivity for smoother pinch-to-zoom on touch devices.
+                    // Scale down the pixel distance to a reasonable range before applying sensitivity.
                     const zoomDelta = -distanceChange * 0.1;
 
                     // Get the center point between the two touches for zoom focus.
                     const center = getPinchCenter(pointers[0], pointers[1]);
 
-                    // Apply zoom at the pinch center point.
-                    this._rangeView.zoomRange(zoomDelta, center.x);
+                    // Apply zoom at the pinch center point with sensitivity.
+                    this._rangeView.zoomRange(zoomDelta, center.x, pinchSensitivity);
                     this._draw();
                 }
 
@@ -532,8 +535,11 @@ export class TempisTimeline {
             // Prevent default scrolling behavior, we want the timeline to handle it instead.
             event.preventDefault();
 
+            // Get wheel sensitivity from options (default 1.0).
+            const wheelSensitivity = this._options.range?.zoom?.wheelSensitivity ?? 1.0;
+
             // Zoom the range view based on the wheel delta and the mouse position.
-            this._rangeView.zoomRange(event.deltaY, getMouseOrPointerPosition(event).x);
+            this._rangeView.zoomRange(event.deltaY, getMouseOrPointerPosition(event).x, wheelSensitivity);
 
             // We will want to redraw the timeline after zooming.
             this._draw();

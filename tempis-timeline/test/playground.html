@@ -505,6 +505,16 @@
       </div>
     </div>
     
+    <div class="control-group">
+      <label>Wheel Sensitivity: <span id="wheelSensitivityValue">1.0</span></label>
+      <input type="range" id="wheelSensitivity" min="0.1" max="3" value="1.0" step="0.1">
+    </div>
+    
+    <div class="control-group">
+      <label>Pinch Sensitivity: <span id="pinchSensitivityValue">1.0</span></label>
+      <input type="range" id="pinchSensitivity" min="0.1" max="3" value="1.0" step="0.1">
+    </div>
+    
     <div class="divider"></div>
     
     <h3>Legend</h3>
@@ -733,7 +743,9 @@
         position: document.getElementById('rangePosition').value,
         fixed: document.getElementById('rangeFixed').checked,
         zoom: {
-          enabled: document.getElementById('zoomEnabled').checked
+          enabled: document.getElementById('zoomEnabled').checked,
+          wheelSensitivity: parseFloat(document.getElementById('wheelSensitivity').value),
+          pinchSensitivity: parseFloat(document.getElementById('pinchSensitivity').value)
         }
       },
       legend: {
@@ -792,6 +804,14 @@
   
   document.getElementById('legendGap').addEventListener('input', (e) => {
     document.getElementById('legendGapValue').textContent = e.target.value;
+  });
+  
+  document.getElementById('wheelSensitivity').addEventListener('input', (e) => {
+    document.getElementById('wheelSensitivityValue').textContent = parseFloat(e.target.value).toFixed(1);
+  });
+  
+  document.getElementById('pinchSensitivity').addEventListener('input', (e) => {
+    document.getElementById('pinchSensitivityValue').textContent = parseFloat(e.target.value).toFixed(2);
   });
 
   // Set Items Dialog handlers

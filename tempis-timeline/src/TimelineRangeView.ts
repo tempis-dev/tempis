@@ -217,10 +217,11 @@ export class TimelineRangeView {
 
     /**
      * Zooms the from and to date value of the range.
-     * @param amount The amount to zoom by as a ratio of the current range between -1 and 1.
-     * @param targetPositionX The x position of the zoom, this is where the zoom will be centered.
+     * @param amount The raw zoom amount from user input (e.g., mouse wheel deltaY or pinch distance change). Will be clamped to -1 to 1 range for normalization across devices.
+     * @param targetPositionX The x position on the canvas where the zoom will be centered (in pixels).
+     * @param sensitivity The zoom sensitivity multiplier. Higher values result in faster zoom. Defaults to 1.0.
      */
-    public zoomRange(amount: number, targetPositionX: number): void {
+    public zoomRange(amount: number, targetPositionX: number, sensitivity: number = 1.0): void {
         // We should not zoom if the range is fixed or zooming is explicitly disabled.
         if (
             this._options.fixed ||
@@ -238,8 +239,9 @@ export class TimelineRangeView {
             : this._fromDt.getTime() +
               (targetPositionX / this._canvas.clientWidth) * (this._toDt.getTime() - this._fromDt.getTime());
 
-        // Calculate the zoom factor based on the amount.
-        const zoomFactor = 1 - clamp(amount, -1, 1) * -0.1;
+        // Calculate the zoom factor based on the amount and sensitivity.
+        // Clamp amount to -1 to 1, then apply base zoom rate (0.1) and sensitivity multiplier.
+        const zoomFactor = 1 - clamp(amount, -1, 1) * -0.1 * sensitivity;
 
         // Calculate the new from and to times based on the current range and zoom factor.
         let targetFrom = targetPositionMillis - (targetPositionMillis - this._fromDt.getTime()) * zoomFactor;
