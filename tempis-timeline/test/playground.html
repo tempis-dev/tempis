@@ -32,7 +32,7 @@
     top: 10px;
     right: 10px;
     z-index: 1001;
-    background: #9C27B0;
+    background: #007bff;
     color: white;
     border: none;
     border-radius: 8px;
@@ -46,7 +46,7 @@
   }
   
   .menu-toggle:hover {
-    background: #7B1FA2;
+    background: #0056b3;
   }
   
   @media (max-width: 768px) {
@@ -83,7 +83,7 @@
     
     .main-content {
       width: 100%;
-      height: 100vh;
+      height: 100dvh;
       padding: 0;
       display: flex;
       flex-direction: column;
@@ -94,6 +94,7 @@
       margin: 65px 10px 10px 10px;
       border-radius: 4px;
       min-height: 0;
+      margin-bottom: 30px;
     }
   }
   
@@ -236,7 +237,7 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: #9C27B0;
+    background: #007bff;
     cursor: pointer;
   }
   
@@ -244,14 +245,14 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: #9C27B0;
+    background: #007bff;
     cursor: pointer;
     border: none;
   }
   
   .control-group label span {
     font-weight: 600;
-    color: #9C27B0;
+    color: #333;
   }
   
   .control-group input[type="checkbox"] {
@@ -435,7 +436,7 @@
     </div>
     
     <div class="control-group">
-      <button id="setItemsBtn" style="background: #9C27B0;">Set Items (JSON)</button>
+      <button id="setItemsBtn">Set Items (JSON)</button>
     </div>
     
     <div class="divider"></div>
@@ -503,6 +504,16 @@
         <input type="checkbox" id="zoomEnabled" checked>
         <label for="zoomEnabled">Zoom Enabled</label>
       </div>
+    </div>
+    
+    <div class="control-group">
+      <label>Wheel Sensitivity: <span id="wheelSensitivityValue">1.0</span></label>
+      <input type="range" id="wheelSensitivity" min="0.1" max="3" value="1.0" step="0.1">
+    </div>
+    
+    <div class="control-group">
+      <label>Pinch Sensitivity: <span id="pinchSensitivityValue">0.1</span></label>
+      <input type="range" id="pinchSensitivity" min="0.02" max="0.3" value="0.1" step="0.02">
     </div>
     
     <div class="divider"></div>
@@ -632,7 +643,7 @@
 ]'></textarea>
       <div class="dialog-buttons">
         <button class="secondary" id="cancelSetItems">Cancel</button>
-        <button id="applySetItems" style="background: #9C27B0;">Apply</button>
+        <button id="applySetItems">Apply</button>
       </div>
     </div>
   </div>
@@ -733,7 +744,9 @@
         position: document.getElementById('rangePosition').value,
         fixed: document.getElementById('rangeFixed').checked,
         zoom: {
-          enabled: document.getElementById('zoomEnabled').checked
+          enabled: document.getElementById('zoomEnabled').checked,
+          wheelSensitivity: parseFloat(document.getElementById('wheelSensitivity').value),
+          pinchSensitivity: parseFloat(document.getElementById('pinchSensitivity').value)
         }
       },
       legend: {
@@ -792,6 +805,14 @@
   
   document.getElementById('legendGap').addEventListener('input', (e) => {
     document.getElementById('legendGapValue').textContent = e.target.value;
+  });
+  
+  document.getElementById('wheelSensitivity').addEventListener('input', (e) => {
+    document.getElementById('wheelSensitivityValue').textContent = parseFloat(e.target.value).toFixed(1);
+  });
+  
+  document.getElementById('pinchSensitivity').addEventListener('input', (e) => {
+    document.getElementById('pinchSensitivityValue').textContent = parseFloat(e.target.value).toFixed(2);
   });
 
   // Set Items Dialog handlers

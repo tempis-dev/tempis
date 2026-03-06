@@ -236,6 +236,12 @@ export interface TempisTimelineRangeZoomOptions {
 
     /** The maximum range that can be zoomed to in milliseconds. */
     max?: number;
+
+    /** The mouse wheel zoom sensitivity multiplier. Higher values = faster zoom. Defaults to 1.0. */
+    wheelSensitivity?: number;
+
+    /** The touch pinch zoom sensitivity multiplier. Higher values = faster zoom. Defaults to 0.1. */
+    pinchSensitivity?: number;
 }
 
 export type TempisTimelineLegendPosition = "top" | "bottom" | "none";
