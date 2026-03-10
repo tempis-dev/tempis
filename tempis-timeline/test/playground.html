@@ -4,7 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Timeline Playground</title>
-  <script src="../dist/tempis_timeline.js"></script>
+  <script>
+    // Cache buster - always load fresh JS
+    const timestamp = new Date().getTime();
+    document.write('<script src="../dist/tempis_timeline.js?' + timestamp + '"><\/script>');
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>eruda.init();</script>
 </head>
 <style>
   * {
@@ -94,7 +100,7 @@
       margin: 65px 10px 10px 10px;
       border-radius: 4px;
       min-height: 0;
-      margin-bottom: 30px;
+      overflow-y: hidden !important;
     }
   }
   
@@ -511,12 +517,12 @@
     
     <div class="control-group">
       <label>Wheel Sensitivity: <span id="wheelSensitivityValue">1.0</span></label>
-      <input type="range" id="wheelSensitivity" min="0.1" max="3" value="1.0" step="0.1">
+      <input type="range" id="wheelSensitivity" min="0.1" max="8" value="1.0" step="0.1">
     </div>
     
     <div class="control-group">
-      <label>Pinch Sensitivity: <span id="pinchSensitivityValue">0.1</span></label>
-      <input type="range" id="pinchSensitivity" min="0.02" max="0.3" value="0.1" step="0.02">
+      <label>Pinch Sensitivity: <span id="pinchSensitivityValue">1.0</span></label>
+      <input type="range" id="pinchSensitivity" min="0.1" max="8" value="1.0" step="0.1">
     </div>
     
     <div class="divider"></div>
@@ -815,7 +821,7 @@
   });
   
   document.getElementById('pinchSensitivity').addEventListener('input', (e) => {
-    document.getElementById('pinchSensitivityValue').textContent = parseFloat(e.target.value).toFixed(2);
+    document.getElementById('pinchSensitivityValue').textContent = parseFloat(e.target.value).toFixed(1);
   });
 
   // Set Items Dialog handlers
@@ -953,5 +959,6 @@
     });
   }
 
+  eruda.init();
 </script>
 </html>

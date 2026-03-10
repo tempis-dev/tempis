@@ -421,15 +421,16 @@ export class TempisTimeline {
                     // Calculate zoom delta based on pinch distance change.
                     const distanceChange = currentDistance - lastPinchDistance;
                     
-                    // Get pinch sensitivity from options (default 0.1).
-                    const pinchSensitivity = this._options.range?.zoom?.pinchSensitivity ?? 0.1;
+                    // Get pinch sensitivity from options (default 1).
+                    const pinchSensitivity = this._options.range?.zoom?.pinchSensitivity ?? 1;
                     
                     // Normalize the distance change relative to canvas width for consistent feel across devices.
                     // A pinch spanning 10% of the canvas width should feel the same on phone vs tablet.
                     const normalizedChange = distanceChange / this._canvas.clientWidth;
                     
                     // Convert to zoom delta (negative = zoom in, positive = zoom out).
-                    const zoomDelta = -normalizedChange;
+                    // TODO Review the multiplier, this looks fine for my pixel 9a but should test for other devives with varying viewports/dpi.
+                    const zoomDelta = -normalizedChange * 20;
 
                     // Get the center point between the two touches for zoom focus.
                     const center = getPinchCenter(pointers[0], pointers[1]);
