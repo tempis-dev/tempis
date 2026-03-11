@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Streaming Data Demo - Tempis Timeline</title>
+    <title>GitHub Events Stream - Tempis Timeline</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -80,7 +80,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Streaming Data Demo</h1>
+        <h1>GitHub Events Stream</h1>
         
         <div class="controls">
             <button id="startBtn">Start Streaming</button>
@@ -146,10 +146,10 @@
                     timeline.destroy();
                 }
                 
-                // Set initial range to 10 seconds centered on current time
+                // Set initial range to 30 seconds centered on current time
                 const now = new Date();
-                const startTime = new Date(now.getTime() - 5000); // 5 seconds ago
-                const endTime = new Date(now.getTime() + 5000);   // 5 seconds from now
+                const startTime = new Date(now.getTime() - 15000); // 15 seconds ago
+                const endTime = new Date(now.getTime() + 15000);   // 15 seconds from now
                 
                 timeline = new tempis_timeline.TempisTimeline('#timeline-canvas', {
                     responsive: true,
@@ -157,7 +157,7 @@
                     items: [],
                     categories: [],
                     legend: {
-                        position: 'top',
+                        position: 'bottom',
                         alignment: 'center'
                     },
                     range: {
@@ -294,10 +294,58 @@
                     const eventType = event.type;
                     const repoName = event.repo ? event.repo.name : 'Unknown';
                     
-                    // Create a readable label
-                    let label = `${eventType.replace('Event', '')}`;
-                    if (event.payload && event.payload.action) {
-                        label += ` (${event.payload.action})`;
+                    // Create a more descriptive label based on event type and payload
+                    let label = '';
+                    const actor = event.actor ? event.actor.login : 'Unknown';
+                    
+                    switch (eventType) {
+                        case 'PushEvent':
+                            const commitCount = event.payload.commits ? event.payload.commits.length : 0;
+                            label = `${actor} pushed ${commitCount} commit${commitCount !== 1 ? 's' : ''}`;
+                            break;
+                        case 'PullRequestEvent':
+                            const action = event.payload.action || 'updated';
+                            const prNumber = event.payload.pull_request ? `#${event.payload.pull_request.number}` : '';
+                            label = `${actor} ${action} PR ${prNumber}`;
+                            break;
+                        case 'IssuesEvent':
+                            const issueAction = event.payload.action || 'updated';
+                            const issueNumber = event.payload.issue ? `#${event.payload.issue.number}` : '';
+                            label = `${actor} ${issueAction} issue ${issueNumber}`;
+                            break;
+                        case 'WatchEvent':
+                            label = `${actor} starred the repository`;
+                            break;
+                        case 'ForkEvent':
+                            label = `${actor} forked the repository`;
+                            break;
+                        case 'CreateEvent':
+                            const refType = event.payload.ref_type || 'repository';
+                            const ref = event.payload.ref || '';
+                            label = `${actor} created ${refType}${ref ? ` "${ref}"` : ''}`;
+                            break;
+                        case 'DeleteEvent':
+                            const deleteRefType = event.payload.ref_type || 'branch';
+                            const deleteRef = event.payload.ref || '';
+                            label = `${actor} deleted ${deleteRefType}${deleteRef ? ` "${deleteRef}"` : ''}`;
+                            break;
+                        case 'ReleaseEvent':
+                            const releaseAction = event.payload.action || 'published';
+                            const tagName = event.payload.release ? event.payload.release.tag_name : '';
+                            label = `${actor} ${releaseAction} release${tagName ? ` ${tagName}` : ''}`;
+                            break;
+                        case 'MemberEvent':
+                            const memberAction = event.payload.action || 'added';
+                            const member = event.payload.member ? event.payload.member.login : '';
+                            label = `${actor} ${memberAction} ${member} as collaborator`;
+                            break;
+                        case 'PublicEvent':
+                            label = `${actor} made repository public`;
+                            break;
+                        default:
+                            // Fallback to generic label
+                            const genericAction = event.payload.action || 'performed';
+                            label = `${actor} ${genericAction} ${eventType.replace('Event', '').toLowerCase()}`;
                     }
                     
                     newEvents.push({
