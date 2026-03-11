@@ -799,6 +799,9 @@ export class TimelineRangeView {
             this._setFromTime(currentFromTime);
             this._setToTime(currentToTime);
             
+            // Recalculate ticks for the new range during animation
+            this.calculateMinorAndMajorUnitTicks();
+            
             if (onUpdate) {
                 onUpdate();
             }

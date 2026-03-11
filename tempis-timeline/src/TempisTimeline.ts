@@ -1,4 +1,4 @@
-import { TempisTimelineItem, TempisTimelineItemSelectionMode, TempisTimelineOptions, TempisTimelineStackMode, TempisTimelineVerticalFillMode } from "./TempisTimelineOptions";
+import { TempisTimelineItem, TempisTimelineItemSelectionMode, TempisTimelineOptions, TempisTimelineStackMode, TempisTimelineVerticalFillMode, TempisTimelineCategory } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineBand } from "./TimelineBand";
 import { TimelineDataView } from "./TimelineDataView";
@@ -8,7 +8,6 @@ import { TimelineRangeView } from "./TimelineRangeView";
 import { TimelineTooltipView } from "./TimelineTooltipView";
 import { TimelineLegendView } from "./TimelineLegendView";
 import { SelectionChangeEvent } from "./Event";
-import { isNullOrUndefined, parseDate } from "./Utilities";
 import { TempisTimelineDateAdapter } from "./TempisTimelineDateAdapter";
 import { AdapterRegistry } from "./AdapterRegistry";
 import { FocusController, FocusOptions } from "./FocusController";
@@ -183,6 +182,19 @@ export class TempisTimeline {
         this._options.items = items;
 
         // Update the dataset with options object containing the updated items.
+        // Note: The dataset update will trigger the registered update callback which calls _draw().
+        this._dataSet.update(this._options);
+    }
+
+    /**
+     * Sets the timeline categories and redraws the timeline.
+     * @param categories The timeline categories to set.
+     */
+    public setCategories(categories: TempisTimelineCategory[]): void {
+        // Update the timeline options with the new categories.
+        this._options.categories = categories;
+
+        // Update the dataset with options object containing the updated categories.
         // Note: The dataset update will trigger the registered update callback which calls _draw().
         this._dataSet.update(this._options);
     }

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming Data Demo - Tempis Timeline</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-top: 0;
+            color: #333;
+        }
+        .controls {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+            font-weight: 500;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            background: #fff3e0;
+            color: #f57c00;
+            border: 1px solid #ff9800;
+        }
+        .canvas-container {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            height: 600px;
+            overflow: hidden;
+        }
+        .info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Streaming Data Demo</h1>
+        
+        <div class="controls">
+            <button id="startBtn">Start Streaming</button>
+            <button id="stopBtn" disabled>Stop Streaming</button>
+            <button id="clearBtn">Clear Timeline</button>
+            <div id="status" class="status">Ready to start</div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="timeline-canvas"></canvas>
+        </div>
+
+        <div class="info">
+            <strong>Live GitHub Events Stream</strong><br>
+            This demo fetches real-time GitHub events and adds them to the timeline using <code>setItems()</code>. 
+            New events are automatically focused with smooth animations.
+        </div>
+    </div>
+
+    <script src="../dist/tempis_timeline.js"></script>
+    <script>
+        console.log('Script starting...');
+        
+        // Check if tempis_timeline is loaded
+        if (typeof tempis_timeline === 'undefined') {
+            console.error('tempis_timeline is not loaded!');
+            document.getElementById('status').textContent = 'Error: Timeline library not loaded';
+            document.getElementById('status').style.background = '#ffebee';
+            document.getElementById('status').style.color = '#c62828';
+        } else {
+            console.log('tempis_timeline loaded successfully');
+        }
+        
+        const canvas = document.getElementById('timeline-canvas');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const status = document.getElementById('status');
+        
+        let timeline = null;
+        let streamingInterval = null;
+        let allEvents = [];
+        let lastEventId = null;
+        let isStreaming = false;
+        let currentCategories = [];
+        
+        // Event type colors
+        const eventTypeColors = {
+            'PushEvent': '#2196F3',
+            'IssuesEvent': '#FF9800',
+            'PullRequestEvent': '#4CAF50',
+            'WatchEvent': '#E91E63',
+            'ForkEvent': '#9C27B0',
+            'CreateEvent': '#00BCD4',
+            'default': '#757575'
+        };
+        
+        function initializeTimeline() {
+            try {
+                console.log('Initializing timeline...');
+                
+                if (timeline) {
+                    timeline.destroy();
+                }
+                
+                // Set initial range to 10 seconds centered on current time
+                const now = new Date();
+                const startTime = new Date(now.getTime() - 5000); // 5 seconds ago
+                const endTime = new Date(now.getTime() + 5000);   // 5 seconds from now
+                
+                timeline = new tempis_timeline.TempisTimeline('#timeline-canvas', {
+                    responsive: true,
+                    verticalFill: 'fill-canvas',
+                    items: [],
+                    categories: [],
+                    legend: {
+                        position: 'top',
+                        alignment: 'center'
+                    },
+                    range: {
+                        position: 'bottom',
+                        start: startTime,
+                        end: endTime,
+                        zoom: {
+                            enabled: true
+                        }
+                    },
+                    selection: 'single'
+                });
+                
+                console.log('Timeline initialized successfully');
+                status.textContent = 'Timeline ready';
+                
+            } catch (error) {
+                console.error('Error initializing timeline:', error);
+                status.textContent = `Error: ${error.message}`;
+                status.style.background = '#ffebee';
+                status.style.color = '#c62828';
+            }
+        }
+        
+        async function fetchGitHubEvents() {
+            try {
+                console.log('Fetching GitHub events...');
+                const response = await fetch('https://api.github.com/events');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                const events = await response.json();
+                console.log(`Fetched ${events.length} events`);
+                return events;
+            } catch (error) {
+                console.error('Failed to fetch GitHub events:', error);
+                status.textContent = `Error: ${error.message}`;
+                status.style.background = '#ffebee';
+                status.style.color = '#c62828';
+                return null;
+            }
+        }
+        
+        function processEvents(events) {
+            if (!events) return [];
+            
+            const processedEvents = [];
+            
+            for (const event of events) {
+                // Skip if we've already seen this event
+                if (lastEventId && event.id <= lastEventId) {
+                    continue;
+                }
+                
+                const eventDate = new Date(event.created_at);
+                const eventType = event.type;
+                const repoName = event.repo ? event.repo.name : 'Unknown';
+                
+                // Create a readable label
+                let label = `${eventType.replace('Event', '')}`;
+                if (event.payload && event.payload.action) {
+                    label += ` (${event.payload.action})`;
+                }
+                
+                processedEvents.push({
+                    id: event.id,
+                    label: label,
+                    start: eventDate,
+                    category: eventType,
+                    grouping: repoName
+                });
+            }
+            
+            return processedEvents.sort((a, b) => a.start.getTime() - b.start.getTime());
+        }
+        
+        function updateCategories() {
+            const eventTypes = [...new Set(allEvents.map(e => e.category))];
+            const categories = eventTypes.map(type => ({
+                name: type,
+                label: type.replace('Event', ''),
+                style: {
+                    backgroundColor: eventTypeColors[type] || eventTypeColors.default,
+                    fontColor: '#ffffff'
+                }
+            }));
+            
+            return categories;
+        }
+        
+        function categoriesChanged(newCategories) {
+            if (newCategories.length !== currentCategories.length) {
+                return true;
+            }
+            
+            const newCategoryNames = new Set(newCategories.map(c => c.name));
+            const currentCategoryNames = new Set(currentCategories.map(c => c.name));
+            
+            for (const name of newCategoryNames) {
+                if (!currentCategoryNames.has(name)) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        async function streamData() {
+            if (!isStreaming) return;
+            
+            try {
+                const events = await fetchGitHubEvents();
+                if (!events) return;
+                
+                // For demo purposes, simulate streaming by taking a few events each time
+                // and treating them as "new" events with current timestamps
+                const eventsToAdd = events.slice(0, Math.floor(Math.random() * 5) + 1); // 1-5 events
+                const newEvents = [];
+                
+                for (const event of eventsToAdd) {
+                    // Create a new event with current timestamp to simulate real streaming
+                    const now = new Date();
+                    const eventType = event.type;
+                    const repoName = event.repo ? event.repo.name : 'Unknown';
+                    
+                    // Create a readable label
+                    let label = `${eventType.replace('Event', '')}`;
+                    if (event.payload && event.payload.action) {
+                        label += ` (${event.payload.action})`;
+                    }
+                    
+                    newEvents.push({
+                        id: `${Date.now()}-${Math.random()}`, // Unique ID for each simulated event
+                        label: label,
+                        start: now,
+                        category: eventType,
+                        grouping: repoName
+                    });
+                }
+                
+                if (newEvents.length > 0) {
+                    // Add new events to our collection
+                    allEvents = [...allEvents, ...newEvents];
+                    
+                    // Keep only the last 50 events to prevent memory issues
+                    if (allEvents.length > 50) {
+                        allEvents = allEvents.slice(-50);
+                    }
+                    
+                    // Update timeline items
+                    console.log("setItems", allEvents.length, "new events:", newEvents.length);
+                    timeline.setItems(allEvents);
+                    
+                    // Only update categories if they've changed
+                    const categories = updateCategories();
+                    if (categoriesChanged(categories)) {
+                        timeline.setCategories(categories);
+                        currentCategories = categories;
+                        console.log('Updated categories:', categories.map(c => c.name));
+                    }
+                    
+                    // Focus on the newest event with animation
+                    const newestEvent = newEvents[newEvents.length - 1];
+                    setTimeout(() => {
+                        timeline.focus({
+                            id: newestEvent.id,
+                            animate: true,
+                            duration: 800,
+                            easing: 'easeInOutCubic',
+                            zoom: false
+                        });
+                    }, 100);
+                    
+                    status.textContent = `Streaming (+${newEvents.length} events, ${allEvents.length} total)`;
+                    status.style.background = '#e8f5e8';
+                    status.style.color = '#2e7d32';
+                    
+                } else {
+                    status.textContent = 'Streaming (no new events this cycle)';
+                    status.style.background = '#e8f5e8';
+                    status.style.color = '#2e7d32';
+                }
+                
+            } catch (error) {
+                console.error('Error in streamData:', error);
+                status.textContent = `Stream error: ${error.message}`;
+                status.style.background = '#ffebee';
+                status.style.color = '#c62828';
+            }
+        }
+        
+        function startStreaming() {
+            if (isStreaming) return;
+            
+            isStreaming = true;
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            
+            status.textContent = 'Starting stream...';
+            status.style.background = '#e8f5e8';
+            status.style.color = '#2e7d32';
+            
+            // Initial fetch
+            streamData();
+            
+            // Set up interval for subsequent fetches (every 5 seconds)
+            streamingInterval = setInterval(streamData, 5000);
+        }
+        
+        function stopStreaming() {
+            if (!isStreaming) return;
+            
+            isStreaming = false;
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            if (streamingInterval) {
+                clearInterval(streamingInterval);
+                streamingInterval = null;
+            }
+            
+            status.textContent = 'Streaming stopped';
+            status.style.background = '#fff3e0';
+            status.style.color = '#f57c00';
+        }
+        
+        // Event listeners
+        startBtn.addEventListener('click', () => {
+            console.log('Start button clicked');
+            startStreaming();
+        });
+        
+        stopBtn.addEventListener('click', () => {
+            console.log('Stop button clicked');
+            stopStreaming();
+        });
+        
+        clearBtn.addEventListener('click', () => {
+            console.log('Clear button clicked');
+            if (timeline) {
+                timeline.setItems([]);
+                timeline.setCategories([]);
+            }
+            allEvents = [];
+            lastEventId = null;
+            currentCategories = [];
+            status.textContent = 'Timeline cleared';
+            status.style.background = '#fff3e0';
+            status.style.color = '#f57c00';
+        });
+        
+        // Initialize
+        console.log('Setting up timeline...');
+        initializeTimeline();
+        
+        // Start streaming automatically on page load
+        setTimeout(() => {
+            startStreaming();
+        }, 1000); // Small delay to ensure timeline is fully initialized
+        
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            stopStreaming();
+            if (timeline) {
+                timeline.destroy();
+            }
+        });
+        
+        console.log('Script loaded successfully');
+    </script>
+</body>
+</html>
