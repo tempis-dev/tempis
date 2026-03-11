@@ -277,7 +277,18 @@
                 const eventsToAdd = events.slice(0, Math.floor(Math.random() * 5) + 1); // 1-5 events
                 const newEvents = [];
                 
+                // Create a set of existing item IDs for deduplication
+                const existingIds = new Set(allEvents.map(item => item.id));
+                
                 for (const event of eventsToAdd) {
+                    // Use the actual GitHub event ID to prevent duplicates
+                    const eventId = event.id;
+                    
+                    // Skip if we already have this event
+                    if (existingIds.has(eventId)) {
+                        continue;
+                    }
+                    
                     // Create a new event with current timestamp to simulate real streaming
                     const now = new Date();
                     const eventType = event.type;
@@ -290,7 +301,7 @@
                     }
                     
                     newEvents.push({
-                        id: `${Date.now()}-${Math.random()}`, // Unique ID for each simulated event
+                        id: eventId, // Use actual GitHub event ID
                         label: label,
                         start: now,
                         category: eventType,
