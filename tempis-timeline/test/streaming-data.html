@@ -301,7 +301,13 @@
                     switch (eventType) {
                         case 'PushEvent':
                             const commitCount = event.payload.commits ? event.payload.commits.length : 0;
-                            label = `${actor} pushed ${commitCount} commit${commitCount !== 1 ? 's' : ''}`;
+                            if (commitCount > 0) {
+                                label = `${actor} pushed ${commitCount} commit${commitCount !== 1 ? 's' : ''}`;
+                            } else {
+                                // Fallback when commit count is 0 or unavailable
+                                const ref = event.payload.ref ? event.payload.ref.replace('refs/heads/', '') : 'branch';
+                                label = `${actor} pushed to ${ref}`;
+                            }
                             break;
                         case 'PullRequestEvent':
                             const action = event.payload.action || 'updated';
