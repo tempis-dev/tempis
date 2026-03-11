@@ -627,6 +627,24 @@
         <option value="viewport">Viewport</option>
       </select>
     </div>
+    
+    <div class="divider"></div>
+    
+    <h3>Focus</h3>
+    <div class="control-group">
+      <label>Select Item</label>
+      <select id="focusItemSelect">
+        <option value="">-- Select Item --</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <button id="focusBtn">Focus on Selected Item</button>
+    </div>
+    
+    <div class="control-group">
+      <button id="focusAllBtn">Focus on All Items</button>
+    </div>
   </div>
   
   <div class="main-content">
@@ -785,13 +803,20 @@
     const options = getTimelineOptions();
     timeline = new tempis_timeline.TempisTimeline("#canvas", options);
     window["timeline"] = timeline;
+    
+    // Populate the focus item dropdown
+    populateItemDropdown(options.items);
   }
 
   // Initialize timeline on load
   regenerateTimeline();
 
-  // Add event listeners to all controls
+  // Add event listeners to all controls (except focus controls)
   document.querySelectorAll('input, select').forEach(control => {
+    // Skip focus controls - they shouldn't regenerate the timeline
+    if (control.id.startsWith('focus')) {
+      return;
+    }
     control.addEventListener('change', regenerateTimeline);
   });
 
@@ -823,6 +848,40 @@
   document.getElementById('pinchSensitivity').addEventListener('input', (e) => {
     document.getElementById('pinchSensitivityValue').textContent = parseFloat(e.target.value).toFixed(1);
   });
+
+  // Focus controls event listeners
+  document.getElementById('focusBtn').addEventListener('click', () => {
+    const selectedItemId = document.getElementById('focusItemSelect').value;
+    console.log('Selected item ID:', selectedItemId);
+    
+    if (!selectedItemId) {
+      alert('Please select an item to focus on');
+      return;
+    }
+
+    // Convert string ID back to number since items are generated with numeric IDs
+    const numericId = parseInt(selectedItemId);
+    console.log('Focusing on item:', numericId);
+    timeline.focus({ id: numericId });
+  });
+
+  document.getElementById('focusAllBtn').addEventListener('click', () => {
+    console.log('Focusing on all items');
+    timeline.focus(); // No options = focus on full range
+  });
+
+  // Function to populate item dropdown
+  function populateItemDropdown(items) {
+    const select = document.getElementById('focusItemSelect');
+    select.innerHTML = '<option value="">Select Item</option>';
+    
+    items.forEach(item => {
+      const option = document.createElement('option');
+      option.value = item.id;
+      option.textContent = `${item.label || 'Untitled'}`;
+      select.appendChild(option);
+    });
+  }
 
   // Set Items Dialog handlers
   const setItemsDialog = document.getElementById('setItemsDialog');
