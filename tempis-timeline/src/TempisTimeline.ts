@@ -11,6 +11,7 @@ import { SelectionChangeEvent } from "./Event";
 import { isNullOrUndefined, parseDate } from "./Utilities";
 import { TempisTimelineDateAdapter } from "./TempisTimelineDateAdapter";
 import { AdapterRegistry } from "./AdapterRegistry";
+import { FocusController, FocusOptions } from "./FocusController";
 
 export class TempisTimeline {
     /** The timeline canvas. */
@@ -39,6 +40,9 @@ export class TempisTimeline {
 
     /** The default timeline font. */
     private readonly _font: TimelineFont;
+
+    /** The focus controller. */
+    private readonly _focusController: FocusController;
 
     /** The canvas container resize observer. */
     private _canvasContainerResizeObserver: ResizeObserver | null = null;
@@ -86,6 +90,16 @@ export class TempisTimeline {
             this._font,
             this._isRTL,
             this._options.tooltip
+        );
+
+        // Create the focus controller.
+        this._focusController = new FocusController(
+            this._canvas,
+            this._dataSet,
+            this._dataView,
+            this._rangeView,
+            this._legendView,
+            () => this._draw()
         );
 
         // Create the timeline bands.
@@ -177,50 +191,12 @@ export class TempisTimeline {
      * Focuses the timeline on a specific item, date, or range.
      * @param options The options to focus the timeline on, if not defined, the timeline will focus on the full range of items.
      */
-    public focus(options?: {
-        id?: number | string;
-        date?: string | number | Date;
-        range?: [string | number | Date, string | number | Date];
-    }): void {
-        if (!options) {
-            // No options were defined, so we will just set the range to the min and max dates of the dataset if they are defined.
-            // This will effectively reset the timeline to show the full range of items.
-            if (this._dataSet.minDate && this._dataSet.maxDate) {
-                this._rangeView.setRange(this._dataSet.minDate, this._dataSet.maxDate);
-            }
-        } else if (!isNullOrUndefined(options.id)) {
-            // We are going to focus on a item that has been specified by its identifier.
-            const item = this._dataSet.getItemById(options.id!);
-
-            if (!item) {
-                throw new Error(`No item found with ID ${options.id}`);
-            } else if (item.end) {
-                // If the item has an end date, we will set the range to the start and end dates of the item.
-                this._rangeView.setRange(item.start, item.end);
-            } else {
-                // If the item is a PIT item then we just want to center the timeline on the start date of the item.
-                this._rangeView.centerOnDate(item.start);
-
-                // TODO Need to scroll vertically to the item in the data view.
-            }
-        } else if (!isNullOrUndefined(options.date)) {
-            // We are going to focus on a specific date.
-            // Parse the date from the options to check if it is valid.
-            const date = parseDate(options.date!);
-
-            // If the date is valid, we will center the timeline on that date.
-            this._rangeView.centerOnDate(date);
-        } else if (options.range && options.range.length === 2) {
-            // We are going to focus on a specific range.
-            // Parse the start and end dates from the options to check if they are valid.
-            const start = parseDate(options.range[0]);
-            const end = parseDate(options.range[1]);
-
-            this._rangeView.setRange(start, end);
-        }
-
-        // We may have updated the range so we need to redraw the timeline.
-        this._draw();
+    /**
+     * Focuses the timeline on specific items, dates, or the full range.
+     * @param options The focus options.
+     */
+    public focus(options?: FocusOptions): void {
+        this._focusController.focus(options);
     }
 
     /**

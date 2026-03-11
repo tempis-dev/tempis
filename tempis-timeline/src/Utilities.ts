@@ -1,6 +1,42 @@
 import { AdapterRegistry } from "./AdapterRegistry";
 
 /**
+ * Easing function names for animations.
+ */
+export type EasingFunction = 
+    | 'linear'
+    | 'easeIn' 
+    | 'easeOut' 
+    | 'easeInOut'
+    | 'easeInQuad'
+    | 'easeOutQuad'
+    | 'easeInOutQuad'
+    | 'easeInCubic'
+    | 'easeOutCubic'
+    | 'easeInOutCubic'
+    | 'easeInQuart'
+    | 'easeOutQuart'
+    | 'easeInOutQuart'
+    | 'easeInQuint'
+    | 'easeOutQuint'
+    | 'easeInOutQuint'
+    | 'easeInExpo'
+    | 'easeOutExpo'
+    | 'easeInOutExpo'
+    | 'easeInCirc'
+    | 'easeOutCirc'
+    | 'easeInOutCirc'
+    | 'easeInBack'
+    | 'easeOutBack'
+    | 'easeInOutBack'
+    | 'easeInElastic'
+    | 'easeOutElastic'
+    | 'easeInOutElastic'
+    | 'easeInBounce'
+    | 'easeOutBounce'
+    | 'easeInOutBounce';
+
+/**
  * Gets whether the given value is null or undefined.
  * @param value The value to check.
  * @returns Whether the given value is null or undefined.

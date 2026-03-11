@@ -3,7 +3,7 @@ import { TimelineBand } from "./TimelineBand";
 import { TimelineItem } from "./TimelineItem";
 import { TempisTimelineStackMode } from "./TempisTimelineOptions";
 import { RangeTick } from "./TimelineRangeView";
-import { clamp, doDateRangesOverlap, drawClippedText } from "./Utilities";
+import { clamp, doDateRangesOverlap, drawClippedText, EasingFunction } from "./Utilities";
 
 export interface DataViewDrawPlan {
     /** The height that is required to draw all groups and items within the specified date range. */
@@ -97,6 +97,9 @@ export class TimelineDataView {
 
     /** The last canvas width used for stable mode caching. */
     private _lastCanvasWidth: number = 0;
+
+    /** Animation frame ID for scroll animations. */
+    private _animationFrameId: number | null = null;
 
     /**
      * Creates a new instance of the TimelineDataView class.
@@ -1069,5 +1072,196 @@ export class TimelineDataView {
         }
 
         return rowStructure;
+    }
+
+    /**
+     * Scrolls to bring a specific item into view.
+     * @param itemId The ID of the item to scroll to.
+     * @param maxHeight The maximum height of the data view.
+     * @param animate Whether to animate the scroll.
+     * @param duration The animation duration in milliseconds.
+     * @param easing The easing function to use.
+     * @param onUpdate Optional callback called on each animation frame.
+     * @param onComplete Optional callback called when animation completes.
+     */
+    public scrollToItem(
+        itemId: string | number,
+        maxHeight: number,
+        animate: boolean = false,
+        duration: number = 500,
+        easing: EasingFunction = 'easeInOut',
+        onUpdate?: () => void,
+        onComplete?: () => void
+    ): void {
+        const itemPosition = this.getItemVerticalPosition(itemId);
+
+        if (itemPosition === null) {
+            if (onComplete) {
+                onComplete();
+            }
+            return;
+        }
+
+        const { yStart, yEnd } = itemPosition;
+
+        // Calculate target scroll offset to center the item
+        const itemCenter = (yStart + yEnd) / 2;
+        const viewCenter = maxHeight / 2;
+        let targetScrollOffset = -(itemCenter - viewCenter);
+
+        // Clamp the scroll offset to valid bounds
+        if (this._drawPlan) {
+            const maxScroll = 0;
+            const minScroll = Math.min(0, maxHeight - this._drawPlan.height);
+            targetScrollOffset = Math.max(minScroll, Math.min(maxScroll, targetScrollOffset));
+        }
+
+        if (animate) {
+            this.animateScrollTo(targetScrollOffset, duration, easing, onUpdate, onComplete);
+        } else {
+            this._scrollYOffset = targetScrollOffset;
+            if (onUpdate) {
+                onUpdate();
+            }
+            if (onComplete) {
+                onComplete();
+            }
+        }
+    }
+
+    /**
+     * Animates vertical scrolling to a target offset.
+     * @param toOffset The target scroll offset.
+     * @param duration The animation duration in milliseconds.
+     * @param easing The easing function to use.
+     * @param onUpdate Optional callback called on each animation frame.
+     * @param onComplete Optional callback called when animation completes.
+     */
+    public animateScrollTo(
+        toOffset: number,
+        duration: number,
+        easing: EasingFunction = 'easeInOut',
+        onUpdate?: () => void,
+        onComplete?: () => void
+    ): void {
+        // Cancel any existing animation
+        this.cancelAnimation();
+
+        const startTime = performance.now();
+        const fromOffset = this._scrollYOffset;
+
+        const animate = (currentTime: number) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Apply easing function
+            const easedProgress = this._applyEasing(progress, easing);
+            
+            // Interpolate between start and target values
+            this._scrollYOffset = fromOffset + (toOffset - fromOffset) * easedProgress;
+            
+            if (onUpdate) {
+                onUpdate();
+            }
+
+            if (progress < 1) {
+                this._animationFrameId = requestAnimationFrame(animate);
+            } else {
+                this._animationFrameId = null;
+                if (onComplete) {
+                    onComplete();
+                }
+            }
+        };
+
+        this._animationFrameId = requestAnimationFrame(animate);
+    }
+
+    /**
+     * Cancels any ongoing scroll animation.
+     */
+    public cancelAnimation(): void {
+        if (this._animationFrameId !== null) {
+            cancelAnimationFrame(this._animationFrameId);
+            this._animationFrameId = null;
+        }
+    }
+
+    /**
+     * Gets the vertical position of an item in the current draw plan.
+     * @param itemId The ID of the item to find.
+     * @returns The vertical position or null if not found.
+     */
+    public getItemVerticalPosition(itemId: string | number): { yStart: number; yEnd: number } | null {
+        if (!this._drawPlan) {
+            return null;
+        }
+
+        for (const groupDrawPlan of this._drawPlan.groupDrawPlans) {
+            for (const itemDrawPlan of groupDrawPlan.rows.flat()) {
+                if (itemDrawPlan.item.id === itemId) {
+                    return {
+                        yStart: itemDrawPlan.yPositionStart,
+                        yEnd: itemDrawPlan.yPositionEnd
+                    };
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Creates a temporary draw plan for a specific date range without actually drawing.
+     * Used for calculating item positions during animations.
+     * @param context The canvas rendering context.
+     * @param fromDt The from date.
+     * @param toDt The to date.
+     * @returns The temporary draw plan.
+     */
+    public createTemporaryDrawPlan(
+        context: CanvasRenderingContext2D,
+        fromDt: Date,
+        toDt: Date
+    ): DataViewDrawPlan {
+        return this._createViewDrawPlan(context, fromDt, toDt);
+    }
+
+    /**
+     * Applies an easing function to a progress value.
+     * @param progress The progress value (0-1).
+     * @param easing The easing function name.
+     * @returns The eased progress value.
+     */
+    private _applyEasing(progress: number, easing: EasingFunction): number {
+        switch (easing) {
+            case 'linear':
+                return progress;
+            case 'easeIn':
+                return progress * progress;
+            case 'easeOut':
+                return 1 - (1 - progress) * (1 - progress);
+            case 'easeInOut':
+                return progress < 0.5 
+                    ? 2 * progress * progress 
+                    : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+            case 'easeInQuad':
+                return progress * progress;
+            case 'easeOutQuad':
+                return 1 - (1 - progress) * (1 - progress);
+            case 'easeInOutQuad':
+                return progress < 0.5 
+                    ? 2 * progress * progress 
+                    : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+            case 'easeInCubic':
+                return progress * progress * progress;
+            case 'easeOutCubic':
+                return 1 - Math.pow(1 - progress, 3);
+            case 'easeInOutCubic':
+                return progress < 0.5 
+                    ? 4 * progress * progress * progress 
+                    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+            default:
+                return progress;
+        }
     }
 }
