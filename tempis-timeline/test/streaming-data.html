@@ -132,7 +132,13 @@
             { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', color: '#f7931a' },
             { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', color: '#627eea' },
             { id: 'solana', name: 'Solana', symbol: 'SOL', color: '#9945ff' },
-            { id: 'dogecoin', name: 'Dogecoin', symbol: 'DOGE', color: '#c2a633' }
+            { id: 'dogecoin', name: 'Dogecoin', symbol: 'DOGE', color: '#c2a633' },
+            { id: 'cardano', name: 'Cardano', symbol: 'ADA', color: '#0033ad' },
+            { id: 'polkadot', name: 'Polkadot', symbol: 'DOT', color: '#e6007a' },
+            { id: 'avalanche', name: 'Avalanche', symbol: 'AVAX', color: '#e84142' },
+            { id: 'chainlink', name: 'Chainlink', symbol: 'LINK', color: '#2a5ada' },
+            { id: 'polygon', name: 'Polygon', symbol: 'MATIC', color: '#8247e5' },
+            { id: 'litecoin', name: 'Litecoin', symbol: 'LTC', color: '#345d9d' }
         ];
         
         function initializeTimeline() {
@@ -143,10 +149,10 @@
                     timeline.destroy();
                 }
                 
-                // Set initial range to show recent price events (last 5 minutes)
+                // Set initial range to show recent price events (last 10 minutes)
                 const now = new Date();
-                const startTime = new Date(now.getTime() - 5 * 60 * 1000); // 5 minutes ago
-                const endTime = new Date(now.getTime() + 1 * 60 * 1000); // 1 minute from now
+                const startTime = new Date(now.getTime() - 10 * 60 * 1000); // 10 minutes ago
+                const endTime = now; // Now
                 
                 timeline = new tempis_timeline.TempisTimeline('#timeline-canvas', {
                     responsive: true,
@@ -178,7 +184,7 @@
         function connectWebSocket() {
             try {
                 console.log('Connecting to CoinCap WebSocket...');
-                websocket = new WebSocket('wss://ws.coincap.io/prices?assets=bitcoin,ethereum,solana,dogecoin');
+                websocket = new WebSocket('wss://ws.coincap.io/prices?assets=bitcoin,ethereum,solana,dogecoin,cardano,polkadot,avalanche,chainlink,polygon,litecoin');
                 
                 websocket.onopen = function(event) {
                     console.log('WebSocket connected successfully');
