@@ -10,7 +10,11 @@
     document.write('<script src="../dist/tempis_timeline.js?' + timestamp + '"><\/script>');
   </script>
   <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-  <script>eruda.init();</script>
+  <script>
+    eruda.init({
+      position: { x: window.innerWidth - 60, y: window.innerHeight / 2 }
+    });
+  </script>
 </head>
 <style>
   * {
@@ -1075,7 +1079,5 @@
       });
     });
   }
-
-  eruda.init();
 </script>
 </html>
