@@ -218,6 +218,10 @@ export class TempisTimeline {
      * This removes all event listeners and observers to prevent memory leaks.
      */
     public destroy(): void {
+        // Cancel any ongoing animations
+        this._rangeView.cancelAnimation();
+        this._dataView.cancelAnimation();
+
         // Remove all canvas event listeners
         if (this._eventHandlers.pointerdown) {
             this._canvas.removeEventListener("pointerdown", this._eventHandlers.pointerdown);
