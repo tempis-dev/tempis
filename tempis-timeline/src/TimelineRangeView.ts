@@ -4,7 +4,7 @@ import {
     TempisTimelineRangeUnitLabelFormats
 } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
-import { clamp, isNullOrUndefined, parseDate } from "./Utilities";
+import { clamp, isNullOrUndefined, parseDate, EasingFunction } from "./Utilities";
 import { AdapterRegistry } from "./AdapterRegistry";
 
 export type Unit = "millisecond" | "second" | "minute" | "hour" | "day" | "month" | "year" | "none";
@@ -79,6 +79,9 @@ export class TimelineRangeView {
 
     /** The calculated major unit tick dates for the current range and canvas width. */
     private _majorUnitTicks: RangeTick[] = [];
+
+    /** Animation frame ID for range animations. */
+    private _animationFrameId: number | null = null;
 
     /**
      * Creates a new instance of the TimelineRangeView class.
@@ -754,5 +757,103 @@ export class TimelineRangeView {
     private _setToTime(time: number): void {
         // Set the to time, clamping it to the min and max if they are set.
         this._toDt.setTime(clamp(time, this._minDate.getTime(), this._maxDate.getTime()));
+    }
+
+    /**
+     * Animates the range from current values to target values.
+     * @param from The target from date.
+     * @param to The target to date.
+     * @param duration The animation duration in milliseconds.
+     * @param easing The easing function to use.
+     * @param onUpdate Optional callback called on each animation frame.
+     * @param onComplete Optional callback called when animation completes.
+     */
+    public animateToRange(
+        from: Date,
+        to: Date,
+        duration: number,
+        easing: EasingFunction,
+        onUpdate?: () => void,
+        onComplete?: () => void
+    ): void {
+        // Cancel any existing animation
+        this.cancelAnimation();
+
+        const startTime = performance.now();
+        const startFromTime = this._fromDt.getTime();
+        const startToTime = this._toDt.getTime();
+        const targetFromTime = from.getTime();
+        const targetToTime = to.getTime();
+
+        const animate = (currentTime: number) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Apply easing function
+            const easedProgress = this._applyEasing(progress, easing);
+            
+            // Interpolate between start and target values
+            const currentFromTime = startFromTime + (targetFromTime - startFromTime) * easedProgress;
+            const currentToTime = startToTime + (targetToTime - startToTime) * easedProgress;
+            
+            this._setFromTime(currentFromTime);
+            this._setToTime(currentToTime);
+            
+            if (onUpdate) {
+                onUpdate();
+            }
+
+            if (progress < 1) {
+                this._animationFrameId = requestAnimationFrame(animate);
+            } else {
+                this._animationFrameId = null;
+                if (onComplete) {
+                    onComplete();
+                }
+            }
+        };
+
+        this._animationFrameId = requestAnimationFrame(animate);
+    }
+
+    /**
+     * Cancels any ongoing range animation.
+     */
+    public cancelAnimation(): void {
+        if (this._animationFrameId !== null) {
+            cancelAnimationFrame(this._animationFrameId);
+            this._animationFrameId = null;
+        }
+    }
+
+    /**
+     * Applies an easing function to a progress value.
+     * @param progress The progress value (0-1).
+     * @param easing The easing function name.
+     * @returns The eased progress value.
+     */
+    private _applyEasing(progress: number, easing: EasingFunction): number {
+        switch (easing) {
+            case 'linear':
+                return progress;
+            case 'easeIn':
+                return progress * progress;
+            case 'easeOut':
+                return 1 - (1 - progress) * (1 - progress);
+            case 'easeInOut':
+                return progress < 0.5 
+                    ? 2 * progress * progress 
+                    : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+            case 'easeInCubic':
+                return progress * progress * progress;
+            case 'easeOutCubic':
+                return 1 - Math.pow(1 - progress, 3);
+            case 'easeInOutCubic':
+                return progress < 0.5 
+                    ? 4 * progress * progress * progress 
+                    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+            default:
+                return progress;
+        }
     }
 }

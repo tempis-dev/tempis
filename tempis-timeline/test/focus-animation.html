@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Animation Test - Tempis Timeline</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-top: 0;
+            color: #333;
+        }
+        .controls {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .control-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .control-row:last-child {
+            margin-bottom: 0;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        select, input[type="number"] {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+            min-width: 150px;
+        }
+        input[type="number"] {
+            min-width: 100px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+            font-weight: 500;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        button.secondary {
+            background: #4CAF50;
+        }
+        button.secondary:hover {
+            background: #388E3C;
+        }
+        button.tertiary {
+            background: #FF9800;
+        }
+        button.tertiary:hover {
+            background: #F57C00;
+        }
+        .canvas-container {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            height: 600px;
+        }
+        .info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Focus Animation Test</h1>
+        
+        <div class="controls">
+            <div class="control-row">
+                <div class="control-group">
+                    <label for="item-select">Select Item</label>
+                    <select id="item-select">
+                        <!-- Populated by JavaScript -->
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="easing-select">Easing Function</label>
+                    <select id="easing-select">
+                        <option value="linear">Linear</option>
+                        <option value="easeIn">Ease In</option>
+                        <option value="easeOut">Ease Out</option>
+                        <option value="easeInOut" selected>Ease In Out</option>
+                        <option value="easeInCubic">Ease In Cubic</option>
+                        <option value="easeOutCubic">Ease Out Cubic</option>
+                        <option value="easeInOutCubic">Ease In Out Cubic</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="duration-input">Duration (ms)</label>
+                    <input type="number" id="duration-input" value="800" min="100" max="3000" step="100">
+                </div>
+                
+                <div class="control-group">
+                    <label for="zoom-select">Zoom Behavior</label>
+                    <select id="zoom-select">
+                        <option value="auto" selected>Auto (Smart)</option>
+                        <option value="true">Always Zoom</option>
+                        <option value="false">Never Zoom</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label style="opacity: 0;">Action</label>
+                    <button onclick="focusSelectedItem()">Focus Selected Item</button>
+                </div>
+            </div>
+            
+            <div class="control-row">
+                <button class="secondary" onclick="focusRandomItem()">Focus Random Item</button>
+                <button class="tertiary" onclick="focusDate()">Focus Date (Mid-Year)</button>
+                <button class="tertiary" onclick="focusRange()">Focus Range (Q2)</button>
+                <button onclick="focusAllAnimated()">Show All (Animated)</button>
+                <button onclick="focusAllInstant()">Show All (Instant)</button>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="timeline-canvas"></canvas>
+        </div>
+
+        <div class="info">
+            <strong>Interactive Focus Animation Demo</strong><br>
+            Select an item from the dropdown, choose an easing function, set the duration, and click "Focus Selected Item" to see smooth animations.
+            The timeline will automatically scroll vertically if the item is outside the visible area.
+            <br><br>
+            <strong>Zoom Behavior:</strong>
+            <ul style="margin: 5px 0; padding-left: 20px;">
+                <li><strong>Auto (Smart):</strong> Zooms to large items, slides small items into view</li>
+                <li><strong>Always Zoom:</strong> Always zooms to show the item's full time range</li>
+                <li><strong>Never Zoom:</strong> Keeps current zoom level, just pans to the item</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="../dist/tempis_timeline.js"></script>
+    <script>
+        const canvas = document.getElementById('timeline-canvas');
+        const itemSelect = document.getElementById('item-select');
+        const easingSelect = document.getElementById('easing-select');
+        const durationInput = document.getElementById('duration-input');
+        const zoomSelect = document.getElementById('zoom-select');
+        
+        // Generate sample items
+        const items = [];
+        const startDate = new Date('2024-01-01');
+        const categories = ['development', 'design', 'testing', 'deployment', 'planning'];
+        const categoryColors = {
+            'development': '#2196F3',
+            'design': '#9C27B0',
+            'testing': '#4CAF50',
+            'deployment': '#FF5722',
+            'planning': '#FF9800'
+        };
+        
+        for (let i = 1; i <= 50; i++) {
+            const itemStart = new Date(startDate);
+            itemStart.setDate(startDate.getDate() + (i - 1) * 7);
+            
+            const isRange = i % 3 !== 0;
+            const category = categories[i % categories.length];
+            
+            items.push({
+                id: i,
+                label: `Item ${i} - ${category}`,
+                start: itemStart,
+                end: isRange ? new Date(itemStart.getTime() + (1 + Math.floor(Math.random() * 5)) * 24 * 60 * 60 * 1000) : undefined,
+                category: category,
+                grouping: `group-${Math.ceil(i / 10)}`
+            });
+        }
+
+        // Populate item dropdown
+        items.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.id;
+            option.textContent = item.label;
+            itemSelect.appendChild(option);
+        });
+
+        const timeline = new tempis_timeline.TempisTimeline(canvas, {
+            responsive: true,
+            verticalFill: 'fill-canvas',
+            items: items,
+            categories: categories.map(cat => ({
+                name: cat,
+                label: cat.charAt(0).toUpperCase() + cat.slice(1),
+                style: {
+                    backgroundColor: categoryColors[cat],
+                    fontColor: '#ffffff',
+                    borderRadius: 4,
+                    padding: 8
+                }
+            })),
+            legend: {
+                position: 'top',
+                alignment: 'center'
+            },
+            range: {
+                position: 'bottom',
+                zoom: {
+                    enabled: true
+                }
+            },
+            selection: 'single'
+        });
+
+        function focusSelectedItem() {
+            const itemId = parseInt(itemSelect.value);
+            const easing = easingSelect.value;
+            const duration = parseInt(durationInput.value);
+            const zoomValue = zoomSelect.value;
+            const zoom = zoomValue === 'auto' ? 'auto' : zoomValue === 'true';
+            
+            timeline.focus({
+                id: itemId,
+                animate: true,
+                duration: duration,
+                easing: easing,
+                zoom: zoom
+            });
+        }
+
+        function focusRandomItem() {
+            const randomItem = items[Math.floor(Math.random() * items.length)];
+            itemSelect.value = randomItem.id;
+            focusSelectedItem();
+        }
+
+        function focusDate() {
+            const easing = easingSelect.value;
+            const duration = parseInt(durationInput.value);
+            
+            timeline.focus({
+                date: '2024-06-15',
+                animate: true,
+                duration: duration,
+                easing: easing
+            });
+        }
+
+        function focusRange() {
+            const easing = easingSelect.value;
+            const duration = parseInt(durationInput.value);
+            
+            timeline.focus({
+                range: ['2024-04-01', '2024-06-30'],
+                animate: true,
+                duration: duration,
+                easing: easing
+            });
+        }
+
+        function focusAllInstant() {
+            timeline.focus();
+        }
+
+        function focusAllAnimated() {
+            const easing = easingSelect.value;
+            const duration = parseInt(durationInput.value);
+            
+            timeline.focus({
+                animate: true,
+                duration: duration,
+                easing: easing
+            });
+        }
+    </script>
+</body>
+</html>

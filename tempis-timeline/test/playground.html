@@ -10,7 +10,11 @@
     document.write('<script src="../dist/tempis_timeline.js?' + timestamp + '"><\/script>');
   </script>
   <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-  <script>eruda.init();</script>
+  <script>
+    eruda.init({
+      position: { x: window.innerWidth - 60, y: window.innerHeight / 2 }
+    });
+  </script>
 </head>
 <style>
   * {
@@ -639,6 +643,40 @@
     </div>
     
     <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="focusAnimate" checked>
+        <label for="focusAnimate">Animate Focus</label>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <label>Animation Duration (ms)</label>
+      <input type="number" id="focusDuration" value="800" min="100" max="3000" step="100">
+    </div>
+    
+    <div class="control-group">
+      <label>Easing Function</label>
+      <select id="focusEasing">
+        <option value="linear">Linear</option>
+        <option value="easeIn">Ease In</option>
+        <option value="easeOut">Ease Out</option>
+        <option value="easeInOut" selected>Ease In Out</option>
+        <option value="easeInCubic">Ease In Cubic</option>
+        <option value="easeOutCubic">Ease Out Cubic</option>
+        <option value="easeInOutCubic">Ease In Out Cubic</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Zoom Behavior</label>
+      <select id="focusZoom">
+        <option value="auto" selected>Auto (Smart)</option>
+        <option value="true">Always Zoom</option>
+        <option value="false">Never Zoom</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
       <button id="focusBtn">Focus on Selected Item</button>
     </div>
     
@@ -859,15 +897,39 @@
       return;
     }
 
+    // Get animation options
+    const animate = document.getElementById('focusAnimate').checked;
+    const duration = parseInt(document.getElementById('focusDuration').value);
+    const easing = document.getElementById('focusEasing').value;
+    const zoomValue = document.getElementById('focusZoom').value;
+    const zoom = zoomValue === 'auto' ? 'auto' : zoomValue === 'true';
+
     // Convert string ID back to number since items are generated with numeric IDs
     const numericId = parseInt(selectedItemId);
-    console.log('Focusing on item:', numericId);
-    timeline.focus({ id: numericId });
+    console.log('Focusing on item:', numericId, { animate, duration, easing, zoom });
+    
+    timeline.focus({ 
+      id: numericId,
+      animate,
+      duration,
+      easing,
+      zoom
+    });
   });
 
   document.getElementById('focusAllBtn').addEventListener('click', () => {
-    console.log('Focusing on all items');
-    timeline.focus(); // No options = focus on full range
+    // Get animation options
+    const animate = document.getElementById('focusAnimate').checked;
+    const duration = parseInt(document.getElementById('focusDuration').value);
+    const easing = document.getElementById('focusEasing').value;
+    
+    console.log('Focusing on all items', { animate, duration, easing });
+    
+    timeline.focus({
+      animate,
+      duration,
+      easing
+    });
   });
 
   // Function to populate item dropdown
@@ -1017,7 +1079,5 @@
       });
     });
   }
-
-  eruda.init();
 </script>
 </html>

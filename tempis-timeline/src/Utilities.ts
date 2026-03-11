@@ -1,6 +1,18 @@
 import { AdapterRegistry } from "./AdapterRegistry";
 
 /**
+ * Easing function names for animations.
+ */
+export type EasingFunction = 
+    | 'linear'
+    | 'easeIn' 
+    | 'easeOut' 
+    | 'easeInOut'
+    | 'easeInCubic'
+    | 'easeOutCubic'
+    | 'easeInOutCubic';
+
+/**
  * Gets whether the given value is null or undefined.
  * @param value The value to check.
  * @returns Whether the given value is null or undefined.
