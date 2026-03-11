@@ -13,7 +13,7 @@ export const DEFAULT_BAND_STYLE: TempisTimelineBandStyle = {
  * Represents a band in the timeline.
  */
 export class TimelineBand {
-    private readonly _definition: TempisTimelineBand; 
+    private readonly _definition: TempisTimelineBand;
     private readonly _start: Date;
     private readonly _end: Date | null;
     private readonly _style: TempisTimelineBandStyle;

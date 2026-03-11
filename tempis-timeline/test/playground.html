@@ -104,7 +104,7 @@
       margin: 65px 10px 10px 10px;
       border-radius: 4px;
       min-height: 0;
-      overflow-y: hidden !important;
+      overflow: hidden;
     }
   }
   
@@ -178,16 +178,13 @@
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    overflow: hidden;
     resize: both;
     min-width: 250px;
     min-height: 250px;
     max-width: 100%;
     max-height: 100%;
     position: relative;
-
-    /* To show scrollbar when vertical fill mode is 'grow-canvas' */
-    overflow-y: auto;
+    overflow: hidden;
   }
   
   .canvas-container canvas {
@@ -841,6 +838,14 @@
     const options = getTimelineOptions();
     timeline = new tempis_timeline.TempisTimeline("#canvas", options);
     window["timeline"] = timeline;
+    
+    // Update canvas container overflow based on vertical fill mode
+    const canvasContainer = document.querySelector('.canvas-container');
+    if (options.verticalFill === 'grow-canvas') {
+      canvasContainer.style.overflowY = 'auto';
+    } else {
+      canvasContainer.style.overflowY = 'hidden';
+    }
     
     // Populate the focus item dropdown
     populateItemDropdown(options.items);
