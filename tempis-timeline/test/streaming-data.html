@@ -288,14 +288,14 @@
                 let itemStyle = {};
                 
                 if (eventType === 'initial_price') {
-                    label = `${coinInfo.symbol}: $${currentPrice.toFixed(2)}`;
+                    label = `$${currentPrice.toFixed(2)}`;
                     itemStyle = {
                         backgroundColor: '#2196F3',
                         fontColor: '#ffffff'
                     };
                 } else {
                     const direction = changePercent > 0 ? '↗' : '↘';
-                    label = `${coinInfo.symbol}: $${currentPrice.toFixed(2)} ${direction} ${Math.abs(changePercent).toFixed(2)}%`;
+                    label = `$${currentPrice.toFixed(2)} ${direction} ${Math.abs(changePercent).toFixed(2)}%`;
                     itemStyle = {
                         backgroundColor: changePercent > 0 ? '#4CAF50' : '#F44336',
                         fontColor: '#ffffff'
@@ -376,14 +376,14 @@
                     let itemStyle = {};
                     
                     if (eventType === 'initial_price') {
-                        label = `${coinInfo.symbol}: $${currentPrice.toFixed(2)}`;
+                        label = `$${currentPrice.toFixed(2)}`;
                         itemStyle = {
                             backgroundColor: '#2196F3', // Blue for initial price
                             fontColor: '#ffffff'
                         };
                     } else {
                         const direction = changePercent > 0 ? '↗' : '↘';
-                        label = `${coinInfo.symbol}: $${currentPrice.toFixed(2)} ${direction} ${Math.abs(changePercent).toFixed(2)}%`;
+                        label = `$${currentPrice.toFixed(2)} ${direction} ${Math.abs(changePercent).toFixed(2)}%`;
                         itemStyle = {
                             backgroundColor: changePercent > 0 ? '#4CAF50' : '#F44336', // Green for increase, red for decrease
                             fontColor: '#ffffff'
