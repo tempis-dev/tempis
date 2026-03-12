@@ -353,6 +353,7 @@ export class TempisTimeline {
         // Track active pointers for multi-touch gestures (pinch-to-zoom).
         const activePointers = new Map<number, PointerEvent>();
         let lastPinchDistance: number | null = null;
+        let wasPinching = false;
 
         // A function that gets the position on the canvas for the mouse event or pointer event.
         const getMouseOrPointerPosition = (event: PointerEvent | MouseEvent) => {
@@ -392,6 +393,7 @@ export class TempisTimeline {
                 const pointers = Array.from(activePointers.values());
                 lastPinchDistance = getPinchDistance(pointers[0], pointers[1]);
                 isPointerDown = false; // Disable panning during pinch
+                wasPinching = true; // Mark that we're in a pinch gesture
                 return;
             }
 
@@ -419,6 +421,7 @@ export class TempisTimeline {
 
             // Handle pinch-to-zoom with 2 pointers.
             if (activePointers.size === 2) {
+                wasPinching = true; // Mark that we're in a pinch gesture
                 const pointers = Array.from(activePointers.values());
                 const currentDistance = getPinchDistance(pointers[0], pointers[1]);
 
@@ -481,13 +484,25 @@ export class TempisTimeline {
                 lastPinchDistance = null;
             }
 
-            // If we still have one pointer down after this release, restart panning.
+            // If we still have one pointer down after this release, don't process clicks.
+            // This handles the case where we're releasing one finger from a pinch.
             if (activePointers.size === 1) {
                 const remainingPointer = Array.from(activePointers.values())[0];
                 isPointerDown = true;
                 startX = remainingPointer.clientX;
                 startY = remainingPointer.clientY;
+                // Don't reset wasPinching here - we're still releasing from a pinch
                 return;
+            }
+
+            // All pointers are now released.
+            if (activePointers.size === 0) {
+                // Skip click detection if we were pinching.
+                if (wasPinching) {
+                    wasPinching = false;
+                    isPointerDown = false;
+                    return;
+                }
             }
 
             // There is nothing to do if the pointer is not currently down.
