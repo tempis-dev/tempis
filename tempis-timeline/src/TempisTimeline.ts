@@ -54,13 +54,17 @@ export class TempisTimeline {
         pointercancel: ((event: PointerEvent) => void) | null;
         wheel: ((event: WheelEvent) => void) | null;
         dblclick: ((event: MouseEvent) => void) | null;
+        mouseenter: (() => void) | null;
+        mouseleave: (() => void) | null;
     } = {
         pointerdown: null,
         pointermove: null,
         pointerup: null,
         pointercancel: null,
         wheel: null,
-        dblclick: null
+        dblclick: null,
+        mouseenter: null,
+        mouseleave: null
     };
 
     /**
@@ -266,6 +270,12 @@ export class TempisTimeline {
         if (this._eventHandlers.dblclick) {
             this._canvas.removeEventListener("dblclick", this._eventHandlers.dblclick);
         }
+        if (this._eventHandlers.mouseenter) {
+            this._canvas.removeEventListener("mouseenter", this._eventHandlers.mouseenter);
+        }
+        if (this._eventHandlers.mouseleave) {
+            this._canvas.removeEventListener("mouseleave", this._eventHandlers.mouseleave);
+        }
 
         // Disconnect the resize observer if it exists
         if (this._canvasContainerResizeObserver) {
@@ -400,6 +410,7 @@ export class TempisTimeline {
             // Single pointer - start panning.
             if (activePointers.size === 1) {
                 isPointerDown = true;
+                this._dataView.setPanning(true);
 
                 // Get the mouse position on the canvas so that we can calculate the movement later.
                 startX = event.clientX;
@@ -497,10 +508,14 @@ export class TempisTimeline {
 
             // All pointers are now released.
             if (activePointers.size === 0) {
+                // Reset panning state
+                this._dataView.setPanning(false);
+                
                 // Skip click detection if we were pinching.
                 if (wasPinching) {
                     wasPinching = false;
                     isPointerDown = false;
+                    this._draw(); // Redraw to hide scrollbar
                     return;
                 }
             }
@@ -511,6 +526,8 @@ export class TempisTimeline {
             }
 
             isPointerDown = false;
+            this._dataView.setPanning(false);
+            this._draw(); // Redraw to update scrollbar visibility
 
             // Work out the distance that the pointer has moved since it was pressed down.
             // We will use this to determine if the pointer has moved significantly or not.
@@ -581,6 +598,19 @@ export class TempisTimeline {
             }
         };
         this._canvas.addEventListener("dblclick", this._eventHandlers.dblclick, false);
+
+        // Handle mouse enter/leave for scrollbar visibility.
+        this._eventHandlers.mouseenter = () => {
+            this._dataView.setHovering(true);
+            this._draw();
+        };
+        this._canvas.addEventListener("mouseenter", this._eventHandlers.mouseenter);
+
+        this._eventHandlers.mouseleave = () => {
+            this._dataView.setHovering(false);
+            this._draw();
+        };
+        this._canvas.addEventListener("mouseleave", this._eventHandlers.mouseleave);
     }
 
     /**

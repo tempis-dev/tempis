@@ -101,6 +101,12 @@ export class TimelineDataView {
     /** Animation frame ID for scroll animations. */
     private _animationFrameId: number | null = null;
 
+    /** Whether the mouse is currently hovering over the data view. */
+    private _isHovering: boolean = false;
+
+    /** Whether the data view is currently being panned. */
+    private _isPanning: boolean = false;
+
     /**
      * Creates a new instance of the TimelineDataView class.
      * @param dataSet The timeline dataset model.
@@ -124,6 +130,22 @@ export class TimelineDataView {
      */
     public scrollByYMovement(movementY: number): void {
         this._scrollYOffset += movementY;
+    }
+
+    /**
+     * Set whether the mouse is hovering over the data view.
+     * @param isHovering Whether the mouse is hovering.
+     */
+    public setHovering(isHovering: boolean): void {
+        this._isHovering = isHovering;
+    }
+
+    /**
+     * Set whether the data view is currently being panned.
+     * @param isPanning Whether the view is being panned.
+     */
+    public setPanning(isPanning: boolean): void {
+        this._isPanning = isPanning;
     }
 
     /**
@@ -185,6 +207,9 @@ export class TimelineDataView {
 
         // Draw our groups and items!
         this._drawGroups(context, yPosition);
+
+        // Draw the scrollbar if there's vertical overflow.
+        this._drawScrollbar(context, yPosition, this._lastDrawHeight);
 
         // Set the y position from where this view was last drawn.
         // This will be used to help align absolute canvas pointer positions with data view elements.
@@ -327,6 +352,46 @@ export class TimelineDataView {
         // Reset the line dash to be solid.
         context.stroke();
         context.setLineDash([]);
+    }
+
+    /**
+     * Draw a passive scrollbar on the end side of the data view to indicate vertical overflow.
+     * @param context The canvas context.
+     * @param yPosition The y position of the top of the view.
+     * @param height The available height of the view.
+     */
+    private _drawScrollbar(context: CanvasRenderingContext2D, yPosition: number, height: number): void {
+        // Only draw scrollbar if there's content overflow and we're hovering or panning
+        if (!this._drawPlan || this._drawPlan.height <= height || (!this._isHovering && !this._isPanning)) {
+            return;
+        }
+
+        const scrollbarWidth = 8;
+        const scrollbarPadding = 4;
+        const scrollbarMargin = 6; // Margin from top and bottom
+        const scrollbarX = this._isRTL 
+            ? scrollbarPadding 
+            : context.canvas.clientWidth - scrollbarWidth - scrollbarPadding;
+
+        // Calculate scrollbar thumb size and position with margins
+        const availableHeight = height - (scrollbarMargin * 2);
+        const visibleRatio = height / this._drawPlan.height;
+        const thumbHeight = Math.max(30, availableHeight * visibleRatio); // Minimum 30px thumb
+        const scrollableHeight = availableHeight - thumbHeight;
+        const scrollRatio = Math.abs(this._scrollYOffset) / (this._drawPlan.height - height);
+        const thumbY = yPosition + scrollbarMargin + (scrollRatio * scrollableHeight);
+
+        // Draw scrollbar track (subtle background)
+        context.fillStyle = "rgba(0, 0, 0, 0.05)";
+        context.beginPath();
+        context.roundRect(scrollbarX, yPosition + scrollbarMargin, scrollbarWidth, availableHeight, scrollbarWidth / 2);
+        context.fill();
+
+        // Draw scrollbar thumb
+        context.fillStyle = "rgba(0, 0, 0, 0.3)";
+        context.beginPath();
+        context.roundRect(scrollbarX, thumbY, scrollbarWidth, thumbHeight, scrollbarWidth / 2);
+        context.fill();
     }
 
     /**
