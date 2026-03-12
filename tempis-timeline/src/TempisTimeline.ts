@@ -1,4 +1,4 @@
-import { TempisTimelineItem, TempisTimelineItemSelectionMode, TempisTimelineOptions, TempisTimelineStackMode, TempisTimelineVerticalFillMode, TempisTimelineCategory } from "./TempisTimelineOptions";
+import { TempisTimelineItem, TempisTimelineItemSelectionMode, TempisTimelineOptions, TempisTimelineStackMode, TempisTimelineVerticalFillMode, TempisTimelineCategory, TempisTimelineBand } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineBand } from "./TimelineBand";
 import { TimelineDataView } from "./TimelineDataView";
@@ -195,6 +195,19 @@ export class TempisTimeline {
         this._options.categories = categories;
 
         // Update the dataset with options object containing the updated categories.
+        // Note: The dataset update will trigger the registered update callback which calls _draw().
+        this._dataSet.update(this._options);
+    }
+
+    /**
+     * Sets the timeline bands and redraws the timeline.
+     * @param bands The timeline bands to set.
+     */
+    public setBands(bands: TempisTimelineBand[]): void {
+        // Update the timeline options with the new bands.
+        this._options.bands = bands;
+
+        // Update the dataset with options object containing the updated bands.
         // Note: The dataset update will trigger the registered update callback which calls _draw().
         this._dataSet.update(this._options);
     }

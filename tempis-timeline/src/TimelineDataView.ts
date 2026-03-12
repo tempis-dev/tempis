@@ -273,9 +273,24 @@ export class TimelineDataView {
 
                 // TODO Draw the left/right borders if they are defined. 
             } else {
-                // TODO Draw vertical line instead.
-                // TODO Try to use the border colour, but fall back to the band colour.
-                // TODO Try to use the border thickness, but fall back to some sensible default.
+                // PIT band - draw a vertical line
+                // Calculate the x position of this band based on the current range and whether we are rendering right-to-left.
+                const xPosition = this._isRTL ?
+                    milliRenderWidth * (rangeToDt.getTime() - band.start.getTime()) :
+                    milliRenderWidth * (band.start.getTime() - rangeFromDt.getTime());
+
+                // Use border color if available, otherwise fall back to band color
+                const lineColor = band.style.borderColor || band.style.color || '#000000';
+                const lineWidth = band.style.borderThickness || 2;
+
+                // Draw the vertical line
+                context.strokeStyle = lineColor;
+                context.lineWidth = lineWidth;
+                context.globalAlpha = band.style.opacity || 1;
+                context.beginPath();
+                context.moveTo(xPosition, yPosition);
+                context.lineTo(xPosition, yPosition + height);
+                context.stroke();
             }
         }
 

@@ -47,6 +47,20 @@
         button:hover {
             background: #1976D2;
         }
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toggle-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .toggle-container label {
+            cursor: pointer;
+            user-select: none;
+        }
         .status {
             padding: 10px 15px;
             border-radius: 4px;
@@ -81,6 +95,10 @@
         <div class="controls">
             <button id="clearBtn">Clear Timeline</button>
             <div id="status" class="status">Ready - Press any key to start</div>
+            <div class="toggle-container">
+                <input type="checkbox" id="autoScrollToggle" checked>
+                <label for="autoScrollToggle">Auto-scroll to current time</label>
+            </div>
         </div>
 
         <div class="canvas-container">
@@ -114,12 +132,16 @@
         const canvas = document.getElementById('timeline-canvas');
         const clearBtn = document.getElementById('clearBtn');
         const status = document.getElementById('status');
+        const autoScrollToggle = document.getElementById('autoScrollToggle');
         
         let timeline = null;
         let allEvents = [];
         let eventIdCounter = 1;
         let activeKeys = {}; // Track currently pressed keys
         let updateInterval = null;
+        let focusInterval = null;
+        let currentTimeBand = null; // Track the current time band
+        let autoScrollEnabled = true; // Track auto-scroll state
         const LONG_PRESS_THRESHOLD = 200; // ms - threshold to convert PIT to range
         
         function initializeTimeline() {
@@ -139,6 +161,7 @@
                     responsive: true,
                     verticalFill: 'fill-canvas',
                     items: [],
+                    bands: [], // Will be updated with current time band
                     range: {
                         position: 'bottom',
                         start: startTime,
@@ -151,6 +174,9 @@
                 });
                 
                 console.log('Timeline initialized successfully');
+                
+                // Start focusing on current time at regular intervals
+                startFocusLoop();
                 
             } catch (error) {
                 console.error('Error initializing timeline:', error);
@@ -194,8 +220,8 @@
                         allEvents[eventIndex].label = `${keyData.label} (${(duration / 1000).toFixed(1)}s)`;
                         hasUpdates = true;
                         
-                        // Track the latest end time for focus
-                        if (!latestEndTime || now > latestEndTime) {
+                        // Track the latest end time for focus (when not auto-scrolling)
+                        if (!autoScrollEnabled && (!latestEndTime || now > latestEndTime)) {
                             latestEndTime = now;
                         }
                     }
@@ -205,8 +231,8 @@
             if (hasUpdates) {
                 timeline.setItems([...allEvents]);
                 
-                // Focus on the latest end time (where the range item is growing)
-                if (latestEndTime) {
+                // Focus on the latest end time when not auto-scrolling
+                if (!autoScrollEnabled && latestEndTime) {
                     setTimeout(() => {
                         timeline.focus({
                             date: latestEndTime,
@@ -217,6 +243,48 @@
                         });
                     }, 10);
                 }
+            }
+        }
+        
+        function focusOnCurrentTime() {
+            if (!autoScrollEnabled) return;
+            
+            // Focus on the current time to keep the timeline moving
+            const now = new Date();
+            
+            // Update the current time band - PIT band (no end date)
+            currentTimeBand = {
+                start: now,
+                style: {
+                    color: '#FF5722',
+                    opacity: 1.0,
+                    borderColor: '#FF5722',
+                    borderThickness: 3
+                }
+            };
+            
+            timeline.setBands([currentTimeBand]);
+            
+            timeline.focus({
+                date: now,
+                animate: true,
+                duration: 300,
+                easing: 'linear',
+                zoom: false
+            });
+        }
+        
+        function startFocusLoop() {
+            if (!focusInterval) {
+                // Focus on current time every 500ms
+                focusInterval = setInterval(focusOnCurrentTime, 300);
+            }
+        }
+        
+        function stopFocusLoop() {
+            if (focusInterval) {
+                clearInterval(focusInterval);
+                focusInterval = null;
             }
         }
         
@@ -233,6 +301,15 @@
                 updateInterval = null;
             }
         }
+        
+        // Event listeners
+        autoScrollToggle.addEventListener('change', (event) => {
+            autoScrollEnabled = event.target.checked;
+            if (!autoScrollEnabled) {
+                // Clear the current time band when auto-scroll is disabled
+                timeline.setBands([]);
+            }
+        });
         
         // Handle keydown event
         document.addEventListener('keydown', (event) => {
@@ -282,16 +359,18 @@
             // Update timeline
             timeline.setItems([...allEvents]);
             
-            // Focus on the newly added item
-            setTimeout(() => {
-                timeline.focus({
-                    id: eventId,
-                    animate: true,
-                    duration: 500,
-                    easing: 'easeOutCubic',
-                    zoom: false
-                });
-            }, 10);
+            // Focus on the newly added item when not auto-scrolling
+            if (!autoScrollEnabled) {
+                setTimeout(() => {
+                    timeline.focus({
+                        id: eventId,
+                        animate: true,
+                        duration: 500,
+                        easing: 'easeOutCubic',
+                        zoom: false
+                    });
+                }, 10);
+            }
             
             // Start update loop if not already running
             startUpdateLoop();
@@ -324,22 +403,24 @@
                     // Update timeline
                     timeline.setItems([...allEvents]);
                     
-                    // Focus on the PIT item
-                    setTimeout(() => {
-                        timeline.focus({
-                            id: keyData.eventId,
-                            animate: true,
-                            duration: 500,
-                            easing: 'easeOutCubic',
-                            zoom: false
-                        });
-                    }, 10);
+                    // Focus on the PIT item when not auto-scrolling
+                    if (!autoScrollEnabled) {
+                        setTimeout(() => {
+                            timeline.focus({
+                                id: keyData.eventId,
+                                animate: true,
+                                duration: 500,
+                                easing: 'easeOutCubic',
+                                zoom: false
+                            });
+                        }, 10);
+                    }
                 } else {
                     // Long press - finalize the range item
                     allEvents[eventIndex].end = now;
                     allEvents[eventIndex].label = `${keyData.label} (${(duration / 1000).toFixed(1)}s)`;
                     
-                    // Update timeline (no focus needed as it was already focused during updates)
+                    // Update timeline
                     timeline.setItems([...allEvents]);
                 }
             }
@@ -381,6 +462,7 @@
         // Clean up on page unload
         window.addEventListener('beforeunload', () => {
             stopUpdateLoop();
+            stopFocusLoop();
             if (timeline) {
                 timeline.destroy();
             }
