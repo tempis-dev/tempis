@@ -149,9 +149,9 @@
                     timeline.destroy();
                 }
                 
-                // Set initial range to show recent price events (last 10 minutes)
+                // Set initial range to show recent price events (last 1 minute)
                 const now = new Date();
-                const startTime = new Date(now.getTime() - 10 * 60 * 1000); // 10 minutes ago
+                const startTime = new Date(now.getTime() - 1 * 60 * 1000); // 1 minute ago
                 const endTime = now; // Now
                 
                 timeline = new tempis_timeline.TempisTimeline('#timeline-canvas', {
