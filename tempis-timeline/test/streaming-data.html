@@ -95,7 +95,7 @@
 
         <div class="info">
             <strong>Live Cryptocurrency Price Stream</strong><br>
-            This demo connects to CoinCap's WebSocket API for real-time cryptocurrency prices and demonstrates streaming by adding price events to the timeline with <code>setItems()</code>. 
+            This demo connects to Binance's public WebSocket API for real-time cryptocurrency prices and demonstrates streaming by adding price events to the timeline with <code>setItems()</code>. 
             Each significant price movement creates a new timeline event with smooth animations.
         </div>
     </div>
@@ -127,18 +127,18 @@
         let lastPrices = {}; // Track previous prices for change detection
         let eventIdCounter = 1; // Simple counter for unique IDs
         
-        // Cryptocurrency data (matching CoinCap asset names)
+        // Cryptocurrency data (matching Binance symbols)
         const cryptoCoins = [
-            { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', color: '#f7931a' },
-            { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', color: '#627eea' },
-            { id: 'solana', name: 'Solana', symbol: 'SOL', color: '#9945ff' },
-            { id: 'dogecoin', name: 'Dogecoin', symbol: 'DOGE', color: '#c2a633' },
-            { id: 'cardano', name: 'Cardano', symbol: 'ADA', color: '#0033ad' },
-            { id: 'polkadot', name: 'Polkadot', symbol: 'DOT', color: '#e6007a' },
-            { id: 'avalanche', name: 'Avalanche', symbol: 'AVAX', color: '#e84142' },
-            { id: 'chainlink', name: 'Chainlink', symbol: 'LINK', color: '#2a5ada' },
-            { id: 'polygon', name: 'Polygon', symbol: 'MATIC', color: '#8247e5' },
-            { id: 'litecoin', name: 'Litecoin', symbol: 'LTC', color: '#345d9d' }
+            { id: 'btcusdt', name: 'Bitcoin', symbol: 'BTC', color: '#f7931a' },
+            { id: 'ethusdt', name: 'Ethereum', symbol: 'ETH', color: '#627eea' },
+            { id: 'solusdt', name: 'Solana', symbol: 'SOL', color: '#9945ff' },
+            { id: 'dogeusdt', name: 'Dogecoin', symbol: 'DOGE', color: '#c2a633' },
+            { id: 'adausdt', name: 'Cardano', symbol: 'ADA', color: '#0033ad' },
+            { id: 'dotusdt', name: 'Polkadot', symbol: 'DOT', color: '#e6007a' },
+            { id: 'avaxusdt', name: 'Avalanche', symbol: 'AVAX', color: '#e84142' },
+            { id: 'linkusdt', name: 'Chainlink', symbol: 'LINK', color: '#2a5ada' },
+            { id: 'maticusdt', name: 'Polygon', symbol: 'MATIC', color: '#8247e5' },
+            { id: 'ltcusdt', name: 'Litecoin', symbol: 'LTC', color: '#345d9d' }
         ];
         
         function initializeTimeline() {
@@ -183,8 +183,24 @@
         
         function connectWebSocket() {
             try {
-                console.log('Connecting to CoinCap WebSocket...');
-                websocket = new WebSocket('wss://ws.coincap.io/prices?assets=bitcoin,ethereum,solana,dogecoin,cardano,polkadot,avalanche,chainlink,polygon,litecoin');
+                console.log('Connecting to Binance WebSocket...');
+                
+                // Use Binance's public WebSocket API - no authentication required
+                // Subscribe to multiple crypto pairs
+                const streams = [
+                    'btcusdt@trade',
+                    'ethusdt@trade',
+                    'solusdt@trade',
+                    'dogeusdt@trade',
+                    'adausdt@trade',
+                    'dotusdt@trade',
+                    'avaxusdt@trade',
+                    'linkusdt@trade',
+                    'maticusdt@trade',
+                    'ltcusdt@trade'
+                ].join('/');
+                
+                websocket = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
                 
                 websocket.onopen = function(event) {
                     console.log('WebSocket connected successfully');
@@ -195,9 +211,10 @@
                 
                 websocket.onmessage = function(event) {
                     try {
-                        const priceData = JSON.parse(event.data);
-                        console.log('Received price data:', priceData);
-                        processPriceUpdate(priceData);
+                        const message = JSON.parse(event.data);
+                        if (message.data) {
+                            processBinanceUpdate(message.data);
+                        }
                     } catch (error) {
                         console.error('Error parsing WebSocket message:', error);
                     }
@@ -232,6 +249,95 @@
                 status.style.background = '#ffebee';
                 status.style.color = '#c62828';
             }
+        }
+        
+        function processBinanceUpdate(trade) {
+            // Binance sends individual trade messages
+            // trade.s = symbol (e.g., "BTCUSDT")
+            // trade.p = price
+            const symbol = trade.s.toLowerCase();
+            const coinInfo = cryptoCoins.find(c => c.id === symbol);
+            if (!coinInfo) return;
+            
+            const currentPrice = parseFloat(trade.p);
+            const lastPrice = lastPrices[symbol];
+            const now = new Date();
+            
+            // Create event for significant price changes or first time seeing this coin
+            let shouldCreateEvent = false;
+            let eventType = 'price_update';
+            let changePercent = 0;
+            
+            if (lastPrice === undefined) {
+                // First time seeing this coin
+                shouldCreateEvent = true;
+                eventType = 'initial_price';
+            } else {
+                // Calculate price change since last update
+                changePercent = ((currentPrice - lastPrice) / lastPrice) * 100;
+                
+                // Create event for changes > 0.1% (more sensitive for real-time data)
+                if (Math.abs(changePercent) > 0.1) {
+                    shouldCreateEvent = true;
+                    eventType = changePercent > 0 ? 'price_increase' : 'price_decrease';
+                }
+            }
+            
+            if (shouldCreateEvent) {
+                let label = '';
+                let itemStyle = {};
+                
+                if (eventType === 'initial_price') {
+                    label = `${coinInfo.symbol}: $${currentPrice.toFixed(2)}`;
+                    itemStyle = {
+                        backgroundColor: '#2196F3',
+                        fontColor: '#ffffff'
+                    };
+                } else {
+                    const direction = changePercent > 0 ? '↗' : '↘';
+                    label = `${coinInfo.symbol}: $${currentPrice.toFixed(2)} ${direction} ${Math.abs(changePercent).toFixed(2)}%`;
+                    itemStyle = {
+                        backgroundColor: changePercent > 0 ? '#4CAF50' : '#F44336',
+                        fontColor: '#ffffff'
+                    };
+                }
+                
+                const newEvent = {
+                    id: eventIdCounter++,
+                    label: label,
+                    start: now,
+                    grouping: coinInfo.name,
+                    style: itemStyle
+                };
+                
+                allEvents.push(newEvent);
+                
+                // Keep only the last 100 events
+                if (allEvents.length > 100) {
+                    allEvents = allEvents.slice(-100);
+                }
+                
+                // Update timeline items
+                timeline.setItems([...allEvents]);
+                
+                // Focus on the newest event with animation
+                setTimeout(() => {
+                    timeline.focus({
+                        id: newEvent.id,
+                        animate: true,
+                        duration: 800,
+                        easing: 'easeInOutCubic',
+                        zoom: false
+                    });
+                }, 100);
+                
+                status.textContent = `Streaming (${allEvents.length} events)`;
+                status.style.background = '#e8f5e8';
+                status.style.color = '#2e7d32';
+            }
+            
+            // Update last price
+            lastPrices[symbol] = currentPrice;
         }
         
         function processPriceUpdate(priceData) {
