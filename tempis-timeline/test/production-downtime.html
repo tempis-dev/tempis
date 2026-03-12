@@ -25,7 +25,7 @@
         }
         .controls {
             margin-bottom: 20px;
-            padding: 20px;
+            padding: 12px 20px;
             background: #f9f9f9;
             border-radius: 4px;
             display: flex;
@@ -682,6 +682,9 @@
             `;
             
             detailsContent.innerHTML = html;
+            
+            // Reset scroll position to top
+            detailsContent.scrollTop = 0;
             
             // Show the details panel with animation
             timelineContainer.classList.add('with-details');
