@@ -1,7 +1,7 @@
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineBand } from "./TimelineBand";
 import { TimelineItem } from "./TimelineItem";
-import { TempisTimelineStackMode } from "./TempisTimelineOptions";
+import { TempisTimelineStackMode, TempisTimelineScrollbarVisibility } from "./TempisTimelineOptions";
 import { RangeTick } from "./TimelineRangeView";
 import { clamp, doDateRangesOverlap, drawClippedText, EasingFunction } from "./Utilities";
 
@@ -107,16 +107,26 @@ export class TimelineDataView {
     /** Whether the data view is currently being panned. */
     private _isPanning: boolean = false;
 
+    /** The scrollbar visibility mode. */
+    private _scrollbarVisibility: TempisTimelineScrollbarVisibility = "hover";
+
     /**
      * Creates a new instance of the TimelineDataView class.
      * @param dataSet The timeline dataset model.
      * @param isRTL Whether the timeline is being rendered right-to-left.
      * @param stackMode The stack mode controlling how items are vertically arranged.
+     * @param scrollbarVisibility The scrollbar visibility mode.
      */
-    public constructor(dataSet: TimelineDataSet, isRTL: boolean, stackMode: TempisTimelineStackMode) {
+    public constructor(
+        dataSet: TimelineDataSet,
+        isRTL: boolean,
+        stackMode: TempisTimelineStackMode,
+        scrollbarVisibility: TempisTimelineScrollbarVisibility = "hover"
+    ) {
         this._dataSet = dataSet;
         this._isRTL = isRTL;
         this._stackMode = stackMode;
+        this._scrollbarVisibility = scrollbarVisibility;
 
         // Register a callback to invalidate cached row structure when dataset changes.
         this._dataSet.registerUpdateCallback(() => {
@@ -361,8 +371,29 @@ export class TimelineDataView {
      * @param height The available height of the view.
      */
     private _drawScrollbar(context: CanvasRenderingContext2D, yPosition: number, height: number): void {
-        // Only draw scrollbar if there's content overflow and we're hovering or panning
-        if (!this._drawPlan || this._drawPlan.height <= height || (!this._isHovering && !this._isPanning)) {
+        // Only draw scrollbar if there's content overflow
+        if (!this._drawPlan || this._drawPlan.height <= height) {
+            return;
+        }
+
+        // Check visibility based on configuration
+        let shouldShow = false;
+        switch (this._scrollbarVisibility) {
+            case "always":
+                shouldShow = true;
+                break;
+            case "hover":
+                shouldShow = this._isHovering || this._isPanning;
+                break;
+            case "panning":
+                shouldShow = this._isPanning;
+                break;
+            case "never":
+                shouldShow = false;
+                break;
+        }
+
+        if (!shouldShow) {
             return;
         }
 

@@ -139,7 +139,30 @@ export interface TempisTimelineStyleOptions {
 
     /** The default item options to use in rendering items, overriding the library item style defaults only. */
     item?: TempisTimelineItemStyle;
+
+    /** The scrollbar visibility options. */
+    scrollbar?: TempisTimelineScrollbarOptions;
 }
+
+export interface TempisTimelineScrollbarOptions {
+    /**
+     * Controls when the scrollbar is visible. Defaults to `"hover"`.
+     * - `"always"` – The scrollbar is always visible when there is vertical overflow.
+     * - `"hover"` – The scrollbar is visible when hovering over the timeline or actively panning.
+     * - `"panning"` – The scrollbar is only visible when actively panning the timeline.
+     * - `"never"` – The scrollbar is never shown.
+     */
+    visibility?: TempisTimelineScrollbarVisibility;
+}
+
+/**
+ * Controls when the scrollbar is visible.
+ * - `"always"` – The scrollbar is always visible when there is vertical overflow.
+ * - `"hover"` – The scrollbar is visible when hovering over the timeline or actively panning.
+ * - `"panning"` – The scrollbar is only visible when actively panning the timeline.
+ * - `"never"` – The scrollbar is never shown.
+ */
+export type TempisTimelineScrollbarVisibility = "always" | "hover" | "panning" | "never";
 
 export interface TempisTimelineFont {
     /** The font size. */

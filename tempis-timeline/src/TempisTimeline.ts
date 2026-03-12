@@ -79,7 +79,12 @@ export class TempisTimeline {
         this._font = new TimelineFont(this._options.style?.font);
 
         this._dataSet = new TimelineDataSet(this._options);
-        this._dataView = new TimelineDataView(this._dataSet, this._isRTL, this._options.stackMode ?? 'stable');
+        this._dataView = new TimelineDataView(
+            this._dataSet,
+            this._isRTL,
+            this._options.stackMode ?? 'stable',
+            this._options.style?.scrollbar?.visibility ?? 'hover'
+        );
         this._rangeView = new TimelineRangeView(
             this._canvas,
             this._dataSet,
