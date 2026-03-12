@@ -83,7 +83,7 @@ export class TempisTimeline {
             this._dataSet,
             this._isRTL,
             this._options.stackMode ?? 'stable',
-            this._options.style?.scrollbar?.visibility ?? 'hover'
+            this._options.scrollbar?.visibility ?? 'hover'
         );
         this._rangeView = new TimelineRangeView(
             this._canvas,

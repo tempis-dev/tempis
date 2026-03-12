@@ -30,6 +30,9 @@ export interface TempisTimelineOptions {
     /** The timeline style options. */
     style?: TempisTimelineStyleOptions;
 
+    /** The scrollbar visibility options. */
+    scrollbar?: TempisTimelineScrollbarOptions;
+
     /** The timeline item categories. */
     categories?: TempisTimelineCategory[];
 
@@ -139,9 +142,6 @@ export interface TempisTimelineStyleOptions {
 
     /** The default item options to use in rendering items, overriding the library item style defaults only. */
     item?: TempisTimelineItemStyle;
-
-    /** The scrollbar visibility options. */
-    scrollbar?: TempisTimelineScrollbarOptions;
 }
 
 export interface TempisTimelineScrollbarOptions {
