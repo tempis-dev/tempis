@@ -61,6 +61,8 @@
             border: 1px solid #ddd;
             opacity: 0;
             transition: width 0.4s ease-out, opacity 0.4s ease-out;
+            display: flex;
+            flex-direction: column;
         }
         .details-panel.visible {
             width: calc(35% - 20px);
@@ -68,16 +70,40 @@
         }
         .details-content {
             padding: 20px;
-            height: 100%;
+            flex: 1;
             overflow-y: auto;
         }
+        .details-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .details-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .details-content::-webkit-scrollbar-thumb {
+            background: transparent;
+            border-radius: 4px;
+        }
+        .details-content:hover::-webkit-scrollbar-thumb {
+            background: #bbb;
+        }
+        .details-content::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+        /* Firefox */
+        .details-content {
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+        }
+        .details-content:hover {
+            scrollbar-color: #bbb transparent;
+        }
         .details-header {
+            padding: 20px 20px 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
             border-bottom: 2px solid #ddd;
+            flex-shrink: 0;
         }
         .details-header h2 {
             margin: 0;
@@ -155,6 +181,10 @@
             </div>
             
             <div class="details-panel" id="detailsPanel">
+                <div class="details-header">
+                    <h2>Downtime Details</h2>
+                    <button class="close-btn" onclick="closeDetails()">Close</button>
+                </div>
                 <div class="details-content" id="detailsContent">
                     <!-- Details will be populated here -->
                 </div>
@@ -595,11 +625,6 @@
             
             // Build details HTML
             const html = `
-                <div class="details-header">
-                    <h2>Downtime Details</h2>
-                    <button class="close-btn" onclick="closeDetails()">Close</button>
-                </div>
-                
                 <div class="detail-section">
                     <h3>Event</h3>
                     <p><strong>${event.label}</strong></p>
