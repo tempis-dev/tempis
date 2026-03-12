@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keypress Logger Timeline - Tempis Timeline</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-top: 0;
+            color: #333;
+        }
+        .controls {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+            font-weight: 500;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        .status {
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            background: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #4caf50;
+        }
+        .canvas-container {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            height: 600px;
+            overflow: hidden;
+        }
+        .info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Keypress Logger Timeline</h1>
+        
+        <div class="controls">
+            <button id="clearBtn">Clear Timeline</button>
+            <div id="status" class="status">Ready - Press any key to start</div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="timeline-canvas"></canvas>
+        </div>
+
+        <div class="info">
+            <strong>Interactive Keypress Timeline</strong><br>
+            Press and hold any key on your keyboard to see it visualized on the timeline:
+            <ul style="margin: 10px 0 0 20px;">
+                <li><strong>Short press:</strong> Creates a point-in-time (PIT) item</li>
+                <li><strong>Long press:</strong> Creates a range item that updates in real-time as you hold the key</li>
+                <li><strong>Multiple keys:</strong> Each key creates its own timeline event</li>
+            </ul>
+            The timeline updates continuously while you hold a key, showing the duration of the press.
+        </div>
+    </div>
+
+    <script src="../dist/tempis_timeline.js"></script>
+    <script>
+        console.log('Script starting...');
+        
+        // Check if tempis_timeline is loaded
+        if (typeof tempis_timeline === 'undefined') {
+            console.error('tempis_timeline is not loaded!');
+            document.getElementById('status').textContent = 'Error: Timeline library not loaded';
+        } else {
+            console.log('tempis_timeline loaded successfully');
+        }
+        
+        const canvas = document.getElementById('timeline-canvas');
+        const clearBtn = document.getElementById('clearBtn');
+        const status = document.getElementById('status');
+        
+        let timeline = null;
+        let allEvents = [];
+        let eventIdCounter = 1;
+        let activeKeys = {}; // Track currently pressed keys
+        let updateInterval = null;
+        const LONG_PRESS_THRESHOLD = 200; // ms - threshold to convert PIT to range
+        
+        function initializeTimeline() {
+            try {
+                console.log('Initializing timeline...');
+                
+                if (timeline) {
+                    timeline.destroy();
+                }
+                
+                // Set initial range to show recent events (last 10 seconds)
+                const now = new Date();
+                const startTime = new Date(now.getTime() - 10 * 1000); // 10 seconds ago
+                const endTime = now; // Now
+                
+                timeline = new tempis_timeline.TempisTimeline('#timeline-canvas', {
+                    responsive: true,
+                    verticalFill: 'fill-canvas',
+                    items: [],
+                    range: {
+                        position: 'bottom',
+                        start: startTime,
+                        end: endTime,
+                        zoom: {
+                            enabled: true
+                        }
+                    },
+                    selection: 'single'
+                });
+                
+                console.log('Timeline initialized successfully');
+                
+            } catch (error) {
+                console.error('Error initializing timeline:', error);
+                status.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        function getKeyLabel(event) {
+            // Get a readable label for the key
+            if (event.key === ' ') return 'Space';
+            if (event.key === 'Enter') return 'Enter';
+            if (event.key === 'Tab') return 'Tab';
+            if (event.key === 'Backspace') return 'Backspace';
+            if (event.key === 'Escape') return 'Esc';
+            if (event.key === 'Shift') return 'Shift';
+            if (event.key === 'Control') return 'Ctrl';
+            if (event.key === 'Alt') return 'Alt';
+            if (event.key === 'Meta') return 'Meta';
+            if (event.key === 'ArrowUp') return '↑';
+            if (event.key === 'ArrowDown') return '↓';
+            if (event.key === 'ArrowLeft') return '←';
+            if (event.key === 'ArrowRight') return '→';
+            if (event.key.length === 1) return event.key.toUpperCase();
+            return event.key;
+        }
+        
+        function updateTimeline() {
+            // Update all active key presses
+            const now = new Date();
+            let hasUpdates = false;
+            let latestEndTime = null;
+            
+            for (const [keyCode, keyData] of Object.entries(activeKeys)) {
+                const duration = now.getTime() - keyData.startTime.getTime();
+                
+                if (duration >= LONG_PRESS_THRESHOLD) {
+                    // Update the range item
+                    const eventIndex = allEvents.findIndex(e => e.id === keyData.eventId);
+                    if (eventIndex !== -1) {
+                        allEvents[eventIndex].end = now;
+                        allEvents[eventIndex].label = `${keyData.label} (${(duration / 1000).toFixed(1)}s)`;
+                        hasUpdates = true;
+                        
+                        // Track the latest end time for focus
+                        if (!latestEndTime || now > latestEndTime) {
+                            latestEndTime = now;
+                        }
+                    }
+                }
+            }
+            
+            if (hasUpdates) {
+                timeline.setItems([...allEvents]);
+                
+                // Focus on the latest end time (where the range item is growing)
+                if (latestEndTime) {
+                    setTimeout(() => {
+                        timeline.focus({
+                            date: latestEndTime,
+                            animate: true,
+                            duration: 300,
+                            easing: 'easeOutCubic',
+                            zoom: false
+                        });
+                    }, 10);
+                }
+            }
+        }
+        
+        function startUpdateLoop() {
+            if (!updateInterval) {
+                // Update timeline frequently (every 50ms) while keys are pressed
+                updateInterval = setInterval(updateTimeline, 50);
+            }
+        }
+        
+        function stopUpdateLoop() {
+            if (updateInterval && Object.keys(activeKeys).length === 0) {
+                clearInterval(updateInterval);
+                updateInterval = null;
+            }
+        }
+        
+        // Handle keydown event
+        document.addEventListener('keydown', (event) => {
+            // Prevent default for some keys to avoid page scrolling, etc.
+            if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.code)) {
+                event.preventDefault();
+            }
+            
+            // Ignore repeated keydown events while key is held
+            if (event.repeat) return;
+            
+            const keyCode = event.code;
+            const keyLabel = getKeyLabel(event);
+            
+            // Check if this key is already being tracked
+            if (activeKeys[keyCode]) return;
+            
+            const now = new Date();
+            const eventId = eventIdCounter++;
+            
+            // Create initial range item (will be converted to PIT if released quickly)
+            const newEvent = {
+                id: eventId,
+                label: keyLabel,
+                start: now,
+                end: now, // Initially same as start
+                style: {
+                    backgroundColor: '#2196F3',
+                    fontColor: '#ffffff'
+                }
+            };
+            
+            allEvents.push(newEvent);
+            
+            // Keep only the last 50 events
+            if (allEvents.length > 50) {
+                allEvents = allEvents.slice(-50);
+            }
+            
+            // Track this key press
+            activeKeys[keyCode] = {
+                eventId: eventId,
+                startTime: now,
+                label: keyLabel
+            };
+            
+            // Update timeline
+            timeline.setItems([...allEvents]);
+            
+            // Focus on the newly added item
+            setTimeout(() => {
+                timeline.focus({
+                    id: eventId,
+                    animate: true,
+                    duration: 500,
+                    easing: 'easeOutCubic',
+                    zoom: false
+                });
+            }, 10);
+            
+            // Start update loop if not already running
+            startUpdateLoop();
+            
+            // Update status
+            const activeCount = Object.keys(activeKeys).length;
+            status.textContent = `${activeCount} key${activeCount !== 1 ? 's' : ''} pressed - ${allEvents.length} total events`;
+            
+            console.log(`Key pressed: ${keyLabel}`);
+        });
+        
+        // Handle keyup event
+        document.addEventListener('keyup', (event) => {
+            const keyCode = event.code;
+            const keyData = activeKeys[keyCode];
+            
+            if (!keyData) return;
+            
+            const now = new Date();
+            const duration = now.getTime() - keyData.startTime.getTime();
+            
+            // Find the event
+            const eventIndex = allEvents.findIndex(e => e.id === keyData.eventId);
+            if (eventIndex !== -1) {
+                if (duration < LONG_PRESS_THRESHOLD) {
+                    // Short press - convert to PIT item by removing end property
+                    delete allEvents[eventIndex].end;
+                    allEvents[eventIndex].label = keyData.label;
+                    
+                    // Update timeline
+                    timeline.setItems([...allEvents]);
+                    
+                    // Focus on the PIT item
+                    setTimeout(() => {
+                        timeline.focus({
+                            id: keyData.eventId,
+                            animate: true,
+                            duration: 500,
+                            easing: 'easeOutCubic',
+                            zoom: false
+                        });
+                    }, 10);
+                } else {
+                    // Long press - finalize the range item
+                    allEvents[eventIndex].end = now;
+                    allEvents[eventIndex].label = `${keyData.label} (${(duration / 1000).toFixed(1)}s)`;
+                    
+                    // Update timeline (no focus needed as it was already focused during updates)
+                    timeline.setItems([...allEvents]);
+                }
+            }
+            
+            // Remove from active keys
+            delete activeKeys[keyCode];
+            
+            // Stop update loop if no more active keys
+            stopUpdateLoop();
+            
+            // Update status
+            const activeCount = Object.keys(activeKeys).length;
+            if (activeCount > 0) {
+                status.textContent = `${activeCount} key${activeCount !== 1 ? 's' : ''} pressed - ${allEvents.length} total events`;
+            } else {
+                status.textContent = `Ready - ${allEvents.length} events recorded`;
+            }
+            
+            console.log(`Key released: ${keyData.label} (${duration}ms)`);
+        });
+        
+        // Clear button
+        clearBtn.addEventListener('click', () => {
+            console.log('Clear button clicked');
+            if (timeline) {
+                timeline.setItems([]);
+            }
+            allEvents = [];
+            activeKeys = {};
+            eventIdCounter = 1;
+            status.textContent = 'Ready - Press any key to start';
+            stopUpdateLoop();
+        });
+        
+        // Initialize
+        console.log('Setting up timeline...');
+        initializeTimeline();
+        
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            stopUpdateLoop();
+            if (timeline) {
+                timeline.destroy();
+            }
+        });
+        
+        console.log('Script loaded successfully');
+    </script>
+</body>
+</html>
