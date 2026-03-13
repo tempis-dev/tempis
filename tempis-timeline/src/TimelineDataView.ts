@@ -1,7 +1,7 @@
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineBand } from "./TimelineBand";
 import { TimelineItem } from "./TimelineItem";
-import { TempisTimelineStackMode } from "./TempisTimelineOptions";
+import { TempisTimelineStackMode, TempisTimelineScrollbarVisibility } from "./TempisTimelineOptions";
 import { RangeTick } from "./TimelineRangeView";
 import { clamp, doDateRangesOverlap, drawClippedText, EasingFunction } from "./Utilities";
 
@@ -101,16 +101,32 @@ export class TimelineDataView {
     /** Animation frame ID for scroll animations. */
     private _animationFrameId: number | null = null;
 
+    /** Whether the mouse is currently hovering over the data view. */
+    private _isHovering: boolean = false;
+
+    /** Whether the data view is currently being panned. */
+    private _isPanning: boolean = false;
+
+    /** The scrollbar visibility mode. */
+    private _scrollbarVisibility: TempisTimelineScrollbarVisibility = "hover";
+
     /**
      * Creates a new instance of the TimelineDataView class.
      * @param dataSet The timeline dataset model.
      * @param isRTL Whether the timeline is being rendered right-to-left.
      * @param stackMode The stack mode controlling how items are vertically arranged.
+     * @param scrollbarVisibility The scrollbar visibility mode.
      */
-    public constructor(dataSet: TimelineDataSet, isRTL: boolean, stackMode: TempisTimelineStackMode) {
+    public constructor(
+        dataSet: TimelineDataSet,
+        isRTL: boolean,
+        stackMode: TempisTimelineStackMode,
+        scrollbarVisibility: TempisTimelineScrollbarVisibility = "hover"
+    ) {
         this._dataSet = dataSet;
         this._isRTL = isRTL;
         this._stackMode = stackMode;
+        this._scrollbarVisibility = scrollbarVisibility;
 
         // Register a callback to invalidate cached row structure when dataset changes.
         this._dataSet.registerUpdateCallback(() => {
@@ -124,6 +140,22 @@ export class TimelineDataView {
      */
     public scrollByYMovement(movementY: number): void {
         this._scrollYOffset += movementY;
+    }
+
+    /**
+     * Set whether the mouse is hovering over the data view.
+     * @param isHovering Whether the mouse is hovering.
+     */
+    public setHovering(isHovering: boolean): void {
+        this._isHovering = isHovering;
+    }
+
+    /**
+     * Set whether the data view is currently being panned.
+     * @param isPanning Whether the view is being panned.
+     */
+    public setPanning(isPanning: boolean): void {
+        this._isPanning = isPanning;
     }
 
     /**
@@ -185,6 +217,9 @@ export class TimelineDataView {
 
         // Draw our groups and items!
         this._drawGroups(context, yPosition);
+
+        // Draw the scrollbar if there's vertical overflow.
+        this._drawScrollbar(context, yPosition, this._lastDrawHeight);
 
         // Set the y position from where this view was last drawn.
         // This will be used to help align absolute canvas pointer positions with data view elements.
@@ -327,6 +362,67 @@ export class TimelineDataView {
         // Reset the line dash to be solid.
         context.stroke();
         context.setLineDash([]);
+    }
+
+    /**
+     * Draw a passive scrollbar on the end side of the data view to indicate vertical overflow.
+     * @param context The canvas context.
+     * @param yPosition The y position of the top of the view.
+     * @param height The available height of the view.
+     */
+    private _drawScrollbar(context: CanvasRenderingContext2D, yPosition: number, height: number): void {
+        // Only draw scrollbar if there's content overflow
+        if (!this._drawPlan || this._drawPlan.height <= height) {
+            return;
+        }
+
+        // Check visibility based on configuration
+        let shouldShow = false;
+        switch (this._scrollbarVisibility) {
+            case "always":
+                shouldShow = true;
+                break;
+            case "hover":
+                shouldShow = this._isHovering || this._isPanning;
+                break;
+            case "panning":
+                shouldShow = this._isPanning;
+                break;
+            case "never":
+                shouldShow = false;
+                break;
+        }
+
+        if (!shouldShow) {
+            return;
+        }
+
+        const scrollbarWidth = 8;
+        const scrollbarPadding = 4;
+        const scrollbarMargin = 6; // Margin from top and bottom
+        const scrollbarX = this._isRTL 
+            ? scrollbarPadding 
+            : context.canvas.clientWidth - scrollbarWidth - scrollbarPadding;
+
+        // Calculate scrollbar thumb size and position with margins
+        const availableHeight = height - (scrollbarMargin * 2);
+        const visibleRatio = height / this._drawPlan.height;
+        const thumbHeight = Math.max(30, availableHeight * visibleRatio); // Minimum 30px thumb
+        const scrollableHeight = availableHeight - thumbHeight;
+        const scrollRatio = Math.abs(this._scrollYOffset) / (this._drawPlan.height - height);
+        const thumbY = yPosition + scrollbarMargin + (scrollRatio * scrollableHeight);
+
+        // Draw scrollbar track (subtle background)
+        context.fillStyle = "rgba(0, 0, 0, 0.05)";
+        context.beginPath();
+        context.roundRect(scrollbarX, yPosition + scrollbarMargin, scrollbarWidth, availableHeight, scrollbarWidth / 2);
+        context.fill();
+
+        // Draw scrollbar thumb
+        context.fillStyle = "rgba(0, 0, 0, 0.3)";
+        context.beginPath();
+        context.roundRect(scrollbarX, thumbY, scrollbarWidth, thumbHeight, scrollbarWidth / 2);
+        context.fill();
     }
 
     /**

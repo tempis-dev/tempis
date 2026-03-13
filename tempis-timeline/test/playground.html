@@ -489,6 +489,16 @@
       </div>
     </div>
     
+    <div class="control-group">
+      <label>Scrollbar Visibility</label>
+      <select id="scrollbarVisibility">
+        <option value="always">Always</option>
+        <option value="hover" selected>Hover</option>
+        <option value="panning">Panning</option>
+        <option value="never">Never</option>
+      </select>
+    </div>
+    
     <div class="divider"></div>
     
     <h3>Range</h3>
@@ -801,6 +811,9 @@
           borderThickness: parseInt(document.getElementById('borderThickness').value) || undefined,
           borderColor: parseInt(document.getElementById('borderThickness').value) > 0 ? '#333333' : undefined
         }
+      },
+      scrollbar: {
+        visibility: document.getElementById('scrollbarVisibility').value
       },
       range: {
         position: document.getElementById('rangePosition').value,
