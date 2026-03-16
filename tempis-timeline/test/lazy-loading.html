@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lazy Loading - Tempis Timeline</title>
+    <script>
+        const timestamp = new Date().getTime();
+        document.write('<script src="../dist/tempis_timeline.js?' + timestamp + '"><\/script>');
+    </script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-top: 0;
+            color: #333;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 16px;
+        }
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+            padding: 10px 16px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .status-bar .stat {
+            color: #555;
+        }
+        .status-bar .stat strong {
+            color: #333;
+        }
+        .loading-indicator {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            color: #667eea;
+            font-weight: 600;
+        }
+        .loading-indicator.active {
+            display: flex;
+        }
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid #667eea;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .load-log {
+            margin-top: 12px;
+            max-height: 120px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 10px 14px;
+            border-radius: 4px;
+        }
+        .load-log .entry {
+            padding: 2px 0;
+        }
+        .load-log .entry .time {
+            color: #6a9955;
+        }
+        .load-log .entry .count {
+            color: #dcdcaa;
+        }
+        .load-log .entry .range {
+            color: #9cdcfe;
+        }
+        .load-log .entry .cached {
+            color: #808080;
+        }
+        canvas {
+            width: 100%;
+            height: 500px;
+        }
+        .canvas-container {
+            width: 100%;
+            height: 500px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Server Request Logs</h1>
+        <p class="subtitle">Pan and zoom to lazily load request logs. Data is fetched on demand and cached per hour block.</p>
+
+        <div class="status-bar">
+            <div class="loading-indicator" id="loadingIndicator">
+                <div class="spinner"></div>
+                <span>Loading...</span>
+            </div>
+            <div class="stat">Items loaded: <strong id="itemCount">0</strong></div>
+            <div class="stat">Hour blocks cached: <strong id="blockCount">0</strong></div>
+            <div class="stat">Range: <strong id="rangeDisplay">-</strong></div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <div class="load-log" id="loadLog"></div>
+    </div>
+
+<script>
+    const { TempisTimeline } = tempis_timeline;
+
+    // --- Simulated server log data source ---
+    // In a real app, this would be an API call like: GET /api/logs?from=...&to=...
+    const endpoints = ['/api/users', '/api/orders', '/api/products', '/api/auth/login', '/api/search', '/api/payments', '/api/inventory', '/api/reports'];
+    const methods = ['GET', 'POST', 'PUT', 'DELETE'];
+    const statusCodes = [
+        { code: 200, weight: 50 }, { code: 201, weight: 10 }, { code: 204, weight: 5 },
+        { code: 301, weight: 3 }, { code: 304, weight: 8 },
+        { code: 400, weight: 5 }, { code: 401, weight: 3 }, { code: 403, weight: 2 },
+        { code: 404, weight: 6 }, { code: 500, weight: 4 }, { code: 502, weight: 2 }, { code: 503, weight: 2 }
+    ];
+
+    function getStatusCategory(code) {
+        if (code < 300) return '2xx Success';
+        if (code < 400) return '3xx Redirect';
+        if (code < 500) return '4xx Client Error';
+        return '5xx Server Error';
+    }
+
+    // Seeded random for consistent data per hour block
+    function seededRandom(seed) {
+        let s = seed;
+        return function() {
+            s = (s * 16807 + 0) % 2147483647;
+            return (s - 1) / 2147483646;
+        };
+    }
+
+    function generateLogsForHour(hourStart) {
+        const seed = Math.abs(hourStart.getTime() / 3600000) | 0;
+        const rng = seededRandom(seed);
+        const logs = [];
+        // Generate 20-80 requests per hour
+        const count = Math.floor(rng() * 60) + 20;
+
+        for (let i = 0; i < count; i++) {
+            const offsetMs = Math.floor(rng() * 3600000);
+            const start = new Date(hourStart.getTime() + offsetMs);
+            const method = methods[Math.floor(rng() * methods.length)];
+            const endpoint = endpoints[Math.floor(rng() * endpoints.length)];
+            const statusTotal = statusCodes.reduce((sum, s) => sum + s.weight, 0);
+            let r = rng() * statusTotal;
+            let status = statusCodes[0].code;
+            for (const s of statusCodes) {
+                r -= s.weight;
+                if (r <= 0) { status = s.code; break; }
+            }
+            // Duration between 5 seconds and 5 minutes to be visible at a 4-hour range
+            const durationMs = Math.floor(rng() * 295000) + 5000;
+            const end = new Date(start.getTime() + durationMs);
+
+            logs.push({
+                id: `${hourStart.getTime()}-${i}`,
+                start: start.toISOString(),
+                end: end.toISOString(),
+                label: `${method} ${endpoint} → ${status}`,
+                category: getStatusCategory(status),
+                grouping: endpoint
+            });
+        }
+        return logs;
+    }
+
+    // Simulate network latency
+    function fetchLogs(hourStart) {
+        return new Promise(resolve => {
+            const delay = 150 + Math.random() * 300;
+            setTimeout(() => resolve(generateLogsForHour(hourStart)), delay);
+        });
+    }
+
+    // --- Lazy loading logic ---
+    const cache = new Map(); // hourKey -> items[]
+    let allItems = [];
+    let isLoading = false;
+    let loadDebounceTimer = null;
+    let timeline = null;
+
+    function getHourKey(date) {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours()).getTime();
+    }
+
+    function getHourBlocksInRange(start, end) {
+        const blocks = [];
+        let current = new Date(start.getFullYear(), start.getMonth(), start.getDate(), start.getHours());
+        const endTime = end.getTime();
+        while (current.getTime() <= endTime) {
+            blocks.push(new Date(current));
+            current = new Date(current.getTime() + 3600000);
+        }
+        return blocks;
+    }
+
+    function logEntry(message) {
+        const log = document.getElementById('loadLog');
+        const now = new Date().toLocaleTimeString();
+        const entry = document.createElement('div');
+        entry.className = 'entry';
+        entry.innerHTML = `<span class="time">[${now}]</span> ${message}`;
+        log.insertBefore(entry, log.firstChild);
+        // Keep log manageable
+        while (log.children.length > 50) log.removeChild(log.lastChild);
+    }
+
+    function updateStats() {
+        document.getElementById('itemCount').textContent = allItems.length;
+        document.getElementById('blockCount').textContent = cache.size;
+    }
+
+    function formatRange(start, end) {
+        const opts = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        return `${start.toLocaleString(undefined, opts)} – ${end.toLocaleString(undefined, opts)}`;
+    }
+
+    async function loadRange(start, end) {
+        const blocks = getHourBlocksInRange(start, end);
+        const uncached = blocks.filter(b => !cache.has(b.getTime()));
+
+        if (uncached.length === 0) return;
+
+        isLoading = true;
+        document.getElementById('loadingIndicator').classList.add('active');
+
+        logEntry(`Fetching <span class="count">${uncached.length} hour block(s)</span> for range <span class="range">${formatRange(start, end)}</span>`);
+
+        // Fetch all uncached blocks in parallel
+        const results = await Promise.all(uncached.map(async (block) => {
+            const logs = await fetchLogs(block);
+            cache.set(block.getTime(), logs);
+            return logs;
+        }));
+
+        // Merge new items with existing
+        const newItems = results.flat();
+        allItems = allItems.concat(newItems);
+
+        logEntry(`Loaded <span class="count">${newItems.length} items</span> from <span class="count">${uncached.length} block(s)</span> — <span class="cached">${cache.size} total cached</span>`);
+
+        // Update the timeline
+        timeline.setItems(allItems);
+        updateStats();
+
+        isLoading = false;
+        document.getElementById('loadingIndicator').classList.remove('active');
+    }
+
+    function onRangeChange(start, end) {
+        document.getElementById('rangeDisplay').textContent = formatRange(start, end);
+
+        // Debounce to avoid flooding during rapid panning
+        clearTimeout(loadDebounceTimer);
+        loadDebounceTimer = setTimeout(() => {
+            if (!isLoading) {
+                loadRange(start, end);
+            }
+        }, 200);
+    }
+
+    // --- Initialize ---
+    const now = new Date();
+    const defaultStart = new Date(now.getTime() - 15 * 60000); // 15 minutes ago
+    const defaultEnd = new Date(now.getTime() + 15 * 60000);   // 15 minutes from now
+
+    timeline = new TempisTimeline('#canvas', {
+        items: [],
+        responsive: true,
+        verticalFill: 'fill-canvas',
+        stackMode: 'compact',
+        range: {
+            start: defaultStart,
+            end: defaultEnd,
+            position: 'bottom',
+            zoom: { enabled: true }
+        },
+        categories: [
+            { name: '2xx Success', label: '2xx Success', style: { backgroundColor: '#4caf50', fontColor: '#fff' } },
+            { name: '3xx Redirect', label: '3xx Redirect', style: { backgroundColor: '#2196f3', fontColor: '#fff' } },
+            { name: '4xx Client Error', label: '4xx Client Error', style: { backgroundColor: '#ff9800', fontColor: '#fff' } },
+            { name: '5xx Server Error', label: '5xx Server Error', style: { backgroundColor: '#f44336', fontColor: '#fff' } }
+        ],
+        legend: {
+            position: 'top',
+            isHighlightOnHover: true,
+            isFilterOnClick: true
+        },
+        tooltip: {
+            enabled: true,
+            overflowBehavior: 'viewport'
+        },
+        onRangeChange
+    });
+
+    // Load initial range
+    loadRange(defaultStart, defaultEnd);
+</script>
+</body>
+</html>
