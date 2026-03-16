@@ -56,30 +56,152 @@
         position: 'bottom'
       },
       legend: { position: 'bottom' },
-      scrollbar: { visibility: 'never' },
-      style: {
-        item: { borderRadius: 4, fontColor: '#fff' }
-      },
+      style: { item: { borderRadius: 4, fontColor: '#fff' } },
       categories: [
-        { name: 'deploy',   label: 'Deployments',  style: { backgroundColor: '#667eea', fontColor: '#fff' } },
-        { name: 'incident', label: 'Incidents',     style: { backgroundColor: '#e84393', fontColor: '#fff' } },
-        { name: 'alert',    label: 'Alerts',        style: { backgroundColor: '#fdcb6e', fontColor: '#2d3748' } },
-        { name: 'task',     label: 'Maintenance',   style: { backgroundColor: '#00b894', fontColor: '#fff' } }
+        { name: 'deploy',   label: 'Deployments', style: { backgroundColor: '#667eea', fontColor: '#fff' } },
+        { name: 'incident', label: 'Incidents',    style: { backgroundColor: '#e84393', fontColor: '#fff' } },
+        { name: 'alert',    label: 'Alerts',       style: { backgroundColor: '#fdcb6e', fontColor: '#2d3748' } },
+        { name: 'task',     label: 'Maintenance',  style: { backgroundColor: '#00b894', fontColor: '#fff' } }
       ],
       items: [
-        { id: 1,  label: 'v2.4.0 → Staging',       start: '2024-03-14T06:30:00', end: '2024-03-14T08:00:00', category: 'deploy',   grouping: 'Releases' },
-        { id: 2,  label: 'v2.4.0 → Production',     start: '2024-03-14T09:00:00', end: '2024-03-14T10:30:00', category: 'deploy',   grouping: 'Releases' },
-        { id: 3,  label: 'v2.4.1 Hotfix',           start: '2024-03-14T15:00:00', end: '2024-03-14T16:30:00', category: 'deploy',   grouping: 'Releases' },
-        { id: 4,  label: 'API Latency Spike',       start: '2024-03-14T10:00:00', end: '2024-03-14T12:30:00', category: 'incident', grouping: 'API' },
-        { id: 5,  label: 'DB Connection Pool',      start: '2024-03-14T13:00:00', end: '2024-03-14T15:00:00', category: 'incident', grouping: 'Database' },
-        { id: 6,  label: 'CPU > 90%',               start: '2024-03-14T10:10:00', category: 'alert', grouping: 'API' },
-        { id: 7,  label: 'Error Rate > 5%',         start: '2024-03-14T10:40:00', category: 'alert', grouping: 'API' },
-        { id: 8,  label: 'Rollback v2.4.0',         start: '2024-03-14T12:20:00', category: 'alert', grouping: 'Releases' },
-        { id: 9,  label: 'Pool Exhausted',           start: '2024-03-14T13:10:00', category: 'alert', grouping: 'Database' },
-        { id: 10, label: 'DB Failover',              start: '2024-03-14T14:50:00', category: 'alert', grouping: 'Database' },
-        { id: 11, label: 'DB Vacuum & Reindex',     start: '2024-03-14T16:00:00', end: '2024-03-14T17:30:00', category: 'task', grouping: 'Database' },
-        { id: 12, label: 'SSL Cert Rotation',       start: '2024-03-14T08:00:00', end: '2024-03-14T09:00:00', category: 'task', grouping: 'API' },
-        { id: 13, label: 'Cache Flush',              start: '2024-03-14T15:00:00', category: 'alert', grouping: 'API' }
+
+        // ── March 12 (Tue) — routine release, overlapping DB maintenance ──
+        { id: 200, label: 'v2.3.0 → Staging',       start: '2024-03-12T07:00:00', end: '2024-03-12T08:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 201, label: 'Staging Smoke Tests',     start: '2024-03-12T07:30:00', end: '2024-03-12T09:00:00', category: 'task',     grouping: 'Releases' },
+        { id: 202, label: 'v2.3.0 → Production',    start: '2024-03-12T10:00:00', end: '2024-03-12T11:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 203, label: 'Canary Analysis',         start: '2024-03-12T10:30:00', end: '2024-03-12T11:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 204, label: 'Deploy Complete',         start: '2024-03-12T11:35:00', category: 'alert', grouping: 'Releases' },
+        { id: 205, label: 'CDN Cache Purge',         start: '2024-03-12T11:00:00', end: '2024-03-12T12:30:00', category: 'task',     grouping: 'API' },
+        { id: 206, label: 'WAF Rule Update',         start: '2024-03-12T11:30:00', end: '2024-03-12T12:30:00', category: 'task',     grouping: 'API' },
+        { id: 207, label: 'Auth Service Restart',    start: '2024-03-12T12:00:00', end: '2024-03-12T13:00:00', category: 'task',     grouping: 'API' },
+        { id: 208, label: 'Slow Query Alert',        start: '2024-03-12T14:00:00', category: 'alert', grouping: 'Database' },
+        { id: 209, label: 'Index Rebuild',           start: '2024-03-12T14:00:00', end: '2024-03-12T16:00:00', category: 'task',     grouping: 'Database' },
+        { id: 210, label: 'Table Partition',         start: '2024-03-12T14:30:00', end: '2024-03-12T17:00:00', category: 'task',     grouping: 'Database' },
+        { id: 211, label: 'Stats Refresh',           start: '2024-03-12T15:00:00', end: '2024-03-12T16:30:00', category: 'task',     grouping: 'Database' },
+        { id: 212, label: 'Deadlock Detected',       start: '2024-03-12T15:30:00', category: 'alert', grouping: 'Database' },
+
+        // ── March 13 (Wed) — memory leak incident, heavy API overlap ──
+        { id: 300, label: 'v2.3.1 Patch',           start: '2024-03-13T07:30:00', end: '2024-03-13T09:00:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 301, label: 'Feature Flag Rollout',   start: '2024-03-13T08:00:00', end: '2024-03-13T09:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 302, label: 'Load Balancer Config',   start: '2024-03-13T09:00:00', end: '2024-03-13T11:00:00', category: 'task',     grouping: 'API' },
+        { id: 303, label: 'TLS Certificate Swap',   start: '2024-03-13T09:30:00', end: '2024-03-13T10:30:00', category: 'task',     grouping: 'API' },
+        { id: 304, label: 'Rate Limit Tuning',      start: '2024-03-13T10:00:00', end: '2024-03-13T11:30:00', category: 'task',     grouping: 'API' },
+        { id: 305, label: 'Memory Leak Detected',   start: '2024-03-13T11:00:00', end: '2024-03-13T14:00:00', category: 'incident', grouping: 'API' },
+        { id: 306, label: 'Gateway Timeouts',       start: '2024-03-13T11:30:00', end: '2024-03-13T13:00:00', category: 'incident', grouping: 'API' },
+        { id: 307, label: 'OOM Kill',               start: '2024-03-13T11:15:00', category: 'alert', grouping: 'API' },
+        { id: 308, label: 'Pod Restart',            start: '2024-03-13T11:20:00', category: 'alert', grouping: 'API' },
+        { id: 309, label: 'Heap Dump Captured',     start: '2024-03-13T11:45:00', category: 'alert', grouping: 'API' },
+        { id: 310, label: 'Circuit Breaker Open',   start: '2024-03-13T12:00:00', category: 'alert', grouping: 'API' },
+        { id: 311, label: 'Replica Lag > 10s',      start: '2024-03-13T13:00:00', end: '2024-03-13T15:00:00', category: 'incident', grouping: 'Database' },
+        { id: 312, label: 'Write Timeout Errors',   start: '2024-03-13T13:30:00', end: '2024-03-13T14:30:00', category: 'incident', grouping: 'Database' },
+        { id: 313, label: 'Replica Lag Alert',      start: '2024-03-13T13:05:00', category: 'alert', grouping: 'Database' },
+        { id: 314, label: 'Failover Initiated',     start: '2024-03-13T14:30:00', category: 'alert', grouping: 'Database' },
+        { id: 315, label: 'DB Backup',              start: '2024-03-13T20:00:00', end: '2024-03-13T22:00:00', category: 'task',     grouping: 'Database' },
+        { id: 316, label: 'Replica Resync',         start: '2024-03-13T20:30:00', end: '2024-03-13T23:00:00', category: 'task',     grouping: 'Database' },
+        { id: 317, label: 'Log Rotation',           start: '2024-03-13T22:00:00', end: '2024-03-13T23:00:00', category: 'task',     grouping: 'API' },
+
+        // ── March 14 (Thu) — DEFAULT VISIBLE RANGE — major outage, very dense ──
+        // Morning: deploy + parallel prep tasks
+        { id: 1,   label: 'v2.4.0 → Staging',       start: '2024-03-14T06:30:00', end: '2024-03-14T08:00:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 2,   label: 'Migration v2.4.0',        start: '2024-03-14T06:30:00', end: '2024-03-14T08:00:00', category: 'task',     grouping: 'Database' },
+        { id: 3,   label: 'Staging E2E Tests',       start: '2024-03-14T07:00:00', end: '2024-03-14T08:30:00', category: 'task',     grouping: 'Releases' },
+        { id: 4,   label: 'SSL Cert Rotation',       start: '2024-03-14T07:00:00', end: '2024-03-14T09:00:00', category: 'task',     grouping: 'API' },
+        { id: 5,   label: 'DNS Propagation',         start: '2024-03-14T07:30:00', end: '2024-03-14T09:00:00', category: 'task',     grouping: 'API' },
+        { id: 6,   label: 'Config Sync',             start: '2024-03-14T08:00:00', end: '2024-03-14T09:30:00', category: 'task',     grouping: 'API' },
+        { id: 7,   label: 'Schema Validation',       start: '2024-03-14T07:30:00', end: '2024-03-14T08:30:00', category: 'task',     grouping: 'Database' },
+        { id: 8,   label: 'Staging Passed',          start: '2024-03-14T08:30:00', category: 'alert', grouping: 'Releases' },
+
+        // Mid-morning: production deploy + canary
+        { id: 10,  label: 'v2.4.0 → Production',    start: '2024-03-14T09:00:00', end: '2024-03-14T10:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 11,  label: 'Canary Analysis',         start: '2024-03-14T09:30:00', end: '2024-03-14T10:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 12,  label: 'Feature Flag: Payments',  start: '2024-03-14T09:30:00', end: '2024-03-14T10:00:00', category: 'deploy',   grouping: 'Releases' },
+
+        // 10:00–12:30: cascading outage — lots of overlapping incidents + alerts
+        { id: 20,  label: 'API Latency Spike',       start: '2024-03-14T10:00:00', end: '2024-03-14T12:30:00', category: 'incident', grouping: 'API' },
+        { id: 21,  label: 'Payment Timeouts',        start: '2024-03-14T10:10:00', end: '2024-03-14T11:30:00', category: 'incident', grouping: 'API' },
+        { id: 22,  label: 'Search Degraded',         start: '2024-03-14T10:20:00', end: '2024-03-14T12:00:00', category: 'incident', grouping: 'API' },
+        { id: 23,  label: 'Auth Failures',           start: '2024-03-14T10:30:00', end: '2024-03-14T11:45:00', category: 'incident', grouping: 'API' },
+        { id: 24,  label: 'Webhook Backlog',         start: '2024-03-14T10:45:00', end: '2024-03-14T12:00:00', category: 'incident', grouping: 'API' },
+        { id: 30,  label: 'CPU > 90%',               start: '2024-03-14T10:05:00', category: 'alert', grouping: 'API' },
+        { id: 31,  label: 'Error Rate > 5%',         start: '2024-03-14T10:15:00', category: 'alert', grouping: 'API' },
+        { id: 32,  label: 'P1 Page Sent',            start: '2024-03-14T10:20:00', category: 'alert', grouping: 'API' },
+        { id: 33,  label: 'Latency P99 > 3s',        start: '2024-03-14T10:35:00', category: 'alert', grouping: 'API' },
+        { id: 34,  label: 'Memory > 85%',            start: '2024-03-14T10:50:00', category: 'alert', grouping: 'API' },
+        { id: 35,  label: 'Queue Depth > 10k',       start: '2024-03-14T11:00:00', category: 'alert', grouping: 'API' },
+        { id: 36,  label: 'Rollback v2.4.0',         start: '2024-03-14T12:20:00', category: 'alert', grouping: 'Releases' },
+
+        // 12:30–15:00: DB cascade from the outage
+        { id: 40,  label: 'DB Connection Pool',      start: '2024-03-14T12:30:00', end: '2024-03-14T15:00:00', category: 'incident', grouping: 'Database' },
+        { id: 41,  label: 'Lock Contention',         start: '2024-03-14T12:45:00', end: '2024-03-14T14:00:00', category: 'incident', grouping: 'Database' },
+        { id: 42,  label: 'Replication Delay',       start: '2024-03-14T13:00:00', end: '2024-03-14T14:30:00', category: 'incident', grouping: 'Database' },
+        { id: 43,  label: 'Query Timeout Surge',     start: '2024-03-14T13:15:00', end: '2024-03-14T14:15:00', category: 'incident', grouping: 'Database' },
+        { id: 44,  label: 'Pool Exhausted',          start: '2024-03-14T12:35:00', category: 'alert', grouping: 'Database' },
+        { id: 45,  label: 'Max Connections Hit',     start: '2024-03-14T12:50:00', category: 'alert', grouping: 'Database' },
+        { id: 46,  label: 'Replica Lag > 30s',       start: '2024-03-14T13:05:00', category: 'alert', grouping: 'Database' },
+        { id: 47,  label: 'Deadlock Detected',       start: '2024-03-14T13:30:00', category: 'alert', grouping: 'Database' },
+        { id: 48,  label: 'DB Failover',             start: '2024-03-14T14:50:00', category: 'alert', grouping: 'Database' },
+
+        // Afternoon: hotfix + recovery
+        { id: 50,  label: 'v2.4.1 Hotfix',          start: '2024-03-14T14:00:00', end: '2024-03-14T15:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 51,  label: 'Hotfix Canary',           start: '2024-03-14T14:30:00', end: '2024-03-14T15:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 52,  label: 'Hotfix Verified',         start: '2024-03-14T15:35:00', category: 'alert', grouping: 'Releases' },
+        { id: 53,  label: 'Cache Flush',             start: '2024-03-14T15:00:00', category: 'alert', grouping: 'API' },
+        { id: 54,  label: 'Pool Resize',             start: '2024-03-14T15:00:00', end: '2024-03-14T16:00:00', category: 'task',     grouping: 'Database' },
+        { id: 55,  label: 'Connection Drain',        start: '2024-03-14T15:00:00', end: '2024-03-14T15:45:00', category: 'task',     grouping: 'API' },
+        { id: 56,  label: 'Queue Replay',            start: '2024-03-14T15:30:00', end: '2024-03-14T16:30:00', category: 'task',     grouping: 'API' },
+        { id: 57,  label: 'Webhook Retry',           start: '2024-03-14T15:30:00', end: '2024-03-14T17:00:00', category: 'task',     grouping: 'API' },
+        { id: 58,  label: 'DB Vacuum & Reindex',     start: '2024-03-14T16:00:00', end: '2024-03-14T17:30:00', category: 'task',     grouping: 'Database' },
+        { id: 59,  label: 'Slow Log Analysis',       start: '2024-03-14T16:00:00', end: '2024-03-14T17:00:00', category: 'task',     grouping: 'Database' },
+        { id: 60,  label: 'Stats Refresh',           start: '2024-03-14T16:30:00', end: '2024-03-14T17:30:00', category: 'task',     grouping: 'Database' },
+
+        // Evening: final deploy + overnight tasks
+        { id: 70,  label: 'v2.4.2 → Production',    start: '2024-03-14T19:00:00', end: '2024-03-14T20:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 71,  label: 'Post-Deploy Canary',      start: '2024-03-14T19:30:00', end: '2024-03-14T20:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 72,  label: 'Health Check OK',         start: '2024-03-14T20:35:00', category: 'alert', grouping: 'API' },
+        { id: 73,  label: 'Disk Usage > 80%',        start: '2024-03-14T21:00:00', category: 'alert', grouping: 'Database' },
+        { id: 74,  label: 'Storage Cleanup',         start: '2024-03-14T21:00:00', end: '2024-03-14T22:30:00', category: 'task',     grouping: 'Database' },
+        { id: 75,  label: 'Archive Old Logs',        start: '2024-03-14T21:00:00', end: '2024-03-14T23:00:00', category: 'task',     grouping: 'API' },
+        { id: 76,  label: 'Incident Postmortem',     start: '2024-03-14T21:30:00', end: '2024-03-14T22:30:00', category: 'task',     grouping: 'API' },
+
+        // ── March 15 (Fri) — release day, overlapping deploys + another incident ──
+        { id: 400, label: 'v2.5.0-rc1 → Staging',   start: '2024-03-15T07:00:00', end: '2024-03-15T08:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 401, label: 'DB Migration v2.5',       start: '2024-03-15T07:00:00', end: '2024-03-15T08:30:00', category: 'task',     grouping: 'Database' },
+        { id: 402, label: 'E2E Test Suite',          start: '2024-03-15T07:30:00', end: '2024-03-15T09:00:00', category: 'task',     grouping: 'Releases' },
+        { id: 403, label: 'Staging Tests Failed',    start: '2024-03-15T08:35:00', category: 'alert', grouping: 'Releases' },
+        { id: 404, label: 'Migration Rollback',      start: '2024-03-15T08:40:00', category: 'alert', grouping: 'Database' },
+        { id: 405, label: 'v2.5.0-rc2 → Staging',   start: '2024-03-15T10:00:00', end: '2024-03-15T11:00:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 406, label: 'Regression Tests',        start: '2024-03-15T10:00:00', end: '2024-03-15T11:30:00', category: 'task',     grouping: 'Releases' },
+        { id: 407, label: 'Perf Benchmark',          start: '2024-03-15T10:30:00', end: '2024-03-15T12:00:00', category: 'task',     grouping: 'Releases' },
+        { id: 408, label: 'Rate Limiter Outage',     start: '2024-03-15T11:30:00', end: '2024-03-15T13:30:00', category: 'incident', grouping: 'API' },
+        { id: 409, label: 'Auth Token Failures',     start: '2024-03-15T11:45:00', end: '2024-03-15T13:00:00', category: 'incident', grouping: 'API' },
+        { id: 410, label: 'Session Store Overflow',  start: '2024-03-15T12:00:00', end: '2024-03-15T13:00:00', category: 'incident', grouping: 'API' },
+        { id: 411, label: '429 Spike',               start: '2024-03-15T11:35:00', category: 'alert', grouping: 'API' },
+        { id: 412, label: 'Token Refresh Errors',    start: '2024-03-15T11:50:00', category: 'alert', grouping: 'API' },
+        { id: 413, label: 'User Reports Flooding',   start: '2024-03-15T12:10:00', category: 'alert', grouping: 'API' },
+        { id: 414, label: 'Redis Cluster Restart',   start: '2024-03-15T13:00:00', end: '2024-03-15T13:30:00', category: 'task',     grouping: 'Database' },
+        { id: 415, label: 'Redis Sentinel Failover', start: '2024-03-15T13:00:00', end: '2024-03-15T13:20:00', category: 'task',     grouping: 'Database' },
+        { id: 416, label: 'v2.5.0 → Production',    start: '2024-03-15T14:00:00', end: '2024-03-15T15:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 417, label: 'Canary Monitoring',       start: '2024-03-15T14:30:00', end: '2024-03-15T15:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 418, label: 'All Green',               start: '2024-03-15T15:35:00', category: 'alert', grouping: 'API' },
+        { id: 419, label: 'CDN Warm-up',             start: '2024-03-15T15:30:00', end: '2024-03-15T16:30:00', category: 'task',     grouping: 'API' },
+        { id: 420, label: 'Cache Preload',           start: '2024-03-15T16:00:00', end: '2024-03-15T17:00:00', category: 'task',     grouping: 'API' },
+        { id: 421, label: 'Weekend DB Backup',       start: '2024-03-15T22:00:00', end: '2024-03-16T00:30:00', category: 'task',     grouping: 'Database' },
+        { id: 422, label: 'Replica Snapshot',        start: '2024-03-15T22:30:00', end: '2024-03-16T01:00:00', category: 'task',     grouping: 'Database' },
+        { id: 423, label: 'Log Archive',             start: '2024-03-15T23:00:00', end: '2024-03-16T00:00:00', category: 'task',     grouping: 'API' },
+
+        // ── March 16 (Sat) — weekend maintenance window ──
+        { id: 500, label: 'Cert Expiry Warning',     start: '2024-03-16T03:00:00', category: 'alert', grouping: 'API' },
+        { id: 501, label: 'Auto-Scaling Event',      start: '2024-03-16T09:00:00', end: '2024-03-16T10:00:00', category: 'task',     grouping: 'API' },
+        { id: 502, label: 'Node Drain',              start: '2024-03-16T09:00:00', end: '2024-03-16T09:30:00', category: 'task',     grouping: 'API' },
+        { id: 503, label: 'Disk IOPS Spike',         start: '2024-03-16T10:00:00', end: '2024-03-16T12:00:00', category: 'incident', grouping: 'Database' },
+        { id: 504, label: 'Checkpoint Stall',        start: '2024-03-16T10:30:00', end: '2024-03-16T11:30:00', category: 'incident', grouping: 'Database' },
+        { id: 505, label: 'IOPS Alert',              start: '2024-03-16T10:05:00', category: 'alert', grouping: 'Database' },
+        { id: 506, label: 'WAL Backlog Alert',       start: '2024-03-16T10:35:00', category: 'alert', grouping: 'Database' },
+        { id: 507, label: 'Snapshot Restore Test',   start: '2024-03-16T14:00:00', end: '2024-03-16T16:00:00', category: 'task',     grouping: 'Database' },
+        { id: 508, label: 'Schema Validation',       start: '2024-03-16T14:30:00', end: '2024-03-16T15:30:00', category: 'task',     grouping: 'Database' },
+        { id: 509, label: 'Kernel Patch',            start: '2024-03-16T16:00:00', end: '2024-03-16T17:00:00', category: 'task',     grouping: 'API' },
+        { id: 510, label: 'Node Rolling Restart',    start: '2024-03-16T16:00:00', end: '2024-03-16T18:00:00', category: 'task',     grouping: 'API' },
+        { id: 511, label: 'Firewall Rule Audit',     start: '2024-03-16T16:30:00', end: '2024-03-16T17:30:00', category: 'task',     grouping: 'API' }
       ]
     });
   </script>
