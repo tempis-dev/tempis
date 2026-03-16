@@ -62,6 +62,13 @@ export interface TempisTimelineOptions {
     onItemDoubleClick?(id: string | number): void;
 
     onSelectionChange?(changes: SelectionChangeEvent[]): void;
+
+    /**
+     * Called when the visible range of the timeline changes due to panning, zooming, or programmatic updates.
+     * @param start The start date of the visible range.
+     * @param end The end date of the visible range.
+     */
+    onRangeChange?(start: Date, end: Date): void;
 }
 
 /**

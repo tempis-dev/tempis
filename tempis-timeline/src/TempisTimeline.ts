@@ -46,6 +46,12 @@ export class TempisTimeline {
     /** The canvas container resize observer. */
     private _canvasContainerResizeObserver: ResizeObserver | null = null;
 
+    /** The last known range start time, used to detect range changes. */
+    private _lastRangeFromTime: number = 0;
+
+    /** The last known range end time, used to detect range changes. */
+    private _lastRangeToTime: number = 0;
+
     /** The event handler references for cleanup. */
     private _eventHandlers: {
         pointerdown: ((event: PointerEvent) => void) | null;
@@ -808,6 +814,32 @@ export class TempisTimeline {
 
         // Clear the canvas from below the bottom of the bottom range view or bottom of the timeline or the bottom of the legend.
         context.clearRect(0, renderOffsetY, this._canvas.clientWidth, this._canvas.clientHeight - renderOffsetY);
+
+        // Handle any post-draw logic.
+        this._onAfterDraw();
+    }
+
+    /**
+     * Called after each draw cycle to handle any post-draw logic.
+     */
+    private _onAfterDraw(): void {
+        // Check if the range has changed and fire the `onRangeChange` callback if so.
+        if (this._options.onRangeChange) {
+            // Grab the current from and to date of the range view.
+            const fromTime = this._rangeView.fromDt.getTime();
+            const toTime = this._rangeView.toDt.getTime();
+
+            // Has the from or to time of the range changed since last time?
+            if (fromTime !== this._lastRangeFromTime || toTime !== this._lastRangeToTime) {
+                this._lastRangeFromTime = fromTime;
+                this._lastRangeToTime = toTime;
+                const from = this._rangeView.fromDt;
+                const to = this._rangeView.toDt;
+
+                // Uses queueMicrotask to prevent issues if callbacks trigger another draw.
+                queueMicrotask(() => this._options.onRangeChange!(from, to));
+            }
+        }
     }
 
     /**
