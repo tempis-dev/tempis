@@ -837,7 +837,10 @@
         overflowBehavior: document.getElementById('tooltipOverflow').value
       },
       categories: generateCategories(categoryCount),
-      items
+      items,
+      grouping: {
+        sort: (a, b) => a.localeCompare(b)
+      },
     };
   }
 

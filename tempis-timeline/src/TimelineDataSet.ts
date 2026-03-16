@@ -314,6 +314,12 @@ export class TimelineDataSet {
             );
         }
 
+        // Sort groups if a sort function is provided.
+        if (options.grouping?.sort) {
+            const sortFunction = options.grouping.sort;
+            this._groupings.sort((a, b) => sortFunction(a.group, b.group));
+        }
+
         // Find the min and max dates of any start/end item dates.
         this._findMinAndMaxDates();
     }

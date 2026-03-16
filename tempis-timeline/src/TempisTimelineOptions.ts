@@ -33,6 +33,9 @@ export interface TempisTimelineOptions {
     /** The scrollbar visibility options. */
     scrollbar?: TempisTimelineScrollbarOptions;
 
+    /** The timeline grouping options. */
+    grouping?: TempisTimelineGroupingOptions;
+
     /** The timeline item categories. */
     categories?: TempisTimelineCategory[];
 
@@ -170,6 +173,15 @@ export interface TempisTimelineScrollbarOptions {
  * - `"never"` – The scrollbar is never shown.
  */
 export type TempisTimelineScrollbarVisibility = "always" | "hover" | "panning" | "never";
+
+export interface TempisTimelineGroupingOptions {
+    /**
+     * A comparator function used to sort groups.
+     * Receives two group name strings and should return a negative number, zero, or positive number.
+     * If not provided, groups are ordered by first encounter in the items array.
+     */
+    sort?: (a: string, b: string) => number;
+}
 
 export interface TempisTimelineFont {
     /** The font size. */
