@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tempis Timeline — Canvas-powered timeline for the web</title>
+  <link rel="icon" type="image/png" href="logo-design-2.png">
   <link rel="stylesheet" href="styles.css">
+  <script src="../dist/tempis_timeline.js"></script>
 </head>
 <body>
   <nav>
@@ -26,7 +28,7 @@
   </nav>
 
   <section class="hero">
-    <h1>Simple, flexible <span>timeline</span> for the web</h1>
+    <h1>A simple, flexible <span>timeline</span> for the web</h1>
     <p>A lightweight, canvas-rendered timeline library with smooth interactions, touch support, and zero dependencies.</p>
     <div class="hero-buttons">
       <a href="get-started.html" class="btn btn-primary">Get Started</a>
@@ -36,6 +38,52 @@
       </a>
     </div>
   </section>
+
+  <section style="max-width:var(--max-width);margin:0 auto;padding:40px 24px 0;">
+    <div style="width:100%;height:500px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);">
+      <canvas id="hero-demo"></canvas>
+    </div>
+  </section>
+
+  <script>
+    const { TempisTimeline } = tempis_timeline;
+    new TempisTimeline('#hero-demo', {
+      responsive: true,
+      verticalFill: 'fill-canvas',
+      range: {
+        start: '2024-03-14T06:00:00',
+        end: '2024-03-14T18:00:00',
+        position: 'bottom'
+      },
+      legend: { position: 'top' },
+      tooltip: { enabled: false },
+      scrollbar: { visibility: 'never' },
+      style: {
+        item: { borderRadius: 4, fontColor: '#fff' }
+      },
+      categories: [
+        { name: 'deploy',   label: 'Deployments',  style: { backgroundColor: '#667eea', fontColor: '#fff' } },
+        { name: 'incident', label: 'Incidents',     style: { backgroundColor: '#e84393', fontColor: '#fff' } },
+        { name: 'alert',    label: 'Alerts',        style: { backgroundColor: '#fdcb6e', fontColor: '#2d3748' } },
+        { name: 'task',     label: 'Maintenance',   style: { backgroundColor: '#00b894', fontColor: '#fff' } }
+      ],
+      items: [
+        { id: 1,  label: 'v2.4.0 → Staging',       start: '2024-03-14T06:30:00', end: '2024-03-14T08:00:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 2,  label: 'v2.4.0 → Production',     start: '2024-03-14T09:00:00', end: '2024-03-14T10:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 3,  label: 'v2.4.1 Hotfix',           start: '2024-03-14T15:00:00', end: '2024-03-14T16:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 4,  label: 'API Latency Spike',       start: '2024-03-14T10:00:00', end: '2024-03-14T12:30:00', category: 'incident', grouping: 'API' },
+        { id: 5,  label: 'DB Connection Pool',      start: '2024-03-14T13:00:00', end: '2024-03-14T15:00:00', category: 'incident', grouping: 'Database' },
+        { id: 6,  label: 'CPU > 90%',               start: '2024-03-14T10:10:00', category: 'alert', grouping: 'API' },
+        { id: 7,  label: 'Error Rate > 5%',         start: '2024-03-14T10:40:00', category: 'alert', grouping: 'API' },
+        { id: 8,  label: 'Rollback v2.4.0',         start: '2024-03-14T12:20:00', category: 'alert', grouping: 'Releases' },
+        { id: 9,  label: 'Pool Exhausted',           start: '2024-03-14T13:10:00', category: 'alert', grouping: 'Database' },
+        { id: 10, label: 'DB Failover',              start: '2024-03-14T14:50:00', category: 'alert', grouping: 'Database' },
+        { id: 11, label: 'DB Vacuum & Reindex',     start: '2024-03-14T16:00:00', end: '2024-03-14T17:30:00', category: 'task', grouping: 'Database' },
+        { id: 12, label: 'SSL Cert Rotation',       start: '2024-03-14T08:00:00', end: '2024-03-14T09:00:00', category: 'task', grouping: 'API' },
+        { id: 13, label: 'Cache Flush',              start: '2024-03-14T15:00:00', category: 'alert', grouping: 'API' }
+      ]
+    });
+  </script>
 
   <section class="features">
     <div class="features-grid">

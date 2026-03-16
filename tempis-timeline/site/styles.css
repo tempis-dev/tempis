@@ -176,7 +176,7 @@ nav .nav-github:hover {
 
 /* Features grid */
 .features {
-  padding: 80px 24px;
+  padding: 48px 24px 80px;
   max-width: var(--max-width);
   margin: 0 auto;
 }
