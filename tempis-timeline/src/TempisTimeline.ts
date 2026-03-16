@@ -189,6 +189,14 @@ export class TempisTimeline {
     }
 
     /**
+     * Gets the current visible range of the timeline.
+     * @returns An object containing the start and end dates of the visible range.
+     */
+    public getRange(): { start: Date; end: Date } {
+        return { start: this._rangeView.fromDt, end: this._rangeView.toDt };
+    }
+
+    /**
      * Sets the timeline items and redraws the timeline.
      * @param items The timeline items to set.
      */
