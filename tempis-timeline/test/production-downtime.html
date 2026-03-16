@@ -546,6 +546,176 @@
                     severity: 'Low',
                     cost: '$120'
                 }
+            },
+            {
+                id: 16,
+                label: 'Motor Overheating',
+                start: new Date(2024, 0, 15, 15, 30),
+                end: new Date(2024, 0, 15, 16, 45),
+                category: 'electrical',
+                grouping: 'Machine A',
+                style: { fontColor: '#ffffff' },
+                details: {
+                    cause: 'Drive motor exceeded temperature threshold',
+                    recordedBy: 'Lisa Anderson',
+                    resolution: 'Replaced cooling fan and cleaned ventilation ducts',
+                    notes: 'Dust buildup restricted airflow. Added monthly vent cleaning to schedule.',
+                    severity: 'High',
+                    cost: '$880'
+                }
+            },
+            {
+                id: 17,
+                label: 'Pneumatic Line Leak',
+                start: new Date(2024, 0, 15, 6, 30),
+                end: new Date(2024, 0, 15, 7, 15),
+                category: 'mechanical',
+                grouping: 'Machine B',
+                style: { fontColor: '#ffffff' },
+                details: {
+                    cause: 'Air leak detected in pneumatic actuator line',
+                    recordedBy: 'Tom Wilson',
+                    resolution: 'Replaced fitting and tested for leaks',
+                    notes: 'Fitting had corroded. Switching to stainless steel fittings.',
+                    severity: 'Low',
+                    cost: '$90'
+                }
+            },
+            {
+                id: 18,
+                label: 'Batch Contamination',
+                start: new Date(2024, 0, 15, 11, 0),
+                end: new Date(2024, 0, 15, 12, 30),
+                category: 'quality',
+                grouping: 'Machine A',
+                style: { fontColor: '#ffffff' },
+                details: {
+                    cause: 'Cross-contamination from previous product run',
+                    recordedBy: 'Quality Control',
+                    resolution: 'Full machine purge and cleaning cycle',
+                    notes: 'Changeover procedure updated to include mandatory purge step.',
+                    severity: 'High',
+                    cost: '$1,400'
+                }
+            },
+            {
+                id: 19,
+                label: 'Coolant System Flush',
+                start: new Date(2024, 0, 15, 17, 0),
+                end: new Date(2024, 0, 15, 18, 0),
+                category: 'maintenance',
+                grouping: 'Machine B',
+                style: { fontColor: '#ffffff' },
+                details: {
+                    cause: 'Scheduled coolant replacement',
+                    recordedBy: 'Maintenance Team',
+                    resolution: 'Flushed system and refilled with fresh coolant',
+                    notes: 'Coolant concentration was within limits but discolored. No issues found.',
+                    severity: 'Low',
+                    cost: '$220'
+                }
+            },
+            {
+                id: 20,
+                label: 'Die Changeover',
+                start: new Date(2024, 0, 15, 9, 0),
+                end: new Date(2024, 0, 15, 10, 0),
+                category: 'changeover',
+                grouping: 'Machine C',
+                style: { fontColor: '#ffffff' },
+                details: {
+                    cause: 'Switching to new die set for order #4521',
+                    recordedBy: 'Production Supervisor',
+                    resolution: 'Die installed and first article inspection passed',
+                    notes: 'New quick-change system reduced changeover time by 20%.',
+                    severity: 'Low',
+                    cost: '$160'
+                }
+            },
+            {
+                id: 21,
+                label: 'Packaging Material Shortage',
+                start: new Date(2024, 0, 15, 14, 30),
+                end: new Date(2024, 0, 15, 15, 15),
+                category: 'material',
+                grouping: 'Machine B',
+                style: { fontColor: '#ffffff' },
+                details: {
+                    cause: 'Ran out of packaging material mid-run',
+                    recordedBy: 'Mike Chen',
+                    resolution: 'Expedited delivery from warehouse',
+                    notes: 'Kanban levels being reviewed. Min stock level increased.',
+                    severity: 'Medium',
+                    cost: '$350'
+                }
+            },
+            {
+                id: 22,
+                label: 'VFD Fault',
+                start: new Date(2024, 0, 15, 7, 0),
+                end: new Date(2024, 0, 15, 8, 30),
+                category: 'electrical',
+                grouping: 'Machine C',
+                style: { fontColor: '#ffffff' },
+                details: {
+                    cause: 'Variable frequency drive threw overcurrent fault',
+                    recordedBy: 'Sarah Johnson',
+                    resolution: 'Cleared fault, inspected wiring, and performed test run',
+                    notes: 'Intermittent wiring issue found. Reterminated motor leads.',
+                    severity: 'High',
+                    cost: '$750'
+                }
+            },
+            {
+                id: 23,
+                label: 'Gearbox Noise',
+                start: new Date(2024, 0, 15, 16, 0),
+                end: new Date(2024, 0, 15, 17, 0),
+                category: 'mechanical',
+                grouping: 'Machine B',
+                style: { fontColor: '#ffffff' },
+                details: {
+                    cause: 'Unusual grinding noise from main gearbox',
+                    recordedBy: 'John Smith',
+                    resolution: 'Replaced worn gear and topped up oil',
+                    notes: 'Gear teeth showed excessive wear. Ordering spare set for stock.',
+                    severity: 'Medium',
+                    cost: '$680'
+                }
+            },
+            {
+                id: 24,
+                label: 'Surface Finish Defects',
+                start: new Date(2024, 0, 15, 10, 15),
+                end: new Date(2024, 0, 15, 11, 0),
+                category: 'quality',
+                grouping: 'Machine B',
+                style: { fontColor: '#ffffff' },
+                details: {
+                    cause: 'Surface roughness exceeding specification',
+                    recordedBy: 'Quality Control',
+                    resolution: 'Replaced worn insert and adjusted feed rate',
+                    notes: 'Insert life tracking implemented to prevent recurrence.',
+                    severity: 'Medium',
+                    cost: '$420'
+                }
+            },
+            {
+                id: 25,
+                label: 'Adhesive Supply Issue',
+                start: new Date(2024, 0, 15, 12, 0),
+                end: new Date(2024, 0, 15, 12, 30),
+                category: 'material',
+                grouping: 'Machine A',
+                style: { fontColor: '#ffffff' },
+                details: {
+                    cause: 'Adhesive viscosity out of spec due to temperature',
+                    recordedBy: 'Mike Chen',
+                    resolution: 'Conditioned adhesive to correct temperature and tested',
+                    notes: 'Storage area temperature control being installed.',
+                    severity: 'Low',
+                    cost: '$180'
+                }
             }
         ];
         
