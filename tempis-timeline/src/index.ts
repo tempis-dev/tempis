@@ -6,8 +6,9 @@ import {
     TempisTimelineScrollbarVisibility
 } from "./TempisTimelineOptions";
 import { FocusOptions } from "./FocusController";
+import { AdapterRegistry } from "./AdapterRegistry";
 
-export { TempisTimeline };
+export { TempisTimeline, AdapterRegistry };
 
 export type {
     TempisTimelineOptions,

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timezone Demo — Luxon Adapter</title>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+  <script src="../dist/tempis_timeline.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { margin-top: 0; color: #333; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .controls label {
+      font-weight: 600;
+      color: #333;
+    }
+    .controls select {
+      padding: 8px 12px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: white;
+      min-width: 240px;
+    }
+    .current-time {
+      margin-left: auto;
+      padding: 8px 16px;
+      background: #e3f2fd;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #1565c0;
+    }
+    .timeline-container {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      height: 600px;
+      overflow: hidden;
+    }
+    .info {
+      margin-top: 15px;
+      padding: 15px;
+      background: #e3f2fd;
+      border-left: 4px solid #2196F3;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Global Flight Schedule</h1>
+    <p class="subtitle">View international flight departures in different timezones using the Luxon date adapter.</p>
+    
+    <div class="controls">
+      <label for="timezone">Timezone:</label>
+      <select id="timezone">
+        <option value="UTC">UTC (Coordinated Universal Time)</option>
+        <option value="America/New_York">New York (EST/EDT)</option>
+        <option value="America/Los_Angeles">Los Angeles (PST/PDT)</option>
+        <option value="Europe/London">London (GMT/BST)</option>
+        <option value="Europe/Paris">Paris (CET/CEST)</option>
+        <option value="Asia/Tokyo">Tokyo (JST)</option>
+        <option value="Asia/Shanghai">Shanghai (CST)</option>
+        <option value="Asia/Dubai">Dubai (GST)</option>
+        <option value="Australia/Sydney">Sydney (AEST/AEDT)</option>
+        <option value="Pacific/Auckland">Auckland (NZST/NZDT)</option>
+      </select>
+      <div class="current-time" id="currentTime"></div>
+    </div>
+    
+    <div class="timeline-container">
+      <canvas id="canvas"></canvas>
+    </div>
+    
+    <div class="info">
+      <strong>Luxon Date Adapter</strong><br>
+      This demo uses a custom Luxon-based date adapter to render all times in the selected timezone. The adapter is registered globally via <code>AdapterRegistry.register()</code>, and the timeline is recreated when the timezone changes. All flight times are stored as UTC timestamps but displayed in the local time of the selected timezone.
+    </div>
+  </div>
+
+<script>
+const { DateTime } = luxon;
+
+// Luxon date adapter implementation
+class LuxonAdapter {
+  constructor(timezone = 'UTC') {
+    this.timezone = timezone;
+  }
+
+  parse(input) {
+    if (input == null) return null;
+    if (typeof input === 'number') return isNaN(input) ? null : input;
+    if (input instanceof Date) {
+      const ts = input.getTime();
+      return isNaN(ts) ? null : ts;
+    }
+    if (typeof input === 'string') {
+      const dt = DateTime.fromISO(input, { zone: 'UTC' });
+      return dt.isValid ? dt.toMillis() : null;
+    }
+    return null;
+  }
+
+  startOf(instant, unit) {
+    return DateTime.fromMillis(instant, { zone: this.timezone })
+      .startOf(unit)
+      .toMillis();
+  }
+
+  add(instant, unit, amount) {
+    const pluralUnit = unit === 'millisecond' ? 'milliseconds' :
+                       unit === 'second' ? 'seconds' :
+                       unit === 'minute' ? 'minutes' :
+                       unit === 'hour' ? 'hours' :
+                       unit === 'day' ? 'days' :
+                       unit === 'week' ? 'weeks' :
+                       unit === 'month' ? 'months' :
+                       unit === 'year' ? 'years' : unit;
+    return DateTime.fromMillis(instant, { zone: this.timezone })
+      .plus({ [pluralUnit]: amount })
+      .toMillis();
+  }
+
+  format(instant, pattern) {
+    // Map date-format-parse tokens to Luxon tokens
+    const luxonPattern = pattern
+      .replace(/YYYY/g, 'yyyy')
+      .replace(/MMMM/g, 'LLLL')
+      .replace(/MMM/g, 'LLL')
+      .replace(/MM/g, 'LL')
+      .replace(/ddd/g, 'ccc')
+      .replace(/DD/g, 'dd')
+      .replace(/\bD\b/g, 'd')
+      .replace(/SSS/g, 'SSS');
+    // HH, mm, ss are the same in both
+    return DateTime.fromMillis(instant, { zone: this.timezone }).toFormat(luxonPattern);
+  }
+}
+
+// Flight data - stored as UTC timestamps
+// Using March 16, 2026 as the reference date (current date from context)
+const baseDate = DateTime.fromISO('2026-03-16T00:00:00Z');
+
+const flights = [
+  // Departures from JFK (New York)
+  { id: 1,  label: 'AA100 JFK→LHR', start: baseDate.plus({ hours: 8 }).toISO(),  end: baseDate.plus({ hours: 15 }).toISO(), category: 'transatlantic', grouping: 'New York (JFK)' },
+  { id: 2,  label: 'BA178 JFK→LHR', start: baseDate.plus({ hours: 10 }).toISO(), end: baseDate.plus({ hours: 17 }).toISO(), category: 'transatlantic', grouping: 'New York (JFK)' },
+  { id: 3,  label: 'DL1 JFK→CDG',   start: baseDate.plus({ hours: 19 }).toISO(), end: baseDate.plus({ hours: 26 }).toISO(), category: 'transatlantic', grouping: 'New York (JFK)' },
+  { id: 4,  label: 'UA15 JFK→NRT',  start: baseDate.plus({ hours: 12 }).toISO(), end: baseDate.plus({ hours: 26 }).toISO(), category: 'transpacific', grouping: 'New York (JFK)' },
+
+  // Departures from LAX (Los Angeles)
+  { id: 10, label: 'AA1 LAX→JFK',   start: baseDate.plus({ hours: 7 }).toISO(),  end: baseDate.plus({ hours: 12 }).toISO(), category: 'domestic', grouping: 'Los Angeles (LAX)' },
+  { id: 11, label: 'UA890 LAX→NRT', start: baseDate.plus({ hours: 11 }).toISO(), end: baseDate.plus({ hours: 23 }).toISO(), category: 'transpacific', grouping: 'Los Angeles (LAX)' },
+  { id: 12, label: 'QF12 LAX→SYD',  start: baseDate.plus({ hours: 22 }).toISO(), end: baseDate.plus({ hours: 37 }).toISO(), category: 'transpacific', grouping: 'Los Angeles (LAX)' },
+  { id: 13, label: 'DL47 LAX→LHR',  start: baseDate.plus({ hours: 16 }).toISO(), end: baseDate.plus({ hours: 27 }).toISO(), category: 'transatlantic', grouping: 'Los Angeles (LAX)' },
+
+  // Departures from LHR (London)
+  { id: 20, label: 'BA115 LHR→JFK', start: baseDate.plus({ hours: 9 }).toISO(),  end: baseDate.plus({ hours: 17 }).toISO(), category: 'transatlantic', grouping: 'London (LHR)' },
+  { id: 21, label: 'VS3 LHR→JFK',   start: baseDate.plus({ hours: 11 }).toISO(), end: baseDate.plus({ hours: 19 }).toISO(), category: 'transatlantic', grouping: 'London (LHR)' },
+  { id: 22, label: 'BA5 LHR→NRT',   start: baseDate.plus({ hours: 13 }).toISO(), end: baseDate.plus({ hours: 25 }).toISO(), category: 'transpacific', grouping: 'London (LHR)' },
+  { id: 23, label: 'EK2 LHR→DXB',   start: baseDate.plus({ hours: 8 }).toISO(),  end: baseDate.plus({ hours: 15 }).toISO(), category: 'middleeast', grouping: 'London (LHR)' },
+  { id: 24, label: 'QF2 LHR→SYD',   start: baseDate.plus({ hours: 21 }).toISO(), end: baseDate.plus({ hours: 45 }).toISO(), category: 'transpacific', grouping: 'London (LHR)' },
+
+  // Departures from NRT (Tokyo)
+  { id: 30, label: 'NH10 NRT→LAX',  start: baseDate.plus({ hours: 1 }).toISO(),  end: baseDate.plus({ hours: 11 }).toISO(), category: 'transpacific', grouping: 'Tokyo (NRT)' },
+  { id: 31, label: 'JL6 NRT→JFK',   start: baseDate.plus({ hours: 2 }).toISO(),  end: baseDate.plus({ hours: 15 }).toISO(), category: 'transpacific', grouping: 'Tokyo (NRT)' },
+  { id: 32, label: 'NH211 NRT→LHR', start: baseDate.plus({ hours: 11 }).toISO(), end: baseDate.plus({ hours: 23 }).toISO(), category: 'transatlantic', grouping: 'Tokyo (NRT)' },
+  { id: 33, label: 'QF22 NRT→SYD',  start: baseDate.plus({ hours: 19 }).toISO(), end: baseDate.plus({ hours: 29 }).toISO(), category: 'transpacific', grouping: 'Tokyo (NRT)' },
+
+  // Departures from SYD (Sydney)
+  { id: 40, label: 'QF11 SYD→LAX',  start: baseDate.plus({ hours: 0 }).toISO(),  end: baseDate.plus({ hours: 14 }).toISO(), category: 'transpacific', grouping: 'Sydney (SYD)' },
+  { id: 41, label: 'QF1 SYD→LHR',   start: baseDate.plus({ hours: 6 }).toISO(),  end: baseDate.plus({ hours: 30 }).toISO(), category: 'transatlantic', grouping: 'Sydney (SYD)' },
+  { id: 42, label: 'EK413 SYD→DXB', start: baseDate.plus({ hours: 14 }).toISO(), end: baseDate.plus({ hours: 28 }).toISO(), category: 'middleeast', grouping: 'Sydney (SYD)' },
+  { id: 43, label: 'NZ104 SYD→AKL', start: baseDate.plus({ hours: 8 }).toISO(),  end: baseDate.plus({ hours: 11 }).toISO(), category: 'domestic', grouping: 'Sydney (SYD)' },
+
+  // Departures from DXB (Dubai)
+  { id: 50, label: 'EK1 DXB→LHR',   start: baseDate.plus({ hours: 3 }).toISO(),  end: baseDate.plus({ hours: 10 }).toISO(), category: 'middleeast', grouping: 'Dubai (DXB)' },
+  { id: 51, label: 'EK201 DXB→JFK', start: baseDate.plus({ hours: 9 }).toISO(),  end: baseDate.plus({ hours: 23 }).toISO(), category: 'transatlantic', grouping: 'Dubai (DXB)' },
+  { id: 52, label: 'EK412 DXB→SYD', start: baseDate.plus({ hours: 2 }).toISO(),  end: baseDate.plus({ hours: 16 }).toISO(), category: 'transpacific', grouping: 'Dubai (DXB)' },
+  { id: 53, label: 'EK318 DXB→NRT', start: baseDate.plus({ hours: 22 }).toISO(), end: baseDate.plus({ hours: 32 }).toISO(), category: 'transpacific', grouping: 'Dubai (DXB)' },
+
+  // Point-in-time events (gate closures, departures)
+  { id: 100, label: '🛫 AA100 Departs',  start: baseDate.plus({ hours: 8 }).toISO(),  category: 'departure', grouping: 'New York (JFK)' },
+  { id: 101, label: '🛫 BA115 Departs',  start: baseDate.plus({ hours: 9 }).toISO(),  category: 'departure', grouping: 'London (LHR)' },
+  { id: 102, label: '🛫 NH10 Departs',   start: baseDate.plus({ hours: 1 }).toISO(),  category: 'departure', grouping: 'Tokyo (NRT)' },
+  { id: 103, label: '🛫 QF11 Departs',   start: baseDate.plus({ hours: 0 }).toISO(),  category: 'departure', grouping: 'Sydney (SYD)' },
+  { id: 104, label: '🛫 EK1 Departs',    start: baseDate.plus({ hours: 3 }).toISO(),  category: 'departure', grouping: 'Dubai (DXB)' },
+  { id: 105, label: '🛫 AA1 Departs',    start: baseDate.plus({ hours: 7 }).toISO(),  category: 'departure', grouping: 'Los Angeles (LAX)' },
+];
+
+let timeline = null;
+
+function updateCurrentTime(timezone) {
+  const now = DateTime.now().setZone(timezone);
+  document.getElementById('currentTime').textContent = 
+    `Current time: ${now.toFormat('ccc, LLL d yyyy HH:mm')} (${timezone})`;
+}
+
+function createTimeline(timezone) {
+  // Register the Luxon adapter with the selected timezone
+  tempis_timeline.AdapterRegistry.register(new LuxonAdapter(timezone));
+
+  // Destroy existing timeline if any
+  if (timeline) {
+    timeline.destroy();
+  }
+
+  // Create new timeline
+  timeline = new tempis_timeline.TempisTimeline("#canvas", {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    selection: 'single',
+    range: {
+      start: baseDate.toISO(),
+      end: baseDate.plus({ hours: 36 }).toISO(),
+      position: 'bottom'
+    },
+    legend: { position: 'top' },
+    grouping: {
+      sort: (a, b) => a.localeCompare(b)
+    },
+    categories: [
+      { name: 'transatlantic', label: 'Transatlantic',  style: { backgroundColor: '#4c63d2', fontColor: '#fff' } },
+      { name: 'transpacific',  label: 'Transpacific',   style: { backgroundColor: '#00a67e', fontColor: '#fff' } },
+      { name: 'middleeast',    label: 'Middle East',    style: { backgroundColor: '#f0a500', fontColor: '#2d3748' } },
+      { name: 'domestic',      label: 'Domestic',       style: { backgroundColor: '#9b59b6', fontColor: '#fff' } },
+      { name: 'departure',     label: 'Departures',     style: { backgroundColor: '#d63384', fontColor: '#fff' } }
+    ],
+    tooltip: {
+      enabled: true,
+      delay: 200
+    },
+    items: flights
+  });
+
+  updateCurrentTime(timezone);
+}
+
+// Initialize with UTC
+createTimeline('UTC');
+
+// Handle timezone changes
+document.getElementById('timezone').addEventListener('change', (e) => {
+  createTimeline(e.target.value);
+});
+
+// Update current time every second
+setInterval(() => {
+  const timezone = document.getElementById('timezone').value;
+  updateCurrentTime(timezone);
+}, 1000);
+</script>
+</body>
+</html>
