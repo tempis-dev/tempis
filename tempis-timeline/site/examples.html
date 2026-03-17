@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Examples — Tempis Timeline</title>
-  <link rel="icon" type="image/png" href="logo-design-2.png">
+  <link rel="icon" type="image/png" href="images/logo.png">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <nav>
     <div class="nav-inner">
       <a href="index.html" class="logo">
-        <img src="logo-design-2.png" alt="Tempis">
+        <img src="images/logo.png" alt="Tempis">
         Tempis
       </a>
       <ul class="nav-links">
@@ -33,104 +33,163 @@
     <h2>Featured</h2>
     <div class="examples-grid">
       <a href="../test/playground.html" class="example-card">
-        <h3>🎮 Playground</h3>
-        <p>Interactive testing environment with controls for all timeline options. Adjust layout, styling, data, and behavior in real-time.</p>
+        <div class="example-card-text">
+          <h3>🎮 Playground</h3>
+          <p>Interactive testing environment with controls for all timeline options. Adjust layout, styling, data, and behavior in real-time.</p>
+        </div>
+        <img class="example-card-img" src="images/examples/playground_tile.png"></img>
       </a>
       <a href="../test/streaming-data.html" class="example-card">
-        <h3>📡 Crypto Price Stream</h3>
-        <p>Live cryptocurrency prices via WebSocket. Demonstrates real-time data updates with color-coded price movements.</p>
+        <div class="example-card-text">
+          <h3>📡 Crypto Price Stream</h3>
+          <p>Live cryptocurrency prices via WebSocket. Demonstrates real-time data updates with color-coded price movements.</p>
+        </div>
+        <img class="example-card-img" src="images/examples/crypto_tile.png"></img>
       </a>
       <a href="../test/production-downtime.html" class="example-card">
-        <h3>🏭 Production Downtime</h3>
-        <p>Downtime tracking with selection-driven detail panels. Shows animated layout transitions and controlled selection.</p>
-      </a>
-      <a href="../test/keypress.html" class="example-card">
-        <h3>⌨️ Keypress Timeline</h3>
-        <p>Keyboard event visualization. Short presses create point-in-time items, long presses create live-updating range items.</p>
+        <div class="example-card-text">
+          <h3>🏭 Production Downtime</h3>
+          <p>Downtime tracking with selection-driven detail panels. Shows animated layout transitions and controlled selection.</p>
+        </div>
+        <img class="example-card-img" src="images/examples/production_tile.png"></img>
       </a>
       <a href="../test/lazy-loading.html" class="example-card">
-        <h3>🔄 Lazy Loading</h3>
-        <p>Server request logs loaded on demand as you pan. Demonstrates onRangeChange with debounced fetching and caching.</p>
+        <div class="example-card-text">
+          <h3>🔄 Lazy Loading</h3>
+          <p>Server request logs loaded on demand as you pan. Demonstrates onRangeChange with debounced fetching and caching.</p>
+        </div>
+        <img class="example-card-img" src="images/examples/logs_tile.png"></img>
       </a>
       <a href="../test/custom-tooltips.html" class="example-card">
-        <h3>💬 Custom Tooltips</h3>
-        <p>Project sprint tracker with rich tooltip cards showing assignee details, status, priority, and progress bars.</p>
-      </a>
-      <a href="../test/focus-animation.html" class="example-card">
-        <h3>🎯 Focus &amp; Animation</h3>
-        <p>Animated focus transitions to items, dates, and ranges with configurable easing functions.</p>
+        <div class="example-card-text">
+          <h3>💬 Custom Tooltips</h3>
+          <p>Project sprint tracker with rich tooltip cards showing assignee details, status, priority, and progress bars.</p>
+        </div>
+        <img class="example-card-img" src="images/examples/tooltips_tile.png"></img>
       </a>
       <a href="../test/timezones.html" class="example-card">
-        <h3>🌍 Timezone Explorer</h3>
-        <p>Global flight schedule with using a custom Luxon-based date adapter. Switch timezones and watch the timeline re-render in different local times.</p>
+        <div class="example-card-text">
+          <h3>🌍 Timezone Explorer</h3>
+          <p>Global flight schedule using a custom Luxon-based date adapter. Switch timezones and watch the timeline re-render in different local times.</p>
+        </div>
+        <img class="example-card-img" src="images/examples/flights_tile.png"></img>
+      </a>
+      <a href="../test/keypress.html" class="example-card">
+        <div class="example-card-text">
+          <h3>⌨️ Keypress Timeline</h3>
+          <p>Keyboard event visualization. Short presses create point-in-time items, long presses create live-updating range items.</p>
+        </div>
+        <img class="example-card-img" src="images/examples/keylog_tile.png"></img>
       </a>
     </div>
 
     <h2>Basic</h2>
     <div class="examples-grid">
       <a href="../test/basic.html" class="example-card">
-        <h3>Basic Timeline</h3>
-        <p>Simple timeline with basic configuration and sample data.</p>
+        <div class="example-card-text">
+          <h3>Basic Timeline</h3>
+          <p>Simple timeline with basic configuration and sample data.</p>
+        </div>
+        <div class="example-card-img"></div>
       </a>
       <a href="../test/categories.html" class="example-card">
-        <h3>Categories</h3>
-        <p>Item categorization with legend, filtering, and color-coded items.</p>
+        <div class="example-card-text">
+          <h3>Categories</h3>
+          <p>Item categorization with legend, filtering, and color-coded items.</p>
+        </div>
+        <div class="example-card-img"></div>
       </a>
       <a href="../test/bands.html" class="example-card">
-        <h3>Bands</h3>
-        <p>Vertical time bands for highlighting specific time periods.</p>
+        <div class="example-card-text">
+          <h3>Bands</h3>
+          <p>Vertical time bands for highlighting specific time periods.</p>
+        </div>
+        <div class="example-card-img"></div>
       </a>
       <a href="../test/selection.html" class="example-card">
-        <h3>Selection</h3>
-        <p>Single and multi-selection modes with selection change callbacks.</p>
+        <div class="example-card-text">
+          <h3>Selection</h3>
+          <p>Single and multi-selection modes with selection change callbacks.</p>
+        </div>
+        <div class="example-card-img"></div>
       </a>
     </div>
 
     <h2>Layout &amp; Styling</h2>
     <div class="examples-grid">
       <a href="../test/stack-mode.html" class="example-card">
-        <h3>Stack Modes</h3>
-        <p>Compare compact vs stable stacking for item vertical arrangement.</p>
+        <div class="example-card-text">
+          <h3>Stack Modes</h3>
+          <p>Compare compact vs stable stacking for item vertical arrangement.</p>
+        </div>
+        <div class="example-card-img"></div>
       </a>
       <a href="../test/vertical-fill.html" class="example-card">
-        <h3>Vertical Fill</h3>
-        <p>Content, fill-canvas, and grow-canvas vertical fill modes.</p>
+        <div class="example-card-text">
+          <h3>Vertical Fill</h3>
+          <p>Content, fill-canvas, and grow-canvas vertical fill modes.</p>
+        </div>
+        <div class="example-card-img"></div>
       </a>
       <a href="../test/styling.html" class="example-card">
-        <h3>Custom Styling</h3>
-        <p>Custom colors, fonts, borders, and visual themes.</p>
+        <div class="example-card-text">
+          <h3>Custom Styling</h3>
+          <p>Custom colors, fonts, borders, and visual themes.</p>
+        </div>
+        <div class="example-card-img"></div>
       </a>
       <a href="../test/rtl.html" class="example-card">
-        <h3>Right-to-Left</h3>
-        <p>Full RTL layout support for right-to-left languages.</p>
+        <div class="example-card-text">
+          <h3>Right-to-Left</h3>
+          <p>Full RTL layout support for right-to-left languages.</p>
+        </div>
+        <div class="example-card-img"></div>
       </a>
       <a href="../test/fullscreen.html" class="example-card">
-        <h3>Fullscreen</h3>
-        <p>Timeline filling the entire viewport.</p>
+        <div class="example-card-text">
+          <h3>Fullscreen</h3>
+          <p>Timeline filling the entire viewport.</p>
+        </div>
+        <div class="example-card-img"></div>
       </a>
       <a href="../test/tooltips.html" class="example-card">
-        <h3>Tooltips</h3>
-        <p>Custom tooltip templates and overflow behavior.</p>
+        <div class="example-card-text">
+          <h3>Tooltips</h3>
+          <p>Custom tooltip templates and overflow behavior.</p>
+        </div>
+        <div class="example-card-img"></div>
       </a>
     </div>
 
     <h2>Advanced</h2>
     <div class="examples-grid">
       <a href="../test/stress-test.html" class="example-card">
-        <h3>Stress Test</h3>
-        <p>Performance testing with large datasets and many items.</p>
+        <div class="example-card-text">
+          <h3>Stress Test</h3>
+          <p>Performance testing with large datasets and many items.</p>
+        </div>
+        <div class="example-card-img"></div>
       </a>
       <a href="../test/set-items.html" class="example-card">
-        <h3>Dynamic Updates</h3>
-        <p>Dynamically updating items with setItems().</p>
+        <div class="example-card-text">
+          <h3>Dynamic Updates</h3>
+          <p>Dynamically updating items with setItems().</p>
+        </div>
+        <div class="example-card-img"></div>
       </a>
       <a href="../test/min_max.html" class="example-card">
-        <h3>Min/Max Range</h3>
-        <p>Constrained date ranges with min and max boundaries.</p>
+        <div class="example-card-text">
+          <h3>Min/Max Range</h3>
+          <p>Constrained date ranges with min and max boundaries.</p>
+        </div>
+        <div class="example-card-img"></div>
       </a>
       <a href="../test/static.html" class="example-card">
-        <h3>Static Timeline</h3>
-        <p>Non-interactive timeline with fixed range and disabled controls.</p>
+        <div class="example-card-text">
+          <h3>Static Timeline</h3>
+          <p>Non-interactive timeline with fixed range and disabled controls.</p>
+        </div>
+        <div class="example-card-img"></div>
       </a>
     </div>
   </div>
