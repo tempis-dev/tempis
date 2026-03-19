@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Palettes — Tempis Timeline</title>
+  <script src="../dist/tempis_timeline.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { margin-top: 0; color: #333; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+    .palette-selector {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .palette-card {
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .palette-card:hover { border-color: #999; }
+    .palette-card.active {
+      border-color: #1565c0;
+      box-shadow: 0 0 0 2px rgba(21,101,192,0.2);
+    }
+    .palette-name {
+      font-weight: 600;
+      font-size: 13px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .palette-swatches { display: flex; gap: 4px; }
+    .swatch { flex: 1; height: 20px; border-radius: 3px; }
+    .timeline-container {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      height: 500px;
+      overflow: hidden;
+    }
+    .info {
+      margin-top: 15px;
+      padding: 15px;
+      background: #e3f2fd;
+      border-left: 4px solid #2196F3;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Color Palettes</h1>
+    <p class="subtitle">Select a palette to change the timeline's category colors. Single-day tech conference with 5 rooms and 10 session tracks.</p>
+
+    <div class="palette-selector" id="paletteSelector"></div>
+
+    <div class="timeline-container">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="info">
+      <strong>Global Color Palette</strong><br>
+      Use <code>TempisTimeline.setGlobalPalette(colors)</code> to define a custom color palette. Categories that don't specify an explicit <code>backgroundColor</code> will cycle through the palette colors in order. Call <code>setCategories()</code> after changing the palette to apply the new colors.
+    </div>
+  </div>
+
+<script>
+const { TempisTimeline } = tempis_timeline;
+
+const palettes = {
+  'Default': ['#7cb620','#1982C4','#6A4C93','#FF595E','#e2b436','#BDBF09','#2292A4','#79B791','#87255B','#B370B0'],
+  'Ocean': ['#0077b6','#00b4d8','#0096c7','#023e8a','#48cae4','#90e0ef','#0353a4','#006d77','#83c5be','#468faf'],
+  'Sunset': ['#e63946','#f4845f','#f7b267','#f25c54','#c1121f','#ff6b6b','#ee6c4d','#f77f00','#fcbf49','#d62828'],
+  'Forest': ['#2d6a4f','#40916c','#52b788','#74c69d','#95d5b2','#1b4332','#588157','#3a5a40','#a3b18a','#344e41'],
+  'Monochrome': ['#212529','#495057','#6c757d','#adb5bd','#343a40','#868e96','#ced4da','#5a6268','#999','#bbb'],
+  'Pastel': ['#f28b82','#f7a072','#fdd663','#81c995','#78d9ec','#8ab4f8','#b694f7','#f48fb1','#c792ea','#e57fa8'],
+  'Earth': ['#6b4226','#a0522d','#cd853f','#deb887','#8b7355','#bc8f8f','#d2691e','#b8860b','#c19a6b','#a67b5b'],
+  'Neon': ['#ff006e','#8338ec','#3a86ff','#fb5607','#ffbe0b','#06d6a0','#118ab2','#ef476f','#ffd166','#073b4c'],
+  'Berry': ['#7b2d8e','#9b2335','#c04cfd','#e0457b','#a855f7','#db2777','#7c3aed','#be185d','#6d28d9','#ec4899'],
+  'Arctic': ['#1e3a5f','#3b82f6','#60a5fa','#93c5fd','#bfdbfe','#1d4ed8','#2563eb','#7dd3fc','#38bdf8','#0ea5e9'],
+  'Playground': ['#4CAF50','#2196F3','#FF9800','#E91E63','#9C27B0','#00BCD4','#FFEB3B','#795548','#607D8B','#F44336'],
+  'Candy': ['#f472b6','#c084fc','#67e8f9','#a3e635','#fbbf24','#fb923c','#f87171','#34d399','#818cf8','#e879f9']
+};
+
+// Categories without explicit colors — they'll pull from the palette
+const categories = [
+  { name: 'keynote',    label: 'Keynote' },
+  { name: 'web',        label: 'Web' },
+  { name: 'mobile',     label: 'Mobile' },
+  { name: 'cloud',      label: 'Cloud & Infra' },
+  { name: 'data',       label: 'Data & AI' },
+  { name: 'security',   label: 'Security' },
+  { name: 'devtools',   label: 'Dev Tools' },
+  { name: 'workshop',   label: 'Workshop' },
+  { name: 'community',  label: 'Community' },
+  { name: 'leadership', label: 'Leadership' }
+];
+
+// Single-day tech conference: 8am–6pm, 5 rooms running in parallel
+const base = new Date('2026-03-16T08:00:00');
+const h = (hours) => new Date(base.getTime() + hours * 3600000).toISOString();
+
+const items = [
+  // Room A
+  { id: 1,  label: 'Opening Keynote',           start: h(0),    end: h(1),    category: 'keynote',    grouping: 'Room A' },
+  { id: 2,  label: 'React Server Components',   start: h(1),    end: h(2),    category: 'web',        grouping: 'Room A' },
+  { id: 3,  label: 'TypeScript 6 Deep Dive',    start: h(2),    end: h(3),    category: 'web',        grouping: 'Room A' },
+  { id: 4,  label: 'CSS Container Queries',     start: h(3),    end: h(4),    category: 'web',        grouping: 'Room A' },
+  { id: 5,  label: 'Next.js App Router',        start: h(4.5),  end: h(5.5),  category: 'web',        grouping: 'Room A' },
+  { id: 6,  label: 'WASM Beyond the Browser',   start: h(5.5),  end: h(6.5),  category: 'web',        grouping: 'Room A' },
+  { id: 7,  label: 'Svelte 5 Runes',            start: h(6.5),  end: h(7.5),  category: 'web',        grouping: 'Room A' },
+  { id: 8,  label: 'GraphQL Federation',        start: h(7.5),  end: h(8.5),  category: 'web',        grouping: 'Room A' },
+  { id: 9,  label: 'Astro & Islands',           start: h(8.5),  end: h(9.5),  category: 'web',        grouping: 'Room A' },
+
+  // Room B
+  { id: 10, label: 'Building with SwiftUI',     start: h(1),    end: h(2),    category: 'mobile',     grouping: 'Room B' },
+  { id: 11, label: 'Flutter Performance',       start: h(2),    end: h(3),    category: 'mobile',     grouping: 'Room B' },
+  { id: 12, label: 'Kotlin Multiplatform',      start: h(3),    end: h(4),    category: 'mobile',     grouping: 'Room B' },
+  { id: 13, label: 'Jetpack Compose Animations',start: h(4.5),  end: h(5.5),  category: 'mobile',     grouping: 'Room B' },
+  { id: 14, label: 'React Native New Arch',     start: h(5.5),  end: h(6.5),  category: 'mobile',     grouping: 'Room B' },
+  { id: 15, label: 'Edge AI on Mobile',         start: h(6.5),  end: h(7.5),  category: 'mobile',     grouping: 'Room B' },
+  { id: 16, label: 'Mobile CI/CD Pipelines',    start: h(7.5),  end: h(8.5),  category: 'mobile',     grouping: 'Room B' },
+  { id: 17, label: 'App Store Optimization',    start: h(8.5),  end: h(9.5),  category: 'mobile',     grouping: 'Room B' },
+
+  // Room C
+  { id: 20, label: 'Kubernetes at Scale',       start: h(1),    end: h(2),    category: 'cloud',      grouping: 'Room C' },
+  { id: 21, label: 'Terraform Best Practices',  start: h(2),    end: h(3),    category: 'cloud',      grouping: 'Room C' },
+  { id: 22, label: 'Serverless at Scale',       start: h(3),    end: h(4),    category: 'cloud',      grouping: 'Room C' },
+  { id: 23, label: 'Platform Engineering',      start: h(4.5),  end: h(5.5),  category: 'cloud',      grouping: 'Room C' },
+  { id: 24, label: 'Zero Trust Architecture',   start: h(5.5),  end: h(6.5),  category: 'security',   grouping: 'Room C' },
+  { id: 25, label: 'Supply Chain Security',     start: h(6.5),  end: h(7.5),  category: 'security',   grouping: 'Room C' },
+  { id: 26, label: 'Pen Testing for Devs',      start: h(7.5),  end: h(8.5),  category: 'security',   grouping: 'Room C' },
+  { id: 27, label: 'Secrets Management',        start: h(8.5),  end: h(9.5),  category: 'security',   grouping: 'Room C' },
+
+  // Room D
+  { id: 30, label: 'Intro to LLM Fine-Tuning', start: h(1),    end: h(2),    category: 'data',       grouping: 'Room D' },
+  { id: 31, label: 'RAG Architectures',         start: h(2),    end: h(3),    category: 'data',       grouping: 'Room D' },
+  { id: 32, label: 'Vector Databases',          start: h(3),    end: h(4),    category: 'data',       grouping: 'Room D' },
+  { id: 33, label: 'ML Pipelines with Kubeflow',start: h(4.5),  end: h(5.5),  category: 'data',       grouping: 'Room D' },
+  { id: 34, label: 'Real-Time Data Streaming',  start: h(5.5),  end: h(6.5),  category: 'data',       grouping: 'Room D' },
+  { id: 35, label: 'Data Mesh Patterns',        start: h(6.5),  end: h(7.5),  category: 'data',       grouping: 'Room D' },
+  { id: 36, label: 'Incident Response',         start: h(7.5),  end: h(8.5),  category: 'security',   grouping: 'Room D' },
+  { id: 37, label: 'Observability & OTel',      start: h(8.5),  end: h(9.5),  category: 'devtools',   grouping: 'Room D' },
+
+  // Room E
+  { id: 40, label: 'VS Code Extensions',        start: h(1),    end: h(3),    category: 'workshop',   grouping: 'Room E' },
+  { id: 41, label: 'Git Internals Workshop',    start: h(3),    end: h(4),    category: 'workshop',   grouping: 'Room E' },
+  { id: 42, label: 'Open Source Panel',         start: h(4.5),  end: h(5.5),  category: 'community',  grouping: 'Room E' },
+  { id: 43, label: 'Building Dev Communities',  start: h(5.5),  end: h(6.5),  category: 'community',  grouping: 'Room E' },
+  { id: 44, label: 'Engineering Management',    start: h(6.5),  end: h(7.5),  category: 'leadership', grouping: 'Room E' },
+  { id: 45, label: 'Staff Engineer Path',       start: h(7.5),  end: h(8.5),  category: 'leadership', grouping: 'Room E' },
+  { id: 46, label: 'Scaling Eng Teams',         start: h(1),    end: h(2),    category: 'leadership', grouping: 'Room E' },
+  { id: 47, label: 'Debugging Production',      start: h(2),    end: h(3),    category: 'devtools',   grouping: 'Room E' },
+  { id: 48, label: 'Profiling & Tracing',       start: h(4.5),  end: h(5.5),  category: 'devtools',   grouping: 'Room E' },
+  { id: 49, label: 'Contributor Sprint',        start: h(8.5),  end: h(9.5),  category: 'community',  grouping: 'Room E' },
+  { id: 50, label: 'Closing Keynote',           start: h(9.5),  end: h(10),   category: 'keynote',    grouping: 'Room A' },
+];
+
+// Build palette selector cards
+const selectorEl = document.getElementById('paletteSelector');
+let activePaletteName = 'Default';
+
+Object.entries(palettes).forEach(([name, colors]) => {
+  const card = document.createElement('div');
+  card.className = 'palette-card' + (name === activePaletteName ? ' active' : '');
+  card.innerHTML = `<div class="palette-name">${name}</div><div class="palette-swatches">${
+    colors.slice(0, 8).map(c => `<div class="swatch" style="background:${c}"></div>`).join('')
+  }</div>`;
+  card.addEventListener('click', () => selectPalette(name, colors));
+  selectorEl.appendChild(card);
+});
+
+// Create timeline
+const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  verticalFill: 'fill-canvas',
+  selection: 'single',
+  range: {
+    start: base.toISOString(),
+    end: h(10),
+    position: 'bottom'
+  },
+  legend: { position: 'top' },
+  grouping: { sort: (a, b) => a.localeCompare(b) },
+  categories: categories,
+  tooltip: { enabled: true, delay: 200 },
+  items: items
+});
+
+function selectPalette(name, colors) {
+  activePaletteName = name;
+  document.querySelectorAll('.palette-card').forEach(c => c.classList.remove('active'));
+  event.currentTarget.closest('.palette-card').classList.add('active');
+
+  // Set the new global palette and re-apply categories to pick up the new colors.
+  TempisTimeline.setGlobalPalette(colors);
+  timeline.setCategories(categories.map(c => ({ name: c.name, label: c.label })));
+}
+</script>
+</body>
+</html>

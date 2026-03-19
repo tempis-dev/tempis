@@ -11,6 +11,7 @@ import { SelectionChangeEvent } from "./Event";
 import { TempisTimelineDateAdapter } from "./TempisTimelineDateAdapter";
 import { AdapterRegistry } from "./AdapterRegistry";
 import { FocusController, FocusOptions } from "./FocusController";
+import { ColorPalette } from "./ColorPalette";
 
 export class TempisTimeline {
     /** The timeline canvas. */
@@ -158,6 +159,22 @@ export class TempisTimeline {
      */
     static getDateAdapter(): TempisTimelineDateAdapter {
         return AdapterRegistry.get();
+    }
+
+    /**
+     * Set the global color palette used for categories that don't specify an explicit backgroundColor.
+     * @param palette An array of color strings.
+     */
+    static setGlobalPalette(palette: string[]): void {
+        ColorPalette.set(palette);
+    }
+
+    /**
+     * Get the current global color palette.
+     * @returns The global color palette array.
+     */
+    static getGlobalPalette(): string[] {
+        return ColorPalette.get();
     }
 
     /** Gets the item selection mode. */

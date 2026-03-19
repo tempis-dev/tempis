@@ -1,7 +1,7 @@
 import { TempisTimelineItem, TempisTimelineItemStyle, TempisTimelineOptions } from "./TempisTimelineOptions";
 import { TimelineItemGrouping } from "./TimelineItemGrouping";
 import { TimelineItemCategory } from "./TimelineItemCategory";
-import { getGlobalPalette } from "./ColorPalette";
+import { ColorPalette } from "./ColorPalette";
 import { DEFAULT_ITEM_STYLE, TimelineItem } from "./TimelineItem";
 import { defaults } from "./Utilities";
 
@@ -233,7 +233,7 @@ export class TimelineDataSet {
             let paletteIndex = 0;
 
             // Grab the global color palette.
-            const palette = getGlobalPalette();
+            const palette = ColorPalette.get();
 
             while (true) {
                 yield palette[paletteIndex];
