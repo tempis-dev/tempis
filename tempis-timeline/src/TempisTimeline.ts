@@ -23,7 +23,7 @@ export class TempisTimeline {
     private readonly _dataSet: TimelineDataSet;
 
     /** The timeline bands. */
-    private readonly _bands: TimelineBand[];
+    private _bands: TimelineBand[];
 
     /** The timeline data view. */
     private readonly _dataView: TimelineDataView;
@@ -230,9 +230,11 @@ export class TempisTimeline {
         // Update the timeline options with the new bands.
         this._options.bands = bands;
 
-        // Update the dataset with options object containing the updated bands.
-        // Note: The dataset update will trigger the registered update callback which calls _draw().
-        this._dataSet.update(this._options);
+        // Recreate the TimelineBand objects from the new definitions.
+        this._bands = bands.map((definition) => new TimelineBand(definition));
+
+        // Bands are purely visual — no dataset update needed, just redraw.
+        this._draw();
     }
 
     /**

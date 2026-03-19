@@ -161,7 +161,6 @@
                     responsive: true,
                     verticalFill: 'fill-canvas',
                     items: [],
-                    bands: [], // Will be updated with current time band
                     range: {
                         position: 'bottom',
                         start: startTime,
@@ -252,19 +251,6 @@
             // Focus on the current time to keep the timeline moving
             const now = new Date();
             
-            // Update the current time band - PIT band (no end date)
-            currentTimeBand = {
-                start: now,
-                style: {
-                    color: '#FF5722',
-                    opacity: 1.0,
-                    borderColor: '#FF5722',
-                    borderThickness: 3
-                }
-            };
-            
-            timeline.setBands([currentTimeBand]);
-            
             timeline.focus({
                 date: now,
                 animate: true,
@@ -306,8 +292,6 @@
         autoScrollToggle.addEventListener('change', (event) => {
             autoScrollEnabled = event.target.checked;
             if (!autoScrollEnabled) {
-                // Clear the current time band when auto-scroll is disabled
-                timeline.setBands([]);
             }
         });
         
