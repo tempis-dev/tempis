@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bands Demo — Server Monitoring</title>
+  <script src="../dist/tempis_timeline.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { margin-top: 0; color: #333; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+    .timeline-container {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      height: 600px;
+      overflow: hidden;
+    }
+    .info {
+      margin-top: 15px;
+      padding: 15px;
+      background: #e3f2fd;
+      border-left: 4px solid #2196F3;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .band-legend {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #555;
+    }
+    .band-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .band-swatch {
+      width: 24px;
+      height: 14px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .band-swatch.line {
+      width: 3px;
+      height: 18px;
+      border-radius: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Server Monitoring — Weekly Overview</h1>
+    <p class="subtitle">Infrastructure events for a production Kubernetes cluster, March 10–16 2026.</p>
+
+    <div class="band-legend">
+      <div class="band-legend-item">
+        <div class="band-swatch" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);"></div>
+        Maintenance Window
+      </div>
+      <div class="band-legend-item">
+        <div class="band-swatch" style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);"></div>
+        Off-Peak Hours
+      </div>
+      <div class="band-legend-item">
+        <div class="band-swatch line" style="background:#dc2626;"></div>
+        Incident
+      </div>
+      <div class="band-legend-item">
+        <div class="band-swatch line" style="background:#059669;"></div>
+        Deployment
+      </div>
+    </div>
+
+    <div class="timeline-container">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="info">
+      <strong>Timeline Bands</strong><br>
+      Range bands (with <code>start</code> and <code>end</code>) highlight time periods like maintenance windows and off-peak hours.
+      Point-in-time bands (with only <code>start</code>) draw vertical marker lines for deployments and incidents.
+      Both types support custom colors, opacity, border styles, and thickness.
+    </div>
+  </div>
+
+<script>
+  // Week of March 10-16, 2026
+  const mon = '2026-03-10';
+  const tue = '2026-03-11';
+  const wed = '2026-03-12';
+  const thu = '2026-03-13';
+  const fri = '2026-03-14';
+  const sat = '2026-03-15';
+  const sun = '2026-03-16';
+  const monNext = '2026-03-17';
+
+  // Bands: maintenance windows, off-peak hours, incident lines, deployment lines
+  const bands = [
+    // Nightly off-peak windows (00:00–06:00 each day) — subtle yellow
+    ...[mon, tue, wed, thu, fri, sat, sun].map(d => ({
+      start: `${d}T00:00:00`, end: `${d}T06:00:00`,
+      style: { color: '#f59e0b', opacity: 0.12 }
+    })),
+
+    // Scheduled maintenance windows — indigo
+    { start: `${tue}T02:00:00`, end: `${tue}T04:30:00`, style: { color: '#6366f1', opacity: 0.15 } },
+    { start: `${thu}T01:00:00`, end: `${thu}T03:00:00`, style: { color: '#6366f1', opacity: 0.15 } },
+    { start: `${sat}T03:00:00`, end: `${sat}T07:00:00`, style: { color: '#6366f1', opacity: 0.15 } },
+
+    // Deployments — green PIT lines
+    { start: `${mon}T09:15:00`, style: { borderColor: '#059669', borderThickness: 2, opacity: 0.7 } },
+    { start: `${tue}T14:30:00`, style: { borderColor: '#059669', borderThickness: 2, opacity: 0.7 } },
+    { start: `${wed}T10:00:00`, style: { borderColor: '#059669', borderThickness: 2, opacity: 0.7 } },
+    { start: `${thu}T16:45:00`, style: { borderColor: '#059669', borderThickness: 2, opacity: 0.7 } },
+    { start: `${fri}T11:00:00`, style: { borderColor: '#059669', borderThickness: 2, opacity: 0.7 } },
+
+    // Incidents — red PIT lines
+    { start: `${wed}T13:22:00`, style: { borderColor: '#dc2626', borderThickness: 2, opacity: 0.8 } },
+    { start: `${fri}T08:47:00`, style: { borderColor: '#dc2626', borderThickness: 2, opacity: 0.8 } },
+  ];
+
+  const items = [
+    // API Gateway
+    { id: 1,  label: 'API Gateway healthy',       start: `${mon}T00:00:00`, end: `${wed}T13:22:00`, category: 'healthy', grouping: 'API Gateway' },
+    { id: 2,  label: '503 errors spike',           start: `${wed}T13:22:00`, end: `${wed}T14:10:00`, category: 'critical', grouping: 'API Gateway' },
+    { id: 3,  label: 'API Gateway recovered',      start: `${wed}T14:10:00`, end: `${fri}T08:47:00`, category: 'healthy', grouping: 'API Gateway' },
+    { id: 4,  label: 'Latency degradation',        start: `${fri}T08:47:00`, end: `${fri}T09:35:00`, category: 'warning', grouping: 'API Gateway' },
+    { id: 5,  label: 'API Gateway healthy',        start: `${fri}T09:35:00`, end: `${monNext}T00:00:00`, category: 'healthy', grouping: 'API Gateway' },
+
+    // Database Cluster
+    { id: 10, label: 'DB cluster healthy',         start: `${mon}T00:00:00`, end: `${tue}T02:00:00`, category: 'healthy', grouping: 'Database Cluster' },
+    { id: 11, label: 'Schema migration',           start: `${tue}T02:00:00`, end: `${tue}T04:30:00`, category: 'maintenance', grouping: 'Database Cluster' },
+    { id: 12, label: 'DB cluster healthy',         start: `${tue}T04:30:00`, end: `${thu}T01:00:00`, category: 'healthy', grouping: 'Database Cluster' },
+    { id: 13, label: 'Index rebuild',              start: `${thu}T01:00:00`, end: `${thu}T03:00:00`, category: 'maintenance', grouping: 'Database Cluster' },
+    { id: 14, label: 'DB cluster healthy',         start: `${thu}T03:00:00`, end: `${monNext}T00:00:00`, category: 'healthy', grouping: 'Database Cluster' },
+    { id: 15, label: 'Replication lag',            start: `${wed}T13:25:00`, end: `${wed}T13:55:00`, category: 'warning', grouping: 'Database Cluster' },
+
+    // Worker Nodes
+    { id: 20, label: 'Workers nominal',            start: `${mon}T00:00:00`, end: `${wed}T13:20:00`, category: 'healthy', grouping: 'Worker Nodes' },
+    { id: 21, label: 'Pod evictions',              start: `${wed}T13:20:00`, end: `${wed}T14:05:00`, category: 'critical', grouping: 'Worker Nodes' },
+    { id: 22, label: 'Workers nominal',            start: `${wed}T14:05:00`, end: `${sat}T03:00:00`, category: 'healthy', grouping: 'Worker Nodes' },
+    { id: 23, label: 'Node pool upgrade',          start: `${sat}T03:00:00`, end: `${sat}T07:00:00`, category: 'maintenance', grouping: 'Worker Nodes' },
+    { id: 24, label: 'Workers nominal',            start: `${sat}T07:00:00`, end: `${monNext}T00:00:00`, category: 'healthy', grouping: 'Worker Nodes' },
+    { id: 25, label: 'Memory pressure',            start: `${fri}T08:50:00`, end: `${fri}T09:20:00`, category: 'warning', grouping: 'Worker Nodes' },
+
+    // CDN / Edge
+    { id: 30, label: 'CDN healthy',                start: `${mon}T00:00:00`, end: `${fri}T08:47:00`, category: 'healthy', grouping: 'CDN / Edge' },
+    { id: 31, label: 'Cache miss rate elevated',   start: `${fri}T08:47:00`, end: `${fri}T09:30:00`, category: 'warning', grouping: 'CDN / Edge' },
+    { id: 32, label: 'CDN healthy',                start: `${fri}T09:30:00`, end: `${monNext}T00:00:00`, category: 'healthy', grouping: 'CDN / Edge' },
+
+    // Message Queue
+    { id: 40, label: 'Queue healthy',              start: `${mon}T00:00:00`, end: `${wed}T13:30:00`, category: 'healthy', grouping: 'Message Queue' },
+    { id: 41, label: 'Consumer backlog',           start: `${wed}T13:30:00`, end: `${wed}T15:00:00`, category: 'warning', grouping: 'Message Queue' },
+    { id: 42, label: 'Queue healthy',              start: `${wed}T15:00:00`, end: `${monNext}T00:00:00`, category: 'healthy', grouping: 'Message Queue' },
+
+    // PIT events — deployments
+    { id: 60, label: 'v2.14.0 deployed',           start: `${mon}T09:15:00`, category: 'deploy', grouping: 'API Gateway' },
+    { id: 61, label: 'v2.14.1 hotfix',             start: `${tue}T14:30:00`, category: 'deploy', grouping: 'API Gateway' },
+    { id: 62, label: 'v2.15.0 deployed',           start: `${wed}T10:00:00`, category: 'deploy', grouping: 'Worker Nodes' },
+    { id: 63, label: 'v2.15.1 rollback fix',       start: `${thu}T16:45:00`, category: 'deploy', grouping: 'API Gateway' },
+    { id: 64, label: 'v2.16.0 deployed',           start: `${fri}T11:00:00`, category: 'deploy', grouping: 'Worker Nodes' },
+
+    // PIT events — incidents
+    { id: 70, label: '⚠ INC-4421 opened',          start: `${wed}T13:22:00`, category: 'incident', grouping: 'API Gateway' },
+    { id: 71, label: '⚠ INC-4435 opened',          start: `${fri}T08:47:00`, category: 'incident', grouping: 'CDN / Edge' },
+  ];
+
+  window["timeline"] = new tempis_timeline.TempisTimeline("#canvas", {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    selection: 'single',
+    range: {
+      start: `${wed}T00:00:00`,
+      end: `${fri}T00:00:00`,
+      position: 'bottom'
+    },
+    legend: { position: 'top' },
+    grouping: {
+      sort: (a, b) => {
+        const order = ['API Gateway', 'Database Cluster', 'Worker Nodes', 'CDN / Edge', 'Message Queue'];
+        return order.indexOf(a) - order.indexOf(b);
+      }
+    },
+    categories: [
+      { name: 'healthy',     label: 'Healthy',     style: { backgroundColor: '#059669', fontColor: '#fff' } },
+      { name: 'warning',     label: 'Warning',     style: { backgroundColor: '#f59e0b', fontColor: '#2d3748' } },
+      { name: 'critical',    label: 'Critical',    style: { backgroundColor: '#dc2626', fontColor: '#fff' } },
+      { name: 'maintenance', label: 'Maintenance', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+      { name: 'deploy',      label: 'Deployment',  style: { backgroundColor: '#0891b2', fontColor: '#fff' } },
+      { name: 'incident',    label: 'Incident',    style: { backgroundColor: '#be123c', fontColor: '#fff' } }
+    ],
+    tooltip: { enabled: true, delay: 200 },
+    bands,
+    items
+  });
+</script>
+</body>
+</html>
