@@ -353,7 +353,7 @@ pre code {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 0;
-  transition: box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
   display: flex;
   align-items: stretch;
   gap: 0;
@@ -362,7 +362,8 @@ pre code {
 }
 
 .example-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
   text-decoration: none;
 }
 
