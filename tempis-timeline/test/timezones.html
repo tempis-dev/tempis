@@ -43,6 +43,25 @@
       background: white;
       min-width: 240px;
     }
+    .toggle-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toggle-btn {
+      padding: 8px 14px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      background: white;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .toggle-btn.active {
+      background: #1565c0;
+      color: white;
+      border-color: #1565c0;
+    }
     .current-time {
       margin-left: auto;
       padding: 8px 16px;
@@ -88,6 +107,11 @@
         <option value="Australia/Sydney">Sydney (AEST/AEDT)</option>
         <option value="Pacific/Auckland">Auckland (NZST/NZDT)</option>
       </select>
+      <div class="toggle-group">
+        <label>Time format:</label>
+        <button id="btn24h" class="toggle-btn active">24h</button>
+        <button id="btn12h" class="toggle-btn">12h</button>
+      </div>
       <div class="current-time" id="currentTime"></div>
     </div>
     
@@ -154,6 +178,9 @@ class LuxonAdapter {
       .replace(/ddd/g, 'ccc')
       .replace(/DD/g, 'dd')
       .replace(/\bD\b/g, 'd')
+      .replace(/\bhh\b/g, 'hh')   // 12-hour padded
+      .replace(/\bh\b/g, 'h')     // 12-hour
+      .replace(/\bA\b/g, 'a')     // AM/PM → Luxon 'a'
       .replace(/SSS/g, 'SSS');
     // HH, mm, ss are the same in both
     return DateTime.fromMillis(instant, { zone: this.timezone }).toFormat(luxonPattern);
@@ -212,11 +239,23 @@ const flights = [
 ];
 
 let timeline = null;
+let use12h = false;
+
+const formats24h = {
+  minor: { millisecond: 'SSS', second: 'HH:mm:ss', minute: 'HH:mm', hour: 'HH:mm', day: 'D', month: 'MMM', year: 'YYYY' },
+  major: { second: 'D MMMM HH:mm:ss', minute: 'D MMMM HH:mm', hour: 'ddd D MMMM HH:mm', day: 'ddd D MMMM', month: 'MMMM YYYY', year: 'YYYY' }
+};
+
+const formats12h = {
+  minor: { millisecond: 'SSS', second: 'h:mm:ss A', minute: 'h:mm A', hour: 'h:mm A', day: 'D', month: 'MMM', year: 'YYYY' },
+  major: { second: 'D MMMM h:mm:ss A', minute: 'D MMMM h:mm A', hour: 'ddd D MMMM h:mm A', day: 'ddd D MMMM', month: 'MMMM YYYY', year: 'YYYY' }
+};
 
 function updateCurrentTime(timezone) {
   const now = DateTime.now().setZone(timezone);
+  const fmt = use12h ? 'ccc, LLL d yyyy h:mm a' : 'ccc, LLL d yyyy HH:mm';
   document.getElementById('currentTime').textContent = 
-    `Current time: ${now.toFormat('ccc, LLL d yyyy HH:mm')} (${timezone})`;
+    `Current time: ${now.toFormat(fmt)} (${timezone})`;
 }
 
 function createTimeline(timezone) {
@@ -229,6 +268,7 @@ function createTimeline(timezone) {
   }
 
   // Create new timeline
+  const fmts = use12h ? formats12h : formats24h;
   timeline = new tempis_timeline.TempisTimeline("#canvas", {
     responsive: true,
     verticalFill: 'fill-canvas',
@@ -236,7 +276,9 @@ function createTimeline(timezone) {
     range: {
       start: baseDate.toISO(),
       end: baseDate.plus({ hours: 36 }).toISO(),
-      position: 'bottom'
+      position: 'bottom',
+      minorUnit: { formats: fmts.minor },
+      majorUnit: { formats: fmts.major }
     },
     legend: { position: 'top' },
     grouping: {
@@ -265,6 +307,24 @@ createTimeline('UTC');
 // Handle timezone changes
 document.getElementById('timezone').addEventListener('change', (e) => {
   createTimeline(e.target.value);
+});
+
+// Handle 12h/24h toggle
+document.getElementById('btn24h').addEventListener('click', () => {
+  if (use12h) {
+    use12h = false;
+    document.getElementById('btn24h').classList.add('active');
+    document.getElementById('btn12h').classList.remove('active');
+    createTimeline(document.getElementById('timezone').value);
+  }
+});
+document.getElementById('btn12h').addEventListener('click', () => {
+  if (!use12h) {
+    use12h = true;
+    document.getElementById('btn12h').classList.add('active');
+    document.getElementById('btn24h').classList.remove('active');
+    createTimeline(document.getElementById('timezone').value);
+  }
 });
 
 // Update current time every second

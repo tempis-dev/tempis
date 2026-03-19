@@ -399,7 +399,7 @@ export class TimelineRangeView {
             const minorTickLabel = this._formatDate(
                 date,
                 this._minorTickUnitAndStep.unit,
-                DEFAULT_MINOR_UNIT_LABEL_FORMATS
+                { ...DEFAULT_MINOR_UNIT_LABEL_FORMATS, ...this._options.minorUnit?.formats }
             );
 
             // Draw the minor date/time label text.
@@ -457,7 +457,7 @@ export class TimelineRangeView {
             const majorTickLabel = this._formatDate(
                 date,
                 this._majorTickUnitAndStep.unit,
-                DEFAULT_MAJOR_UNIT_LABEL_FORMATS
+                { ...DEFAULT_MAJOR_UNIT_LABEL_FORMATS, ...this._options.majorUnit?.formats }
             );
 
             // Determine the default major label x position.
