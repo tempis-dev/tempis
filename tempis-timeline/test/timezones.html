@@ -293,7 +293,8 @@ function createTimeline(timezone) {
     ],
     tooltip: {
       enabled: true,
-      delay: 200
+      delay: 200,
+      dateFormat: use12h ? 'D MMMM h:mm:ss A' : 'D MMMM HH:mm:ss'
     },
     items: flights
   });

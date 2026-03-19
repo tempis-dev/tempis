@@ -163,13 +163,14 @@ export class TimelineTooltip {
             });
 
             const dateAdapter = AdapterRegistry.get();
+            const dateFormat = this._options.dateFormat ?? "D MMMM HH:mm:ss";
 
             // Set the default tooltip content which is a header of the item label as well as the start date for PIT items and start and end date for range items.
             // TODO Improve the default tooltip content formatting and styling, as well as the rtl support.
             if (this._item.end) {
-                this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${dateAdapter.format(this._item.start.getTime(), "D MMMM HH:mm:ss")} - ${dateAdapter.format(this._item.end.getTime(), "D MMMM HH:mm:ss")}</p>`;
+                this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${dateAdapter.format(this._item.start.getTime(), dateFormat)} - ${dateAdapter.format(this._item.end.getTime(), dateFormat)}</p>`;
             } else {
-                this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${dateAdapter.format(this._item.start.getTime(), "D MMMM HH:mm:ss")}</p>`;
+                this._activeElement.innerHTML = `<p style="margin:0.2em;font-weight:bold;">${this._item.label}</p><p style="margin:0.2em;">${dateAdapter.format(this._item.start.getTime(), dateFormat)}</p>`;
             }
         }
 

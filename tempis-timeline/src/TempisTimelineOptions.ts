@@ -105,6 +105,13 @@ export interface TempisTimelineTooltipOptions {
     delay?: number;
 
     /**
+     * The date format pattern used for displaying dates in the default tooltip.
+     * Uses the same format tokens as the range unit labels (e.g., `"D MMMM HH:mm:ss"` for 24-hour or `"D MMMM h:mm:ss A"` for 12-hour).
+     * Defaults to `"D MMMM HH:mm:ss"`.
+     */
+    dateFormat?: string;
+
+    /**
      * Controls how tooltip positioning behaves when near edges. Defaults to `"none"`.
      * - `"none"`: The tooltip is positioned directly near the cursor and may overflow the viewport or canvas.
      * - `"canvas"`: The tooltip will attempt to stay within the canvas bounds by flipping horizontally/vertically as needed.
