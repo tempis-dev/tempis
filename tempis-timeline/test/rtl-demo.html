@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RTL Demo — Arabic Project Schedule</title>
+  <script src="../dist/tempis_timeline.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+      direction: rtl;
+    }
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { margin-top: 0; color: #333; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .toggle-btn {
+      padding: 8px 20px;
+      font-size: 14px;
+      border: 2px solid #6366f1;
+      border-radius: 6px;
+      background: white;
+      color: #6366f1;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .toggle-btn:hover { background: #6366f1; color: white; }
+    .toggle-btn.active { background: #6366f1; color: white; }
+    .direction-label {
+      font-size: 14px;
+      color: #555;
+      padding: 6px 12px;
+      background: #f0f0f0;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .timeline-container {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      height: 600px;
+      overflow: hidden;
+    }
+    .info {
+      margin-top: 15px;
+      padding: 15px;
+      background: #e3f2fd;
+      border-left: none;
+      border-right: 4px solid #2196F3;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    body.ltr-mode { direction: ltr; }
+    body.ltr-mode .info { border-right: none; border-left: 4px solid #2196F3; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>جدول مشروع تطوير التطبيق</h1>
+    <p class="subtitle">جدول زمني لمشروع تطوير تطبيق جوال — الربع الأول ٢٠٢٦</p>
+
+    <div class="controls">
+      <button class="toggle-btn active" id="rtlBtn" onclick="setDirection(true)">RTL — من اليمين لليسار</button>
+      <button class="toggle-btn" id="ltrBtn" onclick="setDirection(false)">LTR — Left to Right</button>
+      <span class="direction-label" id="dirLabel">← الاتجاه الحالي: RTL</span>
+    </div>
+
+    <div class="timeline-container">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="info">
+      <strong>دعم الاتجاه من اليمين لليسار</strong><br>
+      يدعم الجدول الزمني العرض من اليمين لليسار بشكل كامل. محور الوقت يبدأ من اليمين، التسميات محاذاة بشكل صحيح، ووسائل الإيضاح تتبع اتجاه الصفحة. استخدم الأزرار أعلاه للتبديل بين الاتجاهين.
+    </div>
+  </div>
+
+<script>
+  const categories = [
+    { name: 'planning',  label: 'التخطيط',    style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+    { name: 'design',    label: 'التصميم',     style: { backgroundColor: '#8b5cf6', fontColor: '#fff' } },
+    { name: 'dev',       label: 'التطوير',     style: { backgroundColor: '#059669', fontColor: '#fff' } },
+    { name: 'testing',   label: 'الاختبار',    style: { backgroundColor: '#f59e0b', fontColor: '#2d3748' } },
+    { name: 'release',   label: 'الإطلاق',     style: { backgroundColor: '#dc2626', fontColor: '#fff' } },
+    { name: 'milestone', label: 'مرحلة رئيسية', style: { backgroundColor: '#1e293b', fontColor: '#fff' } }
+  ];
+
+  const items = [
+    // التخطيط — Planning
+    { id: 1,  label: 'تحليل المتطلبات',         start: '2026-01-05T09:00:00', end: '2026-01-09T17:00:00', category: 'planning', grouping: 'التخطيط' },
+    { id: 2,  label: 'دراسة الجدوى',            start: '2026-01-07T09:00:00', end: '2026-01-12T17:00:00', category: 'planning', grouping: 'التخطيط' },
+    { id: 3,  label: 'تحديد نطاق المشروع',       start: '2026-01-12T09:00:00', end: '2026-01-14T17:00:00', category: 'planning', grouping: 'التخطيط' },
+    { id: 50, label: '✓ اعتماد الخطة',           start: '2026-01-14T17:00:00', category: 'milestone', grouping: 'التخطيط' },
+
+    // التصميم — Design
+    { id: 5,  label: 'تصميم واجهة المستخدم',     start: '2026-01-14T09:00:00', end: '2026-01-21T17:00:00', category: 'design', grouping: 'التصميم' },
+    { id: 6,  label: 'تصميم قاعدة البيانات',     start: '2026-01-15T09:00:00', end: '2026-01-19T17:00:00', category: 'design', grouping: 'التصميم' },
+    { id: 7,  label: 'النموذج الأولي التفاعلي',   start: '2026-01-19T09:00:00', end: '2026-01-23T17:00:00', category: 'design', grouping: 'التصميم' },
+    { id: 51, label: '✓ اعتماد التصميم',          start: '2026-01-23T17:00:00', category: 'milestone', grouping: 'التصميم' },
+
+    // التطوير — Development
+    { id: 10, label: 'تطوير الواجهة الخلفية',     start: '2026-01-21T09:00:00', end: '2026-02-06T17:00:00', category: 'dev', grouping: 'التطوير' },
+    { id: 11, label: 'تطوير الواجهة الأمامية',    start: '2026-01-23T09:00:00', end: '2026-02-09T17:00:00', category: 'dev', grouping: 'التطوير' },
+    { id: 12, label: 'ربط واجهة البرمجة',         start: '2026-02-02T09:00:00', end: '2026-02-11T17:00:00', category: 'dev', grouping: 'التطوير' },
+    { id: 13, label: 'نظام الإشعارات',            start: '2026-02-04T09:00:00', end: '2026-02-10T17:00:00', category: 'dev', grouping: 'التطوير' },
+    { id: 52, label: '✓ اكتمال التطوير',           start: '2026-02-11T17:00:00', category: 'milestone', grouping: 'التطوير' },
+
+    // الاختبار — Testing
+    { id: 20, label: 'اختبار الوحدات',            start: '2026-02-09T09:00:00', end: '2026-02-16T17:00:00', category: 'testing', grouping: 'الاختبار' },
+    { id: 21, label: 'اختبار التكامل',            start: '2026-02-12T09:00:00', end: '2026-02-18T17:00:00', category: 'testing', grouping: 'الاختبار' },
+    { id: 22, label: 'اختبار الأداء',             start: '2026-02-16T09:00:00', end: '2026-02-20T17:00:00', category: 'testing', grouping: 'الاختبار' },
+    { id: 23, label: 'اختبار قبول المستخدم',      start: '2026-02-18T09:00:00', end: '2026-02-23T17:00:00', category: 'testing', grouping: 'الاختبار' },
+    { id: 53, label: '✓ اعتماد الجودة',           start: '2026-02-23T17:00:00', category: 'milestone', grouping: 'الاختبار' },
+
+    // الإطلاق — Release
+    { id: 30, label: 'إطلاق تجريبي',             start: '2026-02-23T09:00:00', end: '2026-02-27T17:00:00', category: 'release', grouping: 'الإطلاق' },
+    { id: 31, label: 'إطلاق رسمي',               start: '2026-02-27T09:00:00', end: '2026-03-02T17:00:00', category: 'release', grouping: 'الإطلاق' },
+    { id: 54, label: '✓ إطلاق التطبيق',           start: '2026-03-02T17:00:00', category: 'milestone', grouping: 'الإطلاق' },
+  ];
+
+  const groupOrder = ['التخطيط', 'التصميم', 'التطوير', 'الاختبار', 'الإطلاق'];
+
+  let timeline = null;
+  let isRTL = true;
+
+  function createTimeline(rtl) {
+    if (timeline) timeline.destroy();
+
+    timeline = new tempis_timeline.TempisTimeline("#canvas", {
+      responsive: true,
+      rtl: rtl,
+      verticalFill: 'fill-canvas',
+      selection: 'single',
+      range: {
+        start: '2026-01-12T00:00:00',
+        end: '2026-02-16T00:00:00',
+        position: 'bottom'
+      },
+      legend: { position: 'top', alignment: 'start' },
+      grouping: {
+        sort: (a, b) => groupOrder.indexOf(a) - groupOrder.indexOf(b)
+      },
+      categories,
+      tooltip: { enabled: true, delay: 200 },
+      items
+    });
+  }
+
+  function setDirection(rtl) {
+    isRTL = rtl;
+    document.body.classList.toggle('ltr-mode', !rtl);
+    document.getElementById('rtlBtn').classList.toggle('active', rtl);
+    document.getElementById('ltrBtn').classList.toggle('active', !rtl);
+    document.getElementById('dirLabel').textContent = rtl
+      ? '← الاتجاه الحالي: RTL'
+      : 'Current direction: LTR →';
+    createTimeline(rtl);
+  }
+
+  createTimeline(true);
+</script>
+</body>
+</html>
