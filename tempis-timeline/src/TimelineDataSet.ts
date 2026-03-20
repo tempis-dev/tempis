@@ -222,6 +222,14 @@ export class TimelineDataSet {
      * @param options The timeline options.
      */
     private _createCategories(options: TempisTimelineOptions): void {
+        // Capture the current disabled state of categories so we can restore it after rebuilding.
+        const previousDisabledState = new Map<string, boolean>();
+        for (const category of this._categories) {
+            if (category.isDisabled) {
+                previousDisabledState.set(category.name, true);
+            }
+        }
+
         // Clear any existing item categories.
         this._categories = [];
 
@@ -264,6 +272,11 @@ export class TimelineDataSet {
             this._categories.push(
                 new TimelineItemCategory(categoryDefinition.name, categoryDefinition.label, categoryStyle)
             );
+
+            // Restore the disabled state if this category was previously disabled.
+            if (previousDisabledState.has(categoryDefinition.name)) {
+                this._categories[this._categories.length - 1].isDisabled = true;
+            }
 
             categoryNames.push(categoryDefinition.name);
         }
