@@ -206,6 +206,36 @@ export class TempisTimeline {
     }
 
     /**
+     * Programmatically sets the selected items by their identifiers.
+     * This deselects all currently selected items and selects only the items matching the provided IDs.
+     * Works in both controlled and uncontrolled selection modes.
+     * @param ids The identifiers of the items to select.
+     */
+    public setSelection(ids: (string | number)[]): void {
+        // Deselect all currently selected items.
+        this._dataSet.getSelectedItems().forEach((item) => (item.isSelected = false));
+
+        // Select items matching the provided IDs.
+        for (const id of ids) {
+            const item = this._dataSet.getItemById(id);
+            if (item) {
+                item.isSelected = true;
+            }
+        }
+
+        this._draw();
+    }
+
+    /**
+     * Clears all item selections and redraws the timeline.
+     * Works in both controlled and uncontrolled selection modes.
+     */
+    public clearSelection(): void {
+        this._dataSet.getSelectedItems().forEach((item) => (item.isSelected = false));
+        this._draw();
+    }
+
+    /**
      * Gets the current visible range of the timeline.
      * @returns An object containing the start and end dates of the visible range.
      */

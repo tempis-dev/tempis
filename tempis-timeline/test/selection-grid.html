@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selection Grid — Tempis Timeline</title>
+  <script src="../dist/tempis_timeline.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { margin-top: 0; color: #333; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 20px;
+    }
+    .timeline-container {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      height: 500px;
+      overflow: hidden;
+    }
+    .event-grid {
+      height: 500px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .event-grid table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .event-grid thead {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .event-grid th {
+      background: #f8f9fa;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 600;
+      color: #555;
+      border-bottom: 2px solid #ddd;
+    }
+    .event-grid td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #eee;
+    }
+    .event-grid tr.row {
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .event-grid tr.row:hover { background: #f0f4ff; }
+    .event-grid tr.row.selected { background: #e3f2fd; }
+    .category-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    .time-col { white-space: nowrap; color: #888; font-size: 12px; }
+    .info {
+      margin-top: 15px;
+      padding: 15px;
+      background: #e3f2fd;
+      border-left: 4px solid #2196F3;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>External Selection</h1>
+    <p class="subtitle">Click a row in the event grid to select and focus the corresponding item on the timeline. Selection is driven entirely from outside the timeline.</p>
+
+    <div class="layout">
+      <div class="timeline-container">
+        <canvas id="canvas"></canvas>
+      </div>
+      <div class="event-grid">
+        <table>
+          <thead><tr><th>Session</th><th>Room</th><th>Time</th></tr></thead>
+          <tbody id="gridBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="info">
+      <strong>Programmatic Selection</strong><br>
+      The timeline uses <code>selection: "none"</code> so clicking items on the canvas does nothing.
+      Selection is controlled externally via <code>timeline.setSelection([id])</code> and <code>timeline.focus({ id })</code>.
+      Call <code>timeline.clearSelection()</code> to deselect.
+    </div>
+  </div>
+
+<script>
+const { TempisTimeline } = tempis_timeline;
+
+const categories = [
+  { name: 'keynote',    label: 'Keynote' },
+  { name: 'web',        label: 'Web' },
+  { name: 'mobile',     label: 'Mobile' },
+  { name: 'cloud',      label: 'Cloud & Infra' },
+  { name: 'data',       label: 'Data & AI' },
+  { name: 'security',   label: 'Security' },
+  { name: 'devtools',   label: 'Dev Tools' },
+  { name: 'workshop',   label: 'Workshop' },
+  { name: 'community',  label: 'Community' },
+  { name: 'leadership', label: 'Leadership' }
+];
+
+const base = new Date('2026-03-16T08:00:00');
+const h = (hours) => new Date(base.getTime() + hours * 3600000).toISOString();
+const fmt = (iso) => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+const items = [
+  { id: 1,  label: 'Opening Keynote',           start: h(0),   end: h(1),   category: 'keynote',    grouping: 'Room A' },
+  { id: 2,  label: 'React Server Components',   start: h(1),   end: h(2),   category: 'web',        grouping: 'Room A' },
+  { id: 3,  label: 'TypeScript 6 Deep Dive',    start: h(2),   end: h(3),   category: 'web',        grouping: 'Room A' },
+  { id: 4,  label: 'CSS Container Queries',     start: h(3),   end: h(4),   category: 'web',        grouping: 'Room A' },
+  { id: 5,  label: 'Next.js App Router',        start: h(4.5), end: h(5.5), category: 'web',        grouping: 'Room A' },
+  { id: 6,  label: 'WASM Beyond the Browser',   start: h(5.5), end: h(6.5), category: 'web',        grouping: 'Room A' },
+  { id: 7,  label: 'Svelte 5 Runes',            start: h(6.5), end: h(7.5), category: 'web',        grouping: 'Room A' },
+  { id: 8,  label: 'GraphQL Federation',        start: h(7.5), end: h(8.5), category: 'web',        grouping: 'Room A' },
+  { id: 9,  label: 'Astro & Islands',           start: h(8.5), end: h(9.5), category: 'web',        grouping: 'Room A' },
+  { id: 10, label: 'Building with SwiftUI',     start: h(1),   end: h(2),   category: 'mobile',     grouping: 'Room B' },
+  { id: 11, label: 'Flutter Performance',       start: h(2),   end: h(3),   category: 'mobile',     grouping: 'Room B' },
+  { id: 12, label: 'Kotlin Multiplatform',      start: h(3),   end: h(4),   category: 'mobile',     grouping: 'Room B' },
+  { id: 13, label: 'Jetpack Compose Animations',start: h(4.5), end: h(5.5), category: 'mobile',     grouping: 'Room B' },
+  { id: 14, label: 'React Native New Arch',     start: h(5.5), end: h(6.5), category: 'mobile',     grouping: 'Room B' },
+  { id: 15, label: 'Edge AI on Mobile',         start: h(6.5), end: h(7.5), category: 'mobile',     grouping: 'Room B' },
+  { id: 16, label: 'Mobile CI/CD Pipelines',    start: h(7.5), end: h(8.5), category: 'mobile',     grouping: 'Room B' },
+  { id: 20, label: 'Kubernetes at Scale',       start: h(1),   end: h(2),   category: 'cloud',      grouping: 'Room C' },
+  { id: 21, label: 'Terraform Best Practices',  start: h(2),   end: h(3),   category: 'cloud',      grouping: 'Room C' },
+  { id: 22, label: 'Serverless at Scale',       start: h(3),   end: h(4),   category: 'cloud',      grouping: 'Room C' },
+  { id: 23, label: 'Platform Engineering',      start: h(4.5), end: h(5.5), category: 'cloud',      grouping: 'Room C' },
+  { id: 24, label: 'Zero Trust Architecture',   start: h(5.5), end: h(6.5), category: 'security',   grouping: 'Room C' },
+  { id: 25, label: 'Supply Chain Security',     start: h(6.5), end: h(7.5), category: 'security',   grouping: 'Room C' },
+  { id: 30, label: 'Intro to LLM Fine-Tuning', start: h(1),   end: h(2),   category: 'data',       grouping: 'Room D' },
+  { id: 31, label: 'RAG Architectures',         start: h(2),   end: h(3),   category: 'data',       grouping: 'Room D' },
+  { id: 32, label: 'Vector Databases',          start: h(3),   end: h(4),   category: 'data',       grouping: 'Room D' },
+  { id: 33, label: 'ML Pipelines with Kubeflow',start: h(4.5), end: h(5.5), category: 'data',       grouping: 'Room D' },
+  { id: 34, label: 'Real-Time Data Streaming',  start: h(5.5), end: h(6.5), category: 'data',       grouping: 'Room D' },
+  { id: 40, label: 'VS Code Extensions',        start: h(1),   end: h(3),   category: 'workshop',   grouping: 'Room E' },
+  { id: 41, label: 'Git Internals Workshop',    start: h(3),   end: h(4),   category: 'workshop',   grouping: 'Room E' },
+  { id: 42, label: 'Open Source Panel',         start: h(4.5), end: h(5.5), category: 'community',  grouping: 'Room E' },
+  { id: 43, label: 'Building Dev Communities',  start: h(5.5), end: h(6.5), category: 'community',  grouping: 'Room E' },
+  { id: 44, label: 'Engineering Management',    start: h(6.5), end: h(7.5), category: 'leadership', grouping: 'Room E' },
+  { id: 45, label: 'Staff Engineer Path',       start: h(7.5), end: h(8.5), category: 'leadership', grouping: 'Room E' },
+  { id: 50, label: 'Closing Keynote',           start: h(9.5), end: h(10),  category: 'keynote',    grouping: 'Room A' },
+];
+
+// Build the category color lookup after timeline is created
+const categoryLabels = {};
+categories.forEach(c => categoryLabels[c.name] = c.label);
+
+// Create timeline with selection: "none" — clicks on the canvas won't select anything
+const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  verticalFill: 'fill-canvas',
+  selection: 'none',
+  range: {
+    start: base.toISOString(),
+    end: h(10),
+    position: 'top'
+  },
+  legend: { position: 'bottom' },
+  grouping: { sort: (a, b) => a.localeCompare(b) },
+  categories,
+  tooltip: { enabled: true, delay: 200 },
+  items
+});
+
+// Build the event grid rows
+const gridBody = document.getElementById('gridBody');
+let selectedRowId = null;
+
+// Sort items by start time for the grid
+const sortedItems = [...items].sort((a, b) => new Date(a.start) - new Date(b.start));
+
+sortedItems.forEach(item => {
+  const tr = document.createElement('tr');
+  tr.className = 'row';
+  tr.dataset.id = item.id;
+  tr.innerHTML = `
+    <td><span class="category-dot" data-cat="${item.category}"></span>${item.label}</td>
+    <td>${item.grouping}</td>
+    <td class="time-col">${fmt(item.start)} – ${fmt(item.end)}</td>
+  `;
+  tr.addEventListener('click', () => onRowClick(item.id, tr));
+  gridBody.appendChild(tr);
+});
+
+function onRowClick(id, tr) {
+  // Toggle: clicking the same row again clears selection
+  if (selectedRowId === id) {
+    selectedRowId = null;
+    document.querySelectorAll('.row.selected').forEach(r => r.classList.remove('selected'));
+    timeline.clearSelection();
+    timeline.focus({ animate: true, duration: 400 });
+    return;
+  }
+
+  selectedRowId = id;
+
+  // Update grid highlight
+  document.querySelectorAll('.row.selected').forEach(r => r.classList.remove('selected'));
+  tr.classList.add('selected');
+
+  // Select and focus the item on the timeline
+  timeline.setSelection([id]);
+  timeline.focus({ id, animate: true, duration: 400, zoom: 'auto' });
+}
+
+// Apply category colors to the dots after a short delay so the palette has been applied
+requestAnimationFrame(() => {
+  const palette = TempisTimeline.getGlobalPalette();
+  const catColors = {};
+  categories.forEach((c, i) => catColors[c.name] = palette[i % palette.length]);
+  document.querySelectorAll('.category-dot').forEach(dot => {
+    dot.style.background = catColors[dot.dataset.cat] || '#999';
+  });
+});
+</script>
+</body>
+</html>
