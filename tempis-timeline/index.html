@@ -5,248 +5,223 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tempis Timeline - Test Files</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fff;
+            color: #111;
             min-height: 100vh;
-            padding: 40px 20px;
+            padding: 48px 24px;
         }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        header {
+            margin-bottom: 48px;
+            padding-bottom: 32px;
+            border-bottom: 3px solid #111;
+        }
+
+        .logo-row {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 8px;
         }
 
         h1 {
-            color: white;
-            text-align: center;
-            margin-bottom: 40px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            font-size: 2.8em;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            color: #111;
+            line-height: 1;
+        }
+
+        .version {
+            font-size: 13px;
+            font-weight: 500;
+            color: #fff;
+            background: #111;
+            padding: 3px 10px;
+            border-radius: 3px;
+        }
+
+        .tagline {
+            font-size: 16px;
+            color: #777;
+            font-weight: 400;
+        }
+
+        .section-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            font-weight: 700;
+            color: #111;
+            margin-bottom: 16px;
+            margin-top: 40px;
         }
 
         .test-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
+            gap: 16px;
         }
 
         .test-card {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
+            background: #fafafa;
+            padding: 20px 20px 20px 24px;
             text-decoration: none;
             color: inherit;
             display: block;
+            border: 2px solid #eee;
+            border-radius: 0;
+            position: relative;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .test-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            background: #ddd;
+            transition: background 0.15s, width 0.15s;
         }
 
         .test-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+            background: #fff;
+            border-color: #ccc;
+        }
+
+        .test-card:hover::before {
+            width: 9px;
+            filter: brightness(0.85);
         }
 
         .test-card h2 {
-            color: #667eea;
-            font-size: 1.3em;
-            margin-bottom: 12px;
+            font-size: 1em;
+            font-weight: 700;
+            color: #111;
+            margin-bottom: 6px;
         }
 
         .test-card p {
-            color: #666;
-            line-height: 1.6;
-            font-size: 0.95em;
+            color: #888;
+            line-height: 1.55;
+            font-size: 0.85em;
         }
 
-        .featured {
-            grid-column: 1 / -1;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
+        .test-card:hover p { color: #555; }
 
-        .featured h2 {
-            color: white;
-        }
+        /* Each featured card gets a unique vivid left border */
+        .featured { grid-column: 1 / -1; background: #fff; border-color: #eee; }
+        .featured::before { width: 6px; }
+        .featured:hover { background: #fafafa; }
 
-        .featured p {
-            color: rgba(255, 255, 255, 0.9);
-        }
+        .f-1::before  { background: #ff3366; }
+        .f-2::before  { background: #ff8800; }
+        .f-3::before  { background: #ffcc00; }
+        .f-4::before  { background: #00cc66; }
+        .f-5::before  { background: #0088ff; }
+        .f-6::before  { background: #6644ff; }
+        .f-7::before  { background: #cc33ff; }
+        .f-8::before  { background: #ff3366; }
+        .f-9::before  { background: #00bbcc; }
+        .f-10::before { background: #ff5544; }
+        .f-11::before { background: #33aa55; }
+
+        .featured h2 { font-size: 1.1em; }
 
         @media (max-width: 768px) {
-            h1 {
-                font-size: 2em;
-            }
-
-            .test-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .featured {
-                grid-column: 1;
-            }
+            h1 { font-size: 2em; }
+            .test-grid { grid-template-columns: 1fr; }
+            .featured { grid-column: 1; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Tempis Timeline Test Files</h1>
-        
+        <header>
+            <div class="logo-row">
+                <h1>Tempis Timeline</h1>
+                <span class="version">v1.0</span>
+            </div>
+            <p class="tagline">Test files &amp; interactive examples</p>
+        </header>
+
+        <div class="section-title">Featured</div>
         <div class="test-grid">
-            <a href="test/playground.html" class="test-card featured">
+            <a href="test/playground.html" class="test-card featured f-1">
                 <h2>🎮 Playground</h2>
                 <p>Interactive testing environment with comprehensive controls for all timeline options. Adjust layout, styling, data, and behavior in real-time.</p>
             </a>
-
-            <a href="test/streaming-data.html" class="test-card featured">
+            <a href="test/streaming-data.html" class="test-card featured f-2">
                 <h2>📡 Crypto Price Stream</h2>
-                <p>Live cryptocurrency price stream via WebSocket demonstrating real-time data updates. Shows 10 cryptocurrencies with color-coded price movements (green for increases, red for decreases).</p>
+                <p>Live cryptocurrency price stream via WebSocket demonstrating real-time data updates. Shows 10 cryptocurrencies with color-coded price movements.</p>
             </a>
-
-            <a href="test/production-downtime.html" class="test-card featured">
+            <a href="test/production-downtime.html" class="test-card featured f-3">
                 <h2>🏭 Production Downtime</h2>
-                <p>Production line downtime tracking with detailed event information. Click any downtime event to see an animated details panel with cause, resolution, cost, and notes. Demonstrates selection handling and dynamic UI updates.</p>
+                <p>Production line downtime tracking with detailed event information. Click any downtime event to see an animated details panel with cause, resolution, cost, and notes.</p>
             </a>
-
-            <a href="test/lazy-loading.html" class="test-card featured">
+            <a href="test/lazy-loading.html" class="test-card featured f-4">
                 <h2>🔄 Lazy Loading</h2>
-                <p>Server request logs loaded on demand as you pan and zoom. Demonstrates onRangeChange callback with debounced data fetching, per-hour block caching, and a live loading log.</p>
+                <p>Server request logs loaded on demand as you pan and zoom. Demonstrates onRangeChange callback with debounced data fetching and caching.</p>
             </a>
-
-            <a href="test/custom-tooltips.html" class="test-card featured">
+            <a href="test/custom-tooltips.html" class="test-card featured f-5">
                 <h2>💬 Custom Tooltips</h2>
-                <p>Project sprint tracker with rich custom tooltip cards. Hover any task to see assignee details, status, priority, description, and a live progress bar. Demonstrates the tooltip template API with styled HTML content.</p>
+                <p>Project sprint tracker with rich custom tooltip cards. Hover any task to see assignee details, status, priority, and a live progress bar.</p>
             </a>
-
-            <a href="test/timezones.html" class="test-card featured">
+            <a href="test/timezones.html" class="test-card featured f-6">
                 <h2>🌍 Timezone Explorer</h2>
-                <p>Global flight schedule rendered with a Luxon date adapter. Switch timezones from a dropdown and watch the entire timeline re-render, showing how the same UTC events appear in different parts of the world.</p>
+                <p>Global flight schedule rendered with a Luxon date adapter. Switch timezones and watch the entire timeline re-render in different local times.</p>
             </a>
-
-            <a href="test/band-demo.html" class="test-card featured">
+            <a href="test/band-demo.html" class="test-card featured f-7">
                 <h2>📊 Server Monitoring</h2>
-                <p>Weekly Kubernetes cluster overview with timeline bands highlighting maintenance windows, off-peak hours, deployment markers, and incident lines across five infrastructure groups.</p>
+                <p>Weekly Kubernetes cluster overview with timeline bands highlighting maintenance windows, off-peak hours, deployment markers, and incident lines.</p>
             </a>
-
-            <a href="test/rtl-demo.html" class="test-card featured">
+            <a href="test/rtl-demo.html" class="test-card featured f-8">
                 <h2>🌐 RTL Project Schedule</h2>
-                <p>Arabic mobile app development schedule with full right-to-left support. Toggle between RTL and LTR to see the timeline mirror its layout, labels, legend, and time axis.</p>
+                <p>Arabic mobile app development schedule with full right-to-left support. Toggle between RTL and LTR to see the timeline mirror its layout.</p>
             </a>
-
-            <a href="test/keypress.html" class="test-card featured">
-                <h2>⌨️ Keypress Timeline</h2>
-                <p>Interactive keyboard event visualization. Short presses create point-in-time items, long presses create range items that update in real-time as you hold the key.</p>
-            </a>
-
-            <a href="test/color-palettes.html" class="test-card featured">
+            <a href="test/color-palettes.html" class="test-card featured f-10">
                 <h2>🎨 Color Palettes</h2>
-                <p>Switch between curated color palettes and watch the timeline update instantly. Demonstrates the global palette API for theming categories without explicit colors.</p>
+                <p>Switch between curated color palettes and watch the timeline update instantly. Demonstrates the global palette API for theming.</p>
             </a>
-
-            <a href="test/selection-grid.html" class="test-card featured">
+            <a href="test/selection-grid.html" class="test-card featured f-11">
                 <h2>📋 External Selection</h2>
-                <p>Click rows in an event grid to select and focus items on the timeline. Demonstrates programmatic selection with setSelection() and focus() driven entirely from outside the timeline.</p>
+                <p>Click rows in an event grid to select and focus items on the timeline. Demonstrates programmatic selection with setSelection() and focus().</p>
             </a>
+            <a href="test/keypress.html" class="test-card featured f-9">
+                <h2>⌨️ Keypress Timeline</h2>
+                <p>Interactive keyboard event visualization. Short presses create point-in-time items, long presses create range items that update in real-time.</p>
+            </a>
+        </div>
 
-            <a href="test/basic.html" class="test-card">
-                <h2>Basic</h2>
-                <p>Simple timeline demonstration with basic configuration and sample data.</p>
-            </a>
-
-            <a href="test/bands.html" class="test-card">
-                <h2>Bands</h2>
-                <p>Timeline with custom time bands showing different time unit divisions.</p>
-            </a>
-
-            <a href="test/categories.html" class="test-card">
-                <h2>Categories</h2>
-                <p>Demonstrates item categorization with legend, filtering, and color-coded items.</p>
-            </a>
-
-            <a href="test/downtime.html" class="test-card">
-                <h2>Downtime</h2>
-                <p>Specialized view for tracking system downtime and availability periods.</p>
-            </a>
-
-            <a href="test/focus.html" class="test-card">
-                <h2>Focus</h2>
-                <p>Tests the focus() method for programmatically navigating to specific time ranges.</p>
-            </a>
-
-            <a href="test/fullscreen.html" class="test-card">
-                <h2>Fullscreen</h2>
-                <p>Timeline that fills the entire viewport with fullscreen capabilities.</p>
-            </a>
-
-            <a href="test/ltr.html" class="test-card">
-                <h2>Left-to-Right</h2>
-                <p>Standard left-to-right timeline layout (default direction).</p>
-            </a>
-
-            <a href="test/rtl.html" class="test-card">
-                <h2>Right-to-Left</h2>
-                <p>Right-to-left timeline layout for RTL language support.</p>
-            </a>
-
-            <a href="test/min_max.html" class="test-card">
-                <h2>Min/Max Range</h2>
-                <p>Timeline with constrained minimum and maximum date ranges.</p>
-            </a>
-
-            <a href="test/opc.html" class="test-card">
-                <h2>OPC</h2>
-                <p>Industrial automation timeline example with OPC data visualization.</p>
-            </a>
-
-            <a href="test/selection.html" class="test-card">
-                <h2>Selection</h2>
-                <p>Tests item selection modes: single, multiple, and none.</p>
-            </a>
-
-            <a href="test/set-items.html" class="test-card">
-                <h2>Set Items</h2>
-                <p>Demonstrates dynamically updating timeline items using setItems() method.</p>
-            </a>
-
-            <a href="test/single-item.html" class="test-card">
-                <h2>Single Item</h2>
-                <p>Minimal timeline with a single item for testing edge cases.</p>
-            </a>
-
-            <a href="test/stack-mode.html" class="test-card">
-                <h2>Stack Mode</h2>
-                <p>Compares compact vs stable stack modes for item vertical arrangement.</p>
-            </a>
-
-            <a href="test/static.html" class="test-card">
-                <h2>Static</h2>
-                <p>Non-interactive timeline with fixed range and disabled user controls.</p>
-            </a>
-
-            <a href="test/stress-test.html" class="test-card">
-                <h2>Stress Test</h2>
-                <p>Performance testing with large datasets and many items.</p>
-            </a>
-
-            <a href="test/styling.html" class="test-card">
-                <h2>Styling</h2>
-                <p>Custom styling examples with different colors, fonts, and visual themes.</p>
-            </a>
-
-            <a href="test/tooltips.html" class="test-card">
-                <h2>Tooltips</h2>
-                <p>Interactive tooltips showing item details on hover.</p>
-            </a>
-
-            <a href="test/vertical-fill.html" class="test-card">
-                <h2>Vertical Fill</h2>
-                <p>Tests different vertical fill modes: grow-canvas, scroll, and fixed.</p>
-            </a>
+        <div class="section-title">All Examples</div>
+        <div class="test-grid">
+            <a href="test/basic.html" class="test-card"><h2>Basic</h2><p>Simple timeline demonstration with basic configuration and sample data.</p></a>
+            <a href="test/bands.html" class="test-card"><h2>Bands</h2><p>Timeline with custom time bands showing different time unit divisions.</p></a>
+            <a href="test/categories.html" class="test-card"><h2>Categories</h2><p>Demonstrates item categorization with legend, filtering, and color-coded items.</p></a>
+            <a href="test/downtime.html" class="test-card"><h2>Downtime</h2><p>Specialized view for tracking system downtime and availability periods.</p></a>
+            <a href="test/focus.html" class="test-card"><h2>Focus</h2><p>Tests the focus() method for programmatically navigating to specific time ranges.</p></a>
+            <a href="test/fullscreen.html" class="test-card"><h2>Fullscreen</h2><p>Timeline that fills the entire viewport with fullscreen capabilities.</p></a>
+            <a href="test/ltr.html" class="test-card"><h2>Left-to-Right</h2><p>Standard left-to-right timeline layout (default direction).</p></a>
+            <a href="test/rtl.html" class="test-card"><h2>Right-to-Left</h2><p>Right-to-left timeline layout for RTL language support.</p></a>
+            <a href="test/min_max.html" class="test-card"><h2>Min/Max Range</h2><p>Timeline with constrained minimum and maximum date ranges.</p></a>
+            <a href="test/opc.html" class="test-card"><h2>OPC</h2><p>Industrial automation timeline example with OPC data visualization.</p></a>
+            <a href="test/selection.html" class="test-card"><h2>Selection</h2><p>Tests item selection modes: single, multiple, and none.</p></a>
+            <a href="test/set-items.html" class="test-card"><h2>Set Items</h2><p>Demonstrates dynamically updating timeline items using setItems() method.</p></a>
+            <a href="test/single-item.html" class="test-card"><h2>Single Item</h2><p>Minimal timeline with a single item for testing edge cases.</p></a>
+            <a href="test/stack-mode.html" class="test-card"><h2>Stack Mode</h2><p>Compares compact vs stable stack modes for item vertical arrangement.</p></a>
+            <a href="test/static.html" class="test-card"><h2>Static</h2><p>Non-interactive timeline with fixed range and disabled user controls.</p></a>
+            <a href="test/stress-test.html" class="test-card"><h2>Stress Test</h2><p>Performance testing with large datasets and many items.</p></a>
+            <a href="test/styling.html" class="test-card"><h2>Styling</h2><p>Custom styling examples with different colors, fonts, and visual themes.</p></a>
+            <a href="test/tooltips.html" class="test-card"><h2>Tooltips</h2><p>Interactive tooltips showing item details on hover.</p></a>
+            <a href="test/vertical-fill.html" class="test-card"><h2>Vertical Fill</h2><p>Tests different vertical fill modes: grow-canvas, scroll, and fixed.</p></a>
         </div>
     </div>
 </body>
