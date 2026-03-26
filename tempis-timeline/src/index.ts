@@ -1,4 +1,4 @@
-import { TempisTimeline } from "./TempisTimeline";
+import { TempisTimeline, TempisTimelineImageOptions } from "./TempisTimeline";
 import {
     TempisTimelineOptions,
     TempisTimelineItem,
@@ -32,6 +32,7 @@ export type {
     TempisTimelineStyleOptions,
     TempisTimelineGroupingOptions,
     TempisTimelineScrollbarOptions,
+    TempisTimelineImageOptions,
     TempisTimelineDateAdapter,
     SelectionChangeEvent
 };

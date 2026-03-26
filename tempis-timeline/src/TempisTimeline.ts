@@ -20,6 +20,24 @@ import { AdapterRegistry } from "./AdapterRegistry";
 import { FocusController, FocusOptions } from "./FocusController";
 import { ColorPalette } from "./ColorPalette";
 
+/**
+ * The options for exporting the timeline as an image.
+ */
+export interface TempisTimelineImageOptions {
+    /**
+     * The image MIME type (e.g. "image/png", "image/jpeg", "image/webp"). Defaults to "image/png".
+     */
+    type?: string;
+    /** 
+     * A number between 0 and 1 for lossy formats (JPEG, WebP). Ignored for PNG.
+     */
+    quality?: number;
+    /** 
+     * The device pixel ratio for the exported image. Defaults to 1. Use values > 1 for higher resolution exports.
+     */
+    dpr?: number;
+}
+
 export class TempisTimeline {
     /** The timeline canvas. */
     private readonly _canvas: HTMLCanvasElement;
@@ -59,6 +77,9 @@ export class TempisTimeline {
 
     /** The last known range end time, used to detect range changes. */
     private _lastRangeToTime: number = 0;
+
+    /** Whether the timeline has been destroyed. */
+    private _isDestroyed: boolean = false;
 
     /** The event handler references for cleanup. */
     private _eventHandlers: {
@@ -333,6 +354,8 @@ export class TempisTimeline {
      * This removes all event listeners and observers to prevent memory leaks.
      */
     public destroy(): void {
+        this._isDestroyed = true;
+
         // Cancel any ongoing animations
         this._rangeView.cancelAnimation();
         this._dataView.cancelAnimation();
@@ -766,8 +789,10 @@ export class TempisTimeline {
 
     /**
      * Draw the timeline.
+     * @param options Optional draw settings.
+     * @param options.hideScrollbar When `true`, the scrollbar is not rendered. Used by `toImage()` to produce a clean export.
      */
-    private _draw(): void {
+    private _draw(options?: { hideScrollbar?: boolean }): void {
         // Grab the canvas context.
         const context = this._canvas.getContext("2d")!;
 
@@ -869,7 +894,8 @@ export class TempisTimeline {
             renderOffsetY,
             // For "grow-canvas" vertical fill mode we just give the data view a massive height to render into so that it can render all items safely.
             this._verticalFillMode === "grow-canvas" ? Number.MAX_SAFE_INTEGER : dataViewMaxHeight,
-            this._verticalFillMode === "fill-canvas"
+            this._verticalFillMode === "fill-canvas",
+            options?.hideScrollbar
         );
 
         // Restore the original render context, this will bin the clipping rect we put in place to restrict the data view render.
