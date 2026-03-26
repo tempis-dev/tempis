@@ -93,6 +93,34 @@ timeline.focus({ range: ['2024-01-01', '2024-12-31'], animate: true });</code></
     <h3>destroy()</h3>
     <p>Removes all event listeners, disconnects observers, and cleans up resources. Always call this before removing the timeline from the DOM.</p>
 
+    <h3>toImage(options?)</h3>
+    <p>Exports the current timeline view as an image <code>Blob</code>. Returns a <code>Promise&lt;Blob&gt;</code> that resolves with the encoded image data. The canvas is re-rendered before capture to ensure the exported image reflects the latest timeline state. Throws an <code>Error</code> if called after <code>destroy()</code>.</p>
+<pre><code>// Export as PNG (default)
+const blob = await timeline.toImage();
+const url = URL.createObjectURL(blob);
+
+// Export as JPEG with quality
+const jpegBlob = await timeline.toImage({
+  type: 'image/jpeg',
+  quality: 0.85
+});
+
+// Export at 2× resolution for high-DPI displays
+const hiResBlob = await timeline.toImage({ dpr: 2 });</code></pre>
+
+    <h2>Image Options</h2>
+    <p>Options accepted by <code>toImage()</code> via the <code>TempisTimelineImageOptions</code> interface.</p>
+    <table class="api-table">
+      <thead>
+        <tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>type</code></td><td><code>string</code></td><td><code>"image/png"</code></td><td>The image MIME type (e.g. <code>"image/png"</code>, <code>"image/jpeg"</code>, <code>"image/webp"</code>).</td></tr>
+        <tr><td><code>quality</code></td><td><code>number</code></td><td>—</td><td>A number between 0 and 1 for lossy formats (JPEG, WebP). Ignored for PNG.</td></tr>
+        <tr><td><code>dpr</code></td><td><code>number</code></td><td><code>1</code></td><td>Device pixel ratio for the exported image. Output dimensions will be <code>offsetWidth × dpr</code> by <code>offsetHeight × dpr</code>.</td></tr>
+      </tbody>
+    </table>
+
     <h2>Options</h2>
     <table class="api-table">
       <thead>

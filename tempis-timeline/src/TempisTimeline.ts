@@ -28,11 +28,11 @@ export interface TempisTimelineImageOptions {
      * The image MIME type (e.g. "image/png", "image/jpeg", "image/webp"). Defaults to "image/png".
      */
     type?: string;
-    /** 
+    /**
      * A number between 0 and 1 for lossy formats (JPEG, WebP). Ignored for PNG.
      */
     quality?: number;
-    /** 
+    /**
      * The device pixel ratio for the exported image. Defaults to 1. Use values > 1 for higher resolution exports.
      */
     dpr?: number;
@@ -347,6 +347,57 @@ export class TempisTimeline {
 
         // Draw the timeline.
         this._draw();
+    }
+
+    /**
+     * Exports the current timeline view as an image Blob.
+     * @param options The optional export settings.
+     * @returns A Promise that resolves with the image Blob.
+     * @throws Error if the timeline has been destroyed.
+     */
+    public async toImage(options?: TempisTimelineImageOptions): Promise<Blob> {
+        // We cannot export to image if the timeline has already been destroyed.
+        if (this._isDestroyed) {
+            throw new Error("Cannot export image: timeline has been destroyed.");
+        }
+
+        // Render a clean frame without the scrollbar.
+        this._draw({ hideScrollbar: true });
+
+        const dpr = options?.dpr ?? 1;
+        const type = options?.type ?? "image/png";
+        const quality = options?.quality;
+
+        const width = this._canvas.offsetWidth * dpr;
+        const height = this._canvas.offsetHeight * dpr;
+
+        // Create an offscreen canvas at the target dimensions.
+        const offscreen = document.createElement("canvas");
+        offscreen.width = width;
+        offscreen.height = height;
+
+        const offCtx = offscreen.getContext("2d")!;
+        offCtx.drawImage(this._canvas, 0, 0, width, height);
+
+        // Wrap toBlob in a Promise.
+        const blob = await new Promise<Blob>((resolve, reject) => {
+            offscreen.toBlob(
+                (result) => {
+                    if (result) {
+                        resolve(result);
+                    } else {
+                        reject(new Error("Image export failed: toBlob returned null."));
+                    }
+                },
+                type,
+                quality
+            );
+        });
+
+        // Restore the normal render with scrollbar.
+        this._draw();
+
+        return blob;
     }
 
     /**

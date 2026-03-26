@@ -30,11 +30,11 @@ Implement the `toImage()` method on `TempisTimeline` that exports the current ca
     - Pass `options?.hideScrollbar` through to `this._dataView.draw()`
     - _Requirements: 1.4_
 
-- [ ] 4. Checkpoint - Verify scrollbar hiding works
+- [x] 4. Checkpoint - Verify scrollbar hiding works
   - Ensure all existing functionality still works after the `_draw()` and `draw()` signature changes. No callers should break since the new parameters are optional. Ask the user if questions arise.
 
-- [ ] 5. Implement `toImage()` method on `TempisTimeline`
-  - [ ] 5.1 Add the `async toImage(options?: TempisTimelineImageOptions): Promise<Blob>` public method
+- [x] 5. Implement `toImage()` method on `TempisTimeline`
+  - [x] 5.1 Add the `async toImage(options?: TempisTimelineImageOptions): Promise<Blob>` public method
     - Import `TempisTimelineImageOptions` in `TempisTimeline.ts`
     - Throw synchronously if `_isDestroyed` is `true` with message `"Cannot export image: timeline has been destroyed."`
     - Call `this._draw({ hideScrollbar: true })` to render a clean frame without scrollbar
@@ -46,13 +46,13 @@ Implement the `toImage()` method on `TempisTimeline` that exports the current ca
     - Resolve with the `Blob`
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1, 2.2, 2.3, 3.1, 4.1, 5.1, 5.2, 5.3_
 
-- [ ] 6. Update API documentation
+- [x] 6. Update API documentation
   - Add `toImage()` method documentation to `site/api.html`
   - Document the `TempisTimelineImageOptions` interface (type, quality, dpr)
   - Include usage examples for PNG export, JPEG with quality, and high-DPR export
   - _Requirements: 5.1, 5.2_
 
-- [ ] 7. Final checkpoint - Ensure everything compiles and works
+- [x] 7. Final checkpoint - Ensure everything compiles and works
   - Ensure the project compiles without errors. Ask the user if questions arise.
 
 ## Notes

@@ -8,7 +8,7 @@ import { isNullOrUndefined, parseDate, EasingFunction } from "./Utilities";
  * Options for focusing the timeline.
  */
 export interface FocusOptions {
-    /** 
+    /**
      * The identifier of the specific item to focus on.
      */
     id?: number | string;
@@ -20,8 +20,8 @@ export interface FocusOptions {
      * The specific range to centre the timeline on.
      */
     range?: [string | number | Date, string | number | Date];
-    /** 
-     * Whether the focus should be animated. 
+    /**
+     * Whether the focus should be animated.
      */
     animate?: boolean;
     /**
@@ -32,7 +32,7 @@ export interface FocusOptions {
      * The animation easing function to use.
      */
     easing?: EasingFunction;
-    /** 
+    /**
      * The control zoom behavior for range items.
      */
     zoom?: boolean | "auto";
