@@ -396,11 +396,10 @@ export class TimelineRangeView {
             }
 
             // Create the formatted date label for this minor tick.
-            const minorTickLabel = this._formatDate(
-                date,
-                this._minorTickUnitAndStep.unit,
-                { ...DEFAULT_MINOR_UNIT_LABEL_FORMATS, ...this._options.minorUnit?.formats }
-            );
+            const minorTickLabel = this._formatDate(date, this._minorTickUnitAndStep.unit, {
+                ...DEFAULT_MINOR_UNIT_LABEL_FORMATS,
+                ...this._options.minorUnit?.formats
+            });
 
             // Draw the minor date/time label text.
             context.textBaseline = "alphabetic";
@@ -454,11 +453,10 @@ export class TimelineRangeView {
             }
 
             // Create the formatted date label for this major tick.
-            const majorTickLabel = this._formatDate(
-                date,
-                this._majorTickUnitAndStep.unit,
-                { ...DEFAULT_MAJOR_UNIT_LABEL_FORMATS, ...this._options.majorUnit?.formats }
-            );
+            const majorTickLabel = this._formatDate(date, this._majorTickUnitAndStep.unit, {
+                ...DEFAULT_MAJOR_UNIT_LABEL_FORMATS,
+                ...this._options.majorUnit?.formats
+            });
 
             // Determine the default major label x position.
             // If we are right-to-left then the label should be rendered to the left of the tick, otherwise the right.
@@ -656,10 +654,10 @@ export class TimelineRangeView {
      */
     private _getTickDates(unitAndStep: UnitAndStep): Date[] {
         const dateAdapter = AdapterRegistry.get();
-        
+
         // Get the starting timestamp by snapping to the appropriate unit boundary
         let currentTimestamp: number;
-        
+
         // We need to snap to the beginning of the next unit up so ticks always start from that boundary
         if (unitAndStep.unit === "year" || unitAndStep.unit === "month") {
             // Snap to start of year
@@ -788,20 +786,20 @@ export class TimelineRangeView {
         const animate = (currentTime: number) => {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            
+
             // Apply easing function
             const easedProgress = this._applyEasing(progress, easing);
-            
+
             // Interpolate between start and target values
             const currentFromTime = startFromTime + (targetFromTime - startFromTime) * easedProgress;
             const currentToTime = startToTime + (targetToTime - startToTime) * easedProgress;
-            
+
             this._setFromTime(currentFromTime);
             this._setToTime(currentToTime);
-            
+
             // Recalculate ticks for the new range during animation
             this.calculateMinorAndMajorUnitTicks();
-            
+
             if (onUpdate) {
                 onUpdate();
             }
@@ -837,24 +835,20 @@ export class TimelineRangeView {
      */
     private _applyEasing(progress: number, easing: EasingFunction): number {
         switch (easing) {
-            case 'linear':
+            case "linear":
                 return progress;
-            case 'easeIn':
+            case "easeIn":
                 return progress * progress;
-            case 'easeOut':
+            case "easeOut":
                 return 1 - (1 - progress) * (1 - progress);
-            case 'easeInOut':
-                return progress < 0.5 
-                    ? 2 * progress * progress 
-                    : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-            case 'easeInCubic':
+            case "easeInOut":
+                return progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+            case "easeInCubic":
                 return progress * progress * progress;
-            case 'easeOutCubic':
+            case "easeOutCubic":
                 return 1 - Math.pow(1 - progress, 3);
-            case 'easeInOutCubic':
-                return progress < 0.5 
-                    ? 4 * progress * progress * progress 
-                    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+            case "easeInOutCubic":
+                return progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
             default:
                 return progress;
         }

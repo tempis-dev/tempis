@@ -1,4 +1,11 @@
-import { TempisTimelineItem, TempisTimelineItemSelectionMode, TempisTimelineOptions, TempisTimelineStackMode, TempisTimelineVerticalFillMode, TempisTimelineCategory, TempisTimelineBand } from "./TempisTimelineOptions";
+import {
+    TempisTimelineItem,
+    TempisTimelineItemSelectionMode,
+    TempisTimelineOptions,
+    TempisTimelineVerticalFillMode,
+    TempisTimelineCategory,
+    TempisTimelineBand
+} from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineBand } from "./TimelineBand";
 import { TimelineDataView } from "./TimelineDataView";
@@ -89,15 +96,10 @@ export class TempisTimeline {
         this._dataView = new TimelineDataView(
             this._dataSet,
             this._isRTL,
-            this._options.stackMode ?? 'stable',
-            this._options.scrollbar?.visibility ?? 'hover'
+            this._options.stackMode ?? "stable",
+            this._options.scrollbar?.visibility ?? "hover"
         );
-        this._rangeView = new TimelineRangeView(
-            this._canvas,
-            this._dataSet,
-            this._isRTL,
-            this._options.range
-        );
+        this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._isRTL, this._options.range);
         this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._isRTL, this._options.legend);
         this._tooltipView = new TimelineTooltipView(
             this._canvas,
@@ -523,14 +525,14 @@ export class TempisTimeline {
                 if (lastPinchDistance !== null) {
                     // Calculate zoom delta based on pinch distance change.
                     const distanceChange = currentDistance - lastPinchDistance;
-                    
+
                     // Get pinch sensitivity from options (default 1).
                     const pinchSensitivity = this._options.range?.zoom?.pinchSensitivity ?? 1;
-                    
+
                     // Normalize the distance change relative to canvas width for consistent feel across devices.
                     // A pinch spanning 10% of the canvas width should feel the same on phone vs tablet.
                     const normalizedChange = distanceChange / this._canvas.clientWidth;
-                    
+
                     // Convert to zoom delta (negative = zoom in, positive = zoom out).
                     // TODO Review the multiplier, this looks fine for my pixel 9a but should test for other devives with varying viewports/dpi.
                     const zoomDelta = -normalizedChange * 20;
@@ -594,7 +596,7 @@ export class TempisTimeline {
             if (activePointers.size === 0) {
                 // Reset panning state
                 this._dataView.setPanning(false);
-                
+
                 // Skip click detection if we were pinching.
                 if (wasPinching) {
                     wasPinching = false;
@@ -645,12 +647,12 @@ export class TempisTimeline {
         this._eventHandlers.pointercancel = (event) => {
             // Remove this pointer from tracking.
             activePointers.delete(event.pointerId);
-            
+
             // Reset pinch state if we have fewer than 2 pointers.
             if (activePointers.size < 2) {
                 lastPinchDistance = null;
             }
-            
+
             isPointerDown = false;
         };
         this._canvas.addEventListener("pointercancel", this._eventHandlers.pointercancel);
@@ -773,7 +775,7 @@ export class TempisTimeline {
         // to avoid drawing twice (once to measure, once after resizing).
         if (this._verticalFillMode === "grow-canvas") {
             const requiredHeight = this._calculateRequiredCanvasHeight(context);
-            
+
             // Only resize and reapply DPR scaling if the height actually changed.
             if (this._canvas.clientHeight !== requiredHeight) {
                 this._canvas.style.height = requiredHeight + "px";
@@ -939,11 +941,7 @@ export class TempisTimeline {
 
         // Calculate the data view height by creating a draw plan without actually drawing.
         // The draw plan calculates all layout information including the total height needed.
-        const dataViewDrawPlan = this._dataView.createDrawPlan(
-            context,
-            this._rangeView.fromDt,
-            this._rangeView.toDt
-        );
+        const dataViewDrawPlan = this._dataView.createDrawPlan(context, this._rangeView.fromDt, this._rangeView.toDt);
         totalHeight += dataViewDrawPlan.height;
 
         // Add height for bottom range view if configured.

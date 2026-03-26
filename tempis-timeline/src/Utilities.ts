@@ -3,14 +3,14 @@ import { AdapterRegistry } from "./AdapterRegistry";
 /**
  * Easing function names for animations.
  */
-export type EasingFunction = 
-    | 'linear'
-    | 'easeIn' 
-    | 'easeOut' 
-    | 'easeInOut'
-    | 'easeInCubic'
-    | 'easeOutCubic'
-    | 'easeInOutCubic';
+export type EasingFunction =
+    | "linear"
+    | "easeIn"
+    | "easeOut"
+    | "easeInOut"
+    | "easeInCubic"
+    | "easeOutCubic"
+    | "easeInOutCubic";
 
 /**
  * Gets whether the given value is null or undefined.
@@ -41,11 +41,11 @@ export function parseDate(input: string | number | Date): Date {
 
     const dateAdapter = AdapterRegistry.get();
     const timestamp = dateAdapter.parse(input);
-    
+
     if (timestamp === null) {
         throw new Error(`Cannot parse input '${input}' as date - invalid format`);
     }
-    
+
     return new Date(timestamp);
 }
 

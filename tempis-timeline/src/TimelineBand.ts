@@ -5,7 +5,7 @@ import { defaults, parseDate } from "./Utilities";
  * The default band style.
  */
 export const DEFAULT_BAND_STYLE: TempisTimelineBandStyle = {
-    color: "#3b2680ff", 
+    color: "#3b2680ff",
     opacity: 0.4
 };
 

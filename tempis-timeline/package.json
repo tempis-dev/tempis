@@ -10,7 +10,8 @@
     "build:web-minified": "esbuild ./src/index.ts --bundle --minify --platform=browser --global-name=tempis_timeline --outfile=dist/tempis_timeline.min.js --legal-comments=none",
     "serve": "http-server -p 8080 -a 0.0.0.0 -c-1",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint src/",
+    "format": "prettier --write src/"
   },
   "keywords": [],
   "author": "",

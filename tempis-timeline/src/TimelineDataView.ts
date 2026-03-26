@@ -166,11 +166,7 @@ export class TimelineDataView {
      * @param toDt The range to date.
      * @returns A draw plan containing layout information including total height.
      */
-    public createDrawPlan(
-        context: CanvasRenderingContext2D,
-        fromDt: Date,
-        toDt: Date
-    ): DataViewDrawPlan {
+    public createDrawPlan(context: CanvasRenderingContext2D, fromDt: Date, toDt: Date): DataViewDrawPlan {
         return this._createViewDrawPlan(context, fromDt, toDt);
     }
 
@@ -292,12 +288,12 @@ export class TimelineDataView {
                 }
 
                 // Calculate the start/end canvas x position of this band based on the current range and whether we are rendering right-to-left.
-                const xPositionStart = this._isRTL ?
-                    milliRenderWidth * (rangeToDt.getTime() - band.end.getTime()) :
-                    milliRenderWidth * (band.start.getTime() - rangeFromDt.getTime());
-                const xPositionEnd = this._isRTL ?
-                    milliRenderWidth * (rangeToDt.getTime() - band.start.getTime()) :
-                    milliRenderWidth * (band.end.getTime() - rangeFromDt.getTime());
+                const xPositionStart = this._isRTL
+                    ? milliRenderWidth * (rangeToDt.getTime() - band.end.getTime())
+                    : milliRenderWidth * (band.start.getTime() - rangeFromDt.getTime());
+                const xPositionEnd = this._isRTL
+                    ? milliRenderWidth * (rangeToDt.getTime() - band.start.getTime())
+                    : milliRenderWidth * (band.end.getTime() - rangeFromDt.getTime());
 
                 // Draw the band rectangle to the canvas.
                 context.fillStyle = band.style.color!;
@@ -306,16 +302,16 @@ export class TimelineDataView {
                 context.rect(xPositionStart, yPosition, xPositionEnd - xPositionStart, height);
                 context.fill();
 
-                // TODO Draw the left/right borders if they are defined. 
+                // TODO Draw the left/right borders if they are defined.
             } else {
                 // PIT band - draw a vertical line
                 // Calculate the x position of this band based on the current range and whether we are rendering right-to-left.
-                const xPosition = this._isRTL ?
-                    milliRenderWidth * (rangeToDt.getTime() - band.start.getTime()) :
-                    milliRenderWidth * (band.start.getTime() - rangeFromDt.getTime());
+                const xPosition = this._isRTL
+                    ? milliRenderWidth * (rangeToDt.getTime() - band.start.getTime())
+                    : milliRenderWidth * (band.start.getTime() - rangeFromDt.getTime());
 
                 // Use border color if available, otherwise fall back to band color
-                const lineColor = band.style.borderColor || band.style.color || '#000000';
+                const lineColor = band.style.borderColor || band.style.color || "#000000";
                 const lineWidth = band.style.borderThickness || 2;
 
                 // Draw the vertical line
@@ -400,17 +396,17 @@ export class TimelineDataView {
         const scrollbarWidth = 8;
         const scrollbarPadding = 4;
         const scrollbarMargin = 6; // Margin from top and bottom
-        const scrollbarX = this._isRTL 
-            ? scrollbarPadding 
+        const scrollbarX = this._isRTL
+            ? scrollbarPadding
             : context.canvas.clientWidth - scrollbarWidth - scrollbarPadding;
 
         // Calculate scrollbar thumb size and position with margins
-        const availableHeight = height - (scrollbarMargin * 2);
+        const availableHeight = height - scrollbarMargin * 2;
         const visibleRatio = height / this._drawPlan.height;
         const thumbHeight = Math.max(30, availableHeight * visibleRatio); // Minimum 30px thumb
         const scrollableHeight = availableHeight - thumbHeight;
         const scrollRatio = Math.abs(this._scrollYOffset) / (this._drawPlan.height - height);
-        const thumbY = yPosition + scrollbarMargin + (scrollRatio * scrollableHeight);
+        const thumbY = yPosition + scrollbarMargin + scrollRatio * scrollableHeight;
 
         // Draw scrollbar track (subtle background)
         context.fillStyle = "rgba(0, 0, 0, 0.05)";
@@ -638,16 +634,16 @@ export class TimelineDataView {
         if (item.label) {
             // For stable mode PIT items, don't truncate labels - let them extend beyond canvas
             const isPitItem = itemDrawPlan.xPointInTimePosition !== null;
-            const isStableMode = this._stackMode === 'stable';
-            
+            const isStableMode = this._stackMode === "stable";
+
             if (isStableMode && isPitItem) {
                 // Stable mode PIT items: render label at full width, centered on the item box
                 context.textBaseline = "middle";
                 context.textAlign = "center";
                 context.fillStyle = itemFontColor;
-                
+
                 const labelCenterX = (itemDrawPlan.xPositionStart + itemDrawPlan.xPositionEnd) / 2;
-                
+
                 context.fillText(
                     item.label,
                     labelCenterX,
@@ -656,7 +652,7 @@ export class TimelineDataView {
                         1 +
                         scrolledYPosition
                 );
-                
+
                 // Reset text align back to the default for subsequent items
                 context.textAlign = this._isRTL ? "right" : "left";
             } else {
@@ -708,7 +704,7 @@ export class TimelineDataView {
         rangeFromDt: Date,
         rangeToDt: Date
     ): DataViewDrawPlan {
-        if (this._stackMode === 'stable') {
+        if (this._stackMode === "stable") {
             return this._createStableDrawPlan(context, rangeFromDt, rangeToDt);
         } else {
             return this._createCompactDrawPlan(context, rangeFromDt, rangeToDt);
@@ -720,7 +716,7 @@ export class TimelineDataView {
      * - Only visible items are included in the layout
      * - PIT labels are adjusted to fit within canvas bounds
      * - Layout updates on every pan
-     * 
+     *
      * @param context The canvas context
      * @param rangeFromDt The range from date.
      * @param rangeToDt The range to date.
@@ -937,7 +933,8 @@ export class TimelineDataView {
 
         // Check if we need to recalculate the row structure.
         // Row structure is recalculated if zoom changed significantly, canvas width changed, or cache is empty.
-        const needsRowRecalculation = !this._cachedStableRowStructure || 
+        const needsRowRecalculation =
+            !this._cachedStableRowStructure ||
             this._lastZoomRange === 0 ||
             this._lastCanvasWidth !== currentCanvasWidth ||
             Math.abs(currentZoomRange - this._lastZoomRange) / this._lastZoomRange > 0.01;
@@ -963,10 +960,7 @@ export class TimelineDataView {
             const maxRow = Math.max(...Array.from(rowAssignments.values()));
 
             // Create empty row arrays
-            const itemDrawPlanStacks: DataViewItemDrawPlan[][] = Array.from(
-                { length: maxRow + 1 },
-                () => []
-            );
+            const itemDrawPlanStacks: DataViewItemDrawPlan[][] = Array.from({ length: maxRow + 1 }, () => []);
 
             // Get items in the current visible range (not all items)
             let itemsInRange = grouping.getItemsInRange(rangeFromDt, rangeToDt);
@@ -1054,10 +1048,11 @@ export class TimelineDataView {
 
                 // Set y positions for all visible items in this row
                 for (const itemDrawPlan of itemRow) {
-                    const itemHeight = actualBoundingBoxAscent + actualBoundingBoxDescent + itemDrawPlan.item.style.padding! * 2;
+                    const itemHeight =
+                        actualBoundingBoxAscent + actualBoundingBoxDescent + itemDrawPlan.item.style.padding! * 2;
                     itemDrawPlan.yPositionStart = positionY;
                     itemDrawPlan.yPositionEnd = positionY + itemHeight;
-                    
+
                     // Track the maximum item height in this row
                     maxItemHeight = Math.max(maxItemHeight, itemHeight);
                 }
@@ -1200,7 +1195,7 @@ export class TimelineDataView {
         maxHeight: number,
         animate: boolean = false,
         duration: number = 500,
-        easing: EasingFunction = 'easeInOut',
+        easing: EasingFunction = "easeInOut",
         onUpdate?: () => void,
         onComplete?: () => void
     ): void {
@@ -1251,7 +1246,7 @@ export class TimelineDataView {
     public animateScrollTo(
         toOffset: number,
         duration: number,
-        easing: EasingFunction = 'easeInOut',
+        easing: EasingFunction = "easeInOut",
         onUpdate?: () => void,
         onComplete?: () => void
     ): void {
@@ -1264,13 +1259,13 @@ export class TimelineDataView {
         const animate = (currentTime: number) => {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            
+
             // Apply easing function
             const easedProgress = this._applyEasing(progress, easing);
-            
+
             // Interpolate between start and target values
             this._scrollYOffset = fromOffset + (toOffset - fromOffset) * easedProgress;
-            
+
             if (onUpdate) {
                 onUpdate();
             }
@@ -1329,11 +1324,7 @@ export class TimelineDataView {
      * @param toDt The to date.
      * @returns The temporary draw plan.
      */
-    public createTemporaryDrawPlan(
-        context: CanvasRenderingContext2D,
-        fromDt: Date,
-        toDt: Date
-    ): DataViewDrawPlan {
+    public createTemporaryDrawPlan(context: CanvasRenderingContext2D, fromDt: Date, toDt: Date): DataViewDrawPlan {
         return this._createViewDrawPlan(context, fromDt, toDt);
     }
 
@@ -1345,24 +1336,20 @@ export class TimelineDataView {
      */
     private _applyEasing(progress: number, easing: EasingFunction): number {
         switch (easing) {
-            case 'linear':
+            case "linear":
                 return progress;
-            case 'easeIn':
+            case "easeIn":
                 return progress * progress;
-            case 'easeOut':
+            case "easeOut":
                 return 1 - (1 - progress) * (1 - progress);
-            case 'easeInOut':
-                return progress < 0.5 
-                    ? 2 * progress * progress 
-                    : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-            case 'easeInCubic':
+            case "easeInOut":
+                return progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+            case "easeInCubic":
                 return progress * progress * progress;
-            case 'easeOutCubic':
+            case "easeOutCubic":
                 return 1 - Math.pow(1 - progress, 3);
-            case 'easeInOutCubic':
-                return progress < 0.5 
-                    ? 4 * progress * progress * progress 
-                    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+            case "easeInOutCubic":
+                return progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
             default:
                 return progress;
         }

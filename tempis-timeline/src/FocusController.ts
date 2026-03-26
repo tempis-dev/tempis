@@ -1,5 +1,5 @@
 import { TimelineDataSet } from "./TimelineDataSet";
-import { TimelineDataView } from "./TimelineDataView";
+import { TimelineDataView, DataViewDrawPlan } from "./TimelineDataView";
 import { TimelineRangeView } from "./TimelineRangeView";
 import { TimelineLegendView } from "./TimelineLegendView";
 import { isNullOrUndefined, parseDate, EasingFunction } from "./Utilities";
@@ -21,7 +21,7 @@ export interface FocusOptions {
     /** Easing function to use. */
     easing?: EasingFunction;
     /** Control zoom behavior for range items. */
-    zoom?: boolean | 'auto';
+    zoom?: boolean | "auto";
 }
 
 /**
@@ -71,8 +71,8 @@ export class FocusController {
 
         const animate = options?.animate ?? false;
         const duration = options?.duration ?? 500;
-        const easing = options?.easing ?? 'easeInOut';
-        const zoom = options?.zoom ?? 'auto';
+        const easing = options?.easing ?? "easeInOut";
+        const zoom = options?.zoom ?? "auto";
 
         if (!options || (!options.id && !options.date && !options.range)) {
             // No specific target was defined, focus on the full range
@@ -95,12 +95,8 @@ export class FocusController {
     private _focusOnFullRange(animate: boolean, duration: number, easing: EasingFunction): void {
         if (this._dataSet.minDate && this._dataSet.maxDate) {
             if (animate) {
-                this._rangeView.animateToRange(
-                    this._dataSet.minDate,
-                    this._dataSet.maxDate,
-                    duration,
-                    easing,
-                    () => this._onDraw()
+                this._rangeView.animateToRange(this._dataSet.minDate, this._dataSet.maxDate, duration, easing, () =>
+                    this._onDraw()
                 );
             } else {
                 this._rangeView.setRange(this._dataSet.minDate, this._dataSet.maxDate);
@@ -117,7 +113,7 @@ export class FocusController {
         animate: boolean,
         duration: number,
         easing: EasingFunction,
-        zoom: boolean | 'auto'
+        zoom: boolean | "auto"
     ): void {
         const item = this._dataSet.getItemById(itemId);
 
@@ -163,9 +159,9 @@ export class FocusController {
         if (animate) {
             // Pre-calculate target vertical scroll position WITHOUT drawing
             // Create a temporary draw plan to get item positions without actually drawing
-            const context = this._canvas.getContext('2d')!;
+            const context = this._canvas.getContext("2d")!;
             const drawPlan = this._dataView.createTemporaryDrawPlan(context, targetFrom, targetTo);
-            
+
             // Calculate target scroll from the temporary draw plan
             let targetVerticalScroll: number | null = null;
             const itemPosition = this._getItemPositionFromDrawPlan(drawPlan, itemId);
@@ -173,8 +169,8 @@ export class FocusController {
                 const maxDataViewHeight = this._calculateMaxDataViewHeight();
                 const itemCenter = (itemPosition.yStart + itemPosition.yEnd) / 2;
                 const viewCenter = maxDataViewHeight / 2;
-                let scrollOffset = -(itemCenter - viewCenter);
-                
+                const scrollOffset = -(itemCenter - viewCenter);
+
                 // Clamp to valid bounds
                 const maxScroll = 0;
                 const minScroll = Math.min(0, maxDataViewHeight - drawPlan.height);
@@ -255,14 +251,7 @@ export class FocusController {
     private _scrollToItemIfNeeded(itemId: string | number, animate: boolean): void {
         const maxDataViewHeight = this._calculateMaxDataViewHeight();
 
-        this._dataView.scrollToItem(
-            itemId,
-            maxDataViewHeight,
-            animate,
-            500,
-            'easeInOut',
-            () => this._onDraw()
-        );
+        this._dataView.scrollToItem(itemId, maxDataViewHeight, animate, 500, "easeInOut", () => this._onDraw());
     }
 
     /**
@@ -284,7 +273,7 @@ export class FocusController {
         let targetScrollOffset = -(itemCenter - viewCenter);
 
         // Clamp the scroll offset to valid bounds
-        const drawPlan = this._dataView['_drawPlan'];
+        const drawPlan = this._dataView["_drawPlan"];
         if (drawPlan) {
             const maxScroll = 0;
             const minScroll = Math.min(0, maxDataViewHeight - drawPlan.height);
@@ -302,18 +291,18 @@ export class FocusController {
         const rangeHeight = this._rangeView.calculateRequiredHeight();
 
         let dataViewYPosition = 0;
-        if (this._legendView.position === 'top') {
+        if (this._legendView.position === "top") {
             dataViewYPosition += legendHeight;
         }
-        if (['top', 'both'].includes(this._rangeView.position)) {
+        if (["top", "both"].includes(this._rangeView.position)) {
             dataViewYPosition += rangeHeight;
         }
 
         let maxDataViewHeight = this._canvas.clientHeight - dataViewYPosition;
-        if (['bottom', 'both'].includes(this._rangeView.position)) {
+        if (["bottom", "both"].includes(this._rangeView.position)) {
             maxDataViewHeight -= rangeHeight;
         }
-        if (this._legendView.position === 'bottom') {
+        if (this._legendView.position === "bottom") {
             maxDataViewHeight -= legendHeight;
         }
 
@@ -324,7 +313,7 @@ export class FocusController {
      * Gets the vertical position of an item from a draw plan.
      */
     private _getItemPositionFromDrawPlan(
-        drawPlan: any,
+        drawPlan: DataViewDrawPlan,
         itemId: string | number
     ): { yStart: number; yEnd: number } | null {
         for (const groupDrawPlan of drawPlan.groupDrawPlans) {
