@@ -244,6 +244,22 @@ export class TempisTimeline {
     }
 
     /**
+     * Gets the current timeline items.
+     * @returns The item definitions as last provided via the timeline options or setItems().
+     */
+    public getItems(): TempisTimelineItem[] {
+        return this._options.items;
+    }
+
+    /**
+     * Gets the current timeline categories.
+     * @returns The category definitions as last provided via the timeline options or setCategories().
+     */
+    public getCategories(): TempisTimelineCategory[] {
+        return this._options.categories ?? [];
+    }
+
+    /**
      * Sets the timeline items and redraws the timeline.
      * @param items The timeline items to set.
      */

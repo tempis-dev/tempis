@@ -42,11 +42,19 @@
   { id: 1, label: 'Event', start: '2024-01-15T09:00:00', end: '2024-01-15T11:00:00' }
 ]);</code></pre>
 
+    <h3>getItems()</h3>
+    <p>Returns the current item definitions as last provided via the constructor or <code>setItems()</code>.</p>
+<pre><code>const items = timeline.getItems();</code></pre>
+
     <h3>setCategories(categories)</h3>
     <p>Replaces all categories and redraws.</p>
 <pre><code>timeline.setCategories([
   { name: 'task', label: 'Tasks', style: { backgroundColor: '#4caf50' } }
 ]);</code></pre>
+
+    <h3>getCategories()</h3>
+    <p>Returns the current category definitions as last provided via the constructor or <code>setCategories()</code>.</p>
+<pre><code>const categories = timeline.getCategories();</code></pre>
 
     <h3>setBands(bands)</h3>
     <p>Replaces all timeline bands and redraws.</p>
@@ -70,6 +78,14 @@ timeline.focus({ range: ['2024-01-01', '2024-12-31'], animate: true });</code></
 
     <h3>getSelection()</h3>
     <p>Returns an array of selected item IDs.</p>
+
+    <h3>setSelection(ids)</h3>
+    <p>Programmatically selects items by their IDs. Deselects all currently selected items first. Works regardless of the <code>selection</code> mode, including <code>"none"</code>.</p>
+<pre><code>timeline.setSelection([1, 2, 3]);</code></pre>
+
+    <h3>clearSelection()</h3>
+    <p>Deselects all items and redraws.</p>
+<pre><code>timeline.clearSelection();</code></pre>
 
     <h3>redraw()</h3>
     <p>Forces a redraw of the timeline.</p>
@@ -243,6 +259,13 @@ timeline.focus({ range: ['2024-01-01', '2024-12-31'], animate: true });</code></
 
     <h3>TempisTimeline.getDateAdapter()</h3>
     <p>Returns the currently registered date adapter.</p>
+
+    <h3>TempisTimeline.setGlobalPalette(palette)</h3>
+    <p>Set the global color palette used for categories that don't specify an explicit <code>backgroundColor</code>. Call <code>setCategories()</code> after changing the palette to apply the new colors to existing instances.</p>
+<pre><code>TempisTimeline.setGlobalPalette(['#ff3366', '#0088ff', '#00cc66', '#ffcc00']);</code></pre>
+
+    <h3>TempisTimeline.getGlobalPalette()</h3>
+    <p>Returns the current global color palette as an array of color strings.</p>
   </div>
 
   <footer>
