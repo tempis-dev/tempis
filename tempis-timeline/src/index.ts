@@ -1,19 +1,37 @@
 import { TempisTimeline } from "./TempisTimeline";
 import {
     TempisTimelineOptions,
+    TempisTimelineItem,
+    TempisTimelineCategory,
+    TempisTimelineBand,
+    TempisTimelineBandStyle,
+    TempisTimelineItemStyle,
+    TempisTimelineRangeOptions,
+    TempisTimelineLegendOptions,
+    TempisTimelineTooltipOptions,
+    TempisTimelineStyleOptions,
     TempisTimelineGroupingOptions,
     TempisTimelineScrollbarOptions,
-    TempisTimelineScrollbarVisibility
 } from "./TempisTimelineOptions";
-import { FocusOptions } from "./FocusController";
+import { SelectionChangeEvent } from "./Event";
 import { AdapterRegistry } from "./AdapterRegistry";
+import { TempisTimelineDateAdapter } from "./TempisTimelineDateAdapter";
 
 export { TempisTimeline, AdapterRegistry };
 
 export type {
     TempisTimelineOptions,
-    TempisTimelineGroupingOptions as TempisTimelineGroupOptions,
+    TempisTimelineItem,
+    TempisTimelineCategory,
+    TempisTimelineBand,
+    TempisTimelineBandStyle,
+    TempisTimelineItemStyle,
+    TempisTimelineRangeOptions,
+    TempisTimelineLegendOptions,
+    TempisTimelineTooltipOptions,
+    TempisTimelineStyleOptions,
+    TempisTimelineGroupingOptions,
     TempisTimelineScrollbarOptions,
-    TempisTimelineScrollbarVisibility,
-    FocusOptions
+    TempisTimelineDateAdapter,
+    SelectionChangeEvent,
 };
