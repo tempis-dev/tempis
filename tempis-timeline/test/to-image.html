@@ -102,6 +102,10 @@
         <option value="3">3×</option>
       </select>
 
+      <label for="bg-toggle" style="margin-left:4px;">Background:</label>
+      <input type="checkbox" id="bg-toggle">
+      <input type="color" id="bg-color" value="#ffffff" style="display:none;width:32px;height:28px;padding:0;border:1px solid #ddd;border-radius:4px;cursor:pointer;">
+
       <button id="save-btn">Save as Image</button>
     </div>
 
@@ -233,6 +237,8 @@
     const labelEl        = document.getElementById('quality-label');
     const qualityLabelEl = document.getElementById('quality-group-label');
     const dprEl          = document.getElementById('dpr');
+    const bgToggle       = document.getElementById('bg-toggle');
+    const bgColor        = document.getElementById('bg-color');
     const saveBtn        = document.getElementById('save-btn');
     const statusEl       = document.getElementById('status');
 
@@ -246,6 +252,10 @@
     formatEl.addEventListener('change', updateQualityVisibility);
     updateQualityVisibility();
 
+    bgToggle.addEventListener('change', () => {
+      bgColor.style.display = bgToggle.checked ? '' : 'none';
+    });
+
     qualityEl.addEventListener('input', () => { labelEl.textContent = qualityEl.value; });
 
     saveBtn.addEventListener('click', async () => {
@@ -256,8 +266,9 @@
         const type    = formatEl.value;
         const quality = parseFloat(qualityEl.value);
         const dpr     = parseInt(dprEl.value, 10);
+        const backgroundColor = bgToggle.checked ? bgColor.value : undefined;
 
-        const blob = await timeline.toImage({ type, quality, dpr });
+        const blob = await timeline.toImage({ type, quality, dpr, backgroundColor });
 
         const ext = type.split('/')[1];
         const qualitySuffix = type !== 'image/png' ? '_q' + qualityEl.value : '';

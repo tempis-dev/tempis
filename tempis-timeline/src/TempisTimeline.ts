@@ -23,7 +23,7 @@ import { ColorPalette } from "./ColorPalette";
 /**
  * The options for exporting the timeline as an image.
  */
-export interface TempisTimelineImageOptions {
+export interface ImageGenerationOptions {
     /**
      * The image MIME type (e.g. "image/png", "image/jpeg", "image/webp"). Defaults to "image/png".
      */
@@ -36,6 +36,20 @@ export interface TempisTimelineImageOptions {
      * The device pixel ratio for the exported image. Defaults to 1. Use values > 1 for higher resolution exports.
      */
     dpr?: number;
+    /**
+     * Optional background color for the exported image (e.g. "#ffffff"). By default the canvas background is transparent.
+     */
+    backgroundColor?: string;
+}
+
+/**
+ * The options for internal draw calls.
+ */
+interface DrawOptions {
+    /**
+     * When true, the scrollbar is not rendered.
+     */
+    hideScrollbar?: boolean;
 }
 
 export class TempisTimeline {
@@ -355,7 +369,7 @@ export class TempisTimeline {
      * @returns A Promise that resolves with the image Blob.
      * @throws Error if the timeline has been destroyed.
      */
-    public async toImage(options?: TempisTimelineImageOptions): Promise<Blob> {
+    public async toImage(options?: ImageGenerationOptions): Promise<Blob> {
         // We cannot export to image if the timeline has already been destroyed.
         if (this._isDestroyed) {
             throw new Error("Cannot export image: timeline has been destroyed.");
@@ -377,6 +391,13 @@ export class TempisTimeline {
         offscreen.height = height;
 
         const offCtx = offscreen.getContext("2d")!;
+
+        // If a background color was requested, fill the offscreen canvas before compositing the timeline.
+        if (options?.backgroundColor) {
+            offCtx.fillStyle = options.backgroundColor;
+            offCtx.fillRect(0, 0, width, height);
+        }
+
         offCtx.drawImage(this._canvas, 0, 0, width, height);
 
         // Wrap toBlob in a Promise.
@@ -840,10 +861,9 @@ export class TempisTimeline {
 
     /**
      * Draw the timeline.
-     * @param options Optional draw settings.
-     * @param options.hideScrollbar When `true`, the scrollbar is not rendered. Used by `toImage()` to produce a clean export.
+     * @param options The optional draw settings.
      */
-    private _draw(options?: { hideScrollbar?: boolean }): void {
+    private _draw(options?: DrawOptions): void {
         // Grab the canvas context.
         const context = this._canvas.getContext("2d")!;
 
