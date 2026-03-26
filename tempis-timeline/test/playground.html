@@ -690,6 +690,49 @@
     <div class="control-group">
       <button id="focusAllBtn">Focus on All Items</button>
     </div>
+    
+    <div class="divider"></div>
+    
+    <h3>Export</h3>
+    <div class="control-group">
+      <label>Format</label>
+      <select id="exportFormat">
+        <option value="image/png">PNG</option>
+        <option value="image/jpeg">JPEG</option>
+        <option value="image/webp">WebP</option>
+      </select>
+    </div>
+    
+    <div class="control-group" id="exportQualityGroup">
+      <label>Quality: <span id="exportQualityValue">0.9</span></label>
+      <input type="range" id="exportQuality" min="0" max="1" step="0.1" value="0.9">
+    </div>
+    
+    <div class="control-group">
+      <label>DPR</label>
+      <select id="exportDpr">
+        <option value="1">1×</option>
+        <option value="2" selected>2×</option>
+        <option value="3">3×</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="exportBgEnabled">
+        <label for="exportBgEnabled">Background Color</label>
+      </div>
+    </div>
+    
+    <div class="control-group" id="exportBgColorGroup" style="display:none;">
+      <input type="color" id="exportBgColor" value="#ffffff" style="width:100%;height:32px;padding:0;border:1px solid #ddd;border-radius:4px;cursor:pointer;">
+    </div>
+    
+    <div class="control-group">
+      <button id="exportBtn">Save as Image</button>
+    </div>
+    
+    <div id="exportStatus" style="font-size:12px;color:#666;min-height:1.2em;margin-top:4px;"></div>
   </div>
   
   <div class="main-content">
@@ -872,8 +915,8 @@
 
   // Add event listeners to all controls (except focus controls)
   document.querySelectorAll('input, select').forEach(control => {
-    // Skip focus controls - they shouldn't regenerate the timeline
-    if (control.id.startsWith('focus')) {
+    // Skip focus and export controls - they shouldn't regenerate the timeline
+    if (control.id.startsWith('focus') || control.id.startsWith('export')) {
       return;
     }
     control.addEventListener('change', regenerateTimeline);
@@ -1063,6 +1106,63 @@
       jsonError.textContent = error.message;
       jsonError.classList.add('active');
       console.error('Error setting items:', error);
+    }
+  });
+
+  // Export controls
+  const exportFormat   = document.getElementById('exportFormat');
+  const exportQuality  = document.getElementById('exportQuality');
+  const exportQualityGroup = document.getElementById('exportQualityGroup');
+  const exportDpr      = document.getElementById('exportDpr');
+  const exportBgEnabled = document.getElementById('exportBgEnabled');
+  const exportBgColorGroup = document.getElementById('exportBgColorGroup');
+  const exportBgColor  = document.getElementById('exportBgColor');
+  const exportBtn      = document.getElementById('exportBtn');
+  const exportStatus   = document.getElementById('exportStatus');
+
+  function updateExportQualityVisibility() {
+    exportQualityGroup.style.display = exportFormat.value !== 'image/png' ? '' : 'none';
+  }
+  exportFormat.addEventListener('change', updateExportQualityVisibility);
+  updateExportQualityVisibility();
+
+  exportQuality.addEventListener('input', (e) => {
+    document.getElementById('exportQualityValue').textContent = e.target.value;
+  });
+
+  exportBgEnabled.addEventListener('change', () => {
+    exportBgColorGroup.style.display = exportBgEnabled.checked ? '' : 'none';
+  });
+
+  exportBtn.addEventListener('click', async () => {
+    exportBtn.disabled = true;
+    exportStatus.textContent = 'Exporting…';
+
+    try {
+      const type    = exportFormat.value;
+      const quality = parseFloat(exportQuality.value);
+      const dpr     = parseInt(exportDpr.value, 10);
+      const backgroundColor = exportBgEnabled.checked ? exportBgColor.value : undefined;
+
+      const blob = await timeline.toImage({ type, quality, dpr, backgroundColor });
+
+      const ext = type.split('/')[1];
+      const qualitySuffix = type !== 'image/png' ? '_q' + exportQuality.value : '';
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href     = url;
+      a.download = 'timeline_' + dpr + 'x' + qualitySuffix + '.' + ext;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      const kb = (blob.size / 1024).toFixed(1);
+      exportStatus.textContent = 'Saved ' + ext.toUpperCase() + ' (' + kb + ' KB) at ' + dpr + '×';
+    } catch (err) {
+      exportStatus.textContent = 'Export failed: ' + err.message;
+    } finally {
+      exportBtn.disabled = false;
     }
   });
 
