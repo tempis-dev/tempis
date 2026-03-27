@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Export to Image — Tempis Timeline</title>
+  <script src="../dist/tempis_timeline.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { margin-top: 0; color: #333; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+    .timeline-container {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      height: 600px;
+      overflow: hidden;
+    }
+    .controls {
+      margin-bottom: 20px;
+      padding: 12px 20px;
+      background: #f9f9f9;
+      border-radius: 4px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .controls label { font-size: 14px; color: #555; }
+    .controls select, .controls input[type="range"] {
+      padding: 4px 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      background: #fff;
+    }
+    .controls button {
+      padding: 8px 20px;
+      background: #2196F3;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .controls button:hover { background: #1976D2; }
+    .controls button:disabled { background: #bbb; cursor: not-allowed; }
+    .status {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #666;
+      min-height: 1.4em;
+    }
+    .info {
+      margin-top: 15px;
+      padding: 15px;
+      background: #e3f2fd;
+      border-left: 4px solid #2196F3;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Export to Image</h1>
+    <p class="subtitle">Music festival schedule across 5 stages over a weekend. Export the view as an image using <code>toImage()</code>.</p>
+
+    <div class="controls">
+      <label for="format">Format:</label>
+      <select id="format">
+        <option value="image/png">PNG</option>
+        <option value="image/jpeg">JPEG</option>
+        <option value="image/webp">WebP</option>
+      </select>
+
+      <label for="quality" id="quality-group-label">Quality:</label>
+      <input id="quality" type="range" min="0" max="1" step="0.1" value="0.9">
+      <span id="quality-label" style="font-size:14px;color:#555;">0.9</span>
+
+      <label for="dpr">DPR:</label>
+      <select id="dpr">
+        <option value="1">1×</option>
+        <option value="2" selected>2×</option>
+        <option value="3">3×</option>
+      </select>
+
+      <label for="bg-toggle" style="margin-left:4px;">Background:</label>
+      <input type="checkbox" id="bg-toggle">
+      <input type="color" id="bg-color" value="#ffffff" style="display:none;width:32px;height:28px;padding:0;border:1px solid #ddd;border-radius:4px;cursor:pointer;">
+
+      <button id="save-btn">Save as Image</button>
+    </div>
+
+    <div class="timeline-container">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <div class="info">
+      <strong>Image Export</strong><br>
+      Choose a format, quality level, and DPR then click <strong>Save as Image</strong>.
+      The timeline calls <code>toImage()</code> which renders a clean frame (without scrollbar),
+      draws it onto an offscreen canvas at the requested resolution, and returns a <code>Blob</code>
+      that is downloaded automatically.
+    </div>
+  </div>
+
+  <script>
+    const { TempisTimeline } = tempis_timeline;
+
+    // Festival weekend: Sat July 12 – Sun July 13, 2025
+    const sat = '2025-07-12';
+    const sun = '2025-07-13';
+
+    const timeline = new TempisTimeline('#canvas', {
+      responsive: true,
+      verticalFill: 'fill-canvas',
+      range: {
+        start: `${sat}T11:00:00`,
+        end: `${sun}T02:00:00`,
+        position: 'bottom'
+      },
+      legend: { position: 'bottom' },
+      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      categories: [
+        { name: 'rock',       label: 'Rock',        style: { backgroundColor: '#dc2626', fontColor: '#fff' } },
+        { name: 'electronic', label: 'Electronic',   style: { backgroundColor: '#7c3aed', fontColor: '#fff' } },
+        { name: 'hiphop',     label: 'Hip-Hop',      style: { backgroundColor: '#f59e0b', fontColor: '#2d3748' } },
+        { name: 'indie',      label: 'Indie / Folk',  style: { backgroundColor: '#059669', fontColor: '#fff' } },
+        { name: 'pop',        label: 'Pop',          style: { backgroundColor: '#ec4899', fontColor: '#fff' } },
+        { name: 'jazz',       label: 'Jazz / Soul',   style: { backgroundColor: '#0891b2', fontColor: '#fff' } }
+      ],
+      items: [
+        // ── SATURDAY — Main Stage ──
+        { id: 1,   label: 'Gates Open',              start: `${sat}T11:00:00`, category: 'rock',       grouping: 'Main Stage' },
+        { id: 2,   label: 'The Broken Chains',       start: `${sat}T12:00:00`, end: `${sat}T12:45:00`, category: 'rock',       grouping: 'Main Stage' },
+        { id: 3,   label: 'Velvet Riot',             start: `${sat}T13:15:00`, end: `${sat}T14:15:00`, category: 'rock',       grouping: 'Main Stage' },
+        { id: 4,   label: 'Neon Wolves',             start: `${sat}T14:45:00`, end: `${sat}T15:45:00`, category: 'rock',       grouping: 'Main Stage' },
+        { id: 5,   label: 'Crimson Tide',            start: `${sat}T16:15:00`, end: `${sat}T17:30:00`, category: 'rock',       grouping: 'Main Stage' },
+        { id: 6,   label: 'Echo Chamber',            start: `${sat}T18:00:00`, end: `${sat}T19:30:00`, category: 'rock',       grouping: 'Main Stage' },
+        { id: 7,   label: 'Thunderstrike',           start: `${sat}T20:00:00`, end: `${sat}T21:30:00`, category: 'rock',       grouping: 'Main Stage' },
+        { id: 8,   label: 'Black Horizon ★',         start: `${sat}T22:00:00`, end: `${sat}T23:30:00`, category: 'rock',       grouping: 'Main Stage' },
+
+        // ── SATURDAY — Electric Tent ──
+        { id: 10,  label: 'DJ Pulse',                start: `${sat}T12:00:00`, end: `${sat}T13:30:00`, category: 'electronic', grouping: 'Electric Tent' },
+        { id: 11,  label: 'Synthwave Collective',    start: `${sat}T14:00:00`, end: `${sat}T15:30:00`, category: 'electronic', grouping: 'Electric Tent' },
+        { id: 12,  label: 'Bass Architects',         start: `${sat}T16:00:00`, end: `${sat}T17:30:00`, category: 'electronic', grouping: 'Electric Tent' },
+        { id: 13,  label: 'Neon District',           start: `${sat}T18:00:00`, end: `${sat}T19:30:00`, category: 'electronic', grouping: 'Electric Tent' },
+        { id: 14,  label: 'Voltage',                 start: `${sat}T20:00:00`, end: `${sat}T21:30:00`, category: 'electronic', grouping: 'Electric Tent' },
+        { id: 15,  label: 'AURORA ★',                start: `${sat}T22:00:00`, end: `${sun}T00:30:00`, category: 'electronic', grouping: 'Electric Tent' },
+
+        // ── SATURDAY — The Yard ──
+        { id: 20,  label: 'MC Blaze',                start: `${sat}T12:30:00`, end: `${sat}T13:15:00`, category: 'hiphop',     grouping: 'The Yard' },
+        { id: 21,  label: 'Concrete Kings',          start: `${sat}T13:45:00`, end: `${sat}T14:45:00`, category: 'hiphop',     grouping: 'The Yard' },
+        { id: 22,  label: 'Lyric Storm',             start: `${sat}T15:15:00`, end: `${sat}T16:15:00`, category: 'hiphop',     grouping: 'The Yard' },
+        { id: 23,  label: 'Gold Standard',           start: `${sat}T16:45:00`, end: `${sat}T18:00:00`, category: 'hiphop',     grouping: 'The Yard' },
+        { id: 24,  label: 'Phantom Crew',            start: `${sat}T18:30:00`, end: `${sat}T19:45:00`, category: 'hiphop',     grouping: 'The Yard' },
+        { id: 25,  label: 'King Midas ★',            start: `${sat}T20:15:00`, end: `${sat}T21:45:00`, category: 'hiphop',     grouping: 'The Yard' },
+
+        // ── SATURDAY — Woodland Stage ──
+        { id: 30,  label: 'Willow & Pine',           start: `${sat}T12:00:00`, end: `${sat}T12:45:00`, category: 'indie',      grouping: 'Woodland Stage' },
+        { id: 31,  label: 'The Paper Lanterns',       start: `${sat}T13:15:00`, end: `${sat}T14:00:00`, category: 'indie',      grouping: 'Woodland Stage' },
+        { id: 32,  label: 'Campfire Radio',           start: `${sat}T14:30:00`, end: `${sat}T15:30:00`, category: 'indie',      grouping: 'Woodland Stage' },
+        { id: 33,  label: 'Moss & Stone',             start: `${sat}T16:00:00`, end: `${sat}T17:00:00`, category: 'indie',      grouping: 'Woodland Stage' },
+        { id: 34,  label: 'Amber Dusk',               start: `${sat}T17:30:00`, end: `${sat}T18:30:00`, category: 'indie',      grouping: 'Woodland Stage' },
+        { id: 35,  label: 'The Wandering Folk ★',     start: `${sat}T19:00:00`, end: `${sat}T20:30:00`, category: 'indie',      grouping: 'Woodland Stage' },
+        { id: 36,  label: 'Firefly Sessions',         start: `${sat}T21:00:00`, end: `${sat}T22:30:00`, category: 'indie',      grouping: 'Woodland Stage' },
+
+        // ── SATURDAY — Sunset Lounge ──
+        { id: 40,  label: 'Smooth Operator Trio',     start: `${sat}T13:00:00`, end: `${sat}T14:00:00`, category: 'jazz',       grouping: 'Sunset Lounge' },
+        { id: 41,  label: 'Brass & Velvet',           start: `${sat}T14:30:00`, end: `${sat}T15:30:00`, category: 'jazz',       grouping: 'Sunset Lounge' },
+        { id: 42,  label: 'Nina Soulfire',            start: `${sat}T16:00:00`, end: `${sat}T17:15:00`, category: 'jazz',       grouping: 'Sunset Lounge' },
+        { id: 43,  label: 'The Blue Note Ensemble',   start: `${sat}T17:45:00`, end: `${sat}T19:00:00`, category: 'jazz',       grouping: 'Sunset Lounge' },
+        { id: 44,  label: 'Midnight Groove ★',        start: `${sat}T19:30:00`, end: `${sat}T21:00:00`, category: 'jazz',       grouping: 'Sunset Lounge' },
+
+        // ── SUNDAY — Main Stage ──
+        { id: 50,  label: 'Solar Flare',              start: `${sun}T12:00:00`, end: `${sun}T12:45:00`, category: 'pop',        grouping: 'Main Stage' },
+        { id: 51,  label: 'Crystal Waves',            start: `${sun}T13:15:00`, end: `${sun}T14:15:00`, category: 'pop',        grouping: 'Main Stage' },
+        { id: 52,  label: 'Daydream Machine',         start: `${sun}T14:45:00`, end: `${sun}T15:45:00`, category: 'pop',        grouping: 'Main Stage' },
+        { id: 53,  label: 'Electric Hearts',          start: `${sun}T16:15:00`, end: `${sun}T17:30:00`, category: 'pop',        grouping: 'Main Stage' },
+        { id: 54,  label: 'Starlight Parade',         start: `${sun}T18:00:00`, end: `${sun}T19:30:00`, category: 'pop',        grouping: 'Main Stage' },
+        { id: 55,  label: 'Luna ★',                   start: `${sun}T20:00:00`, end: `${sun}T21:30:00`, category: 'pop',        grouping: 'Main Stage' },
+        { id: 56,  label: 'Fireworks Finale',         start: `${sun}T22:00:00`, category: 'pop',        grouping: 'Main Stage' },
+
+        // ── SUNDAY — Electric Tent ──
+        { id: 60,  label: 'Glitch Garden',            start: `${sun}T12:30:00`, end: `${sun}T14:00:00`, category: 'electronic', grouping: 'Electric Tent' },
+        { id: 61,  label: 'Waveform',                 start: `${sun}T14:30:00`, end: `${sun}T16:00:00`, category: 'electronic', grouping: 'Electric Tent' },
+        { id: 62,  label: 'Subterranean',             start: `${sun}T16:30:00`, end: `${sun}T18:00:00`, category: 'electronic', grouping: 'Electric Tent' },
+        { id: 63,  label: 'Frequency Shift',          start: `${sun}T18:30:00`, end: `${sun}T20:00:00`, category: 'electronic', grouping: 'Electric Tent' },
+        { id: 64,  label: 'Orbital ★',                start: `${sun}T20:30:00`, end: `${sun}T22:30:00`, category: 'electronic', grouping: 'Electric Tent' },
+
+        // ── SUNDAY — The Yard ──
+        { id: 70,  label: 'Verse One',                start: `${sun}T12:00:00`, end: `${sun}T13:00:00`, category: 'hiphop',     grouping: 'The Yard' },
+        { id: 71,  label: 'Crown Jewels',             start: `${sun}T13:30:00`, end: `${sun}T14:30:00`, category: 'hiphop',     grouping: 'The Yard' },
+        { id: 72,  label: 'Ink & Flow',               start: `${sun}T15:00:00`, end: `${sun}T16:00:00`, category: 'hiphop',     grouping: 'The Yard' },
+        { id: 73,  label: 'The Architects',           start: `${sun}T16:30:00`, end: `${sun}T17:45:00`, category: 'hiphop',     grouping: 'The Yard' },
+        { id: 74,  label: 'Empress ★',                start: `${sun}T18:15:00`, end: `${sun}T19:45:00`, category: 'hiphop',     grouping: 'The Yard' },
+
+        // ── SUNDAY — Woodland Stage ──
+        { id: 80,  label: 'Morning Dew',              start: `${sun}T11:30:00`, end: `${sun}T12:15:00`, category: 'indie',      grouping: 'Woodland Stage' },
+        { id: 81,  label: 'Foxglove',                  start: `${sun}T12:45:00`, end: `${sun}T13:45:00`, category: 'indie',      grouping: 'Woodland Stage' },
+        { id: 82,  label: 'River Mouth',               start: `${sun}T14:15:00`, end: `${sun}T15:15:00`, category: 'indie',      grouping: 'Woodland Stage' },
+        { id: 83,  label: 'Hollow Pine',               start: `${sun}T15:45:00`, end: `${sun}T16:45:00`, category: 'indie',      grouping: 'Woodland Stage' },
+        { id: 84,  label: 'The Driftwood Band ★',      start: `${sun}T17:15:00`, end: `${sun}T18:45:00`, category: 'indie',      grouping: 'Woodland Stage' },
+        { id: 85,  label: 'Lantern Light',             start: `${sun}T19:15:00`, end: `${sun}T20:30:00`, category: 'indie',      grouping: 'Woodland Stage' },
+
+        // ── SUNDAY — Sunset Lounge ──
+        { id: 90,  label: 'Sunday Brunch Jazz',        start: `${sun}T12:00:00`, end: `${sun}T13:30:00`, category: 'jazz',       grouping: 'Sunset Lounge' },
+        { id: 91,  label: 'Copper & Silk',             start: `${sun}T14:00:00`, end: `${sun}T15:15:00`, category: 'jazz',       grouping: 'Sunset Lounge' },
+        { id: 92,  label: 'The Slow Burn',             start: `${sun}T15:45:00`, end: `${sun}T17:00:00`, category: 'jazz',       grouping: 'Sunset Lounge' },
+        { id: 93,  label: 'Golden Hour Quartet ★',     start: `${sun}T17:30:00`, end: `${sun}T19:00:00`, category: 'jazz',       grouping: 'Sunset Lounge' },
+        { id: 94,  label: 'Closing Ceremony',          start: `${sun}T22:30:00`, category: 'jazz',       grouping: 'Sunset Lounge' }
+      ]
+    });
+
+    const formatEl       = document.getElementById('format');
+    const qualityEl      = document.getElementById('quality');
+    const labelEl        = document.getElementById('quality-label');
+    const qualityLabelEl = document.getElementById('quality-group-label');
+    const dprEl          = document.getElementById('dpr');
+    const bgToggle       = document.getElementById('bg-toggle');
+    const bgColor        = document.getElementById('bg-color');
+    const saveBtn        = document.getElementById('save-btn');
+    const statusEl       = document.getElementById('status');
+
+    function updateQualityVisibility() {
+      const isLossy = formatEl.value !== 'image/png';
+      qualityEl.style.display      = isLossy ? '' : 'none';
+      labelEl.style.display        = isLossy ? '' : 'none';
+      qualityLabelEl.style.display = isLossy ? '' : 'none';
+    }
+
+    formatEl.addEventListener('change', updateQualityVisibility);
+    updateQualityVisibility();
+
+    bgToggle.addEventListener('change', () => {
+      bgColor.style.display = bgToggle.checked ? '' : 'none';
+    });
+
+    qualityEl.addEventListener('input', () => { labelEl.textContent = qualityEl.value; });
+
+    saveBtn.addEventListener('click', async () => {
+      saveBtn.disabled = true;
+      statusEl.textContent = 'Exporting…';
+
+      try {
+        const type    = formatEl.value;
+        const quality = parseFloat(qualityEl.value);
+        const dpr     = parseInt(dprEl.value, 10);
+        const backgroundColor = bgToggle.checked ? bgColor.value : undefined;
+
+        const blob = await timeline.toImage({ type, quality, dpr, backgroundColor });
+
+        const ext = type.split('/')[1];
+        const qualitySuffix = type !== 'image/png' ? '_q' + qualityEl.value : '';
+        const url = URL.createObjectURL(blob);
+        const a   = document.createElement('a');
+        a.href     = url;
+        a.download = 'festival-schedule_' + dpr + 'x' + qualitySuffix + '.' + ext;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+
+        const kb = (blob.size / 1024).toFixed(1);
+        statusEl.textContent = 'Saved ' + ext.toUpperCase() + ' (' + kb + ' KB) at ' + dpr + '× resolution.';
+      } catch (err) {
+        statusEl.textContent = 'Export failed: ' + err.message;
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

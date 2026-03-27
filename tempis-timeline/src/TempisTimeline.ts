@@ -20,6 +20,38 @@ import { AdapterRegistry } from "./AdapterRegistry";
 import { FocusController, FocusOptions } from "./FocusController";
 import { ColorPalette } from "./ColorPalette";
 
+/**
+ * The options for exporting the timeline as an image.
+ */
+export interface ImageGenerationOptions {
+    /**
+     * The image MIME type (e.g. "image/png", "image/jpeg", "image/webp"). Defaults to "image/png".
+     */
+    type?: string;
+    /**
+     * A number between 0 and 1 for lossy formats (JPEG, WebP). Ignored for PNG.
+     */
+    quality?: number;
+    /**
+     * The device pixel ratio for the exported image. Defaults to 1. Use values > 1 for higher resolution exports.
+     */
+    dpr?: number;
+    /**
+     * Optional background color for the exported image (e.g. "#ffffff"). By default the canvas background is transparent.
+     */
+    backgroundColor?: string;
+}
+
+/**
+ * The options for internal draw calls.
+ */
+interface DrawOptions {
+    /**
+     * When true, the scrollbar is not rendered.
+     */
+    hideScrollbar?: boolean;
+}
+
 export class TempisTimeline {
     /** The timeline canvas. */
     private readonly _canvas: HTMLCanvasElement;
@@ -59,6 +91,9 @@ export class TempisTimeline {
 
     /** The last known range end time, used to detect range changes. */
     private _lastRangeToTime: number = 0;
+
+    /** Whether the timeline has been destroyed. */
+    private _isDestroyed: boolean = false;
 
     /** The event handler references for cleanup. */
     private _eventHandlers: {
@@ -329,10 +364,70 @@ export class TempisTimeline {
     }
 
     /**
+     * Exports the current timeline view as an image Blob.
+     * @param options The optional export settings.
+     * @returns A Promise that resolves with the image Blob.
+     * @throws Error if the timeline has been destroyed.
+     */
+    public async toImage(options?: ImageGenerationOptions): Promise<Blob> {
+        // We cannot export to image if the timeline has already been destroyed.
+        if (this._isDestroyed) {
+            throw new Error("Cannot export image: timeline has been destroyed.");
+        }
+
+        // Render a clean frame without the scrollbar.
+        this._draw({ hideScrollbar: true });
+
+        const dpr = options?.dpr ?? 1;
+        const type = options?.type ?? "image/png";
+        const quality = options?.quality;
+
+        const width = this._canvas.offsetWidth * dpr;
+        const height = this._canvas.offsetHeight * dpr;
+
+        // Create an offscreen canvas at the target dimensions.
+        const offscreen = document.createElement("canvas");
+        offscreen.width = width;
+        offscreen.height = height;
+
+        const offCtx = offscreen.getContext("2d")!;
+
+        // If a background color was requested, fill the offscreen canvas before compositing the timeline.
+        if (options?.backgroundColor) {
+            offCtx.fillStyle = options.backgroundColor;
+            offCtx.fillRect(0, 0, width, height);
+        }
+
+        offCtx.drawImage(this._canvas, 0, 0, width, height);
+
+        // Wrap toBlob in a Promise.
+        const blob = await new Promise<Blob>((resolve, reject) => {
+            offscreen.toBlob(
+                (result) => {
+                    if (result) {
+                        resolve(result);
+                    } else {
+                        reject(new Error("Image export failed: toBlob returned null."));
+                    }
+                },
+                type,
+                quality
+            );
+        });
+
+        // Restore the normal render with scrollbar.
+        this._draw();
+
+        return blob;
+    }
+
+    /**
      * Destroy the timeline and clean up all resources.
      * This removes all event listeners and observers to prevent memory leaks.
      */
     public destroy(): void {
+        this._isDestroyed = true;
+
         // Cancel any ongoing animations
         this._rangeView.cancelAnimation();
         this._dataView.cancelAnimation();
@@ -766,8 +861,9 @@ export class TempisTimeline {
 
     /**
      * Draw the timeline.
+     * @param options The optional draw settings.
      */
-    private _draw(): void {
+    private _draw(options?: DrawOptions): void {
         // Grab the canvas context.
         const context = this._canvas.getContext("2d")!;
 
@@ -869,7 +965,8 @@ export class TempisTimeline {
             renderOffsetY,
             // For "grow-canvas" vertical fill mode we just give the data view a massive height to render into so that it can render all items safely.
             this._verticalFillMode === "grow-canvas" ? Number.MAX_SAFE_INTEGER : dataViewMaxHeight,
-            this._verticalFillMode === "fill-canvas"
+            this._verticalFillMode === "fill-canvas",
+            options?.hideScrollbar
         );
 
         // Restore the original render context, this will bin the clipping rect we put in place to restrict the data view render.

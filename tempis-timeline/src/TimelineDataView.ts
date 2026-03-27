@@ -180,6 +180,7 @@ export class TimelineDataView {
      * @param yPosition The y position from where to start drawing the view.
      * @param maxHeight The max height that we can draw the data view before it must start scrolling.
      * @param fillVertically Whether the timeline data view should fill the vertical space available to it.
+     * @param hideScrollbar Whether to suppress scrollbar rendering. Defaults to `false`.
      */
     public draw(
         context: CanvasRenderingContext2D,
@@ -189,7 +190,8 @@ export class TimelineDataView {
         bands: TimelineBand[],
         yPosition: number,
         maxHeight: number,
-        fillVertically: boolean
+        fillVertically: boolean,
+        hideScrollbar?: boolean
     ): number {
         // We should create our plan for drawing the groups and items of the view. This will also give us exactly how much space would be required to do so.
         this._drawPlan = this._createViewDrawPlan(context, fromDt, toDt);
@@ -214,8 +216,10 @@ export class TimelineDataView {
         // Draw our groups and items!
         this._drawGroups(context, yPosition);
 
-        // Draw the scrollbar if there's vertical overflow.
-        this._drawScrollbar(context, yPosition, this._lastDrawHeight);
+        // Draw the scrollbar if there's vertical overflow and we arent explicitly hiding it.
+        if (!hideScrollbar) {
+            this._drawScrollbar(context, yPosition, this._lastDrawHeight);
+        }
 
         // Set the y position from where this view was last drawn.
         // This will be used to help align absolute canvas pointer positions with data view elements.
