@@ -262,8 +262,13 @@ function createTimeline(timezone) {
   // Register the Luxon adapter with the selected timezone
   tempis_timeline.AdapterRegistry.register(new LuxonAdapter(timezone));
 
-  // Destroy existing timeline if any
+  // Capture the current visible range before destroying, so we can restore it.
+  let rangeStart = baseDate.toISO();
+  let rangeEnd = baseDate.plus({ hours: 36 }).toISO();
   if (timeline) {
+    const currentRange = timeline.getRange();
+    rangeStart = currentRange.start;
+    rangeEnd = currentRange.end;
     timeline.destroy();
   }
 
@@ -274,8 +279,8 @@ function createTimeline(timezone) {
     verticalFill: 'fill-canvas',
     selection: 'single',
     range: {
-      start: baseDate.toISO(),
-      end: baseDate.plus({ hours: 36 }).toISO(),
+      start: rangeStart,
+      end: rangeEnd,
       position: 'bottom',
       minorUnit: { formats: fmts.minor },
       majorUnit: { formats: fmts.major }
