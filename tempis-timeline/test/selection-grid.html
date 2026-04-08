@@ -68,6 +68,7 @@
     }
     .event-grid tr.row:hover { background: #f0f4ff; }
     .event-grid tr.row.selected { background: #e3f2fd; }
+    .event-grid tr.row.hovered { background: #fef9c3; }
     .category-dot {
       display: inline-block;
       width: 10px;
@@ -106,10 +107,10 @@
     </div>
 
     <div class="info">
-      <strong>Programmatic Selection</strong><br>
+      <strong>Programmatic Selection &amp; Hover</strong><br>
       The timeline uses <code>selection: "none"</code> so clicking items on the canvas does nothing.
       Selection is controlled externally via <code>timeline.setSelection([id])</code> and <code>timeline.focus({ id })</code>.
-      Call <code>timeline.clearSelection()</code> to deselect.
+      Hovering an item on the timeline highlights the corresponding row in the grid via <code>onItemHover</code>.
     </div>
   </div>
 
@@ -188,6 +189,27 @@ const timeline = new TempisTimeline('#canvas', {
   grouping: { sort: (a, b) => a.localeCompare(b) },
   categories,
   tooltip: { enabled: true, delay: 200 },
+  onItemHover: (id) => {
+    document.querySelectorAll('.row.hovered').forEach(r => r.classList.remove('hovered'));
+    if (id !== null) {
+      const row = gridBody.querySelector(`tr[data-id="${id}"]`);
+      if (row) {
+        row.classList.add('hovered');
+        // Scroll the row into view, accounting for the sticky header.
+        const grid = row.closest('.event-grid');
+        const headerHeight = grid.querySelector('thead').offsetHeight;
+        const rowTop = row.offsetTop - headerHeight;
+        const rowBottom = row.offsetTop + row.offsetHeight;
+        const scrollTop = grid.scrollTop;
+        const viewBottom = scrollTop + grid.clientHeight;
+        if (rowTop < scrollTop) {
+          grid.scrollTo({ top: rowTop, behavior: 'smooth' });
+        } else if (rowBottom > viewBottom) {
+          grid.scrollTo({ top: rowBottom - grid.clientHeight, behavior: 'smooth' });
+        }
+      }
+    }
+  },
   items
 });
 

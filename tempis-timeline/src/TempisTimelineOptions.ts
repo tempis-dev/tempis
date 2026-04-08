@@ -64,6 +64,12 @@ export interface TempisTimelineOptions {
 
     onItemDoubleClick?(id: string | number): void;
 
+    /**
+     * Called when the mouse pointer enters or leaves a timeline item.
+     * @param id The identifier of the item being hovered, or `null` when the pointer leaves all items.
+     */
+    onItemHover?(id: string | number | null): void;
+
     onSelectionChange?(changes: SelectionChangeEvent[]): void;
 
     /**

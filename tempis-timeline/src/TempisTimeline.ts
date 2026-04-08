@@ -546,6 +546,9 @@ export class TempisTimeline {
         let lastPinchDistance: number | null = null;
         let wasPinching = false;
 
+        // Track the last hovered item ID to avoid firing duplicate hover callbacks.
+        let lastHoveredItemId: string | number | null = null;
+
         // A function that gets the position on the canvas for the mouse event or pointer event.
         const getMouseOrPointerPosition = (event: PointerEvent | MouseEvent) => {
             const rect = this._canvas.getBoundingClientRect();
@@ -647,6 +650,16 @@ export class TempisTimeline {
             // Single pointer panning.
             // There is nothing to do if the pointer is not currently down.
             if (!isPointerDown) {
+                // Fire the onItemHover callback if the hovered item has changed.
+                if (this._options.onItemHover) {
+                    const hoveredItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
+                    const hoveredId = hoveredItem?.id ?? null;
+
+                    if (hoveredId !== lastHoveredItemId) {
+                        lastHoveredItemId = hoveredId;
+                        this._options.onItemHover(hoveredId);
+                    }
+                }
                 return;
             }
 
@@ -789,6 +802,13 @@ export class TempisTimeline {
 
         this._eventHandlers.mouseleave = () => {
             this._dataView.setHovering(false);
+
+            // Fire the onItemHover callback with null when the pointer leaves the canvas.
+            if (this._options.onItemHover && lastHoveredItemId !== null) {
+                lastHoveredItemId = null;
+                this._options.onItemHover(null);
+            }
+
             this._draw();
         };
         this._canvas.addEventListener("mouseleave", this._eventHandlers.mouseleave);
