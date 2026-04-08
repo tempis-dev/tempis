@@ -67,23 +67,25 @@
 
     <div class="style-legend">
       <div class="style-legend-item">
-        <div class="style-swatch" style="background:#16a34a;"></div>
+        <div class="style-swatch" style="background:#16a34a;border-radius:2px;"></div>
         Completed
       </div>
       <div class="style-legend-item">
-        <div class="style-swatch" style="border:2px dotted #6366f1;background:#eef2ff;"></div>
+        <div class="style-swatch" style="border:3px dotted #6366f1;background:#eef2ff;border-radius:8px;"></div>
         Tentative
       </div>
       <div class="style-legend-item">
-        <div class="style-swatch" style="border:2px dashed #dc2626;background:#fef2f2;"></div>
+        <div class="style-swatch" style="border:3px dashed #dc2626;background:#fef2f2;border-radius:0;"></div>
         Blocked
       </div>
       <div class="style-legend-item">
-        <div class="style-swatch" style="border:2px dashed #0891b2;background:#ecfeff;"></div>
+        <svg class="style-swatch" viewBox="0 0 32 16" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="30" height="14" rx="6" ry="6" fill="#ecfeff" stroke="#0891b2" stroke-width="2" stroke-dasharray="6,3,1,3" />
+        </svg>
         External Vendor
       </div>
       <div class="style-legend-item">
-        <div class="style-swatch" style="background:#1e1b4b;border:2px solid #a78bfa;border-radius:10px;"></div>
+        <div class="style-swatch" style="background:#1e1b4b;border:4px solid #a78bfa;border-radius:10px;"></div>
         Milestone
       </div>
     </div>
@@ -119,92 +121,86 @@
         end: '2026-02-16',
         position: 'bottom'
       },
-      legend: { position: 'top' },
+      legend: { position: 'none' },
       style: { item: { borderRadius: 4, fontColor: '#fff' } },
-      categories: [
-        { name: 'preprod',  label: 'Pre-Production',  style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
-        { name: 'shoot',    label: 'Shooting',         style: { backgroundColor: '#0891b2', fontColor: '#fff' } },
-        { name: 'postprod', label: 'Post-Production',  style: { backgroundColor: '#d946ef', fontColor: '#fff' } },
-        { name: 'admin',    label: 'Admin / Legal',    style: { backgroundColor: '#64748b', fontColor: '#fff' } }
-      ],
       items: [
         // ── Directing ──
-        { id: 1,  label: 'Script Breakdown',         start: '2026-01-05', end: '2026-01-12', category: 'preprod', grouping: 'Directing', style: done },
-        { id: 2,  label: 'Storyboarding',            start: '2026-01-08', end: '2026-01-18', category: 'preprod', grouping: 'Directing', style: done },
-        { id: 3,  label: 'Shot List Finalization',    start: '2026-01-16', end: '2026-01-20', category: 'preprod', grouping: 'Directing' },
-        { id: 4,  label: 'Rehearsals',               start: '2026-01-19', end: '2026-01-25', category: 'preprod', grouping: 'Directing', style: tentative },
-        { id: 5,  label: 'Principal Photography',    start: '2026-01-26', end: '2026-02-15', category: 'shoot',   grouping: 'Directing' },
-        { id: 6,  label: '📌 Picture Lock',          start: '2026-02-22', category: 'postprod', grouping: 'Directing', style: mile },
-        { id: 7,  label: '⚠ Script Revision Due',    start: '2026-01-15', category: 'preprod', grouping: 'Directing', style: blocked },
+        { id: 1,  label: 'Script Breakdown',         start: '2026-01-05', end: '2026-01-12', grouping: 'Directing', style: done },
+        { id: 2,  label: 'Storyboarding',            start: '2026-01-08', end: '2026-01-18', grouping: 'Directing', style: done },
+        { id: 3,  label: 'Shot List Finalization',    start: '2026-01-16', end: '2026-01-20', grouping: 'Directing' },
+        { id: 4,  label: 'Rehearsals',               start: '2026-01-19', end: '2026-01-25', grouping: 'Directing', style: tentative },
+        { id: 5,  label: 'Principal Photography',    start: '2026-01-26', end: '2026-02-15', grouping: 'Directing' },
+        { id: 6,  label: '📌 Picture Lock',          start: '2026-02-22', grouping: 'Directing', style: mile },
+        { id: 7,  label: '⚠ Script Revision Due',    start: '2026-01-15', grouping: 'Directing', style: blocked },
 
         // ── Camera ──
-        { id: 10, label: 'Camera Tests',             start: '2026-01-12', end: '2026-01-16', category: 'preprod', grouping: 'Camera', style: done },
-        { id: 11, label: 'Lens Kit Selection',       start: '2026-01-14', end: '2026-01-18', category: 'preprod', grouping: 'Camera' },
-        { id: 12, label: 'Gear Rental',              start: '2026-01-23', end: '2026-01-25', category: 'admin',   grouping: 'Camera', style: vendor },
-        { id: 13, label: 'A-Unit Shooting',          start: '2026-01-26', end: '2026-02-08', category: 'shoot',   grouping: 'Camera' },
-        { id: 14, label: 'B-Unit Shooting',          start: '2026-02-02', end: '2026-02-15', category: 'shoot',   grouping: 'Camera' },
-        { id: 15, label: 'Pickup Shots',             start: '2026-02-16', end: '2026-02-19', category: 'shoot',   grouping: 'Camera', style: tentative },
-        { id: 16, label: '🔧 Sensor Calibration',    start: '2026-01-25', category: 'preprod', grouping: 'Camera' },
-        { id: 17, label: '📌 Gear Return Deadline',  start: '2026-02-20', category: 'admin',   grouping: 'Camera', style: mile },
+        { id: 10, label: 'Camera Tests',             start: '2026-01-12', end: '2026-01-16', grouping: 'Camera', style: done },
+        { id: 11, label: 'Lens Kit Selection',       start: '2026-01-14', end: '2026-01-18', grouping: 'Camera' },
+        { id: 12, label: 'Gear Rental',              start: '2026-01-23', end: '2026-01-25', grouping: 'Camera', style: vendor },
+        { id: 13, label: 'A-Unit Shooting',          start: '2026-01-26', end: '2026-02-08', grouping: 'Camera' },
+        { id: 14, label: 'B-Unit Shooting',          start: '2026-02-02', end: '2026-02-15', grouping: 'Camera' },
+        { id: 15, label: 'Pickup Shots',             start: '2026-02-16', end: '2026-02-19', grouping: 'Camera', style: tentative },
+        { id: 16, label: '🔧 Sensor Calibration',    start: '2026-01-25', grouping: 'Camera' },
+        { id: 17, label: '📌 Gear Return Deadline',  start: '2026-02-20', grouping: 'Camera', style: mile },
 
         // ── Sound ──
-        { id: 20, label: 'Location Sound Survey',    start: '2026-01-10', end: '2026-01-14', category: 'preprod', grouping: 'Sound', style: done },
-        { id: 21, label: 'Mic & Boom Prep',          start: '2026-01-20', end: '2026-01-25', category: 'preprod', grouping: 'Sound' },
-        { id: 22, label: 'Production Sound',         start: '2026-01-26', end: '2026-02-15', category: 'shoot',   grouping: 'Sound' },
-        { id: 23, label: 'ADR Sessions (Studio X)',  start: '2026-02-16', end: '2026-02-22', category: 'postprod', grouping: 'Sound', style: vendor },
-        { id: 24, label: 'Foley Recording',          start: '2026-02-18', end: '2026-02-25', category: 'postprod', grouping: 'Sound' },
-        { id: 25, label: 'Sound Mix',                start: '2026-02-23', end: '2026-02-28', category: 'postprod', grouping: 'Sound' },
-        { id: 26, label: '🎤 Voice Talent Booking',  start: '2026-02-14', category: 'postprod', grouping: 'Sound', style: tentative },
+        { id: 20, label: 'Location Sound Survey',    start: '2026-01-10', end: '2026-01-14', grouping: 'Sound', style: done },
+        { id: 21, label: 'Mic & Boom Prep',          start: '2026-01-20', end: '2026-01-25', grouping: 'Sound' },
+        { id: 22, label: 'Production Sound',         start: '2026-01-26', end: '2026-02-15', grouping: 'Sound' },
+        { id: 23, label: 'ADR Sessions (Studio X)',  start: '2026-02-16', end: '2026-02-22', grouping: 'Sound', style: vendor },
+        { id: 24, label: 'Foley Recording',          start: '2026-02-18', end: '2026-02-25', grouping: 'Sound' },
+        { id: 25, label: 'Sound Mix',                start: '2026-02-23', end: '2026-02-28', grouping: 'Sound' },
+        { id: 26, label: '🎤 Voice Talent Booking',  start: '2026-02-14', grouping: 'Sound', style: tentative },
 
         // ── Art Department ──
-        { id: 30, label: 'Concept Art',              start: '2026-01-05', end: '2026-01-14', category: 'preprod', grouping: 'Art Dept', style: done },
-        { id: 31, label: 'Set Design',               start: '2026-01-10', end: '2026-01-22', category: 'preprod', grouping: 'Art Dept', style: done },
-        { id: 32, label: 'Set Construction',         start: '2026-01-15', end: '2026-01-25', category: 'preprod', grouping: 'Art Dept' },
-        { id: 33, label: 'Props Sourcing',           start: '2026-01-12', end: '2026-01-24', category: 'preprod', grouping: 'Art Dept', style: vendor },
-        { id: 34, label: 'Set Dressing',             start: '2026-01-24', end: '2026-02-15', category: 'shoot',   grouping: 'Art Dept' },
-        { id: 35, label: 'Strike & Wrap',            start: '2026-02-16', end: '2026-02-18', category: 'admin',   grouping: 'Art Dept' },
-        { id: 36, label: '📦 Props Delivery',        start: '2026-01-22', category: 'preprod', grouping: 'Art Dept', style: vendor },
-        { id: 37, label: '📌 Set Approval',          start: '2026-01-24', category: 'preprod', grouping: 'Art Dept', style: mile },
+        { id: 30, label: 'Concept Art',              start: '2026-01-05', end: '2026-01-14', grouping: 'Art Dept', style: done },
+        { id: 31, label: 'Set Design',               start: '2026-01-10', end: '2026-01-22', grouping: 'Art Dept', style: done },
+        { id: 32, label: 'Set Construction',         start: '2026-01-15', end: '2026-01-25', grouping: 'Art Dept' },
+        { id: 33, label: 'Props Sourcing',           start: '2026-01-12', end: '2026-01-24', grouping: 'Art Dept', style: vendor },
+        { id: 34, label: 'Set Dressing',             start: '2026-01-24', end: '2026-02-15', grouping: 'Art Dept' },
+        { id: 35, label: 'Strike & Wrap',            start: '2026-02-16', end: '2026-02-18', grouping: 'Art Dept' },
+        { id: 36, label: '📦 Props Delivery',        start: '2026-01-22', grouping: 'Art Dept', style: vendor },
+        { id: 37, label: '📌 Set Approval',          start: '2026-01-24', grouping: 'Art Dept', style: mile },
 
         // ── Wardrobe & Makeup ──
-        { id: 40, label: 'Costume Design',           start: '2026-01-06', end: '2026-01-16', category: 'preprod', grouping: 'Wardrobe & MU', style: done },
-        { id: 41, label: 'Fittings',                 start: '2026-01-17', end: '2026-01-24', category: 'preprod', grouping: 'Wardrobe & MU' },
-        { id: 42, label: 'Prosthetics Fabrication',  start: '2026-01-14', end: '2026-01-25', category: 'preprod', grouping: 'Wardrobe & MU', style: blocked },
-        { id: 43, label: 'On-Set Wardrobe',          start: '2026-01-26', end: '2026-02-15', category: 'shoot',   grouping: 'Wardrobe & MU' },
-        { id: 44, label: 'SFX Makeup',               start: '2026-01-26', end: '2026-02-15', category: 'shoot',   grouping: 'Wardrobe & MU', style: vendor },
-        { id: 45, label: '⚠ Fabric Shipment Late',   start: '2026-01-20', category: 'admin',   grouping: 'Wardrobe & MU', style: blocked },
+        { id: 40, label: 'Costume Design',           start: '2026-01-06', end: '2026-01-16', grouping: 'Wardrobe & MU', style: done },
+        { id: 41, label: 'Fittings',                 start: '2026-01-17', end: '2026-01-24', grouping: 'Wardrobe & MU' },
+        { id: 42, label: 'Prosthetics Fabrication',  start: '2026-01-14', end: '2026-01-25', grouping: 'Wardrobe & MU', style: blocked },
+        { id: 43, label: 'On-Set Wardrobe',          start: '2026-01-26', end: '2026-02-15', grouping: 'Wardrobe & MU' },
+        { id: 44, label: 'SFX Makeup',               start: '2026-01-26', end: '2026-02-15', grouping: 'Wardrobe & MU', style: vendor },
+        { id: 45, label: '⚠ Fabric Shipment Late',   start: '2026-01-20', grouping: 'Wardrobe & MU', style: blocked },
 
         // ── VFX ──
-        { id: 50, label: 'VFX Breakdown',            start: '2026-01-12', end: '2026-01-20', category: 'preprod', grouping: 'VFX' },
-        { id: 51, label: 'Previs & Techvis',         start: '2026-01-16', end: '2026-01-28', category: 'preprod', grouping: 'VFX', style: tentative },
-        { id: 52, label: 'On-Set VFX Supervision',   start: '2026-01-26', end: '2026-02-15', category: 'shoot',   grouping: 'VFX' },
-        { id: 53, label: 'Compositing (Framestore)', start: '2026-02-10', end: '2026-02-25', category: 'postprod', grouping: 'VFX', style: vendor },
-        { id: 54, label: 'CG Asset Build',           start: '2026-01-20', end: '2026-02-10', category: 'postprod', grouping: 'VFX' },
-        { id: 55, label: 'Final VFX Delivery',       start: '2026-02-25', end: '2026-02-28', category: 'postprod', grouping: 'VFX' },
-        { id: 56, label: '📌 VFX Lockoff',           start: '2026-02-28', category: 'postprod', grouping: 'VFX', style: mile },
-        { id: 57, label: '🖥 Render Farm Booked',    start: '2026-02-08', category: 'postprod', grouping: 'VFX', style: vendor },
-        { id: 58, label: '📌 Previs Sign-Off',       start: '2026-01-28', category: 'preprod', grouping: 'VFX', style: mile },
+        { id: 50, label: 'VFX Breakdown',            start: '2026-01-12', end: '2026-01-20', grouping: 'VFX' },
+        { id: 51, label: 'Previs & Techvis',         start: '2026-01-16', end: '2026-01-28', grouping: 'VFX', style: tentative },
+        { id: 52, label: 'On-Set VFX Supervision',   start: '2026-01-26', end: '2026-02-15', grouping: 'VFX' },
+        { id: 53, label: 'Compositing (Framestore)', start: '2026-02-10', end: '2026-02-25', grouping: 'VFX', style: vendor },
+        { id: 54, label: 'CG Asset Build',           start: '2026-01-20', end: '2026-02-10', grouping: 'VFX' },
+        { id: 55, label: 'Final VFX Delivery',       start: '2026-02-25', end: '2026-02-28', grouping: 'VFX' },
+        { id: 56, label: '📌 VFX Lockoff',           start: '2026-02-28', grouping: 'VFX', style: mile },
+        { id: 57, label: '🖥 Render Farm Booked',    start: '2026-02-08', grouping: 'VFX', style: vendor },
+        { id: 58, label: '📌 Previs Sign-Off',       start: '2026-01-28', grouping: 'VFX', style: mile },
 
         // ── Editing ──
-        { id: 60, label: 'Assembly Cut',             start: '2026-02-02', end: '2026-02-12', category: 'postprod', grouping: 'Editing' },
-        { id: 61, label: 'Rough Cut',                start: '2026-02-12', end: '2026-02-18', category: 'postprod', grouping: 'Editing' },
-        { id: 62, label: 'Fine Cut',                 start: '2026-02-18', end: '2026-02-24', category: 'postprod', grouping: 'Editing' },
-        { id: 63, label: 'Color Grading',            start: '2026-02-22', end: '2026-02-28', category: 'postprod', grouping: 'Editing', style: vendor },
-        { id: 64, label: '📌 Final Delivery',        start: '2026-02-28', category: 'postprod', grouping: 'Editing', style: mile },
-        { id: 65, label: '🎬 Director Review',       start: '2026-02-15', category: 'postprod', grouping: 'Editing' },
-        { id: 66, label: '📌 Rough Cut Screening',   start: '2026-02-18', category: 'postprod', grouping: 'Editing', style: mile },
+        { id: 60, label: 'Assembly Cut',             start: '2026-02-02', end: '2026-02-12', grouping: 'Editing' },
+        { id: 61, label: 'Rough Cut',                start: '2026-02-12', end: '2026-02-18', grouping: 'Editing' },
+        { id: 62, label: 'Fine Cut',                 start: '2026-02-18', end: '2026-02-24', grouping: 'Editing' },
+        { id: 63, label: 'Color Grading',            start: '2026-02-22', end: '2026-02-28', grouping: 'Editing', style: vendor },
+        { id: 64, label: '📌 Final Delivery',        start: '2026-02-28', grouping: 'Editing', style: mile },
+        { id: 65, label: '🎬 Director Review',       start: '2026-02-15', grouping: 'Editing' },
+        { id: 66, label: '📌 Rough Cut Screening',   start: '2026-02-18', grouping: 'Editing', style: mile },
 
         // ── Production Office ──
-        { id: 70, label: 'Budget Approval',          start: '2026-01-05', end: '2026-01-09', category: 'admin', grouping: 'Production Office', style: done },
-        { id: 71, label: 'Location Permits',         start: '2026-01-08', end: '2026-01-20', category: 'admin', grouping: 'Production Office', style: done },
-        { id: 72, label: 'Crew Contracts',           start: '2026-01-10', end: '2026-01-22', category: 'admin', grouping: 'Production Office' },
-        { id: 73, label: 'Insurance & Clearances',   start: '2026-01-12', end: '2026-01-25', category: 'admin', grouping: 'Production Office', style: blocked },
-        { id: 74, label: 'Catering & Transport',     start: '2026-01-22', end: '2026-02-15', category: 'admin', grouping: 'Production Office' },
-        { id: 75, label: 'Dailies Review',           start: '2026-01-27', end: '2026-02-15', category: 'admin', grouping: 'Production Office' },
-        { id: 76, label: 'Wrap Accounting',          start: '2026-02-16', end: '2026-02-25', category: 'admin', grouping: 'Production Office', style: tentative },
-        { id: 77, label: '📌 Greenlight',            start: '2026-01-09', category: 'admin', grouping: 'Production Office', style: mile },
-        { id: 78, label: '📋 Safety Briefing',       start: '2026-01-25', category: 'admin', grouping: 'Production Office' },
-        { id: 79, label: '⚠ Permit Expiry',          start: '2026-02-20', category: 'admin', grouping: 'Production Office', style: blocked }
+        { id: 70, label: 'Budget Approval',          start: '2026-01-05', end: '2026-01-09', grouping: 'Production Office', style: done },
+        { id: 71, label: 'Location Permits',         start: '2026-01-08', end: '2026-01-20', grouping: 'Production Office', style: done },
+        { id: 72, label: 'Crew Contracts',           start: '2026-01-10', end: '2026-01-22', grouping: 'Production Office' },
+        { id: 73, label: 'Insurance & Clearances',   start: '2026-01-12', end: '2026-01-25', grouping: 'Production Office', style: blocked },
+        { id: 74, label: 'Catering & Transport',     start: '2026-01-22', end: '2026-02-15', grouping: 'Production Office' },
+        { id: 75, label: 'Dailies Review',           start: '2026-01-27', end: '2026-02-15', grouping: 'Production Office' },
+        { id: 76, label: 'Wrap Accounting',          start: '2026-02-16', end: '2026-02-25', grouping: 'Production Office', style: tentative },
+        { id: 77, label: '📌 Greenlight',            start: '2026-01-09', grouping: 'Production Office', style: mile },
+        { id: 78, label: '📋 Safety Briefing',       start: '2026-01-25', grouping: 'Production Office' },
+        { id: 79, label: '⚠ Permit Expiry',          start: '2026-02-20', grouping: 'Production Office', style: blocked }
       ]
     });
   </script>
