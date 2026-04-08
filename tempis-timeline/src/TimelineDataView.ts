@@ -609,14 +609,16 @@ export class TimelineDataView {
         }
 
         // Draw the item range rectangle.
+        // When a border is configured, inset the fill so it doesn't bleed outside the stroke.
+        const fillInset = itemBorderThickness && itemBorderColor ? itemBorderThickness / 2 : 0;
         context.fillStyle = itemBackgroundColor;
         context.beginPath();
         context.roundRect(
-            itemDrawPlan.xPositionStart,
-            scrolledYPosition + itemDrawPlan.yPositionStart,
-            itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart,
-            itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart,
-            itemBorderRadius
+            itemDrawPlan.xPositionStart + fillInset,
+            scrolledYPosition + itemDrawPlan.yPositionStart + fillInset,
+            itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - fillInset * 2,
+            itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - fillInset * 2,
+            Math.max(0, itemBorderRadius - fillInset)
         );
         context.fill();
 
