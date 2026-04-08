@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Per-Item Styles — Tempis Timeline</title>
+  <script src="../dist/tempis_timeline.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { margin-top: 0; color: #333; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+    .timeline-container {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      height: 600px;
+      overflow: hidden;
+    }
+    .info {
+      margin-top: 15px;
+      padding: 15px;
+      background: #e3f2fd;
+      border-left: 4px solid #2196F3;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .style-legend {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #555;
+    }
+    .style-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .style-swatch {
+      width: 32px;
+      height: 16px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Film Production Schedule</h1>
+    <p class="subtitle">Per-item style overrides convey task status at a glance — completed, tentative, blocked, and key milestones.</p>
+
+    <div class="style-legend">
+      <div class="style-legend-item">
+        <div class="style-swatch" style="background:#16a34a;"></div>
+        Completed
+      </div>
+      <div class="style-legend-item">
+        <div class="style-swatch" style="border:2px dotted #6366f1;background:#eef2ff;"></div>
+        Tentative
+      </div>
+      <div class="style-legend-item">
+        <div class="style-swatch" style="border:2px dashed #dc2626;background:#fef2f2;"></div>
+        Blocked
+      </div>
+      <div class="style-legend-item">
+        <div class="style-swatch" style="border:2px dashed #0891b2;background:#ecfeff;"></div>
+        External Vendor
+      </div>
+      <div class="style-legend-item">
+        <div class="style-swatch" style="background:#1e1b4b;border:2px solid #a78bfa;border-radius:10px;"></div>
+        Milestone
+      </div>
+    </div>
+
+    <div class="timeline-container">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="info">
+      <strong>Per-Item Style Overrides</strong><br>
+      Each item can override <code>backgroundColor</code>, <code>fontColor</code>,
+      <code>borderColor</code>, <code>borderThickness</code>, <code>borderStyle</code> (<code>"solid"</code>,
+      <code>"dashed"</code>, <code>"dotted"</code>), <code>borderRadius</code>, and <code>padding</code>.
+      These override both the global and category styles for that specific item.
+    </div>
+  </div>
+
+  <script>
+    const { TempisTimeline } = tempis_timeline;
+
+    // Status-based style overrides
+    const done      = { backgroundColor: '#16a34a', fontColor: '#fff', borderRadius: 2 };
+    const tentative = { backgroundColor: '#eef2ff', fontColor: '#4338ca', borderColor: '#6366f1', borderThickness: 2, borderStyle: 'dotted', borderRadius: 8 };
+    const blocked   = { backgroundColor: '#fef2f2', fontColor: '#b91c1c', borderColor: '#dc2626', borderThickness: 2, borderStyle: 'long-dash', borderRadius: 0 };
+    const vendor    = { backgroundColor: '#ecfeff', fontColor: '#0e7490', borderColor: '#0891b2', borderThickness: 2, borderStyle: 'dash-dot', borderRadius: 14 };
+    const mile      = { backgroundColor: '#1e1b4b', fontColor: '#e0e7ff', borderColor: '#a78bfa', borderThickness: 2, borderRadius: 10 };
+
+    const timeline = new TempisTimeline('#canvas', {
+      responsive: true,
+      verticalFill: 'fill-canvas',
+      range: {
+        start: '2026-01-12',
+        end: '2026-02-16',
+        position: 'bottom'
+      },
+      legend: { position: 'top' },
+      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      categories: [
+        { name: 'preprod',  label: 'Pre-Production',  style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+        { name: 'shoot',    label: 'Shooting',         style: { backgroundColor: '#0891b2', fontColor: '#fff' } },
+        { name: 'postprod', label: 'Post-Production',  style: { backgroundColor: '#d946ef', fontColor: '#fff' } },
+        { name: 'admin',    label: 'Admin / Legal',    style: { backgroundColor: '#64748b', fontColor: '#fff' } }
+      ],
+      items: [
+        // ── Directing ──
+        { id: 1,  label: 'Script Breakdown',         start: '2026-01-05', end: '2026-01-12', category: 'preprod', grouping: 'Directing', style: done },
+        { id: 2,  label: 'Storyboarding',            start: '2026-01-08', end: '2026-01-18', category: 'preprod', grouping: 'Directing', style: done },
+        { id: 3,  label: 'Shot List Finalization',    start: '2026-01-16', end: '2026-01-20', category: 'preprod', grouping: 'Directing' },
+        { id: 4,  label: 'Rehearsals',               start: '2026-01-19', end: '2026-01-25', category: 'preprod', grouping: 'Directing', style: tentative },
+        { id: 5,  label: 'Principal Photography',    start: '2026-01-26', end: '2026-02-15', category: 'shoot',   grouping: 'Directing' },
+        { id: 6,  label: '📌 Picture Lock',          start: '2026-02-22', category: 'postprod', grouping: 'Directing', style: mile },
+        { id: 7,  label: '⚠ Script Revision Due',    start: '2026-01-15', category: 'preprod', grouping: 'Directing', style: blocked },
+
+        // ── Camera ──
+        { id: 10, label: 'Camera Tests',             start: '2026-01-12', end: '2026-01-16', category: 'preprod', grouping: 'Camera', style: done },
+        { id: 11, label: 'Lens Kit Selection',       start: '2026-01-14', end: '2026-01-18', category: 'preprod', grouping: 'Camera' },
+        { id: 12, label: 'Gear Rental',              start: '2026-01-23', end: '2026-01-25', category: 'admin',   grouping: 'Camera', style: vendor },
+        { id: 13, label: 'A-Unit Shooting',          start: '2026-01-26', end: '2026-02-08', category: 'shoot',   grouping: 'Camera' },
+        { id: 14, label: 'B-Unit Shooting',          start: '2026-02-02', end: '2026-02-15', category: 'shoot',   grouping: 'Camera' },
+        { id: 15, label: 'Pickup Shots',             start: '2026-02-16', end: '2026-02-19', category: 'shoot',   grouping: 'Camera', style: tentative },
+        { id: 16, label: '🔧 Sensor Calibration',    start: '2026-01-25', category: 'preprod', grouping: 'Camera' },
+        { id: 17, label: '📌 Gear Return Deadline',  start: '2026-02-20', category: 'admin',   grouping: 'Camera', style: mile },
+
+        // ── Sound ──
+        { id: 20, label: 'Location Sound Survey',    start: '2026-01-10', end: '2026-01-14', category: 'preprod', grouping: 'Sound', style: done },
+        { id: 21, label: 'Mic & Boom Prep',          start: '2026-01-20', end: '2026-01-25', category: 'preprod', grouping: 'Sound' },
+        { id: 22, label: 'Production Sound',         start: '2026-01-26', end: '2026-02-15', category: 'shoot',   grouping: 'Sound' },
+        { id: 23, label: 'ADR Sessions (Studio X)',  start: '2026-02-16', end: '2026-02-22', category: 'postprod', grouping: 'Sound', style: vendor },
+        { id: 24, label: 'Foley Recording',          start: '2026-02-18', end: '2026-02-25', category: 'postprod', grouping: 'Sound' },
+        { id: 25, label: 'Sound Mix',                start: '2026-02-23', end: '2026-02-28', category: 'postprod', grouping: 'Sound' },
+        { id: 26, label: '🎤 Voice Talent Booking',  start: '2026-02-14', category: 'postprod', grouping: 'Sound', style: tentative },
+
+        // ── Art Department ──
+        { id: 30, label: 'Concept Art',              start: '2026-01-05', end: '2026-01-14', category: 'preprod', grouping: 'Art Dept', style: done },
+        { id: 31, label: 'Set Design',               start: '2026-01-10', end: '2026-01-22', category: 'preprod', grouping: 'Art Dept', style: done },
+        { id: 32, label: 'Set Construction',         start: '2026-01-15', end: '2026-01-25', category: 'preprod', grouping: 'Art Dept' },
+        { id: 33, label: 'Props Sourcing',           start: '2026-01-12', end: '2026-01-24', category: 'preprod', grouping: 'Art Dept', style: vendor },
+        { id: 34, label: 'Set Dressing',             start: '2026-01-24', end: '2026-02-15', category: 'shoot',   grouping: 'Art Dept' },
+        { id: 35, label: 'Strike & Wrap',            start: '2026-02-16', end: '2026-02-18', category: 'admin',   grouping: 'Art Dept' },
+        { id: 36, label: '📦 Props Delivery',        start: '2026-01-22', category: 'preprod', grouping: 'Art Dept', style: vendor },
+        { id: 37, label: '📌 Set Approval',          start: '2026-01-24', category: 'preprod', grouping: 'Art Dept', style: mile },
+
+        // ── Wardrobe & Makeup ──
+        { id: 40, label: 'Costume Design',           start: '2026-01-06', end: '2026-01-16', category: 'preprod', grouping: 'Wardrobe & MU', style: done },
+        { id: 41, label: 'Fittings',                 start: '2026-01-17', end: '2026-01-24', category: 'preprod', grouping: 'Wardrobe & MU' },
+        { id: 42, label: 'Prosthetics Fabrication',  start: '2026-01-14', end: '2026-01-25', category: 'preprod', grouping: 'Wardrobe & MU', style: blocked },
+        { id: 43, label: 'On-Set Wardrobe',          start: '2026-01-26', end: '2026-02-15', category: 'shoot',   grouping: 'Wardrobe & MU' },
+        { id: 44, label: 'SFX Makeup',               start: '2026-01-26', end: '2026-02-15', category: 'shoot',   grouping: 'Wardrobe & MU', style: vendor },
+        { id: 45, label: '⚠ Fabric Shipment Late',   start: '2026-01-20', category: 'admin',   grouping: 'Wardrobe & MU', style: blocked },
+
+        // ── VFX ──
+        { id: 50, label: 'VFX Breakdown',            start: '2026-01-12', end: '2026-01-20', category: 'preprod', grouping: 'VFX' },
+        { id: 51, label: 'Previs & Techvis',         start: '2026-01-16', end: '2026-01-28', category: 'preprod', grouping: 'VFX', style: tentative },
+        { id: 52, label: 'On-Set VFX Supervision',   start: '2026-01-26', end: '2026-02-15', category: 'shoot',   grouping: 'VFX' },
+        { id: 53, label: 'Compositing (Framestore)', start: '2026-02-10', end: '2026-02-25', category: 'postprod', grouping: 'VFX', style: vendor },
+        { id: 54, label: 'CG Asset Build',           start: '2026-01-20', end: '2026-02-10', category: 'postprod', grouping: 'VFX' },
+        { id: 55, label: 'Final VFX Delivery',       start: '2026-02-25', end: '2026-02-28', category: 'postprod', grouping: 'VFX' },
+        { id: 56, label: '📌 VFX Lockoff',           start: '2026-02-28', category: 'postprod', grouping: 'VFX', style: mile },
+        { id: 57, label: '🖥 Render Farm Booked',    start: '2026-02-08', category: 'postprod', grouping: 'VFX', style: vendor },
+        { id: 58, label: '📌 Previs Sign-Off',       start: '2026-01-28', category: 'preprod', grouping: 'VFX', style: mile },
+
+        // ── Editing ──
+        { id: 60, label: 'Assembly Cut',             start: '2026-02-02', end: '2026-02-12', category: 'postprod', grouping: 'Editing' },
+        { id: 61, label: 'Rough Cut',                start: '2026-02-12', end: '2026-02-18', category: 'postprod', grouping: 'Editing' },
+        { id: 62, label: 'Fine Cut',                 start: '2026-02-18', end: '2026-02-24', category: 'postprod', grouping: 'Editing' },
+        { id: 63, label: 'Color Grading',            start: '2026-02-22', end: '2026-02-28', category: 'postprod', grouping: 'Editing', style: vendor },
+        { id: 64, label: '📌 Final Delivery',        start: '2026-02-28', category: 'postprod', grouping: 'Editing', style: mile },
+        { id: 65, label: '🎬 Director Review',       start: '2026-02-15', category: 'postprod', grouping: 'Editing' },
+        { id: 66, label: '📌 Rough Cut Screening',   start: '2026-02-18', category: 'postprod', grouping: 'Editing', style: mile },
+
+        // ── Production Office ──
+        { id: 70, label: 'Budget Approval',          start: '2026-01-05', end: '2026-01-09', category: 'admin', grouping: 'Production Office', style: done },
+        { id: 71, label: 'Location Permits',         start: '2026-01-08', end: '2026-01-20', category: 'admin', grouping: 'Production Office', style: done },
+        { id: 72, label: 'Crew Contracts',           start: '2026-01-10', end: '2026-01-22', category: 'admin', grouping: 'Production Office' },
+        { id: 73, label: 'Insurance & Clearances',   start: '2026-01-12', end: '2026-01-25', category: 'admin', grouping: 'Production Office', style: blocked },
+        { id: 74, label: 'Catering & Transport',     start: '2026-01-22', end: '2026-02-15', category: 'admin', grouping: 'Production Office' },
+        { id: 75, label: 'Dailies Review',           start: '2026-01-27', end: '2026-02-15', category: 'admin', grouping: 'Production Office' },
+        { id: 76, label: 'Wrap Accounting',          start: '2026-02-16', end: '2026-02-25', category: 'admin', grouping: 'Production Office', style: tentative },
+        { id: 77, label: '📌 Greenlight',            start: '2026-01-09', category: 'admin', grouping: 'Production Office', style: mile },
+        { id: 78, label: '📋 Safety Briefing',       start: '2026-01-25', category: 'admin', grouping: 'Production Office' },
+        { id: 79, label: '⚠ Permit Expiry',          start: '2026-02-20', category: 'admin', grouping: 'Production Office', style: blocked }
+      ]
+    });
+  </script>
+</body>
+</html>

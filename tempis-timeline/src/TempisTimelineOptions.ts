@@ -223,6 +223,9 @@ export interface TempisTimelineItemStyle {
     /** The border thickness. */
     borderThickness?: number;
 
+    /** The border style. Defaults to "solid". */
+    borderStyle?: "solid" | "dashed" | "dotted" | "dash-dot" | "long-dash";
+
     /** The border radius. */
     borderRadius?: number;
 }

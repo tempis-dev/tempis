@@ -514,6 +514,7 @@ export class TimelineDataView {
         const itemPadding = item.style.padding!;
         const itemBorderRadius = item.style.borderRadius!;
         const itemBorderThickness = item.style.borderThickness;
+        const itemBorderStyle = item.style.borderStyle ?? "solid";
         let itemBackgroundColor = item.style.backgroundColor!;
         let itemFontColor = item.style.fontColor!;
         let itemBorderColor = item.style.borderColor;
@@ -623,6 +624,24 @@ export class TimelineDataView {
         if (itemBorderThickness && itemBorderColor) {
             context.strokeStyle = itemBorderColor;
             context.lineWidth = itemBorderThickness;
+
+            // Apply the border style (solid, dashed, dotted, dash-dot, long-dash).
+            const prevLineCap = context.lineCap;
+            if (itemBorderStyle === "dashed") {
+                context.setLineDash([8, 4]);
+            } else if (itemBorderStyle === "dotted") {
+                // Use round line caps so each tiny dash renders as a circle.
+                context.lineCap = "round";
+                context.setLineDash([0.5, itemBorderThickness * 2.5]);
+            } else if (itemBorderStyle === "dash-dot") {
+                context.lineCap = "round";
+                context.setLineDash([8, 4, 0.5, 4]);
+            } else if (itemBorderStyle === "long-dash") {
+                context.setLineDash([14, 6]);
+            } else {
+                context.setLineDash([]);
+            }
+
             context.beginPath();
             context.roundRect(
                 itemDrawPlan.xPositionStart + context.lineWidth / 2,
@@ -632,6 +651,10 @@ export class TimelineDataView {
                 itemBorderRadius
             );
             context.stroke();
+
+            // Reset the line dash and line cap back to defaults.
+            context.setLineDash([]);
+            context.lineCap = prevLineCap;
         }
 
         // Draw the item label (if there is one).
