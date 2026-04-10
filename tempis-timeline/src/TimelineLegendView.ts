@@ -451,7 +451,7 @@ export class TimelineLegendView {
         this._eventHandlers.pointermove = (event) => {
             // There is nothing to do if we have no draw plan as we have no rendered categories.
             if (!this._drawPlan) {
-                return null;
+                return;
             }
 
             // There is nothing to do if we aren't going to be setting any focused categories.
@@ -479,7 +479,7 @@ export class TimelineLegendView {
 
                 // Ensure that we are not leaving any categories focused.
                 this._dataSet.unfocusCategories();
-                return null;
+                return;
             }
 
             // Attempt to get the category at the pointer position
@@ -516,7 +516,7 @@ export class TimelineLegendView {
 
             // There is nothing to do if we have no draw plan as we have no rendered categories.
             if (!this._drawPlan) {
-                return null;
+                return;
             }
 
             // There is nothing to do if we aren't going to be toggling the enabled state of any categories when clicked.
@@ -531,7 +531,7 @@ export class TimelineLegendView {
                 pointerPosition.y < this._lastDrawYPosition ||
                 pointerPosition.y > this._lastDrawYPosition + this._drawPlan.height
             ) {
-                return null;
+                return;
             }
 
             // Attempt to get the category at the pointer position

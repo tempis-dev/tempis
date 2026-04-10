@@ -269,35 +269,6 @@ export class FocusController {
     }
 
     /**
-     * Calculates the target scroll offset for an item without actually scrolling.
-     */
-    private _calculateTargetScrollForItem(itemId: string | number): number | null {
-        const itemPosition = this._dataView.getItemVerticalPosition(itemId);
-
-        if (itemPosition === null) {
-            return null;
-        }
-
-        const { yStart, yEnd } = itemPosition;
-        const maxDataViewHeight = this._calculateMaxDataViewHeight();
-
-        // Calculate target scroll offset to center the item
-        const itemCenter = (yStart + yEnd) / 2;
-        const viewCenter = maxDataViewHeight / 2;
-        let targetScrollOffset = -(itemCenter - viewCenter);
-
-        // Clamp the scroll offset to valid bounds
-        const drawPlan = this._dataView["_drawPlan"];
-        if (drawPlan) {
-            const maxScroll = 0;
-            const minScroll = Math.min(0, maxDataViewHeight - drawPlan.height);
-            targetScrollOffset = Math.max(minScroll, Math.min(maxScroll, targetScrollOffset));
-        }
-
-        return targetScrollOffset;
-    }
-
-    /**
      * Calculates the maximum height available for the data view.
      */
     private _calculateMaxDataViewHeight(): number {

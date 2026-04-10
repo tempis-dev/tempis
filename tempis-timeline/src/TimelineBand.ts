@@ -29,6 +29,11 @@ export class TimelineBand {
         this._style = defaults(definition.style ?? {}, DEFAULT_BAND_STYLE)!;
     }
 
+    /** Gets the band definition. */
+    public get definition(): TempisTimelineBand {
+        return this._definition;
+    }
+
     /** Gets the start date of the band. */
     public get start(): Date {
         return this._start;
