@@ -118,6 +118,7 @@ const hiResBlob = await timeline.toImage({ dpr: 2 });</code></pre>
         <tr><td><code>type</code></td><td><code>string</code></td><td><code>"image/png"</code></td><td>The image MIME type (e.g. <code>"image/png"</code>, <code>"image/jpeg"</code>, <code>"image/webp"</code>).</td></tr>
         <tr><td><code>quality</code></td><td><code>number</code></td><td>—</td><td>A number between 0 and 1 for lossy formats (JPEG, WebP). Ignored for PNG.</td></tr>
         <tr><td><code>dpr</code></td><td><code>number</code></td><td><code>1</code></td><td>Device pixel ratio for the exported image. Output dimensions will be <code>offsetWidth × dpr</code> by <code>offsetHeight × dpr</code>.</td></tr>
+        <tr><td><code>backgroundColor</code></td><td><code>string</code></td><td>—</td><td>Optional background color for the exported image (e.g. <code>"#ffffff"</code>). By default the background is transparent.</td></tr>
       </tbody>
     </table>
 
@@ -151,6 +152,7 @@ const hiResBlob = await timeline.toImage({ dpr: 2 });</code></pre>
       <tbody>
         <tr><td><code>onItemClick</code></td><td><code>(id: string | number) => void</code></td><td>Called when an item is clicked.</td></tr>
         <tr><td><code>onItemDoubleClick</code></td><td><code>(id: string | number) => void</code></td><td>Called when an item is double-clicked.</td></tr>
+        <tr><td><code>onItemHover</code></td><td><code>(id: string | number | null) => void</code></td><td>Called when the pointer enters an item (receives the item ID) or leaves all items (receives <code>null</code>). Only fires on change — not repeatedly while moving within the same item.</td></tr>
         <tr><td><code>onSelectionChange</code></td><td><code>(changes: SelectionChangeEvent[]) => void</code></td><td>Called when the selection state changes.</td></tr>
         <tr><td><code>onRangeChange</code></td><td><code>(start: Date, end: Date) => void</code></td><td>Called when the visible range changes due to panning, zooming, or programmatic updates.</td></tr>
       </tbody>
@@ -216,6 +218,7 @@ const hiResBlob = await timeline.toImage({ dpr: 2 });</code></pre>
       <tbody>
         <tr><td><code>enabled</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Enable or disable tooltips.</td></tr>
         <tr><td><code>delay</code></td><td><code>number</code></td><td><code>0</code></td><td>Delay in milliseconds before showing.</td></tr>
+        <tr><td><code>dateFormat</code></td><td><code>string</code></td><td><code>"D MMMM HH:mm:ss"</code></td><td>Date format pattern for the default tooltip. Uses the same tokens as range unit labels.</td></tr>
         <tr><td><code>overflowBehavior</code></td><td><code>"none" | "canvas" | "viewport"</code></td><td><code>"none"</code></td><td>How tooltips handle edge overflow.</td></tr>
         <tr><td><code>template</code></td><td><code>(id) => HTMLElement | string | null</code></td><td>—</td><td>Custom tooltip content function.</td></tr>
         <tr><td><code>shouldShow</code></td><td><code>(id) => boolean</code></td><td>—</td><td>Predicate to control per-item tooltip visibility.</td></tr>
@@ -235,6 +238,7 @@ const hiResBlob = await timeline.toImage({ dpr: 2 });</code></pre>
         <tr><td><code>padding</code></td><td><code>number</code></td><td>Internal padding in pixels.</td></tr>
         <tr><td><code>borderColor</code></td><td><code>string</code></td><td>Border color.</td></tr>
         <tr><td><code>borderThickness</code></td><td><code>number</code></td><td>Border width in pixels.</td></tr>
+        <tr><td><code>borderStyle</code></td><td><code>"solid" | "dashed" | "dotted" | "dash-dot" | "long-dash"</code></td><td>Border line style. Defaults to <code>"solid"</code>.</td></tr>
         <tr><td><code>borderRadius</code></td><td><code>number</code></td><td>Corner radius in pixels.</td></tr>
       </tbody>
     </table>

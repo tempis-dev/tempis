@@ -1,47 +1,11 @@
 # Tempis Timeline
 
-A powerful, flexible, and highly customizable timeline visualization library for JavaScript and TypeScript. Built with performance in mind, Tempis Timeline renders beautiful interactive timelines on HTML5 Canvas.
+A lightweight, canvas-rendered timeline library with smooth interactions, touch support, and minimal dependencies.
 
-![Tempis Timeline Banner](./docs/images/banner.png)
-
-## Features
-
-- **Canvas-Based Rendering** - High-performance rendering using HTML5 Canvas for smooth interactions even with thousands of items
-- **Flexible Item Types** - Support for both point-in-time events and range-based items
-- **Interactive Selection** - Single or multi-select modes with customizable callbacks
-- **Rich Categorization** - Organize items with categories and visual groupings
-- **Customizable Styling** - Full control over colors, fonts, borders, and spacing
-- **Responsive Design** - Automatically adapts to container size changes
-- **RTL Support** - Built-in right-to-left language support
-- **Smart Tooltips** - Configurable tooltips with overflow handling and custom templates
-- **Legend System** - Interactive legend with filtering and highlighting
-- **Zoom & Pan** - Smooth zooming and panning with configurable constraints
-- **Date Adapter System** - Pluggable date adapters (native Date, Luxon, etc.)
-- **TypeScript First** - Written in TypeScript with full type definitions
-
-## Screenshots
-
-### Basic Timeline
-![Basic Timeline](./docs/images/basic-timeline.png)
-
-### Multi-Band Timeline
-![Multi-Band Timeline](./docs/images/bands-timeline.png)
-
-### Categorized Items with Legend
-![Categorized Timeline](./docs/images/categories-timeline.png)
-
-## Installation
+## Install
 
 ```bash
 npm install tempis-timeline
-```
-
-```bash
-yarn add tempis-timeline
-```
-
-```bash
-pnpm add tempis-timeline
 ```
 
 ## Quick Start
@@ -49,357 +13,132 @@ pnpm add tempis-timeline
 ```typescript
 import { TempisTimeline } from 'tempis-timeline';
 
-// Create a canvas element
-const canvas = document.getElementById('timeline-canvas') as HTMLCanvasElement;
-
-// Initialize the timeline
-const timeline = new TempisTimeline(canvas, {
+const timeline = new TempisTimeline('#canvas', {
   responsive: true,
   items: [
-    {
-      id: 1,
-      label: 'Project Kickoff',
-      start: '2024-01-15',
-      category: 'milestone'
-    },
-    {
-      id: 2,
-      label: 'Development Phase',
-      start: '2024-01-20',
-      end: '2024-03-15',
-      category: 'phase'
-    },
-    {
-      id: 3,
-      label: 'Launch',
-      start: '2024-03-20',
-      category: 'milestone'
-    }
-  ],
-  categories: [
-    {
-      name: 'milestone',
-      label: 'Milestones',
-      style: {
-        backgroundColor: '#4CAF50',
-        fontColor: '#ffffff'
-      }
-    },
-    {
-      name: 'phase',
-      label: 'Phases',
-      style: {
-        backgroundColor: '#2196F3',
-        fontColor: '#ffffff'
-      }
-    }
+    { id: 1, label: 'Design',  start: '2026-01-05', end: '2026-01-15', grouping: 'Frontend' },
+    { id: 2, label: 'Build',   start: '2026-01-12', end: '2026-01-28', grouping: 'Frontend' },
+    { id: 3, label: 'Launch',  start: '2026-01-30', grouping: 'Frontend' },
+    { id: 4, label: 'API',     start: '2026-01-08', end: '2026-01-25', grouping: 'Backend' },
+    { id: 5, label: 'Testing', start: '2026-01-20', end: '2026-01-29', grouping: 'Backend' }
   ],
   range: {
-    start: '2024-01-01',
-    end: '2024-12-31'
+    start: '2026-01-01',
+    end: '2026-02-01',
+    position: 'bottom'
   }
 });
 ```
 
-## Use Cases
+Or via script tag:
 
-### Project Management
-Track project milestones, phases, and deliverables with visual timelines that help teams stay aligned.
-
-### Historical Timelines
-Create engaging historical visualizations for educational content, museum exhibits, or documentation.
-
-### Resource Planning
-Visualize resource allocation, availability, and scheduling conflicts across teams and projects.
-
-### Event Scheduling
-Display event schedules, conference agendas, or production timelines with clear visual hierarchy.
-
-### System Monitoring
-Show system uptime, downtime periods, and maintenance windows for infrastructure monitoring.
-
-### Data Analysis
-Visualize time-series data, trends, and patterns with interactive exploration capabilities.
-
-## Basic Usage
-
-### Creating a Timeline
-
-```typescript
-const timeline = new TempisTimeline(canvas, options);
+```html
+<script src="tempis_timeline.js"></script>
+<script>
+  new tempis_timeline.TempisTimeline('#canvas', { ... });
+</script>
 ```
 
-### Adding Items Dynamically
+## Features
 
-```typescript
-timeline.setItems([
-  {
-    id: 'task-1',
-    label: 'Design Phase',
-    start: new Date('2024-01-01'),
-    end: new Date('2024-01-31'),
-    category: 'design'
-  },
-  // ... more items
-]);
-```
+- Canvas rendering — handles thousands of items smoothly with no DOM overhead
+- Range and point-in-time items with automatic stacking
+- Categories with interactive legend (filter on click, highlight on hover)
+- Item groupings with custom sort
+- Timeline bands (range and point-in-time markers)
+- Per-item style overrides (colors, borders, border styles, radius, padding)
+- Border styles: solid, dashed, dotted, dash-dot, long-dash
+- Tooltips with custom templates, delay, and overflow handling
+- Selection modes: none, single, multi
+- Animated focus with configurable easing
+- Zoom and pan with mouse wheel, touch pinch, and keyboard
+- Three vertical fill modes: content, fill-canvas, grow-canvas
+- Two stack modes: compact and stable
+- RTL layout support
+- Responsive resize
+- Image export (PNG, JPEG, WebP) with DPR and background color options
+- Pluggable date adapter system (built-in native adapter, or bring Luxon, Day.js, etc.)
+- Global color palette API
+- Full TypeScript support with declarations
 
-### Handling Selection
-
-```typescript
-const timeline = new TempisTimeline(canvas, {
-  selection: 'multi',
-  onSelectionChange: (changes) => {
-    console.log('Selection changed:', changes);
-  },
-  onItemClick: (id) => {
-    console.log('Item clicked:', id);
-  }
-});
-```
-
-### Getting Selected Items
-
-```typescript
-const selectedIds = timeline.getSelection();
-console.log('Currently selected:', selectedIds);
-```
-
-### Focusing on Items
-
-```typescript
-// Focus on all items
-timeline.focus();
-
-// Focus on specific date range
-timeline.focus({
-  start: '2024-01-01',
-  end: '2024-06-30'
-});
-
-// Focus on specific item
-timeline.focus({ itemId: 'task-1' });
-```
-
-## Configuration
-
-### Responsive Timeline
-
-```typescript
-const timeline = new TempisTimeline(canvas, {
-  responsive: true,
-  verticalFill: 'fill-canvas'
-});
-```
-
-### Custom Styling
-
-```typescript
-const timeline = new TempisTimeline(canvas, {
-  style: {
-    font: {
-      family: 'Inter, sans-serif',
-      size: 14,
-      weight: 500
-    },
-    item: {
-      backgroundColor: '#e0e0e0',
-      fontColor: '#333333',
-      borderRadius: 4,
-      padding: 8,
-      borderColor: '#999999',
-      borderThickness: 1
-    }
-  }
-});
-```
-
-### Stack Mode
-
-Control how items are vertically arranged when they overlap:
-
-```typescript
-const timeline = new TempisTimeline(canvas, {
-  stackMode: 'stable' // or 'compact' (default)
-});
-```
-
-- `'compact'` (default) - Items are dynamically stacked based on visible items only. Point-in-time labels are adjusted to fit within canvas bounds. Layout updates when panning. More space-efficient but items may shift vertically.
-- `'stable'` - All items in the dataset are included in the layout. Point-in-time labels are always centered on their timestamp. Layout only recalculates on zoom or data changes. Items maintain stable vertical positions when panning.
-
-### Custom Tooltips
-
-```typescript
-const timeline = new TempisTimeline(canvas, {
-  tooltip: {
-    enabled: true,
-    delay: 300,
-    overflowBehavior: 'viewport',
-    template: (id) => {
-      const item = items.find(i => i.id === id);
-      return `
-        <div class="custom-tooltip">
-          <h3>${item.label}</h3>
-          <p>Start: ${item.start}</p>
-          ${item.end ? `<p>End: ${item.end}</p>` : ''}
-        </div>
-      `;
-    }
-  }
-});
-```
-
-### Zoom Configuration
-
-```typescript
-const timeline = new TempisTimeline(canvas, {
-  range: {
-    zoom: {
-      enabled: true,
-      min: 24 * 60 * 60 * 1000, // 1 day
-      max: 365 * 24 * 60 * 60 * 1000 // 1 year
-    }
-  }
-});
-```
-
-### Legend Configuration
-
-```typescript
-const timeline = new TempisTimeline(canvas, {
-  legend: {
-    position: 'bottom',           // 'top' | 'bottom' | 'none'
-    alignment: 'center',          // 'start' | 'center' | 'end'
-    markerStyle: 'square-rounded', // 'square' | 'square-rounded' | 'circle'
-    gap: 6,                       // Gap between legend items
-    isHighlightOnHover: true,     // Highlight items on hover
-    isFilterOnClick: true         // Toggle visibility on click
-  }
-});
-```
-
-## API Reference
+## API Overview
 
 ### Constructor
 
 ```typescript
-new TempisTimeline(canvas: HTMLCanvasElement, options: TempisTimelineOptions)
+new TempisTimeline(context: string | HTMLCanvasElement, options: TempisTimelineOptions)
 ```
 
 ### Methods
 
-#### `setItems(items: TempisTimelineItem[])`
-Updates the timeline items without changing the visible range.
+| Method | Description |
+|--------|-------------|
+| `setItems(items)` | Replace all items and redraw |
+| `getItems()` | Get current item definitions |
+| `setCategories(categories)` | Replace all categories and redraw |
+| `getCategories()` | Get current category definitions |
+| `setBands(bands)` | Replace all bands and redraw |
+| `focus(options?)` | Navigate to an item, date, or range with optional animation |
+| `getRange()` | Get the current visible range as `{ start, end }` |
+| `setSelection(ids)` | Programmatically select items by ID |
+| `getSelection()` | Get array of selected item IDs |
+| `clearSelection()` | Deselect all items |
+| `toImage(options?)` | Export as image Blob (PNG, JPEG, WebP) |
+| `redraw()` | Force a redraw |
+| `destroy()` | Clean up all listeners and resources |
 
-#### `getSelection(): (string | number)[]`
-Returns an array of currently selected item IDs.
+### Callbacks
 
-#### `focus(options?: FocusOptions)`
-Focuses the timeline on specific items, dates, or the full range.
+| Callback | Signature |
+|----------|-----------|
+| `onItemClick` | `(id: string \| number) => void` |
+| `onItemDoubleClick` | `(id: string \| number) => void` |
+| `onItemHover` | `(id: string \| number \| null) => void` |
+| `onSelectionChange` | `(changes: SelectionChangeEvent[]) => void` |
+| `onRangeChange` | `(start: Date, end: Date) => void` |
 
-#### `redraw()`
-Manually triggers a redraw of the timeline (useful for non-responsive timelines).
-
-#### `destroy()`
-Destroys the timeline and cleans up all resources. Removes all event listeners and observers to prevent memory leaks. Call this before removing the timeline from the DOM or when creating a new timeline instance.
+### Image Export
 
 ```typescript
-// Clean up before removing
-timeline.destroy();
+const blob = await timeline.toImage({
+  type: 'image/png',       // or 'image/jpeg', 'image/webp'
+  quality: 0.9,            // for lossy formats
+  dpr: 2,                  // resolution multiplier
+  backgroundColor: '#fff'  // optional, transparent by default
+});
 ```
-
-### Events
-
-- `onItemClick` - Fired when an item is clicked
-- `onItemDoubleClick` - Fired when an item is double-clicked
-- `onSelectionChange` - Fired when selection state changes
-
-## Advanced Features
 
 ### Date Adapters
 
-Tempis Timeline supports pluggable date adapters for different date libraries:
-
 ```typescript
-import { LuxonAdapter } from 'tempis-timeline/adapters/luxon';
+import { AdapterRegistry } from 'tempis-timeline';
 
-const timeline = new TempisTimeline(canvas, {
-  dateAdapter: new LuxonAdapter(),
-  // ... other options
-});
+AdapterRegistry.register(myLuxonAdapter);
 ```
 
-### Item Grouping
-
-```typescript
-const timeline = new TempisTimeline(canvas, {
-  items: [
-    {
-      id: 1,
-      label: 'Task A',
-      start: '2024-01-01',
-      grouping: 'team-1'
-    },
-    {
-      id: 2,
-      label: 'Task B',
-      start: '2024-01-05',
-      grouping: 'team-1'
-    }
-  ]
-});
-```
-
-### RTL Support
-
-```typescript
-const timeline = new TempisTimeline(canvas, {
-  rtl: true
-});
-```
-
-## Browser Support
-
-- Chrome/Edge (latest)
-- Firefox (latest)
-- Safari (latest)
-- Opera (latest)
-
-## Performance Tips
-
-- Use `responsive: false` for static timelines to avoid unnecessary redraws
-- Use `stackMode: 'stable'` for better UX when users need to track items across panning operations
-- Use `stackMode: 'compact'` for more space-efficient layouts when vertical space is limited
-- Limit the number of visible items when dealing with large datasets
-- Use `verticalFill: 'content'` for better performance with many items
-- Call `destroy()` when removing timelines to prevent memory leaks
-- Implement virtual scrolling for extremely large datasets
+See the [API Reference](site/api.html) for full documentation.
 
 ## Examples
 
-Check out the `/test` directory for complete working examples:
+The `test/` directory contains interactive demos:
 
-- `basic.html` - Simple timeline setup
-- `categories.html` - Using categories and legend
-- `bands.html` - Multi-band timeline
-- `selection.html` - Selection handling
-- `tooltips.html` - Custom tooltips
-- `styling.html` - Custom styling examples
-- `stack-mode.html` - Stack mode comparison
-- `stress-test.html` - Performance testing
+- [Playground](test/playground.html) — all options with live controls
+- [Crypto Stream](test/streaming-data.html) — real-time WebSocket data
+- [Production Downtime](test/production-downtime.html) — selection-driven detail panels
+- [Lazy Loading](test/lazy-loading.html) — on-demand data fetching
+- [Custom Tooltips](test/custom-tooltips.html) — rich tooltip templates
+- [Timezone Explorer](test/timezones.html) — Luxon date adapter
+- [Server Monitoring](test/band-demo.html) — timeline bands
+- [RTL Schedule](test/rtl-demo.html) — right-to-left layout
+- [Color Palettes](test/color-palettes.html) — global palette API
+- [External Selection](test/selection-grid.html) — programmatic selection from a table
+- [Export to Image](test/to-image.html) — toImage() with format/quality/DPR
+- [Per-Item Styles](test/item-styles.html) — border styles, radius, and thickness overrides
 
-## Contributing
+## Browser Support
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Chrome, Edge, Firefox, Safari, and Opera (latest versions).
 
 ## License
 
-ISC
-
-## Support
-
-For issues, questions, or feature requests, please open an issue on GitHub.
-
----
-
-Made with ❤️ by the Tempis Timeline team
+Free for non-commercial use. Commercial use requires a paid license. See [LICENSE](LICENSE) for details.

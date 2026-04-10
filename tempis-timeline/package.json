@@ -1,7 +1,7 @@
 {
   "name": "tempis-timeline",
   "version": "1.0.0",
-  "description": "A lightweight, canvas-rendered timeline library with smooth interactions, touch support, and zero runtime dependencies.",
+  "description": "A lightweight, canvas-rendered timeline library with smooth interactions, touch support, and minimal dependencies.",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
