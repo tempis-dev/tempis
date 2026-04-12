@@ -394,7 +394,9 @@
       function cycle() {
         // Update active button state
         btns.forEach(function(b, i) { b.classList.toggle('btn-active', i === idx); });
-        focusDemo.focus(targets[idx]);
+        var target = targets[idx];
+        focusDemo.focus(target);
+        focusDemo.setSelection(target.id ? [target.id] : []);
         idx = (idx + 1) % targets.length;
       }
 
