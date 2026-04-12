@@ -1,5 +1,5 @@
 {
-  "name": "tempis-timeline",
+  "name": "@tempis/timeline",
   "version": "1.0.0",
   "description": "A lightweight, canvas-rendered timeline library with smooth interactions, touch support, and minimal dependencies.",
   "main": "dist/index.js",

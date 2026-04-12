@@ -16,6 +16,7 @@ import {
 import { SelectionChangeEvent } from "./Event";
 import { AdapterRegistry } from "./AdapterRegistry";
 import { TempisTimelineDateAdapter } from "./TempisTimelineDateAdapter";
+import { FocusOptions } from "./FocusController";
 
 export { TempisTimeline, AdapterRegistry };
 
@@ -34,5 +35,6 @@ export type {
     TempisTimelineScrollbarOptions,
     ImageGenerationOptions,
     TempisTimelineDateAdapter,
-    SelectionChangeEvent
+    SelectionChangeEvent,
+    FocusOptions
 };
