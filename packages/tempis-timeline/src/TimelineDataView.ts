@@ -496,6 +496,35 @@ export class TimelineDataView {
             }
         }
 
+        // We need a second pass to draw selection outlines on top of all selected items so they're never occluded.
+        for (const groupDrawPlan of this._drawPlan.groupDrawPlans) {
+            for (const groupDrawPlanRow of groupDrawPlan.rows) {
+                for (const itemDrawPlan of groupDrawPlanRow) {
+                    if (!itemDrawPlan.item.isSelected) continue;
+
+                    const selX = itemDrawPlan.xPositionStart;
+                    const selY = scrolledYPosition + itemDrawPlan.yPositionStart;
+                    const selW = itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart;
+                    const selH = itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart;
+                    const pad = 3;
+                    const borderRadius = itemDrawPlan.item.style.borderRadius ?? 0;
+
+                    context.lineWidth = 2;
+                    context.lineCap = "round";
+                    context.strokeStyle = "rgba(128, 128, 128, 0.8)";
+                    context.setLineDash([4, 4]);
+                    context.lineDashOffset = 0;
+                    context.beginPath();
+                    context.roundRect(selX - pad, selY - pad, selW + pad * 2, selH + pad * 2, borderRadius + pad);
+                    context.stroke();
+                }
+            }
+        }
+
+        context.setLineDash([]);
+        context.lineDashOffset = 0;
+        context.lineCap = "butt";
+
         // Always revert the canvas text align to be left.
         context.textAlign = "left";
     }
@@ -535,28 +564,6 @@ export class TimelineDataView {
             itemBackgroundColor = UNFOCUSED_ITEM_BACKGROUND_COLOUR;
             itemBorderColor = UNFOCUSED_ITEM_BACKGROUND_COLOUR;
             itemFontColor = UNFOCUSED_ITEM_FONT_COLOUR;
-        }
-
-        // If the item is selected then we should rendering an underlying selection indicator rectangle.
-        // TODO Improve the way we render the selected item, this is a bit hacky.
-        if (item.isSelected) {
-            context.shadowColor = "rgba(0, 0, 0, 1)";
-            context.shadowBlur = 15;
-            context.shadowOffsetX = 0;
-            context.shadowOffsetY = 0;
-
-            context.fillStyle = "rgba(0, 0, 0, 1)";
-            context.beginPath();
-            context.roundRect(
-                itemDrawPlan.xPositionStart,
-                scrolledYPosition + itemDrawPlan.yPositionStart,
-                itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart,
-                itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart,
-                itemBorderRadius
-            );
-            context.fill();
-
-            context.shadowColor = "transparent";
         }
 
         // If this is a PIT item we should draw the downward marker line.
