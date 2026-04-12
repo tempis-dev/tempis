@@ -1,0 +1,193 @@
+import { TempisTimelineTooltipOptions } from "./TempisTimelineOptions";
+import { TimelineDataView } from "./TimelineDataView";
+import { TimelineFont } from "./TimelineFont";
+import { TimelineTooltip } from "./TimelineTooltip";
+import { isNullOrUndefined } from "./Utilities";
+
+/**
+ * A class responsible for tracking mouse movement over the timeline canvas and displaying tooltips.
+ */
+export class TimelineTooltipView {
+    /** The timeline canvas. */
+    private readonly _canvas: HTMLCanvasElement;
+
+    /** The timeline data view. */
+    private readonly _dataView: TimelineDataView;
+
+    /** The timeline font. */
+    private readonly _font: TimelineFont;
+
+    /** The flag defining whether the timeline is being rendered right-to-left. */
+    private readonly _isRTL: boolean;
+
+    /** The tooltip options. */
+    private readonly _options: TempisTimelineTooltipOptions;
+
+    /** The active tooltip. */
+    private _activeTooltip: TimelineTooltip | null = null;
+
+    /** The event handler references for cleanup. */
+    private _eventHandlers: {
+        pointerdown: (() => void) | null;
+        pointerup: ((event: PointerEvent) => void) | null;
+        pointermove: ((event: PointerEvent) => void) | null;
+        pointerout: (() => void) | null;
+    } = {
+        pointerdown: null,
+        pointerup: null,
+        pointermove: null,
+        pointerout: null
+    };
+
+    /**
+     * Creates a new instance of the TimelineTooltipView class.
+     * @param canvas The timeline canvas.
+     * @param dataView The timeline data view.
+     * @param font The timeline font.
+     * @param isRTL Whether the timeline is being rendered right-to-left.
+     * @param options The tooltip options.
+     */
+    public constructor(
+        canvas: HTMLCanvasElement,
+        dataView: TimelineDataView,
+        font: TimelineFont,
+        isRTL: boolean,
+        options: TempisTimelineTooltipOptions = {}
+    ) {
+        this._canvas = canvas;
+        this._dataView = dataView;
+        this._font = font;
+        this._isRTL = isRTL;
+        this._options = options;
+
+        this._createCanvasEventHandlers();
+    }
+
+    /**
+     * Creates the canvas event handlers for timeline user interface interactions.
+     */
+    private _createCanvasEventHandlers() {
+        // A flag defining whether the pointer is currently down.
+        // This is used to determine if we can show a tooltip.
+        let isPointerDown = false;
+
+        // Handle the pointer down event.
+        this._eventHandlers.pointerdown = () => {
+            isPointerDown = true;
+
+            // Clicking on the canvas should kill any active or pending tooltip.
+            this._activeTooltip?.destroy();
+            this._activeTooltip = null;
+        };
+        this._canvas.addEventListener("pointerdown", this._eventHandlers.pointerdown);
+
+        // Handle the pointer down event.
+        this._eventHandlers.pointerup = (event) => {
+            isPointerDown = false;
+
+            // Attempt to create a tooltip for the position of the pointer up event.
+            this._createTooltip(event);
+        };
+        this._canvas.addEventListener("pointerup", this._eventHandlers.pointerup);
+
+        // Handle the pointer being moved on the canvas.
+        this._eventHandlers.pointermove = (event) => {
+            // There is nothing to do if our pointer is currently down as we don't want tooltips showing if we are dragging/selecting.
+            if (isPointerDown) {
+                return;
+            }
+
+            // Attempt to create a tooltip for the position the cursor has moved to.
+            this._createTooltip(event);
+        };
+        this._canvas.addEventListener("pointermove", this._eventHandlers.pointermove);
+
+        // Add a handler for the cursor moving off of the canvas to clear up any active tooltip.
+        this._eventHandlers.pointerout = () => {
+            this._activeTooltip?.destroy();
+            this._activeTooltip = null;
+        };
+        this._canvas.addEventListener("pointerout", this._eventHandlers.pointerout);
+    }
+
+    /**
+     * Clear any active tooltip.
+     */
+    public clear(): void {
+        this._activeTooltip?.destroy();
+        this._activeTooltip = null;
+    }
+
+    /**
+     * Destroy the tooltip view and clean up all resources.
+     * This removes all event listeners to prevent memory leaks.
+     */
+    public destroy(): void {
+        // Remove all canvas event listeners
+        if (this._eventHandlers.pointerdown) {
+            this._canvas.removeEventListener("pointerdown", this._eventHandlers.pointerdown);
+        }
+        if (this._eventHandlers.pointerup) {
+            this._canvas.removeEventListener("pointerup", this._eventHandlers.pointerup);
+        }
+        if (this._eventHandlers.pointermove) {
+            this._canvas.removeEventListener("pointermove", this._eventHandlers.pointermove);
+        }
+        if (this._eventHandlers.pointerout) {
+            this._canvas.removeEventListener("pointerout", this._eventHandlers.pointerout);
+        }
+
+        // Destroy any active tooltip
+        this._activeTooltip?.destroy();
+        this._activeTooltip = null;
+    }
+
+    /**
+     * Attempt to create a tooltip at the position defined by the event.
+     * @param event The event that triggered the tooltip creation.
+     */
+    private _createTooltip(event: PointerEvent | MouseEvent): void {
+        // A function that gets the position on the canvas for the mouse event or pointer event.
+        const getMouseOrPointerPosition = (event: PointerEvent | MouseEvent) => {
+            const rect = this._canvas.getBoundingClientRect();
+            return {
+                x: ((event.clientX - rect.left) / (rect.right - rect.left)) * this._canvas.clientWidth,
+                y: ((event.clientY - rect.top) / (rect.bottom - rect.top)) * this._canvas.clientHeight
+            };
+        };
+
+        // There is nothing to do if tooltips are not enabled.
+        if (!isNullOrUndefined(this._options.enabled) && !this._options.enabled) {
+            return;
+        }
+
+        // Try to find the item at mouse position.
+        const item = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
+
+        // If we are not hovering over an item then we should clear the active tooltip.
+        if (!item) {
+            this._activeTooltip?.destroy();
+            this._activeTooltip = null;
+        } else {
+            // Do we already have an active tooltip?
+            if (this._activeTooltip && this._activeTooltip.id === item.id) {
+                this._activeTooltip.setPosition(event.clientX, event.clientY);
+                return;
+            } else if (this._activeTooltip && this._activeTooltip.id !== item.id) {
+                this._activeTooltip?.destroy();
+                this._activeTooltip = null;
+            }
+
+            // Create the tooltip.
+            this._activeTooltip = new TimelineTooltip(
+                item,
+                this._canvas,
+                this._font,
+                this._isRTL,
+                this._options,
+                event.clientX,
+                event.clientY
+            );
+        }
+    }
+}
