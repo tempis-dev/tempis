@@ -15,6 +15,7 @@
     "build:node": "esbuild ./src/index.ts --bundle --sourcemap --outdir=dist --platform=node",
     "build:web": "esbuild ./src/index.ts --bundle --sourcemap --platform=browser --global-name=tempis_timeline --outfile=dist/tempis_timeline.js",
     "build:web-watch": "esbuild ./src/index.ts --bundle --watch --sourcemap --platform=browser --global-name=tempis_timeline --outfile=dist/tempis_timeline.js",
+    "build:lib-watch": "esbuild ./src/index.ts --bundle --watch --sourcemap --platform=browser --global-name=tempis_timeline --outfile=../../lib/tempis_timeline.js",
     "build:web-minified": "esbuild ./src/index.ts --bundle --minify --platform=browser --global-name=tempis_timeline --outfile=dist/tempis_timeline.min.js --legal-comments=none",
     "build:all": "npm run build && npm run build:esm && npm run build:web && npm run build:web-minified",
     "serve": "http-server -p 8080 -a 0.0.0.0 -c-1",

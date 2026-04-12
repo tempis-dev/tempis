@@ -1,0 +1,10 @@
+node_modules/
+dist/
+lib/
+*.tgz
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
+*.log

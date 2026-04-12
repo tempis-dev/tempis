@@ -7,12 +7,15 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
-    "build:all": "npm run build:all --workspaces --if-present",
+    "dev": "concurrently -n watch,serve -c blue,green \"npm run build:lib-watch --workspace=packages/tempis-timeline\" \"http-server . -p 8080 -c-1 -o examples/\"",
+    "build": "npm run build:all --workspaces --if-present",
+    "build:site": "node scripts/build-site.js",
     "test": "npm run test --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present",
-    "format": "npm run format --workspaces --if-present",
-    "serve": "npm run serve --workspace=packages/tempis-timeline"
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "http-server": "^14.1.1"
   },
   "repository": {
     "type": "git",
