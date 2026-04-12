@@ -1,4 +1,4 @@
-export { TempisReactTimeline } from "./TempisTimeline";
+export { TempisTimeline } from "./TempisTimeline";
 export type { TempisTimelineProps, TempisTimelineRef } from "./TempisTimeline";
 
 // Re-export core types for convenience.

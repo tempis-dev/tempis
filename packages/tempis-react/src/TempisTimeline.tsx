@@ -68,8 +68,8 @@ export interface TempisTimelineRef {
 
 // ── Component ──
 
-export const TempisReactTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>(
-    function TempisReactTimeline(
+export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>(
+    function TempisTimeline(
         {
             className,
             wrapperStyle,
