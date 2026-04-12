@@ -1,0 +1,22 @@
+{
+  "name": "tempis",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Canvas-based timeline visualisation library, wrappers and utilities",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "build:all": "npm run build:all --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "format": "npm run format --workspaces --if-present",
+    "serve": "npm run serve --workspace=packages/tempis-timeline"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nikkorn/tempis"
+  },
+  "license": "SEE LICENSE IN LICENSE"
+}
