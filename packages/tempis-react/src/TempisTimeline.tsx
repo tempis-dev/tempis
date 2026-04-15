@@ -15,8 +15,92 @@ import {
     type FocusOptions,
 } from "@tempis/timeline";
 
-// ── Props ──
+/**
+ * The Tempis timeline instance ref.
+ */
+export interface TempisTimelineRef {
+    /**
+     * Focuses the timeline on a specific item, date, or range.
+     * @param options The focus options. If not defined, the timeline will focus on the full range of items.
+     */
+    focus(options?: FocusOptions): void;
 
+    /**
+     * Gets the current visible range of the timeline.
+     * @returns An object containing the start and end dates of the visible range.
+     */
+    getRange(): { start: Date; end: Date };
+
+    /**
+     * Sets the timeline items and redraws the timeline.
+     * @param items The timeline items to set.
+     */
+    setItems(items: TempisTimelineItem[]): void;
+
+    /**
+     * Gets the current timeline items.
+     * @returns The item definitions as last provided via the timeline options or setItems().
+     */
+    getItems(): TempisTimelineItem[];
+
+    /**
+     * Sets the timeline categories and redraws the timeline.
+     * @param categories The timeline categories to set.
+     */
+    setCategories(categories: TempisTimelineCategory[]): void;
+
+    /**
+     * Gets the current timeline categories.
+     * @returns The category definitions as last provided via the timeline options or setCategories().
+     */
+    getCategories(): TempisTimelineCategory[];
+
+    /**
+     * Sets the timeline bands and redraws the timeline.
+     * @param bands The timeline bands to set.
+     */
+    setBands(bands: TempisTimelineBand[]): void;
+
+    /**
+     * Programmatically sets the selected items by their identifiers.
+     * This deselects all currently selected items and selects only the items matching the provided IDs.
+     * @param ids The identifiers of the items to select.
+     */
+    setSelection(ids: (string | number)[]): void;
+
+    /**
+     * Gets the identifiers of the currently selected items.
+     * @returns The identifiers of the currently selected items.
+     */
+    getSelection(): (string | number)[];
+
+    /**
+     * Clears all item selections and redraws the timeline.
+     */
+    clearSelection(): void;
+
+    /**
+     * Exports the current timeline view as an image Blob.
+     * @param options The optional export settings.
+     * @returns A Promise that resolves with the image Blob.
+     */
+    toImage(options?: ImageGenerationOptions): Promise<Blob>;
+
+    /**
+     * Redraws the timeline.
+     */
+    redraw(): void;
+
+    /**
+     * Access the underlying core TempisTimeline instance.
+     * Use as an escape hatch when you need functionality not exposed by the ref API.
+     */
+    getInstance(): CoreTimeline | null;
+}
+
+/**
+ * The TempisTimeline component props.
+ */
 export interface TempisTimelineProps
     extends Omit<TempisTimelineOptions, "items"> {
     /** Timeline items (required). */
@@ -35,39 +119,9 @@ export interface TempisTimelineProps
     height?: string | number;
 }
 
-// ── Ref handle ──
-
-export interface TempisTimelineRef {
-    /** Focus the timeline on an item, date, or range. */
-    focus(options?: FocusOptions): void;
-    /** Get the current visible range. */
-    getRange(): { start: Date; end: Date };
-    /** Replace all items. */
-    setItems(items: TempisTimelineItem[]): void;
-    /** Get current items. */
-    getItems(): TempisTimelineItem[];
-    /** Replace all categories. */
-    setCategories(categories: TempisTimelineCategory[]): void;
-    /** Get current categories. */
-    getCategories(): TempisTimelineCategory[];
-    /** Replace all bands. */
-    setBands(bands: TempisTimelineBand[]): void;
-    /** Programmatically select items by ID. */
-    setSelection(ids: (string | number)[]): void;
-    /** Get selected item IDs. */
-    getSelection(): (string | number)[];
-    /** Clear selection. */
-    clearSelection(): void;
-    /** Export as image blob. */
-    toImage(options?: ImageGenerationOptions): Promise<Blob>;
-    /** Force a redraw. */
-    redraw(): void;
-    /** Access the underlying core instance. */
-    getInstance(): CoreTimeline | null;
-}
-
-// ── Component ──
-
+/**
+ * The TempisTimeline component.
+ */
 export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>(
     function TempisTimeline(
         {
