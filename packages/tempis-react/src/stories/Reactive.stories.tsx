@@ -42,10 +42,12 @@ function DynamicItemsDemo() {
                 <button onClick={() => setItems([])}>Clear All</button>
             </div>
             <TempisTimeline
-                responsive
                 height={350}
                 items={items}
-                range={{ start: "2026-05-28", end: "2026-07-05", position: "bottom" }}
+                options={{
+                    responsive: true,
+                    range: { start: "2026-05-28", end: "2026-07-05", position: "bottom" },
+                }}
             />
         </div>
     );
@@ -80,12 +82,14 @@ function ToggleCategoriesDemo() {
                 </button>
             </div>
             <TempisTimeline
-                responsive
                 height={350}
                 items={items}
                 categories={showCategories ? allCategories : undefined}
-                legend={showCategories ? { position: "top" } : undefined}
-                range={{ start: "2026-01-25", end: "2026-04-01", position: "bottom" }}
+                options={{
+                    responsive: true,
+                    legend: showCategories ? { position: "top" } : undefined,
+                    range: { start: "2026-01-25", end: "2026-04-01", position: "bottom" },
+                }}
             />
         </div>
     );

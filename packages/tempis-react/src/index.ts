@@ -1,5 +1,5 @@
 export { TempisTimeline } from "./TempisTimeline";
-export type { TempisTimelineProps, TempisTimelineRef } from "./TempisTimeline";
+export type { TempisTimelineProps, TempisTimelineRef, TempisTimelineConfig } from "./TempisTimeline";
 
 // Re-export core types for convenience.
 export type {

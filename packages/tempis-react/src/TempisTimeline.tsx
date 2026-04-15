@@ -11,8 +11,15 @@ import {
     type TempisTimelineItem,
     type TempisTimelineCategory,
     type TempisTimelineBand,
+    type TempisTimelineRangeOptions,
+    type TempisTimelineLegendOptions,
+    type TempisTimelineTooltipOptions,
+    type TempisTimelineStyleOptions,
+    type TempisTimelineGroupingOptions,
+    type TempisTimelineScrollbarOptions,
     type ImageGenerationOptions,
     type FocusOptions,
+    type SelectionChangeEvent,
 } from "@tempis/timeline";
 
 /**
@@ -104,9 +111,75 @@ export interface TempisTimelineRef {
 }
 
 /**
+ * The configuration options for the timeline instance.
+ * Changes to these trigger a full instance recreate.
+ */
+export interface TempisTimelineConfig {
+    /** Whether the canvas should resize to match the dimensions of its parent container. */
+    responsive?: boolean;
+
+    /** The vertical fill mode. */
+    verticalFill?: TempisTimelineOptions["verticalFill"];
+
+    /** Whether the timeline should be rendered right-to-left. */
+    rtl?: boolean;
+
+    /** The stack mode controlling how items are vertically arranged. */
+    stackMode?: TempisTimelineOptions["stackMode"];
+
+    /** The item selection mode. */
+    selection?: TempisTimelineOptions["selection"];
+
+    /** The timeline range options. */
+    range?: TempisTimelineRangeOptions;
+
+    /** The timeline legend options. */
+    legend?: TempisTimelineLegendOptions;
+
+    /** The timeline tooltip options. */
+    tooltip?: TempisTimelineTooltipOptions;
+
+    /** The timeline style options. */
+    style?: TempisTimelineStyleOptions;
+
+    /** The scrollbar options. */
+    scrollbar?: TempisTimelineScrollbarOptions;
+
+    /** The timeline grouping options. */
+    grouping?: TempisTimelineGroupingOptions;
+}
+
+/**
  * The TempisTimeline component props.
  */
-export interface TempisTimelineProps extends TempisTimelineOptions {
+export interface TempisTimelineProps {
+    /** The timeline items. */
+    items: TempisTimelineItem[];
+
+    /** The timeline item categories. */
+    categories?: TempisTimelineCategory[];
+
+    /** The timeline bands. */
+    bands?: TempisTimelineBand[];
+
+    /** The timeline configuration options. */
+    options?: TempisTimelineConfig;
+
+    /** Called when a timeline item is clicked. */
+    onItemClick?(id: string | number): void;
+
+    /** Called when a timeline item is double-clicked. */
+    onItemDoubleClick?(id: string | number): void;
+
+    /** Called when the mouse pointer enters or leaves a timeline item. */
+    onItemHover?(id: string | number | null): void;
+
+    /** Called when the item selection changes. */
+    onSelectionChange?(changes: SelectionChangeEvent[]): void;
+
+    /** Called when the visible range changes. */
+    onRangeChange?(start: Date, end: Date): void;
+
     /** Optional CSS class for the wrapper div. */
     className?: string;
 
@@ -133,23 +206,38 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
             items,
             categories,
             bands,
-            ...options
+            options = {},
+            onItemClick,
+            onItemDoubleClick,
+            onItemHover,
+            onSelectionChange,
+            onRangeChange,
         },
         ref
     ) {
         const canvasRef = useRef<HTMLCanvasElement>(null);
         const instanceRef = useRef<CoreTimeline | null>(null);
 
-        // Store latest callbacks in refs so we don't recreate the instance when they change.
-        const callbacksRef = useRef(options);
-        callbacksRef.current = options;
+        // Store latest callbacks in a ref so we don't recreate the instance when they change.
+        const callbacksRef = useRef({ onItemClick, onItemDoubleClick, onItemHover, onSelectionChange, onRangeChange });
+        callbacksRef.current = { onItemClick, onItemDoubleClick, onItemHover, onSelectionChange, onRangeChange };
+
+        // Serialise the options object to detect actual value changes,
+        // avoiding unnecessary instance recreates from new object references on every render.
+        const optionsKey = JSON.stringify(options);
 
         // Create / destroy the core instance.
         useEffect(() => {
+            // Guard against SSR environments.
+            if (typeof window === "undefined") {
+                console.warn("[TempisTimeline] Skipping initialisation — no window (SSR environment).");
+                return;
+            }
+
             if (!canvasRef.current) return;
 
             const timeline = new CoreTimeline(canvasRef.current, {
-                ...callbacksRef.current,
+                ...options,
                 items,
                 categories,
                 bands,
@@ -166,15 +254,8 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
                 timeline.destroy();
                 instanceRef.current = null;
             };
-            // Only recreate on options that require a new instance.
             // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [
-            options.responsive,
-            options.verticalFill,
-            options.rtl,
-            options.stackMode,
-            options.selection,
-        ]);
+        }, [optionsKey]);
 
         // Sync items.
         useEffect(() => {

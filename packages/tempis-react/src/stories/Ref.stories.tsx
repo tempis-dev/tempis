@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { TempisTimeline } from "../TempisTimeline";
 import type { TempisTimelineRef, TempisTimelineItem } from "../index";
 
@@ -40,10 +40,12 @@ function FocusDemo() {
             </div>
             <TempisTimeline
                 ref={ref}
-                responsive
                 height={300}
                 items={items}
-                range={{ start: "2026-03-25", end: "2026-05-15", position: "bottom" }}
+                options={{
+                    responsive: true,
+                    range: { start: "2026-03-25", end: "2026-05-15", position: "bottom" },
+                }}
             />
         </div>
     );
@@ -72,11 +74,13 @@ function SelectionDemo() {
             </div>
             <TempisTimeline
                 ref={ref}
-                responsive
                 height={300}
-                selection="multi"
                 items={items}
-                range={{ start: "2026-02-25", end: "2026-04-01", position: "bottom" }}
+                options={{
+                    responsive: true,
+                    selection: "multi",
+                    range: { start: "2026-02-25", end: "2026-04-01", position: "bottom" },
+                }}
             />
         </div>
     );

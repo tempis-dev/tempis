@@ -25,30 +25,36 @@ type Story = StoryObj<typeof TempisTimeline>;
 
 export const SingleSelect: Story = {
     args: {
-        responsive: true,
         height: 350,
-        selection: "single",
         items,
-        range: { start: "2026-02-25", end: "2026-04-01", position: "bottom" },
+        options: {
+            responsive: true,
+            selection: "single",
+            range: { start: "2026-02-25", end: "2026-04-01", position: "bottom" },
+        },
     },
 };
 
 export const MultiSelect: Story = {
     args: {
-        responsive: true,
         height: 350,
-        selection: "multi",
         items,
-        range: { start: "2026-02-25", end: "2026-04-01", position: "bottom" },
+        options: {
+            responsive: true,
+            selection: "multi",
+            range: { start: "2026-02-25", end: "2026-04-01", position: "bottom" },
+        },
     },
 };
 
 export const NoSelection: Story = {
     args: {
-        responsive: true,
         height: 350,
-        selection: "none",
         items,
-        range: { start: "2026-02-25", end: "2026-04-01", position: "bottom" },
+        options: {
+            responsive: true,
+            selection: "none",
+            range: { start: "2026-02-25", end: "2026-04-01", position: "bottom" },
+        },
     },
 };

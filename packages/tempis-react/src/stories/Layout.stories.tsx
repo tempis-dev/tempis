@@ -10,6 +10,8 @@ const items = [
     { id: 6, label: "Monitor", start: "2026-01-28", end: "2026-02-10", grouping: "DevOps" },
 ];
 
+const range = { start: "2026-01-01", end: "2026-02-15", position: "bottom" as const };
+
 const meta: Meta<typeof TempisTimeline> = {
     title: "Layout/Layout",
     component: TempisTimeline,
@@ -27,69 +29,29 @@ export default meta;
 type Story = StoryObj<typeof TempisTimeline>;
 
 export const FillCanvas: Story = {
-    args: {
-        responsive: true,
-        height: 450,
-        verticalFill: "fill-canvas",
-        items,
-        range: { start: "2026-01-01", end: "2026-02-15", position: "bottom" },
-    },
+    args: { height: 450, items, options: { responsive: true, verticalFill: "fill-canvas", range } },
 };
 
 export const ContentHeight: Story = {
-    args: {
-        responsive: true,
-        height: 450,
-        verticalFill: "content",
-        items,
-        range: { start: "2026-01-01", end: "2026-02-15", position: "bottom" },
-    },
+    args: { height: 450, items, options: { responsive: true, verticalFill: "content", range } },
 };
 
 export const CompactStacking: Story = {
-    args: {
-        responsive: true,
-        height: 400,
-        stackMode: "compact",
-        items,
-        range: { start: "2026-01-01", end: "2026-02-15", position: "bottom" },
-    },
+    args: { height: 400, items, options: { responsive: true, stackMode: "compact", range } },
 };
 
 export const StableStacking: Story = {
-    args: {
-        responsive: true,
-        height: 400,
-        stackMode: "stable",
-        items,
-        range: { start: "2026-01-01", end: "2026-02-15", position: "bottom" },
-    },
+    args: { height: 400, items, options: { responsive: true, stackMode: "stable", range } },
 };
 
 export const RTL: Story = {
-    args: {
-        responsive: true,
-        height: 350,
-        rtl: true,
-        items,
-        range: { start: "2026-01-01", end: "2026-02-15", position: "bottom" },
-    },
+    args: { height: 350, items, options: { responsive: true, rtl: true, range } },
 };
 
 export const RangeTop: Story = {
-    args: {
-        responsive: true,
-        height: 350,
-        items,
-        range: { start: "2026-01-01", end: "2026-02-15", position: "top" },
-    },
+    args: { height: 350, items, options: { responsive: true, range: { ...range, position: "top" } } },
 };
 
 export const RangeBoth: Story = {
-    args: {
-        responsive: true,
-        height: 400,
-        items,
-        range: { start: "2026-01-01", end: "2026-02-15", position: "both" },
-    },
+    args: { height: 400, items, options: { responsive: true, range: { ...range, position: "both" } } },
 };
