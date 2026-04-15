@@ -60,8 +60,16 @@ export interface TempisTimelineOptions {
      */
     selection?: TempisTimelineItemSelectionMode;
 
+    /**
+     * Called when a timeline item is clicked.
+     * @param id The identifier of the clicked item.
+     */
     onItemClick?(id: string | number): void;
 
+    /**
+     * Called when a timeline item is double-clicked.
+     * @param id The identifier of the double-clicked item.
+     */
     onItemDoubleClick?(id: string | number): void;
 
     /**
@@ -70,6 +78,10 @@ export interface TempisTimelineOptions {
      */
     onItemHover?(id: string | number | null): void;
 
+    /**
+     * Called when the item selection changes due to user interaction or programmatic updates.
+     * @param changes An array of selection change events describing which items were selected or deselected.
+     */
     onSelectionChange?(changes: SelectionChangeEvent[]): void;
 
     /**
@@ -259,6 +271,9 @@ export interface TempisTimelineRangeUnitOptions {
 
 export type TempisTimelineRangePosition = "top" | "bottom" | "both" | "none";
 
+/**
+ * The options for the timeline range.
+ */
 export interface TempisTimelineRangeOptions {
     /** Whether the timeline range is fixed and cannot be modified via user interaction. */
     fixed?: boolean;
@@ -311,6 +326,9 @@ export type TempisTimelineAlignment = "start" | "center" | "end";
 
 export type TempisTimelineMarkerStyle = "square" | "square-rounded" | "circle";
 
+/**
+ * The options for the timeline legend.
+ */
 export interface TempisTimelineLegendOptions {
     /** The legend position. */
     position?: TempisTimelineLegendPosition;

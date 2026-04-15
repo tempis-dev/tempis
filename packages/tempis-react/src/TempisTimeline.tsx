@@ -101,11 +101,7 @@ export interface TempisTimelineRef {
 /**
  * The TempisTimeline component props.
  */
-export interface TempisTimelineProps
-    extends Omit<TempisTimelineOptions, "items"> {
-    /** Timeline items (required). */
-    items: TempisTimelineItem[];
-
+export interface TempisTimelineProps extends TempisTimelineOptions {
     /** Optional CSS class for the wrapper div. */
     className?: string;
 
