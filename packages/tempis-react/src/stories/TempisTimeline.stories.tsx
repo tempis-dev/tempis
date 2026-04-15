@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useRef, useState } from "react";
+import { fn } from "@storybook/test";
 import { TempisTimeline } from "../TempisTimeline";
 import type { TempisTimelineRef, TempisTimelineItem } from "../index";
 
@@ -7,6 +8,13 @@ const meta: Meta<typeof TempisTimeline> = {
     title: "TempisTimeline",
     component: TempisTimeline,
     parameters: { layout: "padded" },
+    args: {
+        onItemClick: fn(),
+        onItemDoubleClick: fn(),
+        onItemHover: fn(),
+        onSelectionChange: fn(),
+        onRangeChange: fn(),
+    },
 };
 export default meta;
 
