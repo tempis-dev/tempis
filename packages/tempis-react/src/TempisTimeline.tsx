@@ -96,6 +96,11 @@ export interface TempisTimelineRef {
      * Use as an escape hatch when you need functionality not exposed by the ref API.
      */
     getInstance(): CoreTimeline | null;
+
+    /**
+     * Access the underlying canvas element.
+     */
+    getCanvas(): HTMLCanvasElement | null;
 }
 
 /**
@@ -186,7 +191,7 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
             if (bands) instanceRef.current?.setBands(bands);
         }, [bands]);
 
-        // Expose imperative methods.
+        // We need to expose the imperative methods for the instance ref.
         useImperativeHandle(ref, () => ({
             focus: (opts) => instanceRef.current?.focus(opts),
             getRange: () => instanceRef.current!.getRange(),
@@ -201,6 +206,7 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
             toImage: (opts) => instanceRef.current!.toImage(opts),
             redraw: () => instanceRef.current?.redraw(),
             getInstance: () => instanceRef.current,
+            getCanvas: () => canvasRef.current,
         }));
 
         return (
