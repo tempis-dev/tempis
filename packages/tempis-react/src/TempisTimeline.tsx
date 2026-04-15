@@ -219,3 +219,5 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
         );
     }
 );
+
+TempisTimeline.displayName = "TempisTimeline";
