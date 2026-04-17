@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Core API — Tempis Timeline</title>
+  <link rel="icon" type="image/png" href="images/logo.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="Tempis">
+        Tempis
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="get-started.html">Get Started</a></li>
+        <li><a href="examples.html">Examples</a></li>
+        <li><a href="api.html" class="active">API</a></li>
+        <li><a href="pricing.html">Pricing</a></li>
+      </ul>
+      <a href="https://github.com" class="nav-github" aria-label="GitHub">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      </a>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.mobile-menu').classList.add('open');document.querySelector('.mobile-menu-overlay').classList.add('active');">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </nav>
+  <div class="mobile-menu-overlay" onclick="document.querySelector('.mobile-menu').classList.remove('open');this.classList.remove('active');"></div>
+  <div class="mobile-menu">
+    <button class="mobile-menu-close" aria-label="Close menu" onclick="this.parentElement.classList.remove('open');document.querySelector('.mobile-menu-overlay').classList.remove('active');">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <a href="index.html">Home</a>
+    <a href="get-started.html">Get Started</a>
+    <a href="examples.html">Examples</a>
+    <a href="api.html">API</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="https://github.com" class="mobile-menu-github" aria-label="GitHub"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
+  </div>
+
+  <div class="page-wrapper">
+    <h1>Core API Reference</h1>
+    <p>Complete reference for the Tempis Timeline API.</p>
+
+    <h2>Constructor</h2>
+<pre><code>new TempisTimeline(context: string | HTMLCanvasElement, options: TempisTimelineOptions)</code></pre>
+    <p>Creates a new timeline instance. The <code>context</code> can be a CSS selector string or a canvas element reference.</p>
+
+    <h2>Methods</h2>
+
+    <h3>setItems(items)</h3>
+    <p>Replaces all timeline items and redraws.</p>
+<pre><code>timeline.setItems([
+  { id: 1, label: 'Event', start: '2024-01-15T09:00:00', end: '2024-01-15T11:00:00' }
+]);</code></pre>
+
+    <h3>getItems()</h3>
+    <p>Returns the current item definitions as last provided via the constructor or <code>setItems()</code>.</p>
+<pre><code>const items = timeline.getItems();</code></pre>
+
+    <h3>setCategories(categories)</h3>
+    <p>Replaces all categories and redraws.</p>
+<pre><code>timeline.setCategories([
+  { name: 'task', label: 'Tasks', style: { backgroundColor: '#4caf50' } }
+]);</code></pre>
+
+    <h3>getCategories()</h3>
+    <p>Returns the current category definitions as last provided via the constructor or <code>setCategories()</code>.</p>
+<pre><code>const categories = timeline.getCategories();</code></pre>
+
+    <h3>setBands(bands)</h3>
+    <p>Replaces all timeline bands and redraws.</p>
+<pre><code>timeline.setBands([
+  { start: '2024-01-15T12:00:00', end: '2024-01-15T13:00:00', style: { color: '#ff0000', opacity: 0.1 } }
+]);</code></pre>
+
+    <h3>focus(options?)</h3>
+    <p>Navigates the timeline to a specific item, date, or range.</p>
+<pre><code>// Focus on an item
+timeline.focus({ id: 'item-1', animate: true, duration: 500 });
+
+// Focus on a date
+timeline.focus({ date: '2024-06-15' });
+
+// Focus on a range
+timeline.focus({ range: ['2024-01-01', '2024-12-31'], animate: true });</code></pre>
+
+    <h3>getRange()</h3>
+    <p>Returns the current visible range as <code>{ start: Date, end: Date }</code>.</p>
+
+    <h3>getSelection()</h3>
+    <p>Returns an array of selected item IDs.</p>
+
+    <h3>setSelection(ids)</h3>
+    <p>Programmatically selects items by their IDs. Deselects all currently selected items first. Works regardless of the <code>selection</code> mode, including <code>"none"</code>.</p>
+<pre><code>timeline.setSelection([1, 2, 3]);</code></pre>
+
+    <h3>clearSelection()</h3>
+    <p>Deselects all items and redraws.</p>
+<pre><code>timeline.clearSelection();</code></pre>
+
+    <h3>redraw()</h3>
+    <p>Forces a redraw of the timeline.</p>
+
+    <h3>destroy()</h3>
+    <p>Removes all event listeners, disconnects observers, and cleans up resources. Always call this before removing the timeline from the DOM.</p>
+
+    <h3>toImage(options?)</h3>
+    <p>Exports the current timeline view as an image <code>Blob</code>. Returns a <code>Promise&lt;Blob&gt;</code> that resolves with the encoded image data. The canvas is re-rendered before capture to ensure the exported image reflects the latest timeline state. Throws an <code>Error</code> if called after <code>destroy()</code>.</p>
+<pre><code>// Export as PNG (default)
+const blob = await timeline.toImage();
+const url = URL.createObjectURL(blob);
+
+// Export as JPEG with quality
+const jpegBlob = await timeline.toImage({
+  type: 'image/jpeg',
+  quality: 0.85
+});
+
+// Export at 2× resolution for high-DPI displays
+const hiResBlob = await timeline.toImage({ dpr: 2 });</code></pre>
+
+    <h2>Image Options</h2>
+    <p>Options accepted by <code>toImage()</code> via the <code>ImageGenerationOptions</code> interface.</p>
+    <table class="api-table">
+      <thead>
+        <tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>type</code></td><td><code>string</code></td><td><code>"image/png"</code></td><td>The image MIME type (e.g. <code>"image/png"</code>, <code>"image/jpeg"</code>, <code>"image/webp"</code>).</td></tr>
+        <tr><td><code>quality</code></td><td><code>number</code></td><td>—</td><td>A number between 0 and 1 for lossy formats (JPEG, WebP). Ignored for PNG.</td></tr>
+        <tr><td><code>dpr</code></td><td><code>number</code></td><td><code>1</code></td><td>Device pixel ratio for the exported image. Output dimensions will be <code>offsetWidth × dpr</code> by <code>offsetHeight × dpr</code>.</td></tr>
+        <tr><td><code>backgroundColor</code></td><td><code>string</code></td><td>—</td><td>Optional background color for the exported image (e.g. <code>"#ffffff"</code>). By default the background is transparent.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Options</h2>
+    <table class="api-table">
+      <thead>
+        <tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>items</code></td><td><code>TempisTimelineItem[]</code></td><td>required</td><td>The items to display on the timeline.</td></tr>
+        <tr><td><code>responsive</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Whether the canvas resizes to match its parent container.</td></tr>
+        <tr><td><code>verticalFill</code></td><td><code>"content" | "fill-canvas" | "grow-canvas"</code></td><td><code>"content"</code></td><td>How the timeline fills vertical space.</td></tr>
+        <tr><td><code>rtl</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Enable right-to-left rendering.</td></tr>
+        <tr><td><code>stackMode</code></td><td><code>"compact" | "stable"</code></td><td><code>"stable"</code></td><td>How items are vertically stacked. Compact recalculates on pan; stable maintains positions.</td></tr>
+        <tr><td><code>selection</code></td><td><code>"none" | "single" | "multi"</code></td><td><code>"none"</code></td><td>Item selection mode.</td></tr>
+        <tr><td><code>categories</code></td><td><code>TempisTimelineCategory[]</code></td><td>—</td><td>Item categories for color-coding and filtering.</td></tr>
+        <tr><td><code>bands</code></td><td><code>TempisTimelineBand[]</code></td><td>—</td><td>Vertical bands highlighting time periods.</td></tr>
+        <tr><td><code>range</code></td><td><code>object</code></td><td>—</td><td>Range configuration. See Range Options below.</td></tr>
+        <tr><td><code>legend</code></td><td><code>object</code></td><td>—</td><td>Legend configuration. See Legend Options below.</td></tr>
+        <tr><td><code>tooltip</code></td><td><code>object</code></td><td>—</td><td>Tooltip configuration. See Tooltip Options below.</td></tr>
+        <tr><td><code>style</code></td><td><code>object</code></td><td>—</td><td>Default font and item style overrides.</td></tr>
+        <tr><td><code>scrollbar</code></td><td><code>object</code></td><td>—</td><td>Scrollbar visibility configuration.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Callbacks</h2>
+    <table class="api-table">
+      <thead>
+        <tr><th>Property</th><th>Signature</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>onItemClick</code></td><td><code>(id: string | number) => void</code></td><td>Called when an item is clicked.</td></tr>
+        <tr><td><code>onItemDoubleClick</code></td><td><code>(id: string | number) => void</code></td><td>Called when an item is double-clicked.</td></tr>
+        <tr><td><code>onItemHover</code></td><td><code>(id: string | number | null) => void</code></td><td>Called when the pointer enters an item (receives the item ID) or leaves all items (receives <code>null</code>). Only fires on change — not repeatedly while moving within the same item.</td></tr>
+        <tr><td><code>onSelectionChange</code></td><td><code>(changes: SelectionChangeEvent[]) => void</code></td><td>Called when the selection state changes.</td></tr>
+        <tr><td><code>onRangeChange</code></td><td><code>(start: Date, end: Date) => void</code></td><td>Called when the visible range changes due to panning, zooming, or programmatic updates.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Item Options</h2>
+    <table class="api-table">
+      <thead>
+        <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>id</code></td><td><code>string | number</code></td><td>Unique item identifier (required).</td></tr>
+        <tr><td><code>start</code></td><td><code>string | number | Date</code></td><td>Start date (required). Accepts ISO strings, timestamps, or Date objects.</td></tr>
+        <tr><td><code>end</code></td><td><code>string | number | Date</code></td><td>End date. Omit for point-in-time items.</td></tr>
+        <tr><td><code>label</code></td><td><code>string</code></td><td>Display label.</td></tr>
+        <tr><td><code>grouping</code></td><td><code>string</code></td><td>Group name for row organization.</td></tr>
+        <tr><td><code>category</code></td><td><code>string</code></td><td>Category name (must match a defined category).</td></tr>
+        <tr><td><code>style</code></td><td><code>TempisTimelineItemStyle</code></td><td>Per-item style overrides.</td></tr>
+        <tr><td><code>selected</code></td><td><code>boolean</code></td><td>Whether the item is selected.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Range Options</h2>
+    <table class="api-table">
+      <thead>
+        <tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>fixed</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Prevent user interaction with the range.</td></tr>
+        <tr><td><code>position</code></td><td><code>"top" | "bottom" | "both" | "none"</code></td><td><code>"bottom"</code></td><td>Where to display the range axis.</td></tr>
+        <tr><td><code>start</code></td><td><code>string | number | Date</code></td><td>—</td><td>Initial visible range start.</td></tr>
+        <tr><td><code>end</code></td><td><code>string | number | Date</code></td><td>—</td><td>Initial visible range end.</td></tr>
+        <tr><td><code>min</code></td><td><code>string | number | Date</code></td><td>—</td><td>Minimum navigable date.</td></tr>
+        <tr><td><code>max</code></td><td><code>string | number | Date</code></td><td>—</td><td>Maximum navigable date.</td></tr>
+        <tr><td><code>zoom.enabled</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Enable zoom via scroll/pinch.</td></tr>
+        <tr><td><code>zoom.min</code></td><td><code>number</code></td><td>—</td><td>Minimum zoom range in milliseconds.</td></tr>
+        <tr><td><code>zoom.max</code></td><td><code>number</code></td><td>—</td><td>Maximum zoom range in milliseconds.</td></tr>
+        <tr><td><code>zoom.wheelSensitivity</code></td><td><code>number</code></td><td><code>1.0</code></td><td>Mouse wheel zoom speed multiplier.</td></tr>
+        <tr><td><code>zoom.pinchSensitivity</code></td><td><code>number</code></td><td><code>1.0</code></td><td>Touch pinch zoom speed multiplier.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Legend Options</h2>
+    <table class="api-table">
+      <thead>
+        <tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>position</code></td><td><code>"top" | "bottom" | "none"</code></td><td><code>"none"</code></td><td>Legend position.</td></tr>
+        <tr><td><code>alignment</code></td><td><code>"start" | "center" | "end"</code></td><td><code>"center"</code></td><td>Horizontal alignment.</td></tr>
+        <tr><td><code>markerStyle</code></td><td><code>"square" | "square-rounded" | "circle"</code></td><td><code>"square-rounded"</code></td><td>Legend marker shape.</td></tr>
+        <tr><td><code>isHighlightOnHover</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Highlight category items on legend hover.</td></tr>
+        <tr><td><code>isFilterOnClick</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Toggle category visibility on legend click.</td></tr>
+        <tr><td><code>gap</code></td><td><code>number</code></td><td>—</td><td>Gap between legend items in pixels.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Tooltip Options</h2>
+    <table class="api-table">
+      <thead>
+        <tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>enabled</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Enable or disable tooltips.</td></tr>
+        <tr><td><code>delay</code></td><td><code>number</code></td><td><code>0</code></td><td>Delay in milliseconds before showing.</td></tr>
+        <tr><td><code>dateFormat</code></td><td><code>string</code></td><td><code>"D MMMM HH:mm:ss"</code></td><td>Date format pattern for the default tooltip. Uses the same tokens as range unit labels.</td></tr>
+        <tr><td><code>overflowBehavior</code></td><td><code>"none" | "canvas" | "viewport"</code></td><td><code>"none"</code></td><td>How tooltips handle edge overflow.</td></tr>
+        <tr><td><code>template</code></td><td><code>(id) => HTMLElement | string | null</code></td><td>—</td><td>Custom tooltip content function.</td></tr>
+        <tr><td><code>shouldShow</code></td><td><code>(id) => boolean</code></td><td>—</td><td>Predicate to control per-item tooltip visibility.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Style Options</h2>
+    <h3>Item Style</h3>
+    <p>Applied globally via <code>style.item</code> or per-item/category via the <code>style</code> property.</p>
+    <table class="api-table">
+      <thead>
+        <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>backgroundColor</code></td><td><code>string</code></td><td>Item background color.</td></tr>
+        <tr><td><code>fontColor</code></td><td><code>string</code></td><td>Item label color.</td></tr>
+        <tr><td><code>padding</code></td><td><code>number</code></td><td>Internal padding in pixels.</td></tr>
+        <tr><td><code>borderColor</code></td><td><code>string</code></td><td>Border color.</td></tr>
+        <tr><td><code>borderThickness</code></td><td><code>number</code></td><td>Border width in pixels.</td></tr>
+        <tr><td><code>borderStyle</code></td><td><code>"solid" | "dashed" | "dotted" | "dash-dot" | "long-dash"</code></td><td>Border line style. Defaults to <code>"solid"</code>.</td></tr>
+        <tr><td><code>borderRadius</code></td><td><code>number</code></td><td>Corner radius in pixels.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Scrollbar Options</h3>
+    <table class="api-table">
+      <thead>
+        <tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>scrollbar.visibility</code></td><td><code>"always" | "hover" | "panning" | "never"</code></td><td><code>"hover"</code></td><td>When the vertical overflow scrollbar is visible.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Focus Options</h2>
+    <table class="api-table">
+      <thead>
+        <tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>id</code></td><td><code>string | number</code></td><td>—</td><td>Focus on a specific item by ID.</td></tr>
+        <tr><td><code>date</code></td><td><code>string | number | Date</code></td><td>—</td><td>Center the timeline on a specific date.</td></tr>
+        <tr><td><code>range</code></td><td><code>[Date, Date]</code></td><td>—</td><td>Focus on a specific date range.</td></tr>
+        <tr><td><code>animate</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Enable smooth animation.</td></tr>
+        <tr><td><code>duration</code></td><td><code>number</code></td><td><code>300</code></td><td>Animation duration in milliseconds.</td></tr>
+        <tr><td><code>easing</code></td><td><code>EasingFunction</code></td><td><code>"ease-out"</code></td><td>Easing function for animation.</td></tr>
+        <tr><td><code>zoom</code></td><td><code>boolean | "auto"</code></td><td><code>"auto"</code></td><td>Whether to zoom to fit the focused item's range.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Band Options</h2>
+    <table class="api-table">
+      <thead>
+        <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>start</code></td><td><code>string | number | Date</code></td><td>Band start date (required).</td></tr>
+        <tr><td><code>end</code></td><td><code>string | number | Date</code></td><td>Band end date. Omit for a vertical line (PIT band).</td></tr>
+        <tr><td><code>style.color</code></td><td><code>string</code></td><td>Band fill color.</td></tr>
+        <tr><td><code>style.borderColor</code></td><td><code>string</code></td><td>Band border color.</td></tr>
+        <tr><td><code>style.borderThickness</code></td><td><code>number</code></td><td>Band border width.</td></tr>
+        <tr><td><code>style.opacity</code></td><td><code>number</code></td><td>Band opacity (0–1).</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Static Methods</h2>
+    <h3>TempisTimeline.registerDateAdapter(adapter)</h3>
+    <p>Register a custom date adapter for date formatting. The adapter must implement the <code>TempisTimelineDateAdapter</code> interface. If no adapter is registered, the built-in native Date adapter is used.</p>
+<pre><code>TempisTimeline.registerDateAdapter(myLuxonAdapter);</code></pre>
+
+    <h3>TempisTimeline.getDateAdapter()</h3>
+    <p>Returns the currently registered date adapter.</p>
+
+    <h3>TempisTimeline.setGlobalPalette(palette)</h3>
+    <p>Set the global color palette used for categories that don't specify an explicit <code>backgroundColor</code>. Call <code>setCategories()</code> after changing the palette to apply the new colors to existing instances.</p>
+<pre><code>TempisTimeline.setGlobalPalette(['#ff3366', '#0088ff', '#00cc66', '#ffcc00']);</code></pre>
+
+    <h3>TempisTimeline.getGlobalPalette()</h3>
+    <p>Returns the current global color palette as an array of color strings.</p>
+  </div>
+
+  <footer>
+    <p>Tempis Timeline is source-available. Free for non-commercial use. <a href="../LICENSE">Commercial license</a> required for business use.</p>
+  </footer>
+</body>
+</html>
