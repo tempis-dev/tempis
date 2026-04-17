@@ -1,6 +1,25 @@
 <h1>Items</h1>
 <p class="subtitle">Timeline items are the core data — range events and point-in-time markers.</p>
 
+<div class="api-demo"><canvas id="demo-items"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-items', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    items: [
+      { id: 1, label: 'Sprint 1',  start: '2026-01-05', end: '2026-01-19', grouping: 'Work' },
+      { id: 2, label: 'Sprint 2',  start: '2026-01-20', end: '2026-02-02', grouping: 'Work' },
+      { id: 3, label: 'Kickoff',   start: '2026-01-05', grouping: 'Milestones' },
+      { id: 4, label: 'Alpha',     start: '2026-01-19', grouping: 'Milestones' },
+      { id: 5, label: 'Beta',      start: '2026-02-02', grouping: 'Milestones' },
+      { id: 6, label: 'Urgent Fix', start: '2026-01-12', end: '2026-01-14', grouping: 'Work',
+        style: { backgroundColor: '#e11d48', borderColor: '#9f1239', borderThickness: 2, borderStyle: 'dashed' } },
+    ],
+    range: { start: '2026-01-01', end: '2026-02-10', position: 'bottom' }
+  });
+</script>
+
 <h2>Item Interface</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>

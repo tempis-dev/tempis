@@ -8,6 +8,20 @@
 <pre><code class="language-html">&lt;script src="https://unpkg.com/@tempis/timeline/dist/tempis_timeline.min.js"&gt;&lt;/script&gt;</code></pre>
 
 <h2>Minimal Example</h2>
+<div class="api-demo"><canvas id="demo-getting-started"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-getting-started', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    items: [
+      { id: 1, label: 'Design',  start: '2026-01-05', end: '2026-01-15', grouping: 'Frontend' },
+      { id: 2, label: 'Build',   start: '2026-01-12', end: '2026-01-28', grouping: 'Frontend' },
+      { id: 3, label: 'Launch',  start: '2026-01-30', grouping: 'Frontend' },
+      { id: 4, label: 'API',     start: '2026-01-08', end: '2026-01-25', grouping: 'Backend' },
+    ],
+    range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+  });
+</script>
 <pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
 
 const timeline = new TempisTimeline('#canvas', {

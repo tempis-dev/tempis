@@ -7,6 +7,7 @@
   <link rel="icon" type="image/png" href="images/logo.png">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="../lib/tempis_timeline.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
@@ -55,6 +56,7 @@
     .api-content th { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--border); font-weight: 600; }
     .api-content td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
     .api-content td code { font-size: 0.88em; }
+    .api-content td:first-child code { color: #fff; }
     .api-demo { border-radius: 8px; border: 1px solid var(--border); margin: 0 0 24px; overflow: hidden; }
     .api-demo canvas { display: block; width: 100%; height: 250px; }
 </style>
@@ -131,6 +133,14 @@
     var links = document.querySelectorAll('.api-sidebar a');
     var cache = {};
 
+    function runScripts() {
+      contentEl.querySelectorAll('script').forEach(function(old) {
+        var s = document.createElement('script');
+        s.textContent = old.textContent;
+        old.parentNode.replaceChild(s, old);
+      });
+    }
+
     function loadPage(hash) {
       hash = hash || 'core/getting-started';
       var isReact = hash.indexOf('react/') === 0;
@@ -142,6 +152,7 @@
       if (cache[hash]) {
         contentEl.innerHTML = cache[hash];
         hljs.highlightAll();
+        runScripts();
         document.querySelector('.api-content').scrollTop = 0;
         return;
       }
@@ -151,6 +162,7 @@
           cache[hash] = html;
           contentEl.innerHTML = html;
           hljs.highlightAll();
+          runScripts();
           document.querySelector('.api-content').scrollTop = 0;
         });
     }

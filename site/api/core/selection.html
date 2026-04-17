@@ -1,6 +1,23 @@
 <h1>Selection</h1>
 <p class="subtitle">Let users select one or more timeline items.</p>
 
+<div class="api-demo"><canvas id="demo-selection"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-selection', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    selection: 'multi',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    items: [
+      { id: 1, label: 'Task A', start: '2026-03-01', end: '2026-03-10', grouping: 'Team 1' },
+      { id: 2, label: 'Task B', start: '2026-03-05', end: '2026-03-15', grouping: 'Team 1' },
+      { id: 3, label: 'Task C', start: '2026-03-08', end: '2026-03-20', grouping: 'Team 2' },
+      { id: 4, label: 'Task D', start: '2026-03-12', end: '2026-03-22', grouping: 'Team 2' },
+    ],
+    range: { start: '2026-02-25', end: '2026-04-01', position: 'bottom' }
+  });
+</script>
+
 <h2>Selection Modes</h2>
 <table>
   <thead><tr><th>Mode</th><th>Description</th></tr></thead>

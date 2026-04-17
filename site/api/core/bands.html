@@ -1,6 +1,41 @@
 <h1>Bands</h1>
 <p class="subtitle">Highlight time ranges or mark specific dates with background bands.</p>
 
+<div class="api-demo"><canvas id="demo-bands"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-bands', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    categories: [
+      { name: 'task',    label: 'Tasks',       style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+      { name: 'deploy',  label: 'Deployments',  style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+      { name: 'alert',   label: 'Alerts',       style: { backgroundColor: '#f59e0b', fontColor: '#111' } },
+    ],
+    legend: { position: 'bottom' },
+    items: [
+      { id: 1,  label: 'Sprint 4',        start: '2026-03-01', end: '2026-03-14', category: 'task',   grouping: 'Engineering' },
+      { id: 2,  label: 'Sprint 5',        start: '2026-03-15', end: '2026-03-28', category: 'task',   grouping: 'Engineering' },
+      { id: 3,  label: 'Code Review',     start: '2026-03-10', end: '2026-03-13', category: 'task',   grouping: 'Engineering' },
+      { id: 4,  label: 'v2.1 Staging',    start: '2026-03-05', end: '2026-03-07', category: 'deploy', grouping: 'Releases' },
+      { id: 5,  label: 'v2.1 Production', start: '2026-03-08', end: '2026-03-09', category: 'deploy', grouping: 'Releases' },
+      { id: 6,  label: 'v2.2 Staging',    start: '2026-03-20', end: '2026-03-22', category: 'deploy', grouping: 'Releases' },
+      { id: 7,  label: 'v2.2 Production', start: '2026-03-23', end: '2026-03-24', category: 'deploy', grouping: 'Releases' },
+      { id: 8,  label: 'DB Migration',    start: '2026-03-08', end: '2026-03-10', category: 'task',   grouping: 'Database' },
+      { id: 9,  label: 'Index Rebuild',   start: '2026-03-18', end: '2026-03-20', category: 'task',   grouping: 'Database' },
+      { id: 10, label: 'CPU Spike',       start: '2026-03-11', category: 'alert', grouping: 'Engineering' },
+      { id: 11, label: 'Deploy Complete',  start: '2026-03-09', category: 'alert', grouping: 'Releases' },
+    ],
+    bands: [
+      { start: '2026-03-10', end: '2026-03-12', style: { color: '#ef4444', opacity: 0.12 } },
+      { start: '2026-03-17', end: '2026-03-18', style: { color: '#3b82f6', opacity: 0.1 } },
+      { start: '2026-03-28', style: { color: '#f59e0b', borderColor: '#f59e0b', borderThickness: 2 } },
+      { start: '2026-03-07', style: { color: '#10b981', borderColor: '#10b981', borderThickness: 1, opacity: 0.6 } },
+    ],
+    range: { start: '2026-02-27', end: '2026-04-02', position: 'bottom' }
+  });
+</script>
+
 <h2>Band Interface</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>

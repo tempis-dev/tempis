@@ -322,6 +322,7 @@ export class TimelineDataView {
                 context.strokeStyle = lineColor;
                 context.lineWidth = lineWidth;
                 context.globalAlpha = band.style.opacity || 1;
+                context.setLineDash([]);
                 context.beginPath();
                 context.moveTo(xPosition, yPosition);
                 context.lineTo(xPosition, yPosition + height);

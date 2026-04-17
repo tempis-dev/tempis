@@ -1,6 +1,28 @@
 <h1>Focus</h1>
 <p class="subtitle">Pan and zoom the timeline to a specific item, date, or range.</p>
 
+<div class="api-demo"><canvas id="demo-focus"></canvas></div>
+<div style="display: flex; gap: 8px; margin: -16px 0 24px;">
+  <button class="btn btn-outline btn-sm" onclick="window._focusDemo.focus({ id: 1, animate: true, duration: 600 })">Sprint 1</button>
+  <button class="btn btn-outline btn-sm" onclick="window._focusDemo.focus({ id: 3, animate: true, duration: 600 })">Release</button>
+  <button class="btn btn-outline btn-sm" onclick="window._focusDemo.focus({ animate: true, duration: 800 })">Show All</button>
+</div>
+<script>
+  window._focusDemo = new tempis_timeline.TempisTimeline('#demo-focus', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    items: [
+      { id: 1, label: 'Sprint 1',  start: '2026-01-05', end: '2026-01-19', grouping: 'Team A' },
+      { id: 2, label: 'Sprint 2',  start: '2026-01-20', end: '2026-02-02', grouping: 'Team A' },
+      { id: 3, label: 'Release',   start: '2026-02-05', grouping: 'Team A' },
+      { id: 4, label: 'Research',  start: '2026-01-08', end: '2026-01-22', grouping: 'Team B' },
+      { id: 5, label: 'Prototype', start: '2026-01-15', end: '2026-02-01', grouping: 'Team B' },
+    ],
+    range: { start: '2026-01-01', end: '2026-02-10', position: 'bottom' }
+  });
+</script>
+
 <h2>FocusOptions</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
