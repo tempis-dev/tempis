@@ -66,6 +66,11 @@ body {
   overflow-x: hidden;
 }
 
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.3); border-radius: 3px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.5); }
+
 a {
   color: var(--primary);
   text-decoration: none;
@@ -345,7 +350,7 @@ nav .nav-github:hover {
   padding: 18px 32px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
-  font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
   font-size: 1.05em;
 }
 
