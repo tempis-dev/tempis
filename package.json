@@ -10,11 +10,13 @@
     "dev": "concurrently -n watch,serve -c blue,green \"npm run build:lib-watch --workspace=packages/tempis-timeline\" \"http-server . -p 8080 -c-1 -o examples/\"",
     "build": "npm run build:all --workspaces --if-present",
     "build:site": "node scripts/build-site.js",
+    "dev:site": "concurrently -n watch,serve -c blue,green \"node scripts/watch-site.js\" \"http-server dist/site -p 8081 -c-1\"",
+    "serve:site": "http-server dist/site -p 8081 -c-1",
     "test": "npm run test --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present",
-    "serve:site": "http-server dist/site -p 8081 -c-1"
+    "lint": "npm run lint --workspaces --if-present"
   },
   "devDependencies": {
+    "chokidar": "^4.0.0",
     "concurrently": "^9.1.2",
     "http-server": "^14.1.1"
   },
