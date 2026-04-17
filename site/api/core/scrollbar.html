@@ -1,0 +1,35 @@
+<h1>Scrollbar</h1>
+<p class="subtitle">Control the visibility and appearance of the vertical scrollbar.</p>
+
+<h2>TempisTimelineScrollbarOptions</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>visibility</code></td><td><code>"always" | "hover" | "panning" | "never"</code></td><td><code>"hover"</code></td><td>When the scrollbar is visible.</td></tr>
+    <tr><td><code>color</code></td><td><code>string</code></td><td><code>"rgba(128,128,128,0.5)"</code></td><td>Colour of the scrollbar thumb and track.</td></tr>
+  </tbody>
+</table>
+
+<p>The scrollbar appears only when the timeline content overflows vertically. The <code>visibility</code> setting controls when it is shown:</p>
+<ul>
+  <li><code>"always"</code> — visible whenever there is overflow.</li>
+  <li><code>"hover"</code> — visible when the pointer is over the timeline or during panning.</li>
+  <li><code>"panning"</code> — visible only while actively panning.</li>
+  <li><code>"never"</code> — never shown.</li>
+</ul>
+
+<h2>Example</h2>
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  scrollbar: {
+    visibility: 'always',
+    color: 'rgba(99, 102, 241, 0.4)'
+  },
+  items: [
+    { id: 1, label: 'Task 1', start: '2026-01-01', end: '2026-01-10', grouping: 'Group A' },
+    { id: 2, label: 'Task 2', start: '2026-01-05', end: '2026-01-15', grouping: 'Group B' },
+    { id: 3, label: 'Task 3', start: '2026-01-08', end: '2026-01-20', grouping: 'Group C' },
+    { id: 4, label: 'Task 4', start: '2026-01-12', end: '2026-01-25', grouping: 'Group D' },
+  ],
+  range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+});</code></pre>

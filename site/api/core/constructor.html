@@ -1,0 +1,34 @@
+<h1>Constructor</h1>
+<p class="subtitle">Create a new timeline instance.</p>
+
+<pre><code class="language-typescript">new TempisTimeline(context: string | HTMLCanvasElement, options: TempisTimelineOptions)</code></pre>
+
+<p>The <code>context</code> parameter accepts either a CSS selector string pointing to a <code>&lt;canvas&gt;</code> element, or a direct reference to one.</p>
+
+<pre><code class="language-typescript">// Using a selector
+const timeline = new TempisTimeline('#my-canvas', { items: [...] });
+
+// Using an element reference
+const canvas = document.getElementById('my-canvas') as HTMLCanvasElement;
+const timeline = new TempisTimeline(canvas, { items: [...] });</code></pre>
+
+<h2>Options</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>items</code></td><td><code>TempisTimelineItem[]</code></td><td>required</td><td>Items to display.</td></tr>
+    <tr><td><code>responsive</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Resize canvas to match parent container.</td></tr>
+    <tr><td><code>verticalFill</code></td><td><code>"content" | "fill-canvas" | "grow-canvas"</code></td><td><code>"content"</code></td><td>How the timeline fills vertical space.</td></tr>
+    <tr><td><code>rtl</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Right-to-left rendering.</td></tr>
+    <tr><td><code>stackMode</code></td><td><code>"compact" | "stable"</code></td><td><code>"stable"</code></td><td>Item stacking behaviour.</td></tr>
+    <tr><td><code>selection</code></td><td><code>"none" | "single" | "multi"</code></td><td><code>"none"</code></td><td>Item selection mode.</td></tr>
+    <tr><td><code>categories</code></td><td><code>TempisTimelineCategory[]</code></td><td>—</td><td>Item categories.</td></tr>
+    <tr><td><code>bands</code></td><td><code>TempisTimelineBand[]</code></td><td>—</td><td>Timeline bands.</td></tr>
+    <tr><td><code>range</code></td><td><code>TempisTimelineRangeOptions</code></td><td>—</td><td>Range configuration.</td></tr>
+    <tr><td><code>legend</code></td><td><code>TempisTimelineLegendOptions</code></td><td>—</td><td>Legend configuration.</td></tr>
+    <tr><td><code>tooltip</code></td><td><code>TempisTimelineTooltipOptions</code></td><td>—</td><td>Tooltip configuration.</td></tr>
+    <tr><td><code>style</code></td><td><code>TempisTimelineStyleOptions</code></td><td>—</td><td>Style overrides.</td></tr>
+    <tr><td><code>scrollbar</code></td><td><code>TempisTimelineScrollbarOptions</code></td><td>—</td><td>Scrollbar options.</td></tr>
+    <tr><td><code>grouping</code></td><td><code>TempisTimelineGroupingOptions</code></td><td>—</td><td>Grouping options.</td></tr>
+  </tbody>
+</table>

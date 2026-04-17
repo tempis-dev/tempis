@@ -1,0 +1,37 @@
+<h1>Legend</h1>
+<p class="subtitle">Display an interactive legend for category filtering and highlighting.</p>
+
+<h2>TempisTimelineLegendOptions</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>position</code></td><td><code>"top" | "bottom" | "none"</code></td><td><code>"none"</code></td><td>Where the legend is rendered.</td></tr>
+    <tr><td><code>alignment</code></td><td><code>"start" | "center" | "end"</code></td><td><code>"start"</code></td><td>Horizontal alignment of legend items.</td></tr>
+    <tr><td><code>markerStyle</code></td><td><code>"square" | "square-rounded" | "circle"</code></td><td><code>"square-rounded"</code></td><td>Shape of the colour marker next to each label.</td></tr>
+    <tr><td><code>isHighlightOnHover</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Highlight matching items when hovering a legend entry.</td></tr>
+    <tr><td><code>isFilterOnClick</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Toggle category visibility when clicking a legend entry.</td></tr>
+    <tr><td><code>gap</code></td><td><code>number</code></td><td>—</td><td>Gap in pixels between legend items.</td></tr>
+  </tbody>
+</table>
+
+<h2>Example</h2>
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  categories: [
+    { name: 'frontend', label: 'Frontend', style: { backgroundColor: '#6366f1' } },
+    { name: 'backend',  label: 'Backend',  style: { backgroundColor: '#10b981' } },
+  ],
+  legend: {
+    position: 'top',
+    alignment: 'center',
+    markerStyle: 'circle',
+    isHighlightOnHover: true,
+    isFilterOnClick: true,
+    gap: 24
+  },
+  items: [
+    { id: 1, label: 'UI Redesign', start: '2026-02-01', end: '2026-02-14', category: 'frontend' },
+    { id: 2, label: 'API v3',      start: '2026-02-05', end: '2026-02-20', category: 'backend' },
+  ],
+  range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' }
+});</code></pre>

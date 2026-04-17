@@ -1,0 +1,55 @@
+<h1>Items</h1>
+<p class="subtitle">Timeline items are the core data — range events and point-in-time markers.</p>
+
+<h2>Item Interface</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>id</code></td><td><code>string | number</code></td><td>Unique identifier (required).</td></tr>
+    <tr><td><code>start</code></td><td><code>string | number | Date</code></td><td>Start date (required). ISO string, timestamp, or Date.</td></tr>
+    <tr><td><code>end</code></td><td><code>string | number | Date</code></td><td>End date. Omit for point-in-time items.</td></tr>
+    <tr><td><code>label</code></td><td><code>string</code></td><td>Display label.</td></tr>
+    <tr><td><code>grouping</code></td><td><code>string</code></td><td>Group name for row organisation.</td></tr>
+    <tr><td><code>category</code></td><td><code>string</code></td><td>Category name (must match a defined category).</td></tr>
+    <tr><td><code>style</code></td><td><code>TempisTimelineItemStyle</code></td><td>Per-item style overrides.</td></tr>
+  </tbody>
+</table>
+
+<h2>Range Items vs Point-in-Time</h2>
+<p>Items with both <code>start</code> and <code>end</code> render as horizontal bars. Items with only <code>start</code> render as point-in-time markers with a downward triangle.</p>
+
+<pre><code class="language-typescript">const items = [
+  // Range item
+  { id: 1, label: 'Sprint 1', start: '2026-01-05', end: '2026-01-19' },
+  // Point-in-time item
+  { id: 2, label: 'Release', start: '2026-01-20' }
+];</code></pre>
+
+<h2>Methods</h2>
+
+<h3>setItems(items)</h3>
+<p>Replaces all items and redraws the timeline.</p>
+<pre><code class="language-typescript">timeline.setItems([
+  { id: 1, label: 'New Task', start: '2026-02-01', end: '2026-02-10' }
+]);</code></pre>
+
+<h3>getItems()</h3>
+<p>Returns the current item definitions.</p>
+<pre><code class="language-typescript">const items = timeline.getItems();</code></pre>
+
+<h2>Per-Item Styles</h2>
+<p>Override the default appearance on individual items.</p>
+<pre><code class="language-typescript">{ 
+  id: 1, 
+  label: 'Urgent', 
+  start: '2026-01-05', 
+  end: '2026-01-10',
+  style: { 
+    backgroundColor: '#e11d48', 
+    fontColor: '#fff',
+    borderColor: '#9f1239',
+    borderThickness: 2,
+    borderStyle: 'dashed',
+    borderRadius: 8
+  }
+}</code></pre>

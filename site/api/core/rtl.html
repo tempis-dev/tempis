@@ -1,0 +1,30 @@
+<h1>RTL</h1>
+<p class="subtitle">Right-to-left rendering for languages like Arabic and Hebrew.</p>
+
+<h2>Option</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>rtl</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Enable right-to-left layout.</td></tr>
+  </tbody>
+</table>
+
+<h2>What Changes</h2>
+<ul>
+  <li>The time axis flows from right (earliest) to left (latest).</li>
+  <li>Item labels and grouping labels are right-aligned.</li>
+  <li>The legend renders in RTL order.</li>
+  <li>Default tooltips use RTL text direction.</li>
+</ul>
+
+<h2>Example</h2>
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  rtl: true,
+  items: [
+    { id: 1, label: 'تصميم',  start: '2026-01-05', end: '2026-01-15', grouping: 'الفريق أ' },
+    { id: 2, label: 'تطوير',  start: '2026-01-12', end: '2026-01-28', grouping: 'الفريق أ' },
+    { id: 3, label: 'اختبار', start: '2026-01-20', end: '2026-02-05', grouping: 'الفريق ب' },
+  ],
+  range: { start: '2026-01-01', end: '2026-02-15', position: 'bottom' }
+});</code></pre>

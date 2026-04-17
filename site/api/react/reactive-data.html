@@ -1,0 +1,88 @@
+<h1>Reactive Data</h1>
+<p class="subtitle">Dynamically update items, categories, and bands via props.</p>
+
+<h2>How It Works</h2>
+<p>The <code>items</code>, <code>categories</code>, and <code>bands</code> props are synced to the core instance via <code>useEffect</code>. When a prop changes, the component calls the corresponding setter (<code>setItems</code>, <code>setCategories</code>, <code>setBands</code>) on the existing instance — no destroy/recreate needed.</p>
+
+<h2>Dynamic Add / Remove</h2>
+<pre><code class="language-tsx">import { useState } from 'react';
+import { TempisTimeline } from '@tempis/react';
+
+function App() {
+  const [items, setItems] = useState([
+    { id: 1, label: 'Task A', start: '2026-02-01', end: '2026-02-10' },
+  ]);
+
+  let nextId = items.length + 1;
+
+  function addItem() {
+    setItems(prev =&gt; [
+      ...prev,
+      {
+        id: nextId++,
+        label: `Task ${nextId}`,
+        start: '2026-02-12',
+        end: '2026-02-20'
+      }
+    ]);
+  }
+
+  function removeLastItem() {
+    setItems(prev =&gt; prev.slice(0, -1));
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={addItem}&gt;Add Item&lt;/button&gt;
+      &lt;button onClick={removeLastItem}&gt;Remove Last&lt;/button&gt;
+      &lt;TempisTimeline
+        items={items}
+        options={{
+          responsive: true,
+          range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' }
+        }}
+        height={300}
+      /&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<h2>Toggle Categories</h2>
+<pre><code class="language-tsx">import { useState } from 'react';
+import { TempisTimeline } from '@tempis/react';
+
+function App() {
+  const allCategories = [
+    { name: 'dev',    label: 'Development', style: { backgroundColor: '#6366f1' } },
+    { name: 'design', label: 'Design',      style: { backgroundColor: '#f43f5e' } },
+  ];
+
+  const [categories, setCategories] = useState(allCategories);
+
+  function toggleDesign() {
+    setCategories(prev =&gt;
+      prev.some(c =&gt; c.name === 'design')
+        ? prev.filter(c =&gt; c.name !== 'design')
+        : [...prev, allCategories[1]]
+    );
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={toggleDesign}&gt;Toggle Design&lt;/button&gt;
+      &lt;TempisTimeline
+        items={[
+          { id: 1, label: 'Auth',       start: '2026-02-01', end: '2026-02-14', category: 'dev' },
+          { id: 2, label: 'Wireframes', start: '2026-02-05', end: '2026-02-12', category: 'design' },
+        ]}
+        categories={categories}
+        options={{
+          responsive: true,
+          legend: { position: 'top' },
+          range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' }
+        }}
+        height={300}
+      /&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>

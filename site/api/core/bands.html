@@ -1,0 +1,42 @@
+<h1>Bands</h1>
+<p class="subtitle">Highlight time ranges or mark specific dates with background bands.</p>
+
+<h2>Band Interface</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>start</code></td><td><code>string | number | Date</code></td><td>Band start date (required).</td></tr>
+    <tr><td><code>end</code></td><td><code>string | number | Date</code></td><td>Band end date. Omit for a point-in-time band.</td></tr>
+    <tr><td><code>style.color</code></td><td><code>string</code></td><td>Fill colour of the band.</td></tr>
+    <tr><td><code>style.borderColor</code></td><td><code>string</code></td><td>Border colour.</td></tr>
+    <tr><td><code>style.borderThickness</code></td><td><code>number</code></td><td>Border thickness in pixels.</td></tr>
+    <tr><td><code>style.opacity</code></td><td><code>number</code></td><td>Band opacity (0–1).</td></tr>
+  </tbody>
+</table>
+
+<h2>Range Bands vs Point-in-Time Bands</h2>
+<p>Bands with both <code>start</code> and <code>end</code> render as shaded rectangular regions spanning the full height of the timeline. Bands with only <code>start</code> render as a vertical line at that date — useful for deadlines or milestones.</p>
+
+<h2>Methods</h2>
+
+<h3>setBands(bands)</h3>
+<p>Replaces all bands and redraws the timeline.</p>
+<pre><code class="language-typescript">timeline.setBands([
+  { start: '2026-03-10', end: '2026-03-12', style: { color: '#fbbf24', opacity: 0.2 } }
+]);</code></pre>
+
+<h2>Example</h2>
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  items: [
+    { id: 1, label: 'Sprint 4', start: '2026-03-01', end: '2026-03-14', grouping: 'Team A' },
+    { id: 2, label: 'Sprint 5', start: '2026-03-15', end: '2026-03-28', grouping: 'Team A' },
+  ],
+  bands: [
+    // Maintenance window (range band)
+    { start: '2026-03-10', end: '2026-03-12', style: { color: '#ef4444', opacity: 0.15 } },
+    // Deadline marker (point-in-time band)
+    { start: '2026-03-28', style: { color: '#f59e0b', borderColor: '#f59e0b', borderThickness: 2 } },
+  ],
+  range: { start: '2026-02-25', end: '2026-04-01', position: 'bottom' }
+});</code></pre>

@@ -1,0 +1,29 @@
+<h1>Grouping</h1>
+<p class="subtitle">Organise items into labelled rows with optional custom sort order.</p>
+
+<h2>TempisTimelineGroupingOptions</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>sort</code></td><td><code>(a: string, b: string) =&gt; number</code></td><td>Comparator function for group ordering. Receives two group names. If omitted, groups appear in the order they are first encountered in the items array.</td></tr>
+  </tbody>
+</table>
+
+<p>Items are assigned to groups via the <code>grouping</code> property on each item. Items sharing the same <code>grouping</code> value are rendered in the same row section.</p>
+
+<h2>Example</h2>
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  items: [
+    { id: 1, label: 'Design',  start: '2026-01-05', end: '2026-01-15', grouping: 'Phase 2' },
+    { id: 2, label: 'Build',   start: '2026-01-10', end: '2026-01-25', grouping: 'Phase 1' },
+    { id: 3, label: 'Test',    start: '2026-01-20', end: '2026-01-30', grouping: 'Phase 3' },
+  ],
+  grouping: {
+    sort(a, b) {
+      // Custom alphabetical sort
+      return a.localeCompare(b);
+    }
+  },
+  range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+});</code></pre>

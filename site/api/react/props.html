@@ -1,0 +1,52 @@
+<h1>Component Props</h1>
+<p class="subtitle">All props accepted by the <code>&lt;TempisTimeline&gt;</code> component.</p>
+
+<h2>TempisTimelineProps</h2>
+<table>
+  <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>items</code></td><td><code>TempisTimelineItem[]</code></td><td>required</td><td>Timeline items to display.</td></tr>
+    <tr><td><code>categories</code></td><td><code>TempisTimelineCategory[]</code></td><td>—</td><td>Item categories.</td></tr>
+    <tr><td><code>bands</code></td><td><code>TempisTimelineBand[]</code></td><td>—</td><td>Timeline bands.</td></tr>
+    <tr><td><code>options</code></td><td><code>TempisTimelineConfig</code></td><td><code>{}</code></td><td>Configuration options (see <a href="#react/options">Options</a>).</td></tr>
+    <tr><td><code>onItemClick</code></td><td><code>(id: string | number) =&gt; void</code></td><td>—</td><td>Item click handler.</td></tr>
+    <tr><td><code>onItemDoubleClick</code></td><td><code>(id: string | number) =&gt; void</code></td><td>—</td><td>Item double-click handler.</td></tr>
+    <tr><td><code>onItemHover</code></td><td><code>(id: string | number | null) =&gt; void</code></td><td>—</td><td>Item hover handler.</td></tr>
+    <tr><td><code>onSelectionChange</code></td><td><code>(changes: SelectionChangeEvent[]) =&gt; void</code></td><td>—</td><td>Selection change handler.</td></tr>
+    <tr><td><code>onRangeChange</code></td><td><code>(start: Date, end: Date) =&gt; void</code></td><td>—</td><td>Range change handler.</td></tr>
+    <tr><td><code>className</code></td><td><code>string</code></td><td>—</td><td>CSS class for the wrapper <code>&lt;div&gt;</code>.</td></tr>
+    <tr><td><code>wrapperStyle</code></td><td><code>CSSProperties</code></td><td>—</td><td>Inline styles for the wrapper <code>&lt;div&gt;</code>.</td></tr>
+    <tr><td><code>width</code></td><td><code>string | number</code></td><td><code>"100%"</code></td><td>Canvas width.</td></tr>
+    <tr><td><code>height</code></td><td><code>string | number</code></td><td><code>300</code></td><td>Canvas height.</td></tr>
+  </tbody>
+</table>
+
+<h2>Reactive vs Structural</h2>
+<p><code>items</code>, <code>categories</code>, and <code>bands</code> are reactive — changes are synced to the existing instance via <code>useEffect</code> without recreating it. The <code>options</code> prop is structural — when its serialised value changes, the entire timeline instance is destroyed and recreated.</p>
+<p>Callbacks are stored in a ref and never trigger a recreate, so you can safely pass inline arrow functions.</p>
+
+<h2>Example</h2>
+<pre><code class="language-tsx">import { TempisTimeline } from '@tempis/react';
+
+function ProjectTimeline() {
+  return (
+    &lt;TempisTimeline
+      items={[
+        { id: 1, label: 'Alpha', start: '2026-03-01', end: '2026-03-15', category: 'dev' },
+        { id: 2, label: 'Beta',  start: '2026-03-10', end: '2026-03-25', category: 'qa' },
+      ]}
+      categories={[
+        { name: 'dev', label: 'Development', style: { backgroundColor: '#6366f1' } },
+        { name: 'qa',  label: 'QA',          style: { backgroundColor: '#10b981' } },
+      ]}
+      options={{
+        responsive: true,
+        selection: 'single',
+        legend: { position: 'top' },
+        range: { start: '2026-02-25', end: '2026-04-01', position: 'bottom' }
+      }}
+      onItemClick={(id) =&gt; console.log('Clicked', id)}
+      height={350}
+    /&gt;
+  );
+}</code></pre>

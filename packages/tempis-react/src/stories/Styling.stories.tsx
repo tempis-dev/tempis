@@ -26,7 +26,7 @@ export const DarkBackground: Story = {
         options: {
             responsive: true,
             range,
-            style: { backgroundColor: "#1a1a2e", fontColor: "#e0e0e0" },
+            style: { item: { backgroundColor: "#1a1a2e", fontColor: "#e0e0e0" } },
             scrollbar: { color: "rgba(255, 255, 255, 0.3)" },
         },
     },

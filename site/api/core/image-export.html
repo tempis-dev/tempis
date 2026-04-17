@@ -1,0 +1,34 @@
+<h1>Image Export</h1>
+<p class="subtitle">Export the current timeline view as a PNG, JPEG, or WebP image.</p>
+
+<h2>toImage(options?)</h2>
+<p>Returns a <code>Promise&lt;Blob&gt;</code> containing the rendered timeline image. Throws if the timeline has been destroyed.</p>
+
+<pre><code class="language-typescript">const blob = await timeline.toImage(options?);</code></pre>
+
+<h2>ImageGenerationOptions</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>type</code></td><td><code>string</code></td><td><code>"image/png"</code></td><td>MIME type — <code>"image/png"</code>, <code>"image/jpeg"</code>, or <code>"image/webp"</code>.</td></tr>
+    <tr><td><code>quality</code></td><td><code>number</code></td><td>—</td><td>Quality for lossy formats (0–1). Ignored for PNG.</td></tr>
+    <tr><td><code>dpr</code></td><td><code>number</code></td><td><code>1</code></td><td>Device pixel ratio. Use values &gt; 1 for higher resolution exports.</td></tr>
+    <tr><td><code>backgroundColor</code></td><td><code>string</code></td><td>transparent</td><td>Background fill colour (e.g. <code>"#ffffff"</code>).</td></tr>
+  </tbody>
+</table>
+
+<h2>Example — Download as PNG</h2>
+<pre><code class="language-typescript">async function downloadTimeline() {
+  const blob = await timeline.toImage({
+    type: 'image/png',
+    dpr: 2,
+    backgroundColor: '#ffffff'
+  });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'timeline.png';
+  a.click();
+  URL.revokeObjectURL(url);
+}</code></pre>

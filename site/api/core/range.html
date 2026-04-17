@@ -1,0 +1,50 @@
+<h1>Range</h1>
+<p class="subtitle">Control the visible time window, axis position, and zoom behaviour.</p>
+
+<h2>TempisTimelineRangeOptions</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>fixed</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Lock the range so users cannot pan or zoom.</td></tr>
+    <tr><td><code>position</code></td><td><code>"top" | "bottom" | "both" | "none"</code></td><td><code>"bottom"</code></td><td>Where the time axis is rendered.</td></tr>
+    <tr><td><code>start</code></td><td><code>string | number | Date</code></td><td>—</td><td>Initial start of the visible range.</td></tr>
+    <tr><td><code>end</code></td><td><code>string | number | Date</code></td><td>—</td><td>Initial end of the visible range.</td></tr>
+    <tr><td><code>min</code></td><td><code>string | number | Date</code></td><td>—</td><td>Earliest date the user can scroll to.</td></tr>
+    <tr><td><code>max</code></td><td><code>string | number | Date</code></td><td>—</td><td>Latest date the user can scroll to.</td></tr>
+    <tr><td><code>zoom</code></td><td><code>TempisTimelineRangeZoomOptions</code></td><td>—</td><td>Zoom configuration (see below).</td></tr>
+  </tbody>
+</table>
+
+<h3>Zoom Options</h3>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>enabled</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Enable or disable zooming.</td></tr>
+    <tr><td><code>min</code></td><td><code>number</code></td><td>—</td><td>Minimum visible range in milliseconds.</td></tr>
+    <tr><td><code>max</code></td><td><code>number</code></td><td>—</td><td>Maximum visible range in milliseconds.</td></tr>
+    <tr><td><code>wheelSensitivity</code></td><td><code>number</code></td><td><code>1.0</code></td><td>Mouse wheel zoom speed multiplier.</td></tr>
+    <tr><td><code>pinchSensitivity</code></td><td><code>number</code></td><td><code>1.0</code></td><td>Touch pinch zoom speed multiplier.</td></tr>
+  </tbody>
+</table>
+
+<h2>Example</h2>
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  items: [
+    { id: 1, label: 'Phase 1', start: '2026-01-01', end: '2026-03-01' },
+    { id: 2, label: 'Phase 2', start: '2026-03-01', end: '2026-06-01' },
+  ],
+  range: {
+    start: '2026-01-01',
+    end: '2026-06-30',
+    min: '2025-01-01',
+    max: '2027-01-01',
+    position: 'bottom',
+    zoom: {
+      enabled: true,
+      min: 1000 * 60 * 60 * 24 * 7,   // 1 week minimum
+      max: 1000 * 60 * 60 * 24 * 365,  // 1 year maximum
+      wheelSensitivity: 1.2
+    }
+  }
+});</code></pre>

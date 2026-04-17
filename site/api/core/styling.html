@@ -1,0 +1,60 @@
+<h1>Styling</h1>
+<p class="subtitle">Customise the look of the timeline, items, and text.</p>
+
+<h2>TempisTimelineStyleOptions</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>font</code></td><td><code>TempisTimelineFont</code></td><td>Default font settings (size, family, style, weight, lineHeight).</td></tr>
+    <tr><td><code>item</code></td><td><code>TempisTimelineItemStyle</code></td><td>Default item style overrides applied to all items.</td></tr>
+  </tbody>
+</table>
+
+<h2>TempisTimelineItemStyle</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>backgroundColor</code></td><td><code>string</code></td><td>palette colour</td><td>Item background colour.</td></tr>
+    <tr><td><code>fontColor</code></td><td><code>string</code></td><td>—</td><td>Item label colour.</td></tr>
+    <tr><td><code>padding</code></td><td><code>number</code></td><td>—</td><td>Inner padding in pixels.</td></tr>
+    <tr><td><code>borderColor</code></td><td><code>string</code></td><td>—</td><td>Border colour.</td></tr>
+    <tr><td><code>borderThickness</code></td><td><code>number</code></td><td>—</td><td>Border width in pixels.</td></tr>
+    <tr><td><code>borderStyle</code></td><td><code>string</code></td><td><code>"solid"</code></td><td>One of: <code>solid</code>, <code>dashed</code>, <code>dotted</code>, <code>dash-dot</code>, <code>long-dash</code>.</td></tr>
+    <tr><td><code>borderRadius</code></td><td><code>number</code></td><td>—</td><td>Corner radius in pixels.</td></tr>
+  </tbody>
+</table>
+
+<h2>Style Precedence</h2>
+<p>Styles are resolved in the following order (highest priority first):</p>
+<ol>
+  <li>Per-item <code>style</code> on the item object.</li>
+  <li>Category <code>style</code> from the matching category.</li>
+  <li>Global <code>style.item</code> from the constructor options.</li>
+  <li>Library defaults.</li>
+</ol>
+
+<h2>Example — Dark Theme</h2>
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  style: {
+    font: { family: 'Inter, sans-serif', size: 13, weight: 500 },
+    item: {
+      backgroundColor: '#334155',
+      fontColor: '#f1f5f9',
+      borderColor: '#475569',
+      borderThickness: 1,
+      borderStyle: 'solid',
+      borderRadius: 6,
+      padding: 6
+    }
+  },
+  items: [
+    { id: 1, label: 'Research',    start: '2026-01-05', end: '2026-01-15' },
+    { id: 2, label: 'Development', start: '2026-01-12', end: '2026-01-28' },
+    {
+      id: 3, label: 'Urgent Fix', start: '2026-01-20', end: '2026-01-22',
+      style: { backgroundColor: '#dc2626', borderStyle: 'dashed' }
+    },
+  ],
+  range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+});</code></pre>

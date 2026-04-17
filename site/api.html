@@ -3,17 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>API Reference — Tempis Timeline</title>
+  <title>API — Tempis</title>
   <link rel="icon" type="image/png" href="images/logo.png">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+  <style>
+    body { overflow: hidden; }
+    .api-layout { display: flex; height: calc(100vh - 56px); }
+    .api-sidebar {
+      width: 260px; min-width: 260px; overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 24px 0; font-size: 0.88em;
+      background: var(--bg);
+    }
+    .api-sidebar::-webkit-scrollbar { width: 4px; }
+    .api-sidebar::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.3); border-radius: 2px; }
+    .api-sidebar .sidebar-group { padding: 0 20px; margin-bottom: 20px; }
+    .api-sidebar .sidebar-heading {
+      font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.12em;
+      font-weight: 700; opacity: 0.5; margin-bottom: 8px; padding: 0 4px;
+    }
+    .api-sidebar .sidebar-heading.pink { color: #ff0071; opacity: 1; }
+    .api-sidebar .sidebar-heading.blue { color: #61dafb; opacity: 1; }
+    .api-sidebar a {
+      display: block; padding: 5px 12px; border-radius: 6px;
+      text-decoration: none; color: var(--text-secondary);
+      transition: background 0.15s, color 0.15s;
+    }
+    .api-sidebar a:hover { background: var(--hover-bg); color: var(--text); }
+    .api-sidebar a.active { background: var(--primary); color: #fff; }
+    .api-sidebar a.active-react { background: #61dafb; color: #111; }
+    .api-content {
+      flex: 1; overflow-y: auto; padding: 48px 56px 80px;
+    }
+    .api-content h1 { font-size: 2em; font-weight: 800; margin: 0 0 8px; }
+    .api-content .subtitle { opacity: 0.6; margin: 0 0 32px; font-size: 1.05em; }
+    .api-content h2 { font-size: 1.35em; font-weight: 700; margin: 40px 0 12px; }
+    .api-content h3 { font-size: 1.1em; font-weight: 600; margin: 28px 0 8px; }
+    .api-content p { line-height: 1.7; margin: 0 0 16px; }
+    .api-content pre {
+      border-radius: 8px; padding: 16px 20px; overflow-x: auto;
+      font-size: 0.88em; margin: 0 0 20px; border: 1px solid var(--border);
+    }
+    .api-content code:not(pre code) {
+      background: var(--hover-bg); padding: 2px 6px; border-radius: 4px; font-size: 0.9em;
+    }
+    .api-content table { width: 100%; border-collapse: collapse; margin: 0 0 24px; font-size: 0.92em; }
+    .api-content th { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--border); font-weight: 600; }
+    .api-content td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+    .api-content td code { font-size: 0.88em; }
+    .api-demo { border-radius: 8px; border: 1px solid var(--border); margin: 0 0 24px; overflow: hidden; }
+    .api-demo canvas { display: block; width: 100%; height: 250px; }
+</style>
+  <style>
+    @media (max-width: 768px) {
+      .api-sidebar { display: none; }
+      .api-content { padding: 32px 20px 60px; }
+    }
+  </style>
 </head>
 <body>
   <nav>
     <div class="nav-inner">
-      <a href="index.html" class="logo">
-        <img src="images/logo.png" alt="Tempis">
-        Tempis
-      </a>
+      <a href="index.html" class="logo"><img src="images/logo.png" alt="Tempis"> Tempis</a>
       <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="get-started.html">Get Started</a></li>
@@ -21,44 +76,87 @@
         <li><a href="api.html" class="active">API</a></li>
         <li><a href="pricing.html">Pricing</a></li>
       </ul>
-      <a href="https://github.com" class="nav-github" aria-label="GitHub">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-      </a>
-      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.mobile-menu').classList.add('open');document.querySelector('.mobile-menu-overlay').classList.add('active');">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
+      <a href="https://github.com" class="nav-github" aria-label="GitHub"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.mobile-menu').classList.add('open');document.querySelector('.mobile-menu-overlay').classList.add('active');"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
     </div>
   </nav>
   <div class="mobile-menu-overlay" onclick="document.querySelector('.mobile-menu').classList.remove('open');this.classList.remove('active');"></div>
   <div class="mobile-menu">
-    <button class="mobile-menu-close" aria-label="Close menu" onclick="this.parentElement.classList.remove('open');document.querySelector('.mobile-menu-overlay').classList.remove('active');">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-    <a href="index.html">Home</a>
-    <a href="get-started.html">Get Started</a>
-    <a href="examples.html">Examples</a>
-    <a href="api.html">API</a>
-    <a href="pricing.html">Pricing</a>
-    <a href="https://github.com" class="mobile-menu-github" aria-label="GitHub"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
+    <button class="mobile-menu-close" aria-label="Close" onclick="this.parentElement.classList.remove('open');document.querySelector('.mobile-menu-overlay').classList.remove('active');"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <a href="index.html">Home</a><a href="get-started.html">Get Started</a><a href="examples.html">Examples</a><a href="api.html">API</a><a href="pricing.html">Pricing</a>
   </div>
 
-  <div class="page-wrapper">
-    <h1>API Reference</h1>
-    <p>Choose a package to view its API documentation.</p>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 40px; max-width: 700px;">
-      <a href="api-core.html" style="display: block; padding: 32px; border: 2px solid var(--border); border-radius: 12px; text-decoration: none; color: inherit; transition: border-color 0.2s;">
-        <h2 style="margin: 0 0 8px; font-size: 1.3em;">@tempis/timeline</h2>
-        <p style="margin: 0; opacity: 0.7;">Core canvas library — constructor, methods, options, callbacks.</p>
-      </a>
-      <a href="api-react.html" style="display: block; padding: 32px; border: 2px solid var(--border); border-radius: 12px; text-decoration: none; color: inherit; transition: border-color 0.2s;">
-        <h2 style="margin: 0 0 8px; font-size: 1.3em;">@tempis/react</h2>
-        <p style="margin: 0; opacity: 0.7;">React wrapper — component props, options, ref API.</p>
-      </a>
-    </div>
+  <div class="api-layout">
+    <aside class="api-sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-heading pink">@tempis/timeline</div>
+        <a href="#core/getting-started">Getting Started</a>
+        <a href="#core/constructor">Constructor</a>
+        <a href="#core/items">Items</a>
+        <a href="#core/categories">Categories</a>
+        <a href="#core/bands">Bands</a>
+        <a href="#core/range">Range</a>
+        <a href="#core/selection">Selection</a>
+        <a href="#core/focus">Focus</a>
+        <a href="#core/tooltips">Tooltips</a>
+        <a href="#core/legend">Legend</a>
+        <a href="#core/grouping">Grouping</a>
+        <a href="#core/styling">Styling</a>
+        <a href="#core/scrollbar">Scrollbar</a>
+        <a href="#core/layout">Vertical Fill &amp; Stacking</a>
+        <a href="#core/rtl">RTL</a>
+        <a href="#core/image-export">Image Export</a>
+        <a href="#core/date-adapters">Date Adapters</a>
+        <a href="#core/color-palette">Color Palette</a>
+        <a href="#core/callbacks">Callbacks</a>
+        <a href="#core/destroy">destroy()</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-heading blue">@tempis/react</div>
+        <a href="#react/getting-started">Getting Started</a>
+        <a href="#react/props">Component Props</a>
+        <a href="#react/options">Options</a>
+        <a href="#react/ref">Ref API</a>
+        <a href="#react/reactive-data">Reactive Data</a>
+        <a href="#react/ssr">SSR &amp; Next.js</a>
+      </div>
+    </aside>
+    <main class="api-content" id="api-content">
+      <div id="api-page"></div>
+    </main>
   </div>
 
-  <footer>
-    <p>Tempis Timeline is source-available. Free for non-commercial use. <a href="../LICENSE">Commercial license</a> required for business use.</p>
-  </footer>
+  <script>
+    var contentEl = document.getElementById('api-page');
+    var links = document.querySelectorAll('.api-sidebar a');
+    var cache = {};
+
+    function loadPage(hash) {
+      hash = hash || 'core/getting-started';
+      var isReact = hash.indexOf('react/') === 0;
+      links.forEach(function(a) {
+        var isMatch = a.getAttribute('href') === '#' + hash;
+        a.classList.remove('active', 'active-react');
+        if (isMatch) a.classList.add(isReact ? 'active-react' : 'active');
+      });
+      if (cache[hash]) {
+        contentEl.innerHTML = cache[hash];
+        hljs.highlightAll();
+        document.querySelector('.api-content').scrollTop = 0;
+        return;
+      }
+      fetch('api/' + hash + '.html')
+        .then(function(r) { return r.ok ? r.text() : '<h1>Not found</h1><p>This page hasn\'t been written yet.</p>'; })
+        .then(function(html) {
+          cache[hash] = html;
+          contentEl.innerHTML = html;
+          hljs.highlightAll();
+          document.querySelector('.api-content').scrollTop = 0;
+        });
+    }
+
+    window.addEventListener('hashchange', function() { loadPage(location.hash.slice(1)); });
+    loadPage(location.hash.slice(1));
+  </script>
 </body>
 </html>

@@ -1,0 +1,45 @@
+<h1>Tooltips</h1>
+<p class="subtitle">Show contextual information when hovering over timeline items.</p>
+
+<h2>TempisTimelineTooltipOptions</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>enabled</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Enable or disable tooltips globally.</td></tr>
+    <tr><td><code>delay</code></td><td><code>number</code></td><td><code>0</code></td><td>Delay in milliseconds before the tooltip appears.</td></tr>
+    <tr><td><code>dateFormat</code></td><td><code>string</code></td><td><code>"D MMMM HH:mm:ss"</code></td><td>Date format pattern for the default tooltip.</td></tr>
+    <tr><td><code>overflowBehavior</code></td><td><code>"none" | "canvas" | "viewport"</code></td><td><code>"none"</code></td><td>How the tooltip repositions near edges.</td></tr>
+    <tr><td><code>template</code></td><td><code>(id) =&gt; HTMLElement | string | null</code></td><td>—</td><td>Custom template function. Return an HTML string or element.</td></tr>
+    <tr><td><code>shouldShow</code></td><td><code>(id) =&gt; boolean</code></td><td>—</td><td>Predicate controlling whether a tooltip appears for a given item.</td></tr>
+  </tbody>
+</table>
+
+<h2>Custom Template</h2>
+<p>The <code>template</code> function receives the item ID and should return an HTML string or <code>HTMLElement</code>. Return <code>null</code> to fall back to the default tooltip.</p>
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  items: [
+    { id: 1, label: 'Deploy v2.1', start: '2026-04-10', end: '2026-04-12' },
+  ],
+  range: { start: '2026-04-01', end: '2026-04-30', position: 'bottom' },
+  tooltip: {
+    overflowBehavior: 'viewport',
+    template(id) {
+      const item = timeline.getItems().find(i => i.id === id);
+      return `
+        &lt;div style="padding: 8px; font-family: sans-serif;"&gt;
+          &lt;strong&gt;${item?.label}&lt;/strong&gt;
+          &lt;p style="margin: 4px 0 0;"&gt;Custom tooltip content&lt;/p&gt;
+        &lt;/div&gt;
+      `;
+    }
+  }
+});</code></pre>
+
+<h2>shouldShow Predicate</h2>
+<p>Use <code>shouldShow</code> to conditionally suppress tooltips for specific items.</p>
+<pre><code class="language-typescript">tooltip: {
+  shouldShow(id) {
+    // Only show tooltips for items with id > 10
+    return typeof id === 'number' && id > 10;
+  }
+}</code></pre>

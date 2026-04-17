@@ -1,0 +1,41 @@
+<h1>Vertical Fill &amp; Stack Modes</h1>
+<p class="subtitle">Control how the timeline fills vertical space and how items are stacked.</p>
+
+<h2>Vertical Fill Modes</h2>
+<table>
+  <thead><tr><th>Mode</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>"content"</code></td><td>The timeline height is determined by its content. It takes up only as much vertical space as needed to render all visible items. This is the default.</td></tr>
+    <tr><td><code>"fill-canvas"</code></td><td>The timeline expands to fill the full height of the canvas element, regardless of content height.</td></tr>
+    <tr><td><code>"grow-canvas"</code></td><td>The canvas element itself grows to match the required content height. Useful when the timeline is inside a scrollable container.</td></tr>
+  </tbody>
+</table>
+
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  verticalFill: 'fill-canvas',
+  items: [
+    { id: 1, label: 'Task A', start: '2026-01-05', end: '2026-01-15' },
+  ],
+  range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+});</code></pre>
+
+<h2>Stack Modes</h2>
+<table>
+  <thead><tr><th>Mode</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>"compact"</code></td><td>Items are stacked based on visible items only. More compact, but items may shift position when panning. Point-in-time labels are adjusted to fit within canvas bounds. Layout updates on every pan.</td></tr>
+    <tr><td><code>"stable"</code></td><td>All items are included in the layout calculation. Items maintain stable positions when panning. Point-in-time labels are always centred on their timestamp. Layout only updates on zoom or data changes. This is the default.</td></tr>
+  </tbody>
+</table>
+
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  stackMode: 'compact',
+  items: [
+    { id: 1, label: 'Sprint 1', start: '2026-01-05', end: '2026-01-19', grouping: 'Team A' },
+    { id: 2, label: 'Sprint 2', start: '2026-01-20', end: '2026-02-02', grouping: 'Team A' },
+    { id: 3, label: 'Research', start: '2026-01-08', end: '2026-01-22', grouping: 'Team B' },
+  ],
+  range: { start: '2026-01-01', end: '2026-02-15', position: 'bottom' }
+});</code></pre>

@@ -1,0 +1,38 @@
+<h1>Categories</h1>
+<p class="subtitle">Colour-code items and filter them via an interactive legend.</p>
+
+<h2>Category Interface</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>name</code></td><td><code>string</code></td><td>Unique identifier referenced by items.</td></tr>
+    <tr><td><code>label</code></td><td><code>string</code></td><td>Display label in the legend.</td></tr>
+    <tr><td><code>style</code></td><td><code>TempisTimelineItemStyle</code></td><td>Style applied to all items in this category.</td></tr>
+  </tbody>
+</table>
+
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  categories: [
+    { name: 'dev',    label: 'Development', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+    { name: 'design', label: 'Design',      style: { backgroundColor: '#f43f5e', fontColor: '#fff' } },
+    { name: 'qa',     label: 'QA',          style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+  ],
+  legend: { position: 'top' },
+  items: [
+    { id: 1, label: 'Auth Module', start: '2026-02-01', end: '2026-02-14', category: 'dev' },
+    { id: 2, label: 'Wireframes',  start: '2026-02-05', end: '2026-02-12', category: 'design' },
+    { id: 3, label: 'Unit Tests',  start: '2026-02-10', end: '2026-02-20', category: 'qa' },
+  ],
+  range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' }
+});</code></pre>
+
+<h2>Methods</h2>
+
+<h3>setCategories(categories)</h3>
+<p>Replaces all categories and redraws.</p>
+
+<h3>getCategories()</h3>
+<p>Returns the current category definitions.</p>
+
+<h2>Colour Palette</h2>
+<p>Categories without an explicit <code>backgroundColor</code> are assigned colours from the global palette. See <a href="#core/color-palette">Color Palette</a>.</p>

@@ -1,0 +1,32 @@
+<h1>Getting Started (React)</h1>
+<p class="subtitle">Install the React wrapper and render your first timeline component.</p>
+
+<h2>Install</h2>
+<pre><code class="language-bash">npm install @tempis/timeline @tempis/react</code></pre>
+<p><code>@tempis/timeline</code> is a peer dependency of <code>@tempis/react</code> and must be installed alongside it.</p>
+
+<h2>Minimal Example</h2>
+<pre><code class="language-tsx">import { TempisTimeline } from '@tempis/react';
+
+function App() {
+  const items = [
+    { id: 1, label: 'Design',  start: '2026-01-05', end: '2026-01-15', grouping: 'Frontend' },
+    { id: 2, label: 'Build',   start: '2026-01-12', end: '2026-01-28', grouping: 'Frontend' },
+    { id: 3, label: 'Launch',  start: '2026-01-30', grouping: 'Frontend' },
+    { id: 4, label: 'API',     start: '2026-01-08', end: '2026-01-25', grouping: 'Backend' },
+  ];
+
+  return (
+    &lt;TempisTimeline
+      items={items}
+      options={{
+        responsive: true,
+        range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+      }}
+      height={400}
+    /&gt;
+  );
+}</code></pre>
+
+<h2>Peer Dependencies</h2>
+<p>The React wrapper requires <code>react</code> &ge; 18 and <code>@tempis/timeline</code> as peer dependencies. Make sure both are installed in your project.</p>

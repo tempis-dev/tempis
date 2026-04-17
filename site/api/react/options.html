@@ -1,0 +1,50 @@
+<h1>Options</h1>
+<p class="subtitle">Configuration passed via the <code>options</code> prop.</p>
+
+<h2>TempisTimelineConfig</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>responsive</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Resize canvas to match parent container.</td></tr>
+    <tr><td><code>verticalFill</code></td><td><code>"content" | "fill-canvas" | "grow-canvas"</code></td><td><code>"content"</code></td><td>Vertical fill mode.</td></tr>
+    <tr><td><code>rtl</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Right-to-left rendering.</td></tr>
+    <tr><td><code>stackMode</code></td><td><code>"compact" | "stable"</code></td><td><code>"stable"</code></td><td>Item stacking behaviour.</td></tr>
+    <tr><td><code>selection</code></td><td><code>"none" | "single" | "multi"</code></td><td><code>"none"</code></td><td>Selection mode.</td></tr>
+    <tr><td><code>range</code></td><td><code>TempisTimelineRangeOptions</code></td><td>—</td><td>Range configuration.</td></tr>
+    <tr><td><code>legend</code></td><td><code>TempisTimelineLegendOptions</code></td><td>—</td><td>Legend configuration.</td></tr>
+    <tr><td><code>tooltip</code></td><td><code>TempisTimelineTooltipOptions</code></td><td>—</td><td>Tooltip configuration.</td></tr>
+    <tr><td><code>style</code></td><td><code>TempisTimelineStyleOptions</code></td><td>—</td><td>Style overrides.</td></tr>
+    <tr><td><code>scrollbar</code></td><td><code>TempisTimelineScrollbarOptions</code></td><td>—</td><td>Scrollbar options.</td></tr>
+    <tr><td><code>grouping</code></td><td><code>TempisTimelineGroupingOptions</code></td><td>—</td><td>Grouping options.</td></tr>
+  </tbody>
+</table>
+
+<h2>Instance Recreate</h2>
+<p>Changes to the <code>options</code> prop trigger a full destroy-and-recreate of the underlying core instance. The component uses <code>JSON.stringify</code> to compare the previous and next options, so passing inline objects is safe — a recreate only happens when the serialised value actually changes.</p>
+
+<h2>useMemo Is Optional</h2>
+<p>Because the component compares options by value (via <code>JSON.stringify</code>), you do not need to wrap your options in <code>useMemo</code>. However, if your options object is expensive to construct, <code>useMemo</code> can still help avoid unnecessary work during renders.</p>
+
+<pre><code class="language-tsx">import { useMemo } from 'react';
+import { TempisTimeline } from '@tempis/react';
+
+function Timeline({ zoomEnabled }: { zoomEnabled: boolean }) {
+  const options = useMemo(() => ({
+    responsive: true,
+    range: {
+      start: '2026-01-01',
+      end: '2026-06-01',
+      position: 'bottom' as const,
+      zoom: { enabled: zoomEnabled }
+    }
+  }), [zoomEnabled]);
+
+  return (
+    &lt;TempisTimeline
+      items={[
+        { id: 1, label: 'Task', start: '2026-02-01', end: '2026-03-01' }
+      ]}
+      options={options}
+    /&gt;
+  );
+}</code></pre>

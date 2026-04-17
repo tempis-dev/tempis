@@ -1,0 +1,25 @@
+<h1>destroy()</h1>
+<p class="subtitle">Clean up a timeline instance and release all resources.</p>
+
+<h2>Method</h2>
+<pre><code class="language-typescript">timeline.destroy();</code></pre>
+
+<h2>What It Cleans Up</h2>
+<ul>
+  <li>All pointer, wheel, mouse, and double-click event listeners on the canvas.</li>
+  <li>The <code>ResizeObserver</code> watching the canvas container (when <code>responsive</code> is enabled).</li>
+  <li>Any in-progress focus or scroll animations.</li>
+  <li>The tooltip DOM element and its event listeners.</li>
+  <li>The legend DOM element and its event listeners.</li>
+  <li>The canvas is cleared.</li>
+</ul>
+
+<h2>When to Call It</h2>
+<p>Call <code>destroy()</code> before removing the canvas from the DOM or when the timeline is no longer needed. This prevents memory leaks from orphaned listeners and observers.</p>
+<p>In frameworks like React, the <code>&lt;TempisTimeline&gt;</code> component handles this automatically on unmount. You only need to call <code>destroy()</code> when managing the core library directly.</p>
+
+<pre><code class="language-typescript">// Create
+const timeline = new TempisTimeline('#canvas', { items: [...] });
+
+// Later, when done
+timeline.destroy();</code></pre>

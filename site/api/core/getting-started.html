@@ -1,0 +1,35 @@
+<h1>Getting Started</h1>
+<p class="subtitle">Install the core library and render your first timeline.</p>
+
+<h2>Install</h2>
+<pre><code class="language-bash">npm install @tempis/timeline</code></pre>
+
+<h2>CDN</h2>
+<pre><code class="language-html">&lt;script src="https://unpkg.com/@tempis/timeline/dist/tempis_timeline.min.js"&gt;&lt;/script&gt;</code></pre>
+
+<h2>Minimal Example</h2>
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  items: [
+    { id: 1, label: 'Design',  start: '2026-01-05', end: '2026-01-15', grouping: 'Frontend' },
+    { id: 2, label: 'Build',   start: '2026-01-12', end: '2026-01-28', grouping: 'Frontend' },
+    { id: 3, label: 'Launch',  start: '2026-01-30', grouping: 'Frontend' },
+    { id: 4, label: 'API',     start: '2026-01-08', end: '2026-01-25', grouping: 'Backend' },
+  ],
+  range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+});</code></pre>
+
+<h2>Script Tag Usage</h2>
+<pre><code class="language-html">&lt;canvas id="my-timeline"&gt;&lt;/canvas&gt;
+&lt;script src="https://unpkg.com/@tempis/timeline/dist/tempis_timeline.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  new tempis_timeline.TempisTimeline('#my-timeline', {
+    responsive: true,
+    items: [
+      { id: 1, label: 'Task', start: '2026-01-05', end: '2026-01-15' }
+    ],
+    range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+  });
+&lt;/script&gt;</code></pre>
