@@ -12,15 +12,15 @@ const timeline = new TempisTimeline('#my-canvas', { items: [...] });
 const canvas = document.getElementById('my-canvas') as HTMLCanvasElement;
 const timeline = new TempisTimeline(canvas, { items: [...] });</code></pre>
 
-<h2>Options</h2>
+<h2>TempisTimelineOptions</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
   <tbody>
-    <tr><td><code>items</code></td><td><code>TempisTimelineItem[]</code></td><td>required</td><td>Items to display.</td></tr>
-    <tr><td><code>responsive</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Resize canvas to match parent container.</td></tr>
-    <tr><td><code>verticalFill</code></td><td><code>"content" | "fill-canvas" | "grow-canvas"</code></td><td><code>"content"</code></td><td>How the timeline fills vertical space.</td></tr>
-    <tr><td><code>rtl</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Right-to-left rendering.</td></tr>
-    <tr><td><code>stackMode</code></td><td><code>"compact" | "stable"</code></td><td><code>"stable"</code></td><td>Item stacking behaviour.</td></tr>
+    <tr><td><code>items</code></td><td><code>TempisTimelineItem[]</code></td><td>required</td><td>The items to display.</td></tr>
+    <tr><td><code>responsive</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Whether to automatically resize the canvas to match parent container dimensions.</td></tr>
+    <tr><td><code>verticalFill</code></td><td><code>"content" | "fill-canvas" | "grow-canvas"</code></td><td><code>"content"</code></td><td>Defines how the timeline fills vertical space.</td></tr>
+    <tr><td><code>rtl</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Whether to use right-to-left rendering.</td></tr>
+    <tr><td><code>stackMode</code></td><td><code>"compact" | "stable"</code></td><td><code>"stable"</code></td><td>The item stacking behaviour.</td></tr>
     <tr><td><code>selection</code></td><td><code>"none" | "single" | "multi"</code></td><td><code>"none"</code></td><td>Item selection mode.</td></tr>
     <tr><td><code>categories</code></td><td><code>TempisTimelineCategory[]</code></td><td>—</td><td>Item categories.</td></tr>
     <tr><td><code>bands</code></td><td><code>TempisTimelineBand[]</code></td><td>—</td><td>Timeline bands.</td></tr>

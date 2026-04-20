@@ -10,7 +10,7 @@ import { TempisTimeline } from '@tempis/react';
 
 function App() {
   const [items, setItems] = useState([
-    { id: 1, label: 'Task A', start: '2026-02-01', end: '2026-02-10' },
+    { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-10' },
   ]);
 
   let nextId = items.length + 1;
@@ -20,7 +20,7 @@ function App() {
       ...prev,
       {
         id: nextId++,
-        label: `Task ${nextId}`,
+        label: `Item ${nextId}`,
         start: '2026-02-12',
         end: '2026-02-20'
       }
@@ -53,27 +53,27 @@ import { TempisTimeline } from '@tempis/react';
 
 function App() {
   const allCategories = [
-    { name: 'dev',    label: 'Development', style: { backgroundColor: '#6366f1' } },
-    { name: 'design', label: 'Design',      style: { backgroundColor: '#f43f5e' } },
+    { name: 'cat-a', label: 'Category A', style: { backgroundColor: '#6366f1' } },
+    { name: 'cat-b', label: 'Category B', style: { backgroundColor: '#f43f5e' } },
   ];
 
   const [categories, setCategories] = useState(allCategories);
 
-  function toggleDesign() {
+  function toggleCategory() {
     setCategories(prev =&gt;
-      prev.some(c =&gt; c.name === 'design')
-        ? prev.filter(c =&gt; c.name !== 'design')
+      prev.some(c =&gt; c.name === 'cat-b')
+        ? prev.filter(c =&gt; c.name !== 'cat-b')
         : [...prev, allCategories[1]]
     );
   }
 
   return (
     &lt;div&gt;
-      &lt;button onClick={toggleDesign}&gt;Toggle Design&lt;/button&gt;
+      &lt;button onClick={toggleCategory}&gt;Toggle Category B&lt;/button&gt;
       &lt;TempisTimeline
         items={[
-          { id: 1, label: 'Auth',       start: '2026-02-01', end: '2026-02-14', category: 'dev' },
-          { id: 2, label: 'Wireframes', start: '2026-02-05', end: '2026-02-12', category: 'design' },
+          { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-14', category: 'cat-a' },
+          { id: 2, label: 'Item 2', start: '2026-02-05', end: '2026-02-12', category: 'cat-b' },
         ]}
         categories={categories}
         options={{

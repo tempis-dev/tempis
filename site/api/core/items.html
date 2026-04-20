@@ -1,26 +1,7 @@
 <h1>Items</h1>
 <p class="subtitle">Timeline items are the core data — range events and point-in-time markers.</p>
 
-<div class="api-demo"><canvas id="demo-items"></canvas></div>
-<script>
-  new tempis_timeline.TempisTimeline('#demo-items', {
-    responsive: true,
-    verticalFill: 'fill-canvas',
-    style: { item: { borderRadius: 4, fontColor: '#fff' } },
-    items: [
-      { id: 1, label: 'Sprint 1',  start: '2026-01-05', end: '2026-01-19', grouping: 'Work' },
-      { id: 2, label: 'Sprint 2',  start: '2026-01-20', end: '2026-02-02', grouping: 'Work' },
-      { id: 3, label: 'Kickoff',   start: '2026-01-05', grouping: 'Milestones' },
-      { id: 4, label: 'Alpha',     start: '2026-01-19', grouping: 'Milestones' },
-      { id: 5, label: 'Beta',      start: '2026-02-02', grouping: 'Milestones' },
-      { id: 6, label: 'Urgent Fix', start: '2026-01-12', end: '2026-01-14', grouping: 'Work',
-        style: { backgroundColor: '#e11d48', borderColor: '#9f1239', borderThickness: 2, borderStyle: 'dashed' } },
-    ],
-    range: { start: '2026-01-01', end: '2026-02-10', position: 'bottom' }
-  });
-</script>
-
-<h2>Item Interface</h2>
+<h2>TempisTimelineItem</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
   <tbody>
@@ -37,11 +18,30 @@
 <h2>Range Items vs Point-in-Time</h2>
 <p>Items with both <code>start</code> and <code>end</code> render as horizontal bars. Items with only <code>start</code> render as point-in-time markers with a downward triangle.</p>
 
+<div class="api-demo"><canvas id="demo-items-types"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-items-types', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    items: [
+      { id: 1, label: 'Item 1',    start: '2026-01-05', end: '2026-01-19', grouping: 'Range Items' },
+      { id: 2, label: 'Item 2',    start: '2026-01-20', end: '2026-02-02', grouping: 'Range Items' },
+      { id: 3, label: 'Item 3',    start: '2026-01-08', end: '2026-01-16', grouping: 'Range Items' },
+      { id: 4, label: 'Event 1',   start: '2026-01-05', grouping: 'Point-in-Time' },
+      { id: 5, label: 'Event 2',   start: '2026-01-19', grouping: 'Point-in-Time' },
+      { id: 6, label: 'Event 3',   start: '2026-02-02', grouping: 'Point-in-Time' },
+      { id: 7, label: 'Event 4',   start: '2026-02-10', grouping: 'Point-in-Time' },
+    ],
+    range: { start: '2026-01-01', end: '2026-02-15', position: 'bottom' }
+  });
+</script>
+
 <pre><code class="language-typescript">const items = [
-  // Range item
-  { id: 1, label: 'Sprint 1', start: '2026-01-05', end: '2026-01-19' },
-  // Point-in-time item
-  { id: 2, label: 'Release', start: '2026-01-20' }
+  // Range item — has start and end
+  { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-19' },
+  // Point-in-time item — only start
+  { id: 2, label: 'Event 1', start: '2026-01-20' }
 ];</code></pre>
 
 <h2>Methods</h2>
@@ -49,7 +49,7 @@
 <h3>setItems(items)</h3>
 <p>Replaces all items and redraws the timeline.</p>
 <pre><code class="language-typescript">timeline.setItems([
-  { id: 1, label: 'New Task', start: '2026-02-01', end: '2026-02-10' }
+  { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-10' }
 ]);</code></pre>
 
 <h3>getItems()</h3>
@@ -58,13 +58,37 @@
 
 <h2>Per-Item Styles</h2>
 <p>Override the default appearance on individual items.</p>
-<pre><code class="language-typescript">{ 
-  id: 1, 
-  label: 'Urgent', 
-  start: '2026-01-05', 
+
+<div class="api-demo"><canvas id="demo-items-styles"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-items-styles', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    items: [
+      { id: 1, label: 'Item 1 (Default)', start: '2026-01-05', end: '2026-01-15' },
+      { id: 2, label: 'Item 2 (Dashed)', start: '2026-01-10', end: '2026-01-22',
+        style: { backgroundColor: '#6366f1', borderColor: '#818cf8', borderThickness: 2, borderStyle: 'dashed' } },
+      { id: 3, label: 'Item 3 (Rounded)', start: '2026-01-18', end: '2026-01-28',
+        style: { backgroundColor: '#7c3aed', fontColor: '#fff', borderRadius: 12 } },
+      { id: 4, label: 'Item 4 (Dotted)', start: '2026-01-08', end: '2026-01-20',
+        style: { backgroundColor: '#059669', borderColor: '#34d399', borderThickness: 2, borderStyle: 'dotted' } },
+      { id: 5, label: 'Item 5 (Styled)', start: '2026-01-14', end: '2026-01-19',
+        style: { backgroundColor: '#e11d48', borderColor: '#9f1239', borderThickness: 2, borderStyle: 'dashed', borderRadius: 8 } },
+      { id: 6, label: 'Item 6 (Long Dash)', start: '2026-01-22', end: '2026-01-30',
+        style: { backgroundColor: '#0ea5e9', borderColor: '#38bdf8', borderThickness: 2, borderStyle: 'long-dash' } },
+    ],
+    range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+  });
+</script>
+
+<pre><code class="language-typescript">{
+  id: 1,
+  label: 'Item (Styled)',
+  start: '2026-01-05',
   end: '2026-01-10',
-  style: { 
-    backgroundColor: '#e11d48', 
+  style: {
+    backgroundColor: '#e11d48',
     fontColor: '#fff',
     borderColor: '#9f1239',
     borderThickness: 2,

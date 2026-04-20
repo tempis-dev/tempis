@@ -7,23 +7,23 @@
     responsive: true,
     verticalFill: 'fill-canvas',
     categories: [
-      { name: 'dev',    label: 'Development', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
-      { name: 'design', label: 'Design',      style: { backgroundColor: '#f43f5e', fontColor: '#fff' } },
-      { name: 'qa',     label: 'QA',          style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+      { name: 'cat-a', label: 'Category A', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+      { name: 'cat-b', label: 'Category B', style: { backgroundColor: '#f43f5e', fontColor: '#fff' } },
+      { name: 'cat-c', label: 'Category C', style: { backgroundColor: '#10b981', fontColor: '#fff' } },
     ],
     legend: { position: 'top' },
     items: [
-      { id: 1, label: 'Auth Module', start: '2026-02-01', end: '2026-02-14', category: 'dev' },
-      { id: 2, label: 'Wireframes',  start: '2026-02-05', end: '2026-02-12', category: 'design' },
-      { id: 3, label: 'Unit Tests',  start: '2026-02-10', end: '2026-02-20', category: 'qa' },
-      { id: 4, label: 'Dashboard',   start: '2026-02-15', end: '2026-03-01', category: 'dev' },
-      { id: 5, label: 'E2E Tests',   start: '2026-02-18', end: '2026-03-05', category: 'qa' },
+      { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-14', category: 'cat-a' },
+      { id: 2, label: 'Item 2', start: '2026-02-05', end: '2026-02-12', category: 'cat-b' },
+      { id: 3, label: 'Item 3', start: '2026-02-10', end: '2026-02-20', category: 'cat-c' },
+      { id: 4, label: 'Item 4', start: '2026-02-15', end: '2026-03-01', category: 'cat-a' },
+      { id: 5, label: 'Item 5', start: '2026-02-18', end: '2026-03-05', category: 'cat-c' },
     ],
     range: { start: '2026-01-25', end: '2026-03-10', position: 'bottom' }
   });
 </script>
 
-<h2>Category Interface</h2>
+<h2>TempisTimelineCategory</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
   <tbody>
@@ -35,15 +35,15 @@
 
 <pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
   categories: [
-    { name: 'dev',    label: 'Development', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
-    { name: 'design', label: 'Design',      style: { backgroundColor: '#f43f5e', fontColor: '#fff' } },
-    { name: 'qa',     label: 'QA',          style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+    { name: 'cat-a', label: 'Category A', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+    { name: 'cat-b', label: 'Category B', style: { backgroundColor: '#f43f5e', fontColor: '#fff' } },
+    { name: 'cat-c', label: 'Category C', style: { backgroundColor: '#10b981', fontColor: '#fff' } },
   ],
   legend: { position: 'top' },
   items: [
-    { id: 1, label: 'Auth Module', start: '2026-02-01', end: '2026-02-14', category: 'dev' },
-    { id: 2, label: 'Wireframes',  start: '2026-02-05', end: '2026-02-12', category: 'design' },
-    { id: 3, label: 'Unit Tests',  start: '2026-02-10', end: '2026-02-20', category: 'qa' },
+    { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-14', category: 'cat-a' },
+    { id: 2, label: 'Item 2', start: '2026-02-05', end: '2026-02-12', category: 'cat-b' },
+    { id: 3, label: 'Item 3', start: '2026-02-10', end: '2026-02-20', category: 'cat-c' },
   ],
   range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' }
 });</code></pre>

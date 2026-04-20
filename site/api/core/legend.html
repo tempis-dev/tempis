@@ -18,8 +18,8 @@
 <pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
   responsive: true,
   categories: [
-    { name: 'frontend', label: 'Frontend', style: { backgroundColor: '#6366f1' } },
-    { name: 'backend',  label: 'Backend',  style: { backgroundColor: '#10b981' } },
+    { name: 'cat-a', label: 'Category A', style: { backgroundColor: '#6366f1' } },
+    { name: 'cat-b', label: 'Category B', style: { backgroundColor: '#10b981' } },
   ],
   legend: {
     position: 'top',
@@ -30,8 +30,8 @@
     gap: 24
   },
   items: [
-    { id: 1, label: 'UI Redesign', start: '2026-02-01', end: '2026-02-14', category: 'frontend' },
-    { id: 2, label: 'API v3',      start: '2026-02-05', end: '2026-02-20', category: 'backend' },
+    { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-14', category: 'cat-a' },
+    { id: 2, label: 'Item 2', start: '2026-02-05', end: '2026-02-20', category: 'cat-b' },
   ],
   range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' }
 });</code></pre>

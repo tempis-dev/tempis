@@ -33,19 +33,19 @@ function App() {
   const timelineRef = useRef&lt;TempisTimelineRef&gt;(null);
 
   const items = [
-    { id: 1, label: 'Sprint 1', start: '2026-01-05', end: '2026-01-19' },
-    { id: 2, label: 'Sprint 2', start: '2026-01-20', end: '2026-02-02' },
-    { id: 3, label: 'Release',  start: '2026-02-05' },
+    { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-19' },
+    { id: 2, label: 'Item 2', start: '2026-01-20', end: '2026-02-02' },
+    { id: 3, label: 'Item 3', start: '2026-02-05' },
   ];
 
   return (
     &lt;div&gt;
       &lt;div style={{ marginBottom: 8 }}&gt;
         &lt;button onClick={() =&gt; timelineRef.current?.focus({ id: 1, animate: true })}&gt;
-          Focus Sprint 1
+          Focus Item 1
         &lt;/button&gt;
         &lt;button onClick={() =&gt; timelineRef.current?.focus({ id: 3, animate: true })}&gt;
-          Focus Release
+          Focus Item 3
         &lt;/button&gt;
         &lt;button onClick={() =&gt; timelineRef.current?.focus({ animate: true })}&gt;
           Fit All

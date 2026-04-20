@@ -26,15 +26,15 @@ TempisTimeline.setGlobalPalette([
 const timeline = new TempisTimeline('#canvas', {
   responsive: true,
   categories: [
-    { name: 'design',  label: 'Design' },   // gets #6366f1
-    { name: 'dev',     label: 'Dev' },       // gets #ec4899
-    { name: 'qa',      label: 'QA' },        // gets #14b8a6
+    { name: 'cat-a', label: 'Category A' },   // gets #6366f1
+    { name: 'cat-b', label: 'Category B' },       // gets #ec4899
+    { name: 'cat-c', label: 'Category C' },        // gets #14b8a6
   ],
   legend: { position: 'top' },
   items: [
-    { id: 1, label: 'Wireframes', start: '2026-02-01', end: '2026-02-10', category: 'design' },
-    { id: 2, label: 'API',        start: '2026-02-05', end: '2026-02-18', category: 'dev' },
-    { id: 3, label: 'Tests',      start: '2026-02-12', end: '2026-02-22', category: 'qa' },
+    { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-10', category: 'cat-a' },
+    { id: 2, label: 'Item 2', start: '2026-02-05', end: '2026-02-18', category: 'cat-b' },
+    { id: 3, label: 'Item 3', start: '2026-02-12', end: '2026-02-22', category: 'cat-c' },
   ],
   range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' }
 });</code></pre>
