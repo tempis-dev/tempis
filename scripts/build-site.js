@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { execSync } = require("child_process");
 
 const OUT = path.resolve(__dirname, "..", "dist", "site");
 const ROOT = path.resolve(__dirname, "..");
@@ -16,6 +17,15 @@ function copyDir(src, dest) {
     }
   }
 }
+
+// Build the browser bundle and copy to lib/
+console.log("Building browser bundle...");
+execSync("npm run build:web --workspace=packages/tempis-timeline", { cwd: ROOT, stdio: ["inherit", "inherit", "pipe"] });
+fs.mkdirSync(path.join(ROOT, "lib"), { recursive: true });
+fs.copyFileSync(
+  path.join(ROOT, "packages", "tempis-timeline", "dist", "tempis_timeline.js"),
+  path.join(ROOT, "lib", "tempis_timeline.js")
+);
 
 // Clean
 fs.rmSync(OUT, { recursive: true, force: true });

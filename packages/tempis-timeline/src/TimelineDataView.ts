@@ -3,7 +3,7 @@ import { TimelineBand } from "./TimelineBand";
 import { TimelineItem } from "./TimelineItem";
 import { TempisTimelineStackMode, TempisTimelineScrollbarOptions } from "./TempisTimelineOptions";
 import { RangeTick } from "./TimelineRangeView";
-import { clamp, doDateRangesOverlap, drawClippedText, EasingFunction } from "./Utilities";
+import { clamp, doDateRangesOverlap, drawClippedText, EasingFunction, GRID_COLOUR } from "./Utilities";
 
 export interface DataViewDrawPlan {
     /** The height that is required to draw all groups and items within the specified date range. */
@@ -348,7 +348,7 @@ export class TimelineDataView {
         height: number
     ): void {
         context.lineWidth = 1;
-        context.strokeStyle = "#c2c2c2";
+        context.strokeStyle = GRID_COLOUR;
         context.setLineDash([3, 3]); /* dashes are 5px and spaces are 3px */
         context.beginPath();
 
@@ -413,7 +413,7 @@ export class TimelineDataView {
         const scrollRatio = Math.abs(this._scrollYOffset) / (this._drawPlan.height - height);
         const thumbY = yPosition + scrollbarMargin + scrollRatio * scrollableHeight;
 
-        const scrollbarColor = this._scrollbarOptions.color ?? "rgba(128, 128, 128, 0.5)";
+        const scrollbarColor = this._scrollbarOptions.color ?? GRID_COLOUR;
 
         // Draw scrollbar track (subtle background)
         context.save();
@@ -458,7 +458,7 @@ export class TimelineDataView {
             // If this is not our first group then we should draw a group separator line.
             if (groupDrawPlanIndex > 0) {
                 context.lineWidth = 0.5;
-                context.strokeStyle = "#595959";
+                context.strokeStyle = GRID_COLOUR;
                 context.beginPath();
                 context.moveTo(0, scrolledYPosition + groupDrawPlan.yPositionStart - 1);
                 context.lineTo(context.canvas.clientWidth, scrolledYPosition + groupDrawPlan.yPositionStart - 1);
@@ -468,7 +468,7 @@ export class TimelineDataView {
             // Draw the group label if we have one.
             if (groupDrawPlan.label) {
                 context.textBaseline = "top";
-                context.fillStyle = "#595959";
+                context.fillStyle = GRID_COLOUR;
                 context.beginPath();
                 // If rendering right-to-left then the group labels will be rendered to the right of the canvas, otherwise left.
                 if (this._isRTL) {

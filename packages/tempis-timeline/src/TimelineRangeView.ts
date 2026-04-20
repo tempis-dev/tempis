@@ -4,7 +4,7 @@ import {
     TempisTimelineRangeUnitLabelFormats
 } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
-import { clamp, isNullOrUndefined, parseDate, EasingFunction } from "./Utilities";
+import { clamp, isNullOrUndefined, parseDate, EasingFunction, GRID_COLOUR } from "./Utilities";
 import { AdapterRegistry } from "./AdapterRegistry";
 
 export type Unit = "millisecond" | "second" | "minute" | "hour" | "day" | "month" | "year" | "none";
@@ -387,7 +387,7 @@ export class TimelineRangeView {
             if (xPosition > 0 && xPosition < context.canvas.clientWidth) {
                 // Draw the actual tick.
                 context.lineWidth = 1;
-                context.strokeStyle = "#c2c2c2";
+                context.strokeStyle = GRID_COLOUR;
                 context.setLineDash([3, 3]); /* dashes are 5px and spaces are 3px */
                 context.beginPath();
                 context.moveTo(xPosition, minorTicksYPosition);
@@ -403,7 +403,7 @@ export class TimelineRangeView {
 
             // Draw the minor date/time label text.
             context.textBaseline = "alphabetic";
-            context.fillStyle = "#595959";
+            context.fillStyle = GRID_COLOUR;
             context.beginPath();
             // If we are rendering right-to-left then the label should be rendered to the left of the tick, otherwise the right.
             if (this._isRTL) {
@@ -488,7 +488,7 @@ export class TimelineRangeView {
             // Draw the major date/time label text.
             context.lineWidth = 0.5;
             context.textBaseline = "middle";
-            context.fillStyle = "#595959";
+            context.fillStyle = GRID_COLOUR;
             context.beginPath();
             context.fillText(
                 majorTickLabel,

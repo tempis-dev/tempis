@@ -1,6 +1,11 @@
 import { AdapterRegistry } from "./AdapterRegistry";
 
 /**
+ * The neutral grey used for all grid chrome: minor tick lines, unit labels, group separators, group labels, and legend labels.
+ */
+export const GRID_COLOUR = "#808080";
+
+/**
  * Easing function names for animations.
  */
 export type EasingFunction =

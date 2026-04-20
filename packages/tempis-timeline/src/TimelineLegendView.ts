@@ -6,7 +6,7 @@ import {
 } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineItemCategory } from "./TimelineItemCategory";
-import { drawClippedText, isNullOrUndefined } from "./Utilities";
+import { drawClippedText, isNullOrUndefined, GRID_COLOUR } from "./Utilities";
 
 export interface LegendViewDrawPlan {
     /** The height of the view. */
@@ -260,7 +260,7 @@ export class TimelineLegendView {
             context.fill();
 
             // Draw the category label clipped to the available legend view width.
-            context.fillStyle = "#595959";
+            context.fillStyle = GRID_COLOUR;
             context.textBaseline = "middle";
             // If right-to-left then the label will be drawn to the left of the marker.
             if (this._isRTL) {

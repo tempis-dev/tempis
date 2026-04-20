@@ -189,7 +189,7 @@ export interface TempisTimelineScrollbarOptions {
      */
     visibility?: TempisTimelineScrollbarVisibility;
 
-    /** The colour of the scrollbar thumb and track. Defaults to `"rgba(128, 128, 128, 0.5)"`. */
+    /** The colour of the scrollbar thumb and track. Defaults to the grid colour. */
     color?: string;
 }
 
