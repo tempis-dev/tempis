@@ -390,8 +390,9 @@ export class TimelineRangeView {
                 context.strokeStyle = GRID_COLOUR;
                 context.setLineDash([3, 3]); /* dashes are 5px and spaces are 3px */
                 context.beginPath();
-                context.moveTo(xPosition, minorTicksYPosition);
-                context.lineTo(xPosition, minorTicksYPosition + rangeContainerHeight / 2);
+                const x = Math.round(xPosition) + 0.5;
+                context.moveTo(x, minorTicksYPosition);
+                context.lineTo(x, minorTicksYPosition + rangeContainerHeight / 2);
                 context.stroke();
             }
 
@@ -447,8 +448,9 @@ export class TimelineRangeView {
                 context.lineCap = "round";
                 context.setLineDash([]);
                 context.beginPath();
-                context.moveTo(xPosition, majorTicksYPosition + 3);
-                context.lineTo(xPosition, majorTicksYPosition + rangeContainerHeight / 2 - 3);
+                const mx = Math.round(xPosition) + 0.5;
+                context.moveTo(mx, majorTicksYPosition + 3);
+                context.lineTo(mx, majorTicksYPosition + rangeContainerHeight / 2 - 3);
                 context.stroke();
             }
 

@@ -355,8 +355,10 @@ export class TimelineDataView {
         for (const { xPosition } of rangeMinorTicks) {
             // We should only render a unit bar if its not right at the edge of the canvas as it looks a little weird.
             if (xPosition > 0 && xPosition < context.canvas.width) {
-                context.moveTo(xPosition, yPosition);
-                context.lineTo(xPosition, yPosition + height);
+                // Render the unit bar at a half-pixel unit so we dont get blur.
+                const x = Math.round(xPosition) + 0.5;
+                context.moveTo(x, yPosition);
+                context.lineTo(x, yPosition + height);
             }
         }
 
@@ -460,8 +462,9 @@ export class TimelineDataView {
                 context.lineWidth = 0.5;
                 context.strokeStyle = GRID_COLOUR;
                 context.beginPath();
-                context.moveTo(0, scrolledYPosition + groupDrawPlan.yPositionStart - 1);
-                context.lineTo(context.canvas.clientWidth, scrolledYPosition + groupDrawPlan.yPositionStart - 1);
+                const separatorY = Math.round(scrolledYPosition + groupDrawPlan.yPositionStart - 1) + 0.5;
+                context.moveTo(0, separatorY);
+                context.lineTo(context.canvas.clientWidth, separatorY);
                 context.stroke();
             }
 
