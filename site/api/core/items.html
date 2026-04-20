@@ -37,12 +37,21 @@
   });
 </script>
 
-<pre><code class="language-typescript">const items = [
-  // Range item — has start and end
-  { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-19' },
-  // Point-in-time item — only start
-  { id: 2, label: 'Event 1', start: '2026-01-20' }
-];</code></pre>
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  items: [
+    { id: 1, label: 'Item 1',  start: '2026-01-05', end: '2026-01-19', grouping: 'Range Items' },
+    { id: 2, label: 'Item 2',  start: '2026-01-20', end: '2026-02-02', grouping: 'Range Items' },
+    { id: 3, label: 'Item 3',  start: '2026-01-08', end: '2026-01-16', grouping: 'Range Items' },
+    { id: 4, label: 'Event 1', start: '2026-01-05', grouping: 'Point-in-Time' },
+    { id: 5, label: 'Event 2', start: '2026-01-19', grouping: 'Point-in-Time' },
+    { id: 6, label: 'Event 3', start: '2026-02-02', grouping: 'Point-in-Time' },
+    { id: 7, label: 'Event 4', start: '2026-02-10', grouping: 'Point-in-Time' },
+  ],
+  range: { start: '2026-01-01', end: '2026-02-15', position: 'bottom' }
+});</code></pre>
 
 <h2>Methods</h2>
 
@@ -82,17 +91,22 @@
   });
 </script>
 
-<pre><code class="language-typescript">{
-  id: 1,
-  label: 'Item (Styled)',
-  start: '2026-01-05',
-  end: '2026-01-10',
-  style: {
-    backgroundColor: '#e11d48',
-    fontColor: '#fff',
-    borderColor: '#9f1239',
-    borderThickness: 2,
-    borderStyle: 'dashed',
-    borderRadius: 8
-  }
-}</code></pre>
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  items: [
+    { id: 1, label: 'Item 1 (Default)', start: '2026-01-05', end: '2026-01-15' },
+    { id: 2, label: 'Item 2 (Dashed)', start: '2026-01-10', end: '2026-01-22',
+      style: { backgroundColor: '#6366f1', borderColor: '#818cf8', borderThickness: 2, borderStyle: 'dashed' } },
+    { id: 3, label: 'Item 3 (Rounded)', start: '2026-01-18', end: '2026-01-28',
+      style: { backgroundColor: '#7c3aed', fontColor: '#fff', borderRadius: 12 } },
+    { id: 4, label: 'Item 4 (Dotted)', start: '2026-01-08', end: '2026-01-20',
+      style: { backgroundColor: '#059669', borderColor: '#34d399', borderThickness: 2, borderStyle: 'dotted' } },
+    { id: 5, label: 'Item 5 (Styled)', start: '2026-01-14', end: '2026-01-19',
+      style: { backgroundColor: '#e11d48', borderColor: '#9f1239', borderThickness: 2, borderStyle: 'dashed', borderRadius: 8 } },
+    { id: 6, label: 'Item 6 (Long Dash)', start: '2026-01-22', end: '2026-01-30',
+      style: { backgroundColor: '#0ea5e9', borderColor: '#38bdf8', borderThickness: 2, borderStyle: 'long-dash' } },
+  ],
+  range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+});</code></pre>

@@ -49,15 +49,18 @@
 <pre><code class="language-typescript">onSelectionChange(changes: SelectionChangeEvent[]): void</code></pre>
 
 <h2>Example</h2>
-<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+const timeline = new TempisTimeline('#canvas', {
   responsive: true,
   selection: 'multi',
   items: [
-    { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-10' },
-    { id: 2, label: 'Item 2', start: '2026-02-05', end: '2026-02-15' },
-    { id: 3, label: 'Item 3', start: '2026-02-12', end: '2026-02-20' },
+    { id: 1, label: 'Item 1', start: '2026-03-01', end: '2026-03-10', grouping: 'Group 1' },
+    { id: 2, label: 'Item 2', start: '2026-03-05', end: '2026-03-15', grouping: 'Group 1' },
+    { id: 3, label: 'Item 3', start: '2026-03-08', end: '2026-03-20', grouping: 'Group 2' },
+    { id: 4, label: 'Item 4', start: '2026-03-12', end: '2026-03-22', grouping: 'Group 2' },
   ],
-  range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' },
+  range: { start: '2026-02-25', end: '2026-04-01', position: 'bottom' },
   onSelectionChange(changes) {
     console.log('Selection changed:', changes);
   }

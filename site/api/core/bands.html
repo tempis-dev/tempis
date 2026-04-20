@@ -61,17 +61,34 @@
 ]);</code></pre>
 
 <h2>Example</h2>
-<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+const timeline = new TempisTimeline('#canvas', {
   responsive: true,
+  categories: [
+    { name: 'cat-a', label: 'Category A', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+    { name: 'cat-b', label: 'Category B', style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+    { name: 'cat-c', label: 'Category C', style: { backgroundColor: '#f59e0b', fontColor: '#111' } },
+  ],
+  legend: { position: 'bottom' },
   items: [
-    { id: 1, label: 'Item 1', start: '2026-03-01', end: '2026-03-14', grouping: 'Group 1' },
-    { id: 2, label: 'Item 2', start: '2026-03-15', end: '2026-03-28', grouping: 'Group 1' },
+    { id: 1,  label: 'Item 1',  start: '2026-03-01', end: '2026-03-14', category: 'cat-a', grouping: 'Group 1' },
+    { id: 2,  label: 'Item 2',  start: '2026-03-15', end: '2026-03-28', category: 'cat-a', grouping: 'Group 1' },
+    { id: 3,  label: 'Item 3',  start: '2026-03-10', end: '2026-03-13', category: 'cat-a', grouping: 'Group 1' },
+    { id: 4,  label: 'Item 4',  start: '2026-03-05', end: '2026-03-07', category: 'cat-b', grouping: 'Group 2' },
+    { id: 5,  label: 'Item 5',  start: '2026-03-08', end: '2026-03-09', category: 'cat-b', grouping: 'Group 2' },
+    { id: 6,  label: 'Item 6',  start: '2026-03-20', end: '2026-03-22', category: 'cat-b', grouping: 'Group 2' },
+    { id: 7,  label: 'Item 7',  start: '2026-03-23', end: '2026-03-24', category: 'cat-b', grouping: 'Group 2' },
+    { id: 8,  label: 'Item 8',  start: '2026-03-08', end: '2026-03-10', category: 'cat-a', grouping: 'Group 3' },
+    { id: 9,  label: 'Item 9',  start: '2026-03-18', end: '2026-03-20', category: 'cat-a', grouping: 'Group 3' },
+    { id: 10, label: 'Event 1', start: '2026-03-11', category: 'cat-c', grouping: 'Group 1' },
+    { id: 11, label: 'Event 2', start: '2026-03-09', category: 'cat-c', grouping: 'Group 2' },
   ],
   bands: [
-    // Maintenance window (range band)
-    { start: '2026-03-10', end: '2026-03-12', style: { color: '#ef4444', opacity: 0.15 } },
-    // Deadline marker (point-in-time band)
+    { start: '2026-03-10', end: '2026-03-12', style: { color: '#ef4444', opacity: 0.35 } },
+    { start: '2026-03-17', end: '2026-03-18', style: { color: '#3b82f6', opacity: 0.3 } },
     { start: '2026-03-28', style: { color: '#f59e0b', borderColor: '#f59e0b', borderThickness: 2 } },
+    { start: '2026-03-07', style: { color: '#10b981', borderColor: '#10b981', borderThickness: 2 } },
   ],
-  range: { start: '2026-02-25', end: '2026-04-01', position: 'bottom' }
+  range: { start: '2026-02-27', end: '2026-04-02', position: 'bottom' }
 });</code></pre>

@@ -12,16 +12,38 @@
 <p>Items are assigned to groups via the <code>grouping</code> property on each item. Items sharing the same <code>grouping</code> value are rendered in the same row section.</p>
 
 <h2>Example</h2>
+<div class="api-demo"><canvas id="demo-grouping"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-grouping', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    items: [
+      { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-15', grouping: 'Group 3' },
+      { id: 2, label: 'Item 2', start: '2026-01-08', end: '2026-01-20', grouping: 'Group 1' },
+      { id: 3, label: 'Item 3', start: '2026-01-12', end: '2026-01-25', grouping: 'Group 2' },
+      { id: 4, label: 'Item 4', start: '2026-01-18', end: '2026-01-28', grouping: 'Group 1' },
+      { id: 5, label: 'Item 5', start: '2026-01-10', end: '2026-01-22', grouping: 'Group 3' },
+      { id: 6, label: 'Item 6', start: '2026-01-20', end: '2026-01-30', grouping: 'Group 2' },
+    ],
+    grouping: {
+      sort: function(a, b) { return a.localeCompare(b); }
+    },
+    range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+  });
+</script>
 <pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
   responsive: true,
   items: [
-    { id: 1, label: 'Item 1',  start: '2026-01-05', end: '2026-01-15', grouping: 'Group 1' },
-    { id: 2, label: 'Item 2',   start: '2026-01-10', end: '2026-01-25', grouping: 'Group 2' },
-    { id: 3, label: 'Item 3',    start: '2026-01-20', end: '2026-01-30', grouping: 'Group 3' },
+    { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-15', grouping: 'Group 3' },
+    { id: 2, label: 'Item 2', start: '2026-01-08', end: '2026-01-20', grouping: 'Group 1' },
+    { id: 3, label: 'Item 3', start: '2026-01-12', end: '2026-01-25', grouping: 'Group 2' },
+    { id: 4, label: 'Item 4', start: '2026-01-18', end: '2026-01-28', grouping: 'Group 1' },
+    { id: 5, label: 'Item 5', start: '2026-01-10', end: '2026-01-22', grouping: 'Group 3' },
+    { id: 6, label: 'Item 6', start: '2026-01-20', end: '2026-01-30', grouping: 'Group 2' },
   ],
   grouping: {
     sort(a, b) {
-      // Custom alphabetical sort
       return a.localeCompare(b);
     }
   },
