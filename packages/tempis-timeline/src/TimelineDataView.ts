@@ -561,36 +561,63 @@ export class TimelineDataView {
                     if (sourceX < 0 && targetX < 0) continue;
                     if (sourceX > context.canvas.clientWidth && targetX > context.canvas.clientWidth) continue;
 
-                    // Draw the connector line.
-                    const midX = (sourceX + targetX) / 2;
                     context.strokeStyle = GRID_COLOUR;
                     context.lineWidth = 1.5;
                     context.setLineDash([]);
                     context.beginPath();
-                    context.moveTo(sourceX, sourceY);
-                    context.bezierCurveTo(midX, sourceY, midX, targetY, targetX, targetY);
-                    context.stroke();
 
-                    // Draw arrowhead at the target end.
                     const arrowSize = 6;
-                    // Calculate the tangent direction at the end of the bezier for the arrowhead angle.
-                    const t = 0.98;
-                    const t1 = 1 - t;
-                    const tangentX = 3 * t1 * t1 * (midX - sourceX) + 6 * t1 * t * (midX - midX) + 3 * t * t * (targetX - midX);
-                    const tangentY = 3 * t1 * t1 * (sourceY - sourceY) + 6 * t1 * t * (targetY - sourceY) + 3 * t * t * (targetY - targetY);
-                    const angle = Math.atan2(tangentY, tangentX);
+                    const margin = 12;
+                    const radius = 6;
 
+                    if (sourceY === targetY && targetX > sourceX) {
+                        // Same row, no overlap — straight horizontal line.
+                        context.moveTo(sourceX, sourceY);
+                        context.lineTo(targetX, targetY);
+                        context.stroke();
+                    } else if (targetX > sourceX + margin * 2) {
+                        // Target is to the right with enough space — step connector.
+                        // Go right to midpoint, then vertical to target row, then right to target.
+                        const midX = (sourceX + targetX) / 2;
+                        const goingDown = targetY > sourceY;
+                        const r = Math.min(radius, Math.abs(midX - sourceX), Math.abs(targetY - sourceY) / 2);
+
+                        context.moveTo(sourceX, sourceY);
+                        context.lineTo(midX - r, sourceY);
+                        context.arcTo(midX, sourceY, midX, sourceY + (goingDown ? r : -r), r);
+                        context.lineTo(midX, targetY + (goingDown ? -r : r));
+                        context.arcTo(midX, targetY, midX + r, targetY, r);
+                        context.lineTo(targetX, targetY);
+                        context.stroke();
+                    } else {
+                        // Overlapping or close — S-shaped route around both items.
+                        const goingDown = targetY >= sourceY;
+                        const midY = goingDown
+                            ? scrolledYPosition + (sourcePlan.yPositionEnd + targetPlan.yPositionStart) / 2
+                            : scrolledYPosition + (targetPlan.yPositionEnd + sourcePlan.yPositionStart) / 2;
+                        const stubX = sourceX + margin;
+                        const stubTargetX = targetX - margin;
+                        const r = Math.min(radius, Math.abs(midY - sourceY) / 2, margin / 2);
+
+                        context.moveTo(sourceX, sourceY);
+                        context.lineTo(stubX - r, sourceY);
+                        context.arcTo(stubX, sourceY, stubX, sourceY + (goingDown ? r : -r), r);
+                        context.lineTo(stubX, midY + (goingDown ? -r : r));
+                        context.arcTo(stubX, midY, stubX - r, midY, r);
+                        context.lineTo(stubTargetX + r, midY);
+                        context.arcTo(stubTargetX, midY, stubTargetX, midY + (goingDown ? r : -r), r);
+                        context.lineTo(stubTargetX, targetY + (goingDown ? -r : r));
+                        context.arcTo(stubTargetX, targetY, stubTargetX + r, targetY, r);
+                        context.lineTo(targetX, targetY);
+                        context.stroke();
+                    }
+
+                    // Arrowhead pointing right.
                     context.fillStyle = GRID_COLOUR;
                     context.beginPath();
                     context.moveTo(targetX, targetY);
-                    context.lineTo(
-                        targetX - arrowSize * Math.cos(angle - Math.PI / 6),
-                        targetY - arrowSize * Math.sin(angle - Math.PI / 6)
-                    );
-                    context.lineTo(
-                        targetX - arrowSize * Math.cos(angle + Math.PI / 6),
-                        targetY - arrowSize * Math.sin(angle + Math.PI / 6)
-                    );
+                    context.lineTo(targetX - arrowSize, targetY - arrowSize / 2);
+                    context.lineTo(targetX - arrowSize, targetY + arrowSize / 2);
                     context.closePath();
                     context.fill();
                 }
