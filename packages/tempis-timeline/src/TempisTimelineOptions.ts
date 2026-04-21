@@ -79,7 +79,10 @@ export interface TempisTimelineOptions {
     onItemHover?(id: string | number | null): void;
 
     /**
-     * Called when the item selection changes due to user interaction or programmatic updates.
+     * Called when the item selection changes due to user interaction.
+     * Providing this callback enables controlled selection mode — the timeline will not update
+     * selection state internally. You must call `setSelection()` to apply the changes.
+     * Omit this callback for uncontrolled selection where the timeline manages state automatically.
      * @param changes An array of selection change events describing which items were selected or deselected.
      */
     onSelectionChange?(changes: SelectionChangeEvent[]): void;

@@ -139,6 +139,20 @@
         s.textContent = old.textContent;
         old.parentNode.replaceChild(s, old);
       });
+      // Wire up toggle button groups: clicking a button adds btn-active and removes it from siblings
+      contentEl.querySelectorAll('.btn-group').forEach(function(group) {
+        var btns = group.querySelectorAll('.btn');
+        btns.forEach(function(btn) {
+          var orig = btn.onclick;
+          btn.onclick = function(e) {
+            btns.forEach(function(b) { b.classList.remove('btn-active'); });
+            btn.classList.add('btn-active');
+            if (orig) orig.call(btn, e);
+          };
+        });
+        // Activate the first button by default
+        if (btns.length) btns[0].classList.add('btn-active');
+      });
     }
 
     function loadPage(hash) {

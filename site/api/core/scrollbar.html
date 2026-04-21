@@ -1,6 +1,35 @@
 <h1>Scrollbar</h1>
 <p class="subtitle">Control the visibility and appearance of the vertical scrollbar.</p>
 
+<div class="api-demo"><canvas id="demo-scrollbar"></canvas></div>
+<div class="btn-group" style="display: flex; gap: 8px; margin: 0 0 16px;">
+  <button class="btn btn-outline btn-sm" onclick="window._scrollbarDemo.destroy(); window._scrollbarDemo = new tempis_timeline.TempisTimeline('#demo-scrollbar', Object.assign({}, window._scrollbarBase, { scrollbar: { visibility: 'always' } }));">Always</button>
+  <button class="btn btn-outline btn-sm" onclick="window._scrollbarDemo.destroy(); window._scrollbarDemo = new tempis_timeline.TempisTimeline('#demo-scrollbar', Object.assign({}, window._scrollbarBase, { scrollbar: { visibility: 'hover' } }));">Hover</button>
+  <button class="btn btn-outline btn-sm" onclick="window._scrollbarDemo.destroy(); window._scrollbarDemo = new tempis_timeline.TempisTimeline('#demo-scrollbar', Object.assign({}, window._scrollbarBase, { scrollbar: { visibility: 'panning' } }));">Panning</button>
+  <button class="btn btn-outline btn-sm" onclick="window._scrollbarDemo.destroy(); window._scrollbarDemo = new tempis_timeline.TempisTimeline('#demo-scrollbar', Object.assign({}, window._scrollbarBase, { scrollbar: { visibility: 'never' } }));">Never</button>
+</div>
+<script>
+  window._scrollbarBase = {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    scrollbar: { visibility: 'always' },
+    items: [
+      { id: 1, label: 'Item 1', start: '2026-01-01', end: '2026-01-10', grouping: 'Group 1' },
+      { id: 2, label: 'Item 2', start: '2026-01-08', end: '2026-01-18', grouping: 'Group 1' },
+      { id: 3, label: 'Item 3', start: '2026-01-05', end: '2026-01-15', grouping: 'Group 2' },
+      { id: 4, label: 'Item 4', start: '2026-01-12', end: '2026-01-22', grouping: 'Group 2' },
+      { id: 5, label: 'Item 5', start: '2026-01-03', end: '2026-01-13', grouping: 'Group 3' },
+      { id: 6, label: 'Item 6', start: '2026-01-10', end: '2026-01-20', grouping: 'Group 3' },
+      { id: 7, label: 'Item 7', start: '2026-01-06', end: '2026-01-16', grouping: 'Group 4' },
+      { id: 8, label: 'Item 8', start: '2026-01-14', end: '2026-01-25', grouping: 'Group 4' },
+      { id: 9, label: 'Item 9', start: '2026-01-02', end: '2026-01-12', grouping: 'Group 4' }
+    ],
+    range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+  };
+  window._scrollbarDemo = new tempis_timeline.TempisTimeline('#demo-scrollbar', window._scrollbarBase);
+</script>
+
 <h2>TempisTimelineScrollbarOptions</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>

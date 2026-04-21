@@ -1,6 +1,23 @@
 <h1>Styling</h1>
 <p class="subtitle">Customise the look of the timeline, items, and text.</p>
 
+<div class="api-demo"><canvas id="demo-styling"></canvas></div>
+<script>
+  window._stylingDemo = new tempis_timeline.TempisTimeline('#demo-styling', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    items: [
+      { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-15', grouping: 'Group 1', style: { backgroundColor: '#6366f1' } },
+      { id: 2, label: 'Item 2', start: '2026-01-12', end: '2026-01-25', grouping: 'Group 1', style: { backgroundColor: '#f43f5e', borderColor: '#be123c', borderThickness: 2, borderStyle: 'solid' } },
+      { id: 3, label: 'Item 3', start: '2026-01-08', end: '2026-01-20', grouping: 'Group 2', style: { backgroundColor: '#10b981' } },
+      { id: 4, label: 'Item 4', start: '2026-01-18', end: '2026-01-30', grouping: 'Group 2', style: { backgroundColor: '#f59e0b', borderColor: '#d97706', borderThickness: 2, borderStyle: 'dashed' } },
+      { id: 5, label: 'Item 5', start: '2026-01-03', end: '2026-01-14', grouping: 'Group 3', style: { backgroundColor: '#8b5cf6', borderColor: '#7c3aed', borderThickness: 2, borderStyle: 'solid', borderRadius: 12 } }
+    ],
+    range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+  });
+</script>
+
 <h2>TempisTimelineStyleOptions</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>

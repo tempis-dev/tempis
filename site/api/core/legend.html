@@ -1,6 +1,52 @@
 <h1>Legend</h1>
 <p class="subtitle">Display an interactive legend for category filtering and highlighting.</p>
 
+<div class="api-demo"><canvas id="demo-legend"></canvas></div>
+<p style="margin: 0 0 6px; font-size: 0.8em; font-weight: 600; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.08em;">Position</p>
+<div class="btn-group" style="display: flex; gap: 8px; margin: 0 0 16px;">
+  <button class="btn btn-outline btn-sm" onclick="window._legendConfig.position='top'; window._legendDemo.destroy(); window._legendDemo = new tempis_timeline.TempisTimeline('#demo-legend', window._legendOpts());">Top</button>
+  <button class="btn btn-outline btn-sm" onclick="window._legendConfig.position='bottom'; window._legendDemo.destroy(); window._legendDemo = new tempis_timeline.TempisTimeline('#demo-legend', window._legendOpts());">Bottom</button>
+  <button class="btn btn-outline btn-sm" onclick="window._legendConfig.position='none'; window._legendDemo.destroy(); window._legendDemo = new tempis_timeline.TempisTimeline('#demo-legend', window._legendOpts());">None</button>
+</div>
+<p style="margin: 0 0 6px; font-size: 0.8em; font-weight: 600; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.08em;">Marker Style</p>
+<div class="btn-group" style="display: flex; gap: 8px; margin: 0 0 16px;">
+  <button class="btn btn-outline btn-sm" onclick="window._legendConfig.markerStyle='square'; window._legendDemo.destroy(); window._legendDemo = new tempis_timeline.TempisTimeline('#demo-legend', window._legendOpts());">Square</button>
+  <button class="btn btn-outline btn-sm" onclick="window._legendConfig.markerStyle='square-rounded'; window._legendDemo.destroy(); window._legendDemo = new tempis_timeline.TempisTimeline('#demo-legend', window._legendOpts());">Square Rounded</button>
+  <button class="btn btn-outline btn-sm" onclick="window._legendConfig.markerStyle='circle'; window._legendDemo.destroy(); window._legendDemo = new tempis_timeline.TempisTimeline('#demo-legend', window._legendOpts());">Circle</button>
+</div>
+<script>
+  window._legendConfig = { position: 'top', markerStyle: 'circle' };
+  window._legendOpts = function() {
+    return {
+      responsive: true,
+      verticalFill: 'fill-canvas',
+      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      categories: [
+        { name: 'cat-a', label: 'Category A', style: { backgroundColor: '#6366f1' } },
+        { name: 'cat-b', label: 'Category B', style: { backgroundColor: '#f43f5e' } },
+        { name: 'cat-c', label: 'Category C', style: { backgroundColor: '#10b981' } }
+      ],
+      legend: {
+        position: window._legendConfig.position,
+        alignment: 'center',
+        markerStyle: window._legendConfig.markerStyle,
+        isHighlightOnHover: true,
+        isFilterOnClick: true,
+        gap: 24
+      },
+      items: [
+        { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-10', category: 'cat-a' },
+        { id: 2, label: 'Item 2', start: '2026-02-05', end: '2026-02-18', category: 'cat-b' },
+        { id: 3, label: 'Item 3', start: '2026-02-12', end: '2026-02-22', category: 'cat-c' },
+        { id: 4, label: 'Item 4', start: '2026-02-08', end: '2026-02-15', category: 'cat-a' },
+        { id: 5, label: 'Item 5', start: '2026-02-16', end: '2026-02-26', category: 'cat-b' }
+      ],
+      range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' }
+    };
+  };
+  window._legendDemo = new tempis_timeline.TempisTimeline('#demo-legend', window._legendOpts());
+</script>
+
 <h2>TempisTimelineLegendOptions</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>

@@ -81,6 +81,8 @@
   });
 &lt;/script&gt;</code></pre>
 
+    <div class="note">When using <code>responsive: true</code>, the canvas must be inside a container with explicit dimensions. The timeline resizes to fill its parent — if the parent has no width or height, the canvas will collapse to zero.</div>
+
     <h3>Categories</h3>
     <p>Colour-code items and filter them via an interactive legend:</p>
 <pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
@@ -123,10 +125,10 @@ timeline.focus({ range: ['2026-01-01', '2026-12-31'], animate: true });</code></
     <h2>React</h2>
 
     <h3>Install</h3>
-    <p><code>@tempis/timeline</code> is a peer dependency and must be installed alongside the React wrapper.</p>
-    <div class="install-box">
+    <div class="install-box" style="margin-bottom: 12px;">
       <span class="prompt">$</span> npm install <span style="color: #61dafb; font-weight: 600;">@tempis/react</span> <span style="color: #ff0071; font-weight: 600;">@tempis/timeline</span>
     </div>
+    <p><code>@tempis/timeline</code> is a peer dependency and must be installed alongside the React wrapper.</p>
 
     <h3>Usage</h3>
     <p>Import the component and pass your data as props. The timeline renders into a canvas inside a wrapper div:</p>
@@ -149,6 +151,8 @@ function App() {
     /&gt;
   );
 }</code></pre>
+
+    <div class="note">When using <code>responsive: true</code>, the component must be inside a container with explicit dimensions. The timeline resizes to fill its parent — if the parent has no width or height, the canvas will collapse to zero.</div>
 
     <h3>Ref API</h3>
     <p>Access imperative methods via a ref:</p>

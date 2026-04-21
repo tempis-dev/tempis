@@ -2,11 +2,16 @@
 <p class="subtitle">Let users select one or more timeline items.</p>
 
 <div class="api-demo"><canvas id="demo-selection"></canvas></div>
+<div class="btn-group" style="display: flex; gap: 8px; margin: 0 0 16px;">
+  <button class="btn btn-outline btn-sm" onclick="window._selectionDemo.destroy(); window._selectionDemo = new tempis_timeline.TempisTimeline('#demo-selection', Object.assign({}, window._selectionBase, { selection: 'none' }));">None</button>
+  <button class="btn btn-outline btn-sm" onclick="window._selectionDemo.destroy(); window._selectionDemo = new tempis_timeline.TempisTimeline('#demo-selection', Object.assign({}, window._selectionBase, { selection: 'single' }));">Single</button>
+  <button class="btn btn-outline btn-sm" onclick="window._selectionDemo.destroy(); window._selectionDemo = new tempis_timeline.TempisTimeline('#demo-selection', Object.assign({}, window._selectionBase, { selection: 'multi' }));">Multi</button>
+</div>
 <script>
-  new tempis_timeline.TempisTimeline('#demo-selection', {
+  window._selectionBase = {
     responsive: true,
     verticalFill: 'fill-canvas',
-    selection: 'multi',
+    selection: 'none',
     style: { item: { borderRadius: 4, fontColor: '#fff' } },
     items: [
       { id: 1, label: 'Item 1', start: '2026-03-01', end: '2026-03-10', grouping: 'Group 1' },
@@ -15,7 +20,8 @@
       { id: 4, label: 'Item 4', start: '2026-03-12', end: '2026-03-22', grouping: 'Group 2' },
     ],
     range: { start: '2026-02-25', end: '2026-04-01', position: 'bottom' }
-  });
+  };
+  window._selectionDemo = new tempis_timeline.TempisTimeline('#demo-selection', window._selectionBase);
 </script>
 
 <h2>Selection Modes</h2>
@@ -42,13 +48,36 @@
 <p>Deselects all items and redraws.</p>
 <pre><code class="language-typescript">timeline.clearSelection();</code></pre>
 
+<h2>Controlled vs Uncontrolled</h2>
+<p>Selection behaviour depends on whether <code>onSelectionChange</code> is provided:</p>
+<ul>
+  <li><strong>Uncontrolled</strong> (no <code>onSelectionChange</code>) — the timeline manages selection state internally. Clicking an item selects it and redraws automatically.</li>
+  <li><strong>Controlled</strong> (with <code>onSelectionChange</code>) — the timeline fires the callback but does not update selection state. You must call <code>setSelection()</code> yourself to apply the changes. This gives you full control over selection logic.</li>
+</ul>
+
+<div class="note">If you provide <code>onSelectionChange</code>, you are responsible for calling <code>setSelection()</code> to update the visual state. Without it, clicks will fire the callback but items won't appear selected.</div>
+
 <h2>Callback</h2>
 
 <h3>onSelectionChange</h3>
 <p>Fires whenever the selection changes, whether by user interaction or programmatic update. Receives an array of <code>SelectionChangeEvent</code> objects describing which items were selected or deselected.</p>
 <pre><code class="language-typescript">onSelectionChange(changes: SelectionChangeEvent[]): void</code></pre>
 
-<h2>Example</h2>
+<h2>Example — Uncontrolled</h2>
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+// No onSelectionChange — selection is managed automatically
+const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  selection: 'multi',
+  items: [
+    { id: 1, label: 'Item 1', start: '2026-03-01', end: '2026-03-10', grouping: 'Group 1' },
+    { id: 2, label: 'Item 2', start: '2026-03-05', end: '2026-03-15', grouping: 'Group 1' },
+  ],
+  range: { start: '2026-02-25', end: '2026-04-01', position: 'bottom' }
+});</code></pre>
+
+<h2>Example — Controlled</h2>
 <pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
 
 const timeline = new TempisTimeline('#canvas', {
@@ -57,14 +86,19 @@ const timeline = new TempisTimeline('#canvas', {
   items: [
     { id: 1, label: 'Item 1', start: '2026-03-01', end: '2026-03-10', grouping: 'Group 1' },
     { id: 2, label: 'Item 2', start: '2026-03-05', end: '2026-03-15', grouping: 'Group 1' },
-    { id: 3, label: 'Item 3', start: '2026-03-08', end: '2026-03-20', grouping: 'Group 2' },
-    { id: 4, label: 'Item 4', start: '2026-03-12', end: '2026-03-22', grouping: 'Group 2' },
   ],
   range: { start: '2026-02-25', end: '2026-04-01', position: 'bottom' },
   onSelectionChange(changes) {
-    console.log('Selection changed:', changes);
+    // Apply the selection changes manually
+    const current = timeline.getSelection();
+    changes.forEach(change => {
+      if (change.selected) {
+        current.push(change.id);
+      } else {
+        const idx = current.indexOf(change.id);
+        if (idx !== -1) current.splice(idx, 1);
+      }
+    });
+    timeline.setSelection(current);
   }
-});
-
-// Programmatically select the first two items
-timeline.setSelection([1, 2]);</code></pre>
+});</code></pre>

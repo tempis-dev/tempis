@@ -1,6 +1,29 @@
 <h1>Range</h1>
 <p class="subtitle">Control the visible time window, axis position, and zoom behaviour.</p>
 
+<div class="api-demo"><canvas id="demo-range"></canvas></div>
+<div class="btn-group" style="display: flex; gap: 8px; margin: 0 0 16px;">
+  <button class="btn btn-outline btn-sm" onclick="window._rangeDemo.destroy(); window._rangeDemo = new tempis_timeline.TempisTimeline('#demo-range', Object.assign({}, window._rangeBase, { range: Object.assign({}, window._rangeBase.range, { position: 'top' }) }));">Top</button>
+  <button class="btn btn-outline btn-sm" onclick="window._rangeDemo.destroy(); window._rangeDemo = new tempis_timeline.TempisTimeline('#demo-range', Object.assign({}, window._rangeBase, { range: Object.assign({}, window._rangeBase.range, { position: 'bottom' }) }));">Bottom</button>
+  <button class="btn btn-outline btn-sm" onclick="window._rangeDemo.destroy(); window._rangeDemo = new tempis_timeline.TempisTimeline('#demo-range', Object.assign({}, window._rangeBase, { range: Object.assign({}, window._rangeBase.range, { position: 'both' }) }));">Both</button>
+  <button class="btn btn-outline btn-sm" onclick="window._rangeDemo.destroy(); window._rangeDemo = new tempis_timeline.TempisTimeline('#demo-range', Object.assign({}, window._rangeBase, { range: Object.assign({}, window._rangeBase.range, { position: 'none' }) }));">None</button>
+</div>
+<script>
+  window._rangeBase = {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    items: [
+      { id: 1, label: 'Item 1', start: '2026-01-01', end: '2026-01-15', grouping: 'Group 1' },
+      { id: 2, label: 'Item 2', start: '2026-01-10', end: '2026-01-25', grouping: 'Group 1' },
+      { id: 3, label: 'Item 3', start: '2026-01-05', end: '2026-01-20', grouping: 'Group 2' },
+      { id: 4, label: 'Item 4', start: '2026-01-18', end: '2026-02-01', grouping: 'Group 2' }
+    ],
+    range: { start: '2025-12-25', end: '2026-02-10', position: 'bottom' }
+  };
+  window._rangeDemo = new tempis_timeline.TempisTimeline('#demo-range', window._rangeBase);
+</script>
+
 <h2>TempisTimelineRangeOptions</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>

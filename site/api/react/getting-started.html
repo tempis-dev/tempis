@@ -2,7 +2,7 @@
 <p class="subtitle">Install the React wrapper and render your first timeline component.</p>
 
 <h2>Install</h2>
-<div class="install-box">
+<div class="install-box" style="margin-bottom: 12px;">
   <span class="prompt">$</span> npm install <span style="color: #61dafb; font-weight: 600;">@tempis/react</span> <span style="color: #ff0071; font-weight: 600;">@tempis/timeline</span>
 </div>
 <p><code>@tempis/timeline</code> is a peer dependency of <code>@tempis/react</code> and must be installed alongside it.</p>
@@ -30,5 +30,4 @@ function App() {
   );
 }</code></pre>
 
-<h2>Peer Dependencies</h2>
-<p>The React wrapper requires <code>react</code> &ge; 18 and <code>@tempis/timeline</code> as peer dependencies. Make sure both are installed in your project.</p>
+<div class="note">When using <code>responsive: true</code>, the component's wrapper must be inside a container with explicit dimensions. The timeline resizes to fill its parent — if the parent has no width or height, the canvas will collapse to zero.</div>

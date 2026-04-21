@@ -37,6 +37,8 @@ const timeline = new TempisTimeline('#canvas', {
   range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
 });</code></pre>
 
+<div class="note">When using <code>responsive: true</code>, the canvas must be inside a container with explicit dimensions. The timeline resizes to fill its parent — if the parent has no width or height, the canvas will collapse to zero.</div>
+
 <h2>Script Tag Usage</h2>
 <pre><code class="language-html">&lt;canvas id="my-timeline"&gt;&lt;/canvas&gt;
 &lt;script src="https://unpkg.com/@tempis/timeline/dist/tempis_timeline.min.js"&gt;&lt;/script&gt;

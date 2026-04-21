@@ -1,6 +1,33 @@
 <h1>Tooltips</h1>
 <p class="subtitle">Show contextual information when hovering over timeline items.</p>
 
+<div class="api-demo"><canvas id="demo-tooltips"></canvas></div>
+<p style="margin: 0 0 16px; color: #64748b; font-size: 14px;">Hover over items to see custom tooltips.</p>
+<script>
+  window._tooltipsDemo = new tempis_timeline.TempisTimeline('#demo-tooltips', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    items: [
+      { id: 1, label: 'Item 1', start: '2026-04-01', end: '2026-04-10', grouping: 'Group 1' },
+      { id: 2, label: 'Item 2', start: '2026-04-08', end: '2026-04-18', grouping: 'Group 1' },
+      { id: 3, label: 'Item 3', start: '2026-04-05', end: '2026-04-15', grouping: 'Group 2' },
+      { id: 4, label: 'Item 4', start: '2026-04-12', end: '2026-04-22', grouping: 'Group 2' }
+    ],
+    range: { start: '2026-03-25', end: '2026-04-30', position: 'bottom' },
+    tooltip: {
+      overflowBehavior: 'viewport',
+      template: function(id) {
+        var item = window._tooltipsDemo.getItems().find(function(i) { return i.id === id; });
+        return '<div style="padding: 8px; font-family: sans-serif;">' +
+          '<strong>' + (item ? item.label : '') + '</strong>' +
+          '<p style="margin: 4px 0 0;">Custom tooltip for item ' + id + '</p>' +
+          '</div>';
+      }
+    }
+  });
+</script>
+
 <h2>TempisTimelineTooltipOptions</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
