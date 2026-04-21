@@ -529,6 +529,72 @@ export class TimelineDataView {
         context.lineDashOffset = 0;
         context.lineCap = "butt";
 
+        // Third pass: draw dependency arrows between items.
+        // Build a lookup map of item ID → draw plan for quick access.
+        const itemDrawPlanMap = new Map<string | number, DataViewItemDrawPlan>();
+        for (const groupDrawPlan of this._drawPlan.groupDrawPlans) {
+            for (const row of groupDrawPlan.rows) {
+                for (const itemDrawPlan of row) {
+                    itemDrawPlanMap.set(itemDrawPlan.item.id, itemDrawPlan);
+                }
+            }
+        }
+
+        // Draw arrows for each dependency relationship.
+        for (const [, targetPlan] of itemDrawPlanMap) {
+            if (targetPlan.item.dependencies.length === 0) continue;
+
+            for (const depId of targetPlan.item.dependencies) {
+                const sourcePlan = itemDrawPlanMap.get(depId);
+                if (!sourcePlan) continue;
+
+                // Source: right edge, vertical centre.
+                const sourceX = sourcePlan.xPositionEnd;
+                const sourceY = scrolledYPosition + (sourcePlan.yPositionStart + sourcePlan.yPositionEnd) / 2;
+
+                // Target: left edge, vertical centre.
+                const targetX = targetPlan.xPositionStart;
+                const targetY = scrolledYPosition + (targetPlan.yPositionStart + targetPlan.yPositionEnd) / 2;
+
+                // Don't draw if both endpoints are off-screen.
+                if (sourceX < 0 && targetX < 0) continue;
+                if (sourceX > context.canvas.clientWidth && targetX > context.canvas.clientWidth) continue;
+
+                // Draw the connector line.
+                const midX = (sourceX + targetX) / 2;
+                context.strokeStyle = GRID_COLOUR;
+                context.lineWidth = 1.5;
+                context.setLineDash([]);
+                context.beginPath();
+                context.moveTo(sourceX, sourceY);
+                context.bezierCurveTo(midX, sourceY, midX, targetY, targetX, targetY);
+                context.stroke();
+
+                // Draw arrowhead at the target end.
+                const arrowSize = 6;
+                // Calculate the tangent direction at the end of the bezier for the arrowhead angle.
+                const t = 0.98;
+                const t1 = 1 - t;
+                const tangentX = 3 * t1 * t1 * (midX - sourceX) + 6 * t1 * t * (midX - midX) + 3 * t * t * (targetX - midX);
+                const tangentY = 3 * t1 * t1 * (sourceY - sourceY) + 6 * t1 * t * (targetY - sourceY) + 3 * t * t * (targetY - targetY);
+                const angle = Math.atan2(tangentY, tangentX);
+
+                context.fillStyle = GRID_COLOUR;
+                context.beginPath();
+                context.moveTo(targetX, targetY);
+                context.lineTo(
+                    targetX - arrowSize * Math.cos(angle - Math.PI / 6),
+                    targetY - arrowSize * Math.sin(angle - Math.PI / 6)
+                );
+                context.lineTo(
+                    targetX - arrowSize * Math.cos(angle + Math.PI / 6),
+                    targetY - arrowSize * Math.sin(angle + Math.PI / 6)
+                );
+                context.closePath();
+                context.fill();
+            }
+        }
+
         // Always revert the canvas text align to be left.
         context.textAlign = "left";
     }

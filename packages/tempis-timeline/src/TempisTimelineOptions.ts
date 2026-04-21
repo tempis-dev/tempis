@@ -379,6 +379,9 @@ export interface TempisTimelineItem {
 
     /** A flag defining whether the item is selected. */
     selected?: boolean;
+
+    /** IDs of items that this item depends on. Renders connector arrows from each dependency to this item. */
+    dependencies?: (string | number)[];
 }
 
 /**
