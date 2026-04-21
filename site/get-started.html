@@ -6,6 +6,10 @@
   <title>Get Started — Tempis Timeline</title>
   <link rel="icon" type="image/png" href="images/logo.png">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
 </head>
 <body>
   <nav>
@@ -44,112 +48,142 @@
 
   <div class="page-wrapper">
     <h1>Get Started</h1>
-    <p>Up and running with Tempis Timeline in a few minutes.</p>
+    <p>Up and running with Tempis in a few minutes. Choose your path — use the core library directly, or drop in the React component.</p>
 
-    <h2>Installation</h2>
-    <h3>npm</h3>
-<pre><code>npm install tempis-timeline</code></pre>
+    <h2>Core Library</h2>
+
+    <h3>Install</h3>
+    <p>Install the core library via npm:</p>
+<pre><code class="language-bash">npm install @tempis/timeline</code></pre>
 
     <h3>CDN</h3>
-    <p>Include the script directly in your HTML:</p>
-<pre><code>&lt;script src="https://unpkg.com/tempis-timeline/dist/tempis_timeline.min.js"&gt;&lt;/script&gt;</code></pre>
+    <p>Or include it directly in your HTML via a CDN script tag:</p>
+<pre><code class="language-html">&lt;script src="https://unpkg.com/@tempis/timeline/dist/tempis_timeline.min.js"&gt;&lt;/script&gt;</code></pre>
 
-    <h2>Basic Usage</h2>
-    <p>Create a canvas element and initialize the timeline:</p>
-<pre><code>&lt;div style="width: 100%; height: 400px;"&gt;
-  &lt;canvas id="timeline"&gt;&lt;/canvas&gt;
-&lt;/div&gt;
+    <h3>Usage</h3>
+    <p>Create a canvas element and initialise the timeline:</p>
+<pre><code class="language-html">&lt;canvas id="timeline"&gt;&lt;/canvas&gt;
 
 &lt;script&gt;
+  import { TempisTimeline } from '@tempis/timeline';
+
   const timeline = new TempisTimeline('#timeline', {
     responsive: true,
-    verticalFill: 'fill-canvas',
     items: [
-      {
-        id: 1,
-        label: 'Project Kickoff',
-        start: '2024-01-15T09:00:00',
-        end: '2024-01-15T11:00:00'
-      },
-      {
-        id: 2,
-        label: 'Design Review',
-        start: '2024-01-15T13:00:00',
-        end: '2024-01-15T15:30:00'
-      },
-      {
-        id: 3,
-        label: 'Deployment',
-        start: '2024-01-15T16:00:00'  // Point-in-time item (no end date)
-      }
-    ]
+      { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-15', grouping: 'Group 1' },
+      { id: 2, label: 'Item 2', start: '2026-01-12', end: '2026-01-28', grouping: 'Group 1' },
+      { id: 3, label: 'Event 1', start: '2026-01-30', grouping: 'Group 1' },
+      { id: 4, label: 'Item 3', start: '2026-01-08', end: '2026-01-25', grouping: 'Group 2' },
+    ],
+    range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
   });
 &lt;/script&gt;</code></pre>
 
-    <h2>Adding Categories</h2>
-    <p>Categories let you color-code and filter items via an interactive legend:</p>
-<pre><code>const timeline = new TempisTimeline('#timeline', {
+    <h3>Categories</h3>
+    <p>Colour-code items and filter them via an interactive legend:</p>
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+const timeline = new TempisTimeline('#timeline', {
   responsive: true,
-  verticalFill: 'fill-canvas',
   legend: { position: 'top' },
   categories: [
-    { name: 'meeting', label: 'Meetings', style: { backgroundColor: '#4caf50', fontColor: '#fff' } },
-    { name: 'deadline', label: 'Deadlines', style: { backgroundColor: '#f44336', fontColor: '#fff' } }
+    { name: 'cat-a', label: 'Category A', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+    { name: 'cat-b', label: 'Category B', style: { backgroundColor: '#f43f5e', fontColor: '#fff' } },
   ],
   items: [
-    { id: 1, label: 'Sprint Planning', start: '2024-01-15T09:00:00', end: '2024-01-15T10:00:00', category: 'meeting' },
-    { id: 2, label: 'Release v2.0', start: '2024-01-15T17:00:00', category: 'deadline' }
-  ]
+    { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-14', category: 'cat-a' },
+    { id: 2, label: 'Item 2', start: '2026-02-05', end: '2026-02-12', category: 'cat-b' },
+  ],
+  range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' }
 });</code></pre>
 
-    <h2>Groups</h2>
-    <p>Use the <code>grouping</code> property to organize items into rows:</p>
-<pre><code>items: [
-  { id: 1, label: 'Task A', start: '2024-01-15T09:00:00', end: '2024-01-15T11:00:00', grouping: 'Team Alpha' },
-  { id: 2, label: 'Task B', start: '2024-01-15T10:00:00', end: '2024-01-15T12:00:00', grouping: 'Team Beta' },
-  { id: 3, label: 'Task C', start: '2024-01-15T13:00:00', end: '2024-01-15T15:00:00', grouping: 'Team Alpha' }
-]</code></pre>
-
-    <h2>Selection</h2>
-    <p>Enable item selection with the <code>selection</code> option:</p>
-<pre><code>const timeline = new TempisTimeline('#timeline', {
-  selection: 'single', // or 'multi' or 'none'
-  onSelectionChange(changes) {
-    console.log('Selection changed:', changes);
-  },
-  items: [...]
-});</code></pre>
-
-    <h2>Updating Data</h2>
-    <p>Update items dynamically at any time:</p>
-<pre><code>// Replace all items
-timeline.setItems(newItems);
-
-// Update categories
+    <h3>Updating Data</h3>
+    <p>Replace items, categories, or bands at any time — the timeline redraws automatically:</p>
+<pre><code class="language-typescript">timeline.setItems(newItems);
 timeline.setCategories(newCategories);
-
-// Update bands
 timeline.setBands(newBands);</code></pre>
 
-    <h2>Focus &amp; Navigation</h2>
-    <p>Programmatically navigate the timeline:</p>
-<pre><code>// Animate to a specific item
-timeline.focus({ id: 'item-1', animate: true, duration: 500 });
+    <h3>Focus &amp; Navigation</h3>
+    <p>Programmatically pan and zoom to any item, date, or range:</p>
+<pre><code class="language-typescript">// Animate to a specific item
+timeline.focus({ id: 1, animate: true, duration: 500 });
 
 // Jump to a date
-timeline.focus({ date: '2024-06-15', animate: false });
+timeline.focus({ date: '2026-06-15' });
 
 // Focus on a date range
-timeline.focus({ range: ['2024-01-01', '2024-12-31'], animate: true });</code></pre>
+timeline.focus({ range: ['2026-01-01', '2026-12-31'], animate: true });</code></pre>
 
-    <h2>Cleanup</h2>
+    <h3>Cleanup</h3>
     <p>Always destroy the timeline when you're done to prevent memory leaks:</p>
-<pre><code>timeline.destroy();</code></pre>
+<pre><code class="language-typescript">timeline.destroy();</code></pre>
 
+    <h2>React</h2>
+
+    <h3>Install</h3>
+    <p><code>@tempis/timeline</code> is a peer dependency and must be installed alongside the React wrapper.</p>
+<pre><code class="language-bash">npm install @tempis/react @tempis/timeline</code></pre>
+
+    <h3>Usage</h3>
+    <p>Import the component and pass your data as props. The timeline renders into a canvas inside a wrapper div:</p>
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/react';
+
+function App() {
+  return (
+    &lt;TempisTimeline
+      items={[
+        { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-15', grouping: 'Group 1' },
+        { id: 2, label: 'Item 2', start: '2026-01-12', end: '2026-01-28', grouping: 'Group 1' },
+        { id: 3, label: 'Item 3', start: '2026-01-08', end: '2026-01-25', grouping: 'Group 2' },
+      ]}
+      options={{
+        responsive: true,
+        range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+      }}
+      onItemClick={(id) =&gt; console.log('Clicked', id)}
+      height={400}
+    /&gt;
+  );
+}</code></pre>
+
+    <h3>Ref API</h3>
+    <p>Access imperative methods via a ref:</p>
+<pre><code class="language-typescript">import { useRef } from 'react';
+import { TempisTimeline, type TempisTimelineRef } from '@tempis/react';
+
+function App() {
+  const ref = useRef&lt;TempisTimelineRef&gt;(null);
+
+  return (
+    &lt;&gt;
+      &lt;button onClick={() =&gt; ref.current?.focus({ id: 1, animate: true })}&gt;
+        Focus Item 1
+      &lt;/button&gt;
+      &lt;TempisTimeline
+        ref={ref}
+        items={items}
+        options={{ responsive: true, range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' } }}
+      /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+    <h3>Reactive Data</h3>
+    <p>The <code>items</code>, <code>categories</code>, and <code>bands</code> props sync automatically when they change — no manual <code>setItems()</code> calls needed.</p>
+<pre><code class="language-typescript">const [items, setItems] = useState([
+  { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-10' },
+]);
+
+// Adding an item re-renders the timeline automatically
+setItems(prev =&gt; [...prev, { id: 2, label: 'Item 2', start: '2026-02-12', end: '2026-02-20' }]);</code></pre>
+
+    <h2>Next Steps</h2>
+    <p>Explore the <a href="api.html">API reference</a> for the full list of options, methods, and callbacks. Check out the <a href="examples.html">interactive examples</a> to see what's possible.</p>
   </div>
 
   <footer>
     <p>Tempis Timeline is source-available. Free for non-commercial use. <a href="../LICENSE">Commercial license</a> required for business use.</p>
   </footer>
+  <script>hljs.highlightAll();</script>
 </body>
 </html>
