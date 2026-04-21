@@ -756,6 +756,7 @@ export class TimelineDataView {
         const ARROW_SIZE = 6;
         const MARGIN = 12;
         const RADIUS = 6;
+        const rtl = this._isRTL;
 
         // Build a lookup map of item ID → draw plan.
         const planMap = new Map<string | number, DataViewItemDrawPlan>();
@@ -779,61 +780,65 @@ export class TimelineDataView {
                 const source = planMap.get(depId);
                 if (!source) continue;
 
-                const sx = source.xPositionEnd;
+                // In LTR: source right edge → target left edge. In RTL: source left edge → target right edge.
+                const sx = rtl ? source.xPositionStart : source.xPositionEnd;
                 const sy = scrolledYPosition + (source.yPositionStart + source.yPositionEnd) / 2;
-                const tx = target.xPositionStart;
+                const tx = rtl ? target.xPositionEnd : target.xPositionStart;
                 const ty = scrolledYPosition + (target.yPositionStart + target.yPositionEnd) / 2;
+
+                // Direction multiplier: +1 for LTR (arrows go right), -1 for RTL (arrows go left).
+                const dir = rtl ? -1 : 1;
 
                 // Skip if both endpoints are off-screen.
                 if ((sx < 0 && tx < 0) || (sx > context.canvas.clientWidth && tx > context.canvas.clientWidth)) continue;
 
                 context.beginPath();
 
-                if (sy === ty && tx > sx) {
+                if (sy === ty && (tx - sx) * dir > 0) {
                     // Same row, no overlap — straight line.
                     context.moveTo(sx, sy);
                     context.lineTo(tx, ty);
-                } else if (tx > sx + MARGIN * 2) {
-                    // Step connector: right → vertical → right.
+                } else if ((tx - sx) * dir > MARGIN * 2) {
+                    // Step connector: horizontal → vertical → horizontal.
                     const midX = (sx + tx) / 2;
                     const down = ty > sy;
                     const r = Math.min(RADIUS, Math.abs(midX - sx), Math.abs(ty - sy) / 2);
 
                     context.moveTo(sx, sy);
-                    context.lineTo(midX - r, sy);
+                    context.lineTo(midX - r * dir, sy);
                     context.arcTo(midX, sy, midX, sy + (down ? r : -r), r);
                     context.lineTo(midX, ty + (down ? -r : r));
-                    context.arcTo(midX, ty, midX + r, ty, r);
+                    context.arcTo(midX, ty, midX + r * dir, ty, r);
                     context.lineTo(tx, ty);
                 } else {
-                    // S-shaped connector: right → vertical → horizontal → vertical → right.
+                    // S-shaped connector.
                     const down = ty >= sy;
                     const midY = down
                         ? scrolledYPosition + (source.yPositionEnd + target.yPositionStart) / 2
                         : scrolledYPosition + (target.yPositionEnd + source.yPositionStart) / 2;
-                    const stubR = sx + MARGIN;
-                    const stubL = tx - MARGIN;
+                    const stubR = sx + MARGIN * dir;
+                    const stubL = tx - MARGIN * dir;
                     const r = Math.min(RADIUS, Math.abs(midY - sy) / 2, MARGIN / 2);
 
                     context.moveTo(sx, sy);
-                    context.lineTo(stubR - r, sy);
+                    context.lineTo(stubR - r * dir, sy);
                     context.arcTo(stubR, sy, stubR, sy + (down ? r : -r), r);
                     context.lineTo(stubR, midY + (down ? -r : r));
-                    context.arcTo(stubR, midY, stubR - r, midY, r);
-                    context.lineTo(stubL + r, midY);
+                    context.arcTo(stubR, midY, stubR - r * dir, midY, r);
+                    context.lineTo(stubL + r * dir, midY);
                     context.arcTo(stubL, midY, stubL, midY + (down ? r : -r), r);
                     context.lineTo(stubL, ty + (down ? -r : r));
-                    context.arcTo(stubL, ty, stubL + r, ty, r);
+                    context.arcTo(stubL, ty, stubL + r * dir, ty, r);
                     context.lineTo(tx, ty);
                 }
 
                 context.stroke();
 
-                // Arrowhead.
+                // Arrowhead pointing in the direction of flow.
                 context.beginPath();
                 context.moveTo(tx, ty);
-                context.lineTo(tx - ARROW_SIZE, ty - ARROW_SIZE / 2);
-                context.lineTo(tx - ARROW_SIZE, ty + ARROW_SIZE / 2);
+                context.lineTo(tx - ARROW_SIZE * dir, ty - ARROW_SIZE / 2);
+                context.lineTo(tx - ARROW_SIZE * dir, ty + ARROW_SIZE / 2);
                 context.closePath();
                 context.fill();
             }

@@ -23,6 +23,12 @@
       overflow: hidden;
     }
     canvas { display: block; width: 100%; height: 350px; }
+    .btn-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .btn-row button {
+      background: transparent; color: #aaa; border: 1px solid #444;
+      padding: 4px 14px; border-radius: 4px; cursor: pointer; font-size: 0.85em;
+    }
+    .btn-row button.active { color: #fff; border-color: #ff0071; background: rgba(255,0,113,0.15); }
   </style>
 </head>
 <body>
@@ -31,6 +37,10 @@
 
   <div class="demo">
     <h2>Linear Chain</h2>
+    <div class="btn-row" id="btns-linear">
+      <button class="active" onclick="toggleDir('linear', false, this)">LTR</button>
+      <button onclick="toggleDir('linear', true, this)">RTL</button>
+    </div>
     <div class="demo-container">
       <canvas id="demo-linear"></canvas>
     </div>
@@ -38,6 +48,10 @@
 
   <div class="demo">
     <h2>Multiple Dependencies</h2>
+    <div class="btn-row" id="btns-multi">
+      <button class="active" onclick="toggleDir('multi', false, this)">LTR</button>
+      <button onclick="toggleDir('multi', true, this)">RTL</button>
+    </div>
     <div class="demo-container">
       <canvas id="demo-multi"></canvas>
     </div>
@@ -45,6 +59,10 @@
 
   <div class="demo">
     <h2>Cross-Group Dependencies</h2>
+    <div class="btn-row" id="btns-cross">
+      <button class="active" onclick="toggleDir('cross', false, this)">LTR</button>
+      <button onclick="toggleDir('cross', true, this)">RTL</button>
+    </div>
     <div class="demo-container">
       <canvas id="demo-cross"></canvas>
     </div>
@@ -53,12 +71,11 @@
   <script>
     var TT = tempis_timeline.TempisTimeline;
     var baseStyle = { item: { borderRadius: 4, fontColor: '#fff' } };
+    var demos = {};
+    var configs = {};
 
-    // Linear chain: A → B → C → D
-    new TT('#demo-linear', {
-      responsive: true,
-      verticalFill: 'fill-canvas',
-      style: baseStyle,
+    configs.linear = {
+      responsive: true, verticalFill: 'fill-canvas', style: baseStyle,
       items: [
         { id: 1, label: 'Research',    start: '2026-01-05', end: '2026-01-12' },
         { id: 2, label: 'Design',      start: '2026-01-13', end: '2026-01-20', dependencies: [1] },
@@ -67,13 +84,10 @@
         { id: 5, label: 'Release',     start: '2026-02-14', dependencies: [4] },
       ],
       range: { start: '2026-01-01', end: '2026-02-20', position: 'bottom' }
-    });
+    };
 
-    // Multiple dependencies: several items feed into one
-    new TT('#demo-multi', {
-      responsive: true,
-      verticalFill: 'fill-canvas',
-      style: baseStyle,
+    configs.multi = {
+      responsive: true, verticalFill: 'fill-canvas', style: baseStyle,
       categories: [
         { name: 'prep',  label: 'Preparation', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
         { name: 'build', label: 'Build',        style: { backgroundColor: '#10b981', fontColor: '#fff' } },
@@ -89,13 +103,10 @@
         { id: 6, label: 'Deploy',         start: '2026-03-06', end: '2026-03-08', category: 'ship',  dependencies: [5] },
       ],
       range: { start: '2026-01-28', end: '2026-03-12', position: 'bottom' }
-    });
+    };
 
-    // Cross-group dependencies
-    new TT('#demo-cross', {
-      responsive: true,
-      verticalFill: 'fill-canvas',
-      style: baseStyle,
+    configs.cross = {
+      responsive: true, verticalFill: 'fill-canvas', style: baseStyle,
       categories: [
         { name: 'fe', label: 'Frontend', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
         { name: 'be', label: 'Backend',  style: { backgroundColor: '#f43f5e', fontColor: '#fff' } },
@@ -103,15 +114,32 @@
       ],
       legend: { position: 'bottom' },
       items: [
-        { id: 1,  label: 'API Endpoints',  start: '2026-03-01', end: '2026-03-12', category: 'be',  grouping: 'Backend' },
-        { id: 2,  label: 'Auth Service',   start: '2026-03-05', end: '2026-03-15', category: 'be',  grouping: 'Backend' },
-        { id: 3,  label: 'UI Components',  start: '2026-03-08', end: '2026-03-18', category: 'fe',  grouping: 'Frontend', dependencies: [1] },
-        { id: 4,  label: 'Login Flow',     start: '2026-03-16', end: '2026-03-22', category: 'fe',  grouping: 'Frontend', dependencies: [2, 3] },
-        { id: 5,  label: 'CI Pipeline',    start: '2026-03-10', end: '2026-03-16', category: 'ops', grouping: 'DevOps', dependencies: [1] },
-        { id: 6,  label: 'Staging Deploy', start: '2026-03-23', end: '2026-03-25', category: 'ops', grouping: 'DevOps', dependencies: [4, 5] },
+        { id: 1, label: 'API Endpoints',  start: '2026-03-01', end: '2026-03-12', category: 'be',  grouping: 'Backend' },
+        { id: 2, label: 'Auth Service',   start: '2026-03-05', end: '2026-03-15', category: 'be',  grouping: 'Backend' },
+        { id: 3, label: 'UI Components',  start: '2026-03-08', end: '2026-03-18', category: 'fe',  grouping: 'Frontend', dependencies: [1] },
+        { id: 4, label: 'Login Flow',     start: '2026-03-16', end: '2026-03-22', category: 'fe',  grouping: 'Frontend', dependencies: [2, 3] },
+        { id: 5, label: 'CI Pipeline',    start: '2026-03-10', end: '2026-03-16', category: 'ops', grouping: 'DevOps', dependencies: [1] },
+        { id: 6, label: 'Staging Deploy', start: '2026-03-23', end: '2026-03-25', category: 'ops', grouping: 'DevOps', dependencies: [4, 5] },
       ],
       range: { start: '2026-02-26', end: '2026-03-28', position: 'bottom' }
-    });
+    };
+
+    function createDemo(name, rtl) {
+      var cfg = Object.assign({}, configs[name], { rtl: !!rtl });
+      return new TT('#demo-' + name, cfg);
+    }
+
+    function toggleDir(name, rtl, btn) {
+      demos[name].destroy();
+      demos[name] = createDemo(name, rtl);
+      var row = btn.parentElement;
+      row.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+    }
+
+    demos.linear = createDemo('linear', false);
+    demos.multi = createDemo('multi', false);
+    demos.cross = createDemo('cross', false);
   </script>
 </body>
 </html>
