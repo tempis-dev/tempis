@@ -11,8 +11,9 @@ function build() {
 
 build();
 
-const watcher = chokidar.watch(["site", "examples", "lib"], {
+const watcher = chokidar.watch(["site", "examples"], {
   ignoreInitial: true,
+  ignored: ["**/dist/**"],
   awaitWriteFinish: { stabilityThreshold: 200 },
 });
 
@@ -22,4 +23,4 @@ watcher.on("all", () => {
   timeout = setTimeout(build, 300);
 });
 
-console.log("Watching site/, examples/, lib/ for changes...");
+console.log("Watching site/, examples/ for changes...");
