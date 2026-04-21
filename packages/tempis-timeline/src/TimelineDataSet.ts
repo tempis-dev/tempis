@@ -32,6 +32,9 @@ export class TimelineDataSet {
     /** The currently focused category. */
     private _focusedCategory: TimelineItemCategory | null = null;
 
+    /** Whether any items in the dataset have dependencies defined. */
+    private _hasDependencies: boolean = false;
+
     /** The registered update callbacks that are to be invoked when the dataset is updated. */
     private _registeredUpdateCallbacks: UpdateCallback[] = [];
 
@@ -67,6 +70,11 @@ export class TimelineDataSet {
     /** Gets the currently focused category, or null if there is no focused category. */
     public get focusedCategory(): TimelineItemCategory | null {
         return this._focusedCategory;
+    }
+
+    /** Whether any items in the dataset have dependencies. */
+    public get hasDependencies(): boolean {
+        return this._hasDependencies;
     }
 
     /**
@@ -204,6 +212,11 @@ export class TimelineDataSet {
 
         // Then we need to create our actual groupings and item models.
         this._createGroupings(options);
+
+        // Check if any items have dependencies.
+        this._hasDependencies = this._groupings.some((grouping) =>
+            grouping.items.some((item) => item.dependencies.length > 0)
+        );
 
         // We have updated the dataset, so any registered update callbacks should be invoked.
         this._invokeUpdateCallbacks();
