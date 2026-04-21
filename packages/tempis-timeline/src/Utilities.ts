@@ -6,6 +6,11 @@ import { AdapterRegistry } from "./AdapterRegistry";
 export const GRID_COLOUR = "#808080";
 
 /**
+ * The default scrollbar colour — the grid colour with 50% transparency.
+ */
+export const GRID_COLOUR_TRANSPARENT = "rgba(128, 128, 128, 0.5)";
+
+/**
  * Easing function names for animations.
  */
 export type EasingFunction =

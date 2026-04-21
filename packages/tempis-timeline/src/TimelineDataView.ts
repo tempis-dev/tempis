@@ -3,7 +3,7 @@ import { TimelineBand } from "./TimelineBand";
 import { TimelineItem } from "./TimelineItem";
 import { TempisTimelineStackMode, TempisTimelineScrollbarOptions } from "./TempisTimelineOptions";
 import { RangeTick } from "./TimelineRangeView";
-import { clamp, doDateRangesOverlap, drawClippedText, EasingFunction, GRID_COLOUR } from "./Utilities";
+import { clamp, doDateRangesOverlap, drawClippedText, EasingFunction, GRID_COLOUR, GRID_COLOUR_TRANSPARENT } from "./Utilities";
 
 export interface DataViewDrawPlan {
     /** The height that is required to draw all groups and items within the specified date range. */
@@ -415,7 +415,7 @@ export class TimelineDataView {
         const scrollRatio = Math.abs(this._scrollYOffset) / (this._drawPlan.height - height);
         const thumbY = yPosition + scrollbarMargin + scrollRatio * scrollableHeight;
 
-        const scrollbarColor = this._scrollbarOptions.color ?? GRID_COLOUR;
+        const scrollbarColor = this._scrollbarOptions.color ?? GRID_COLOUR_TRANSPARENT;
 
         // Draw scrollbar track (subtle background)
         context.save();
