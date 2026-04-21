@@ -531,97 +531,7 @@ export class TimelineDataView {
 
         // We need a third pass to draw dependency arrows between items (only if any dependencies exist).
         if (this._dataSet.hasDependencies) {
-            // Build a lookup map of item ID → draw plan for quick access.
-            const itemDrawPlanMap = new Map<string | number, DataViewItemDrawPlan>();
-            for (const groupDrawPlan of this._drawPlan.groupDrawPlans) {
-                for (const row of groupDrawPlan.rows) {
-                    for (const itemDrawPlan of row) {
-                        itemDrawPlanMap.set(itemDrawPlan.item.id, itemDrawPlan);
-                    }
-                }
-            }
-
-            // Draw arrows for each dependency relationship.
-            for (const [, targetPlan] of itemDrawPlanMap) {
-                if (targetPlan.item.dependencies.length === 0) continue;
-
-                for (const depId of targetPlan.item.dependencies) {
-                    const sourcePlan = itemDrawPlanMap.get(depId);
-                    if (!sourcePlan) continue;
-
-                    // Source: right edge, vertical centre.
-                    const sourceX = sourcePlan.xPositionEnd;
-                    const sourceY = scrolledYPosition + (sourcePlan.yPositionStart + sourcePlan.yPositionEnd) / 2;
-
-                    // Target: left edge, vertical centre.
-                    const targetX = targetPlan.xPositionStart;
-                    const targetY = scrolledYPosition + (targetPlan.yPositionStart + targetPlan.yPositionEnd) / 2;
-
-                    // Don't draw if both endpoints are off-screen.
-                    if (sourceX < 0 && targetX < 0) continue;
-                    if (sourceX > context.canvas.clientWidth && targetX > context.canvas.clientWidth) continue;
-
-                    context.strokeStyle = GRID_COLOUR;
-                    context.lineWidth = 1.5;
-                    context.setLineDash([]);
-                    context.beginPath();
-
-                    const arrowSize = 6;
-                    const margin = 12;
-                    const radius = 6;
-
-                    if (sourceY === targetY && targetX > sourceX) {
-                        // Same row, no overlap — straight horizontal line.
-                        context.moveTo(sourceX, sourceY);
-                        context.lineTo(targetX, targetY);
-                        context.stroke();
-                    } else if (targetX > sourceX + margin * 2) {
-                        // Target is to the right with enough space — step connector.
-                        // Go right to midpoint, then vertical to target row, then right to target.
-                        const midX = (sourceX + targetX) / 2;
-                        const goingDown = targetY > sourceY;
-                        const r = Math.min(radius, Math.abs(midX - sourceX), Math.abs(targetY - sourceY) / 2);
-
-                        context.moveTo(sourceX, sourceY);
-                        context.lineTo(midX - r, sourceY);
-                        context.arcTo(midX, sourceY, midX, sourceY + (goingDown ? r : -r), r);
-                        context.lineTo(midX, targetY + (goingDown ? -r : r));
-                        context.arcTo(midX, targetY, midX + r, targetY, r);
-                        context.lineTo(targetX, targetY);
-                        context.stroke();
-                    } else {
-                        // Overlapping or close — S-shaped route around both items.
-                        const goingDown = targetY >= sourceY;
-                        const midY = goingDown
-                            ? scrolledYPosition + (sourcePlan.yPositionEnd + targetPlan.yPositionStart) / 2
-                            : scrolledYPosition + (targetPlan.yPositionEnd + sourcePlan.yPositionStart) / 2;
-                        const stubX = sourceX + margin;
-                        const stubTargetX = targetX - margin;
-                        const r = Math.min(radius, Math.abs(midY - sourceY) / 2, margin / 2);
-
-                        context.moveTo(sourceX, sourceY);
-                        context.lineTo(stubX - r, sourceY);
-                        context.arcTo(stubX, sourceY, stubX, sourceY + (goingDown ? r : -r), r);
-                        context.lineTo(stubX, midY + (goingDown ? -r : r));
-                        context.arcTo(stubX, midY, stubX - r, midY, r);
-                        context.lineTo(stubTargetX + r, midY);
-                        context.arcTo(stubTargetX, midY, stubTargetX, midY + (goingDown ? r : -r), r);
-                        context.lineTo(stubTargetX, targetY + (goingDown ? -r : r));
-                        context.arcTo(stubTargetX, targetY, stubTargetX + r, targetY, r);
-                        context.lineTo(targetX, targetY);
-                        context.stroke();
-                    }
-
-                    // Arrowhead pointing right.
-                    context.fillStyle = GRID_COLOUR;
-                    context.beginPath();
-                    context.moveTo(targetX, targetY);
-                    context.lineTo(targetX - arrowSize, targetY - arrowSize / 2);
-                    context.lineTo(targetX - arrowSize, targetY + arrowSize / 2);
-                    context.closePath();
-                    context.fill();
-                }
-            }
+            this._drawDependencyArrows(context, scrolledYPosition);
         }
 
         // Always revert the canvas text align to be left.
@@ -827,6 +737,105 @@ export class TimelineDataView {
                         maxLabelWidth
                     );
                 }
+            }
+        }
+    }
+
+    /**
+     * Draw dependency arrows between items that have dependencies defined.
+     * Uses orthogonal routing with rounded corners:
+     * - Straight line when source and target are on the same row with no overlap.
+     * - Step connector (right → down/up → right) when target is to the right with space.
+     * - S-shaped connector when items overlap horizontally.
+     * @param context The canvas context.
+     * @param scrolledYPosition The y position including scroll offset.
+     */
+    private _drawDependencyArrows(context: CanvasRenderingContext2D, scrolledYPosition: number): void {
+        if (!this._drawPlan) return;
+
+        const ARROW_SIZE = 6;
+        const MARGIN = 12;
+        const RADIUS = 6;
+
+        // Build a lookup map of item ID → draw plan.
+        const planMap = new Map<string | number, DataViewItemDrawPlan>();
+        for (const group of this._drawPlan.groupDrawPlans) {
+            for (const row of group.rows) {
+                for (const plan of row) {
+                    planMap.set(plan.item.id, plan);
+                }
+            }
+        }
+
+        context.strokeStyle = GRID_COLOUR;
+        context.fillStyle = GRID_COLOUR;
+        context.lineWidth = 1.5;
+        context.setLineDash([]);
+
+        for (const [, target] of planMap) {
+            if (target.item.dependencies.length === 0) continue;
+
+            for (const depId of target.item.dependencies) {
+                const source = planMap.get(depId);
+                if (!source) continue;
+
+                const sx = source.xPositionEnd;
+                const sy = scrolledYPosition + (source.yPositionStart + source.yPositionEnd) / 2;
+                const tx = target.xPositionStart;
+                const ty = scrolledYPosition + (target.yPositionStart + target.yPositionEnd) / 2;
+
+                // Skip if both endpoints are off-screen.
+                if ((sx < 0 && tx < 0) || (sx > context.canvas.clientWidth && tx > context.canvas.clientWidth)) continue;
+
+                context.beginPath();
+
+                if (sy === ty && tx > sx) {
+                    // Same row, no overlap — straight line.
+                    context.moveTo(sx, sy);
+                    context.lineTo(tx, ty);
+                } else if (tx > sx + MARGIN * 2) {
+                    // Step connector: right → vertical → right.
+                    const midX = (sx + tx) / 2;
+                    const down = ty > sy;
+                    const r = Math.min(RADIUS, Math.abs(midX - sx), Math.abs(ty - sy) / 2);
+
+                    context.moveTo(sx, sy);
+                    context.lineTo(midX - r, sy);
+                    context.arcTo(midX, sy, midX, sy + (down ? r : -r), r);
+                    context.lineTo(midX, ty + (down ? -r : r));
+                    context.arcTo(midX, ty, midX + r, ty, r);
+                    context.lineTo(tx, ty);
+                } else {
+                    // S-shaped connector: right → vertical → horizontal → vertical → right.
+                    const down = ty >= sy;
+                    const midY = down
+                        ? scrolledYPosition + (source.yPositionEnd + target.yPositionStart) / 2
+                        : scrolledYPosition + (target.yPositionEnd + source.yPositionStart) / 2;
+                    const stubR = sx + MARGIN;
+                    const stubL = tx - MARGIN;
+                    const r = Math.min(RADIUS, Math.abs(midY - sy) / 2, MARGIN / 2);
+
+                    context.moveTo(sx, sy);
+                    context.lineTo(stubR - r, sy);
+                    context.arcTo(stubR, sy, stubR, sy + (down ? r : -r), r);
+                    context.lineTo(stubR, midY + (down ? -r : r));
+                    context.arcTo(stubR, midY, stubR - r, midY, r);
+                    context.lineTo(stubL + r, midY);
+                    context.arcTo(stubL, midY, stubL, midY + (down ? r : -r), r);
+                    context.lineTo(stubL, ty + (down ? -r : r));
+                    context.arcTo(stubL, ty, stubL + r, ty, r);
+                    context.lineTo(tx, ty);
+                }
+
+                context.stroke();
+
+                // Arrowhead.
+                context.beginPath();
+                context.moveTo(tx, ty);
+                context.lineTo(tx - ARROW_SIZE, ty - ARROW_SIZE / 2);
+                context.lineTo(tx - ARROW_SIZE, ty + ARROW_SIZE / 2);
+                context.closePath();
+                context.fill();
             }
         }
     }
