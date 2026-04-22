@@ -26,9 +26,6 @@ export class TimelineItem {
     /** Whether the item is currently selected. */
     private _isSelected: boolean;
 
-    /** IDs of items this item depends on. */
-    private readonly _dependencies: (string | number)[];
-
     /**
      * Creates a new instance of the TimelineItem class.
      * @param definition The item definition.
@@ -43,7 +40,6 @@ export class TimelineItem {
         this._end = definition.end ? parseDate(definition.end) : null;
         this._style = style;
         this._isSelected = !!definition.selected;
-        this._dependencies = definition.dependencies ?? [];
     }
 
     /** Gets the item definition. */
@@ -87,10 +83,5 @@ export class TimelineItem {
     }
     public set isSelected(value: boolean) {
         this._isSelected = value;
-    }
-
-    /** Gets the IDs of items this item depends on. */
-    public get dependencies(): (string | number)[] {
-        return this._dependencies;
     }
 }

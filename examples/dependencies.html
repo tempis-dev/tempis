@@ -7,139 +7,142 @@
   <script src="../lib/tempis_timeline.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #111;
-      color: #f5f5f5;
-      padding: 32px;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #111; color: #f5f5f5; padding: 32px; }
     h1 { font-size: 1.6em; font-weight: 700; margin-bottom: 8px; }
     p { color: #888; margin-bottom: 24px; font-size: 0.95em; }
     .demo { margin-bottom: 40px; }
     .demo h2 { font-size: 1.1em; font-weight: 600; margin-bottom: 12px; color: #ccc; }
-    .demo-container {
-      border: 1px solid #333;
-      border-radius: 8px;
-      overflow: hidden;
-    }
+    .demo-container { border: 1px solid #333; border-radius: 8px; overflow: hidden; }
     canvas { display: block; width: 100%; height: 350px; }
     .btn-row { display: flex; gap: 8px; margin-bottom: 12px; }
-    .btn-row button {
-      background: transparent; color: #aaa; border: 1px solid #444;
-      padding: 4px 14px; border-radius: 4px; cursor: pointer; font-size: 0.85em;
-    }
+    .btn-row button { background: transparent; color: #aaa; border: 1px solid #444; padding: 4px 14px; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
     .btn-row button.active { color: #fff; border-color: #ff0071; background: rgba(255,0,113,0.15); }
   </style>
 </head>
 <body>
   <h1>Item Dependencies</h1>
-  <p>Dependency arrows connect items to show relationships. Arrows are drawn from the end of the source item to the start of the dependent item.</p>
+  <p>Dependency arrows connect items to show relationships. Dependencies are defined separately from items as source → target pairs.</p>
 
   <div class="demo">
     <h2>Linear Chain</h2>
-    <div class="btn-row" id="btns-linear">
-      <button class="active" onclick="toggleDir('linear', false, this)">LTR</button>
-      <button onclick="toggleDir('linear', true, this)">RTL</button>
-    </div>
-    <div class="demo-container">
-      <canvas id="demo-linear"></canvas>
-    </div>
+    <div class="btn-row" id="btns-linear"><button class="active" onclick="toggle('linear',false,this)">LTR</button><button onclick="toggle('linear',true,this)">RTL</button></div>
+    <div class="demo-container"><canvas id="demo-linear"></canvas></div>
   </div>
-
   <div class="demo">
     <h2>Multiple Dependencies</h2>
-    <div class="btn-row" id="btns-multi">
-      <button class="active" onclick="toggleDir('multi', false, this)">LTR</button>
-      <button onclick="toggleDir('multi', true, this)">RTL</button>
-    </div>
-    <div class="demo-container">
-      <canvas id="demo-multi"></canvas>
-    </div>
+    <div class="btn-row" id="btns-multi"><button class="active" onclick="toggle('multi',false,this)">LTR</button><button onclick="toggle('multi',true,this)">RTL</button></div>
+    <div class="demo-container"><canvas id="demo-multi"></canvas></div>
   </div>
-
   <div class="demo">
     <h2>Cross-Group Dependencies</h2>
-    <div class="btn-row" id="btns-cross">
-      <button class="active" onclick="toggleDir('cross', false, this)">LTR</button>
-      <button onclick="toggleDir('cross', true, this)">RTL</button>
-    </div>
-    <div class="demo-container">
-      <canvas id="demo-cross"></canvas>
-    </div>
+    <div class="btn-row" id="btns-cross"><button class="active" onclick="toggle('cross',false,this)">LTR</button><button onclick="toggle('cross',true,this)">RTL</button></div>
+    <div class="demo-container"><canvas id="demo-cross"></canvas></div>
+  </div>
+  <div class="demo">
+    <h2>Varying Item Sizes</h2>
+    <div class="btn-row" id="btns-sizes"><button class="active" onclick="toggle('sizes',false,this)">LTR</button><button onclick="toggle('sizes',true,this)">RTL</button></div>
+    <div class="demo-container"><canvas id="demo-sizes"></canvas></div>
   </div>
 
   <script>
     var TT = tempis_timeline.TempisTimeline;
-    var baseStyle = { item: { borderRadius: 4, fontColor: '#fff' } };
-    var demos = {};
-    var configs = {};
+    var base = { item: { borderRadius: 4, fontColor: '#fff' } };
+    var demos = {}, configs = {};
 
     configs.linear = {
-      responsive: true, verticalFill: 'fill-canvas', style: baseStyle,
+      responsive: true, verticalFill: 'fill-canvas', style: base,
       items: [
         { id: 1, label: 'Research',    start: '2026-01-05', end: '2026-01-12' },
-        { id: 2, label: 'Design',      start: '2026-01-13', end: '2026-01-20', dependencies: [1] },
-        { id: 3, label: 'Development', start: '2026-01-21', end: '2026-02-04', dependencies: [2] },
-        { id: 4, label: 'Testing',     start: '2026-02-05', end: '2026-02-12', dependencies: [3] },
-        { id: 5, label: 'Release',     start: '2026-02-14', dependencies: [4] },
+        { id: 2, label: 'Design',      start: '2026-01-13', end: '2026-01-20' },
+        { id: 3, label: 'Development', start: '2026-01-21', end: '2026-02-04' },
+        { id: 4, label: 'Testing',     start: '2026-02-05', end: '2026-02-12' },
+        { id: 5, label: 'Release',     start: '2026-02-14' }
+      ],
+      dependencies: [
+        { source: 1, target: 2 }, { source: 2, target: 3 },
+        { source: 3, target: 4 }, { source: 4, target: 5 }
       ],
       range: { start: '2026-01-01', end: '2026-02-20', position: 'bottom' }
     };
 
     configs.multi = {
-      responsive: true, verticalFill: 'fill-canvas', style: baseStyle,
+      responsive: true, verticalFill: 'fill-canvas', style: base,
       categories: [
         { name: 'prep',  label: 'Preparation', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
         { name: 'build', label: 'Build',        style: { backgroundColor: '#10b981', fontColor: '#fff' } },
-        { name: 'ship',  label: 'Ship',         style: { backgroundColor: '#f59e0b', fontColor: '#111' } },
+        { name: 'ship',  label: 'Ship',         style: { backgroundColor: '#f59e0b', fontColor: '#111' } }
       ],
       legend: { position: 'bottom' },
       items: [
         { id: 1, label: 'API Design',     start: '2026-02-01', end: '2026-02-10', category: 'prep' },
         { id: 2, label: 'UI Mockups',     start: '2026-02-03', end: '2026-02-12', category: 'prep' },
         { id: 3, label: 'Data Model',     start: '2026-02-02', end: '2026-02-08', category: 'prep' },
-        { id: 4, label: 'Implementation', start: '2026-02-13', end: '2026-02-25', category: 'build', dependencies: [1, 2, 3] },
-        { id: 5, label: 'QA',             start: '2026-02-26', end: '2026-03-05', category: 'build', dependencies: [4] },
-        { id: 6, label: 'Deploy',         start: '2026-03-06', end: '2026-03-08', category: 'ship',  dependencies: [5] },
+        { id: 4, label: 'Implementation', start: '2026-02-13', end: '2026-02-25', category: 'build' },
+        { id: 5, label: 'QA',             start: '2026-02-26', end: '2026-03-05', category: 'build' },
+        { id: 6, label: 'Deploy',         start: '2026-03-06', end: '2026-03-08', category: 'ship' }
+      ],
+      dependencies: [
+        { source: 1, target: 4 }, { source: 2, target: 4 }, { source: 3, target: 4 },
+        { source: 4, target: 5 }, { source: 5, target: 6 }
       ],
       range: { start: '2026-01-28', end: '2026-03-12', position: 'bottom' }
     };
 
     configs.cross = {
-      responsive: true, verticalFill: 'fill-canvas', style: baseStyle,
+      responsive: true, verticalFill: 'fill-canvas', style: base,
       categories: [
-        { name: 'fe', label: 'Frontend', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
-        { name: 'be', label: 'Backend',  style: { backgroundColor: '#f43f5e', fontColor: '#fff' } },
-        { name: 'ops', label: 'DevOps',  style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+        { name: 'fe',  label: 'Frontend', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+        { name: 'be',  label: 'Backend',  style: { backgroundColor: '#f43f5e', fontColor: '#fff' } },
+        { name: 'ops', label: 'DevOps',   style: { backgroundColor: '#10b981', fontColor: '#fff' } }
       ],
       legend: { position: 'bottom' },
       items: [
         { id: 1, label: 'API Endpoints',  start: '2026-03-01', end: '2026-03-12', category: 'be',  grouping: 'Backend' },
         { id: 2, label: 'Auth Service',   start: '2026-03-05', end: '2026-03-15', category: 'be',  grouping: 'Backend' },
-        { id: 3, label: 'UI Components',  start: '2026-03-08', end: '2026-03-18', category: 'fe',  grouping: 'Frontend', dependencies: [1] },
-        { id: 4, label: 'Login Flow',     start: '2026-03-16', end: '2026-03-22', category: 'fe',  grouping: 'Frontend', dependencies: [2, 3] },
-        { id: 5, label: 'CI Pipeline',    start: '2026-03-10', end: '2026-03-16', category: 'ops', grouping: 'DevOps', dependencies: [1] },
-        { id: 6, label: 'Staging Deploy', start: '2026-03-23', end: '2026-03-25', category: 'ops', grouping: 'DevOps', dependencies: [4, 5] },
+        { id: 3, label: 'UI Components',  start: '2026-03-08', end: '2026-03-18', category: 'fe',  grouping: 'Frontend' },
+        { id: 4, label: 'Login Flow',     start: '2026-03-16', end: '2026-03-22', category: 'fe',  grouping: 'Frontend' },
+        { id: 5, label: 'CI Pipeline',    start: '2026-03-10', end: '2026-03-16', category: 'ops', grouping: 'DevOps' },
+        { id: 6, label: 'Staging Deploy', start: '2026-03-23', end: '2026-03-25', category: 'ops', grouping: 'DevOps' }
+      ],
+      dependencies: [
+        { source: 1, target: 3 }, { source: 2, target: 4 }, { source: 3, target: 4 },
+        { source: 1, target: 5 }, { source: 4, target: 6 }, { source: 5, target: 6 }
       ],
       range: { start: '2026-02-26', end: '2026-03-28', position: 'bottom' }
     };
 
-    function createDemo(name, rtl) {
-      var cfg = Object.assign({}, configs[name], { rtl: !!rtl });
-      return new TT('#demo-' + name, cfg);
-    }
+    configs.sizes = {
+      responsive: true, verticalFill: 'fill-canvas', style: base,
+      items: [
+        { id: 1, label: 'Brief',       start: '2026-04-01', end: '2026-04-03', style: { padding: 4 } },
+        { id: 2, label: 'Exploration', start: '2026-04-04', end: '2026-04-14', style: { padding: 18 } },
+        { id: 3, label: 'Review',      start: '2026-04-10', end: '2026-04-12', style: { padding: 6 } },
+        { id: 4, label: 'Build Phase', start: '2026-04-15', end: '2026-04-28', style: { padding: 22 } },
+        { id: 5, label: 'QA',          start: '2026-04-20', end: '2026-04-24', style: { padding: 8 } },
+        { id: 6, label: 'Sign-off',    start: '2026-04-29', end: '2026-04-30', style: { padding: 4 } }
+      ],
+      dependencies: [
+        { source: 1, target: 2 }, { source: 1, target: 3 },
+        { source: 2, target: 4 }, { source: 3, target: 4 },
+        { source: 2, target: 5 }, { source: 4, target: 6 }, { source: 5, target: 6 }
+      ],
+      range: { start: '2026-03-28', end: '2026-05-04', position: 'bottom' }
+    };
 
-    function toggleDir(name, rtl, btn) {
+    function create(name, rtl) {
+      return new TT('#demo-' + name, Object.assign({}, configs[name], { rtl: !!rtl }));
+    }
+    function toggle(name, rtl, btn) {
       demos[name].destroy();
-      demos[name] = createDemo(name, rtl);
-      var row = btn.parentElement;
-      row.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
+      demos[name] = create(name, rtl);
+      btn.parentElement.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
       btn.classList.add('active');
     }
 
-    demos.linear = createDemo('linear', false);
-    demos.multi = createDemo('multi', false);
-    demos.cross = createDemo('cross', false);
+    demos.linear = create('linear', false);
+    demos.multi  = create('multi', false);
+    demos.cross  = create('cross', false);
+    demos.sizes  = create('sizes', false);
   </script>
 </body>
 </html>

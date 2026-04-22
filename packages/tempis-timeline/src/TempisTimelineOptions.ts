@@ -45,6 +45,9 @@ export interface TempisTimelineOptions {
     /** The items to display on the timeline. */
     items: TempisTimelineItem[];
 
+    /** The timeline item dependencies. */
+    dependencies?: TempisTimelineDependency[];
+
     /**
      * The stack mode which defines how items are vertically arranged. Defaults to `"stable"`.
      * - `"compact"` – Items are dynamically stacked based on visible items only. PIT labels are adjusted to fit within canvas bounds. Layout updates when panning.
@@ -379,9 +382,6 @@ export interface TempisTimelineItem {
 
     /** A flag defining whether the item is selected. */
     selected?: boolean;
-
-    /** IDs of items that this item depends on. Renders connector arrows from each dependency to this item. */
-    dependencies?: (string | number)[];
 }
 
 /**
@@ -427,4 +427,16 @@ export interface TempisTimelineBandStyle {
 
     /** The band opacity. */
     opacity?: number;
+}
+
+/**
+ * A dependency relationship between two timeline items.
+ * Renders a connector arrow from the source item to the target item.
+ */
+export interface TempisTimelineDependency {
+    /** The ID of the source item (arrow starts here). */
+    source: string | number;
+
+    /** The ID of the target item (arrow points here). */
+    target: string | number;
 }

@@ -1,7 +1,7 @@
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineBand } from "./TimelineBand";
 import { TimelineItem } from "./TimelineItem";
-import { TempisTimelineStackMode, TempisTimelineScrollbarOptions } from "./TempisTimelineOptions";
+import { TempisTimelineStackMode, TempisTimelineScrollbarOptions, TempisTimelineDependency } from "./TempisTimelineOptions";
 import { RangeTick } from "./TimelineRangeView";
 import { clamp, doDateRangesOverlap, drawClippedText, EasingFunction, GRID_COLOUR, GRID_COLOUR_TRANSPARENT } from "./Utilities";
 
@@ -110,6 +110,9 @@ export class TimelineDataView {
     /** The scrollbar options. */
     private _scrollbarOptions: TempisTimelineScrollbarOptions;
 
+    /** The current dependency definitions. */
+    private _dependencies: TempisTimelineDependency[] = [];
+
     /**
      * Creates a new instance of the TimelineDataView class.
      * @param dataSet The timeline dataset model.
@@ -148,6 +151,14 @@ export class TimelineDataView {
      */
     public setHovering(isHovering: boolean): void {
         this._isHovering = isHovering;
+    }
+
+    /**
+     * Set the dependency definitions.
+     * @param dependencies The dependency definitions.
+     */
+    public setDependencies(dependencies: TempisTimelineDependency[]): void {
+        this._dependencies = dependencies;
     }
 
     /**
@@ -530,7 +541,7 @@ export class TimelineDataView {
         context.lineCap = "butt";
 
         // We need a third pass to draw dependency arrows between items (only if any dependencies exist).
-        if (this._dataSet.hasDependencies) {
+        if (this._dependencies.length > 0) {
             this._drawDependencyArrows(context, scrolledYPosition);
         }
 
@@ -773,18 +784,16 @@ export class TimelineDataView {
         context.lineWidth = 1.5;
         context.setLineDash([]);
 
-        for (const [, target] of planMap) {
-            if (target.item.dependencies.length === 0) continue;
+        for (const dependency of this._dependencies) {
+            const source = planMap.get(dependency.source);
+            const target = planMap.get(dependency.target);
+            if (!source || !target) continue;
 
-            for (const depId of target.item.dependencies) {
-                const source = planMap.get(depId);
-                if (!source) continue;
-
-                // In LTR: source right edge → target left edge. In RTL: source left edge → target right edge.
-                const sx = rtl ? source.xPositionStart : source.xPositionEnd;
-                const sy = scrolledYPosition + (source.yPositionStart + source.yPositionEnd) / 2;
-                const tx = rtl ? target.xPositionEnd : target.xPositionStart;
-                const ty = scrolledYPosition + (target.yPositionStart + target.yPositionEnd) / 2;
+            // In LTR: source right edge → target left edge. In RTL: source left edge → target right edge.
+            const sx = rtl ? source.xPositionStart : source.xPositionEnd;
+            const sy = scrolledYPosition + (source.yPositionStart + source.yPositionEnd) / 2;
+            const tx = rtl ? target.xPositionEnd : target.xPositionStart;
+            const ty = scrolledYPosition + (target.yPositionStart + target.yPositionEnd) / 2;
 
                 // Direction multiplier: +1 for LTR (arrows go right), -1 for RTL (arrows go left).
                 const dir = rtl ? -1 : 1;
@@ -841,7 +850,6 @@ export class TimelineDataView {
                 context.lineTo(tx - ARROW_SIZE * dir, ty + ARROW_SIZE / 2);
                 context.closePath();
                 context.fill();
-            }
         }
     }
 
