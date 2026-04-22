@@ -764,7 +764,7 @@ export class TimelineDataView {
     private _drawDependencyArrows(context: CanvasRenderingContext2D, scrolledYPosition: number): void {
         if (!this._drawPlan) return;
 
-        const ARROW_SIZE = 6;
+        const ARROW_SIZE = 7;
         const MARGIN = 12;
         const RADIUS = 6;
         const rtl = this._isRTL;
@@ -803,10 +803,13 @@ export class TimelineDataView {
 
                 context.beginPath();
 
-                if (sy === ty && (tx - sx) * dir > 0) {
-                    // Same row, no overlap — straight line.
+                if (sy === ty && (tx - sx) * dir > ARROW_SIZE) {
+                    // Same row, enough gap — straight line.
                     context.moveTo(sx, sy);
                     context.lineTo(tx, ty);
+                } else if (sy === ty && (tx - sx) * dir > 0) {
+                    // Same row, gap too small for arrow — skip entirely.
+                    continue;
                 } else if ((tx - sx) * dir > MARGIN * 2) {
                     // Step connector: horizontal → vertical → horizontal.
                     const midX = (sx + tx) / 2;
