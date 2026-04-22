@@ -8,6 +8,7 @@ export type {
     TempisTimelineBand,
     TempisTimelineBandStyle,
     TempisTimelineItemStyle,
+    TempisTimelineDependency,
     TempisTimelineOptions,
     TempisTimelineRangeOptions,
     TempisTimelineLegendOptions,

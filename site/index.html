@@ -298,6 +298,16 @@
 
     <div class="showcase-row showcase-row-reverse">
       <div class="showcase-text">
+        <h2>Show item dependencies</h2>
+        <p>Define source/target item relationships and the timeline renders connector arrows automatically.</p>
+      </div>
+      <div class="showcase-demo">
+        <canvas id="demo-deps"></canvas>
+      </div>
+    </div>
+
+    <div class="showcase-row">
+      <div class="showcase-text">
         <h2>Export to image</h2>
         <p>One call and you've got a PNG, JPEG, or WebP. Control DPR for crisp retina output.</p>
         <div class="showcase-actions">
@@ -625,6 +635,35 @@
       }
       scheduleNext();
     })();
+
+    // ── Dependencies demo ──
+    new TempisTimeline('#demo-deps', {
+      responsive: true,
+      verticalFill: 'fill-canvas',
+      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      categories: [
+        { name: 'prep',  label: 'Preparation', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+        { name: 'build', label: 'Build',        style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+        { name: 'ship',  label: 'Ship',         style: { backgroundColor: '#f59e0b', fontColor: '#111' } },
+      ],
+      legend: { position: 'bottom' },
+      items: [
+        { id: 1, label: 'API Design',     start: '2026-02-01', end: '2026-02-10', category: 'prep' },
+        { id: 2, label: 'UI Mockups',     start: '2026-02-03', end: '2026-02-12', category: 'prep' },
+        { id: 3, label: 'Data Model',     start: '2026-02-02', end: '2026-02-08', category: 'prep' },
+        { id: 4, label: 'Implementation', start: '2026-02-13', end: '2026-02-25', category: 'build' },
+        { id: 5, label: 'QA',             start: '2026-02-26', end: '2026-03-05', category: 'build' },
+        { id: 6, label: 'Deploy',         start: '2026-03-06', end: '2026-03-08', category: 'ship' },
+      ],
+      dependencies: [
+        { source: 1, target: 4 },
+        { source: 2, target: 4 },
+        { source: 3, target: 4 },
+        { source: 4, target: 5 },
+        { source: 5, target: 6 },
+      ],
+      range: { start: '2026-01-28', end: '2026-03-12', position: 'bottom' }
+    });
 
     // ── Export demo ──
     var exportTimeline = new TempisTimeline('#demo-export', {

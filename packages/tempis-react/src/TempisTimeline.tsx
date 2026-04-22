@@ -11,6 +11,7 @@ import {
     type TempisTimelineItem,
     type TempisTimelineCategory,
     type TempisTimelineBand,
+    type TempisTimelineDependency,
     type TempisTimelineRangeOptions,
     type TempisTimelineLegendOptions,
     type TempisTimelineTooltipOptions,
@@ -67,6 +68,12 @@ export interface TempisTimelineRef {
      * @param bands The timeline bands to set.
      */
     setBands(bands: TempisTimelineBand[]): void;
+
+    /**
+     * Sets the item dependencies and redraws the timeline.
+     * @param dependencies The dependency definitions.
+     */
+    setDependencies(dependencies: TempisTimelineDependency[]): void;
 
     /**
      * Programmatically sets the selected items by their identifiers.
@@ -162,6 +169,9 @@ export interface TempisTimelineProps {
     /** The timeline bands. */
     bands?: TempisTimelineBand[];
 
+    /** The timeline item dependencies. Each defines a source → target relationship rendered as a connector arrow. */
+    dependencies?: TempisTimelineDependency[];
+
     /** The timeline configuration options. */
     options?: TempisTimelineConfig;
 
@@ -206,6 +216,7 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
             items,
             categories,
             bands,
+            dependencies,
             options = {},
             onItemClick,
             onItemDoubleClick,
@@ -241,6 +252,7 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
                 items,
                 categories,
                 bands,
+                dependencies,
                 onItemClick: (id) => callbacksRef.current.onItemClick?.(id),
                 onItemDoubleClick: (id) => callbacksRef.current.onItemDoubleClick?.(id),
                 onItemHover: (id) => callbacksRef.current.onItemHover?.(id),
@@ -272,6 +284,11 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
             if (bands) instanceRef.current?.setBands(bands);
         }, [bands]);
 
+        // Sync dependencies.
+        useEffect(() => {
+            if (dependencies) instanceRef.current?.setDependencies(dependencies);
+        }, [dependencies]);
+
         // We need to expose the imperative methods for the instance ref.
         useImperativeHandle(ref, () => ({
             focus: (opts) => instanceRef.current?.focus(opts),
@@ -281,6 +298,7 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
             setCategories: (c) => instanceRef.current?.setCategories(c),
             getCategories: () => instanceRef.current?.getCategories() ?? [],
             setBands: (b) => instanceRef.current?.setBands(b),
+            setDependencies: (d) => instanceRef.current?.setDependencies(d),
             setSelection: (ids) => instanceRef.current?.setSelection(ids),
             getSelection: () => instanceRef.current?.getSelection() ?? [],
             clearSelection: () => instanceRef.current?.clearSelection(),
