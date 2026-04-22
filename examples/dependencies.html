@@ -3,146 +3,155 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dependencies — Tempis Timeline</title>
+  <title>Dependencies — Mobile App Launch</title>
   <script src="../lib/tempis_timeline.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #111; color: #f5f5f5; padding: 32px; }
-    h1 { font-size: 1.6em; font-weight: 700; margin-bottom: 8px; }
-    p { color: #888; margin-bottom: 24px; font-size: 0.95em; }
-    .demo { margin-bottom: 40px; }
-    .demo h2 { font-size: 1.1em; font-weight: 600; margin-bottom: 12px; color: #ccc; }
-    .demo-container { border: 1px solid #333; border-radius: 8px; overflow: hidden; }
-    canvas { display: block; width: 100%; height: 350px; }
-    .btn-row { display: flex; gap: 8px; margin-bottom: 12px; }
-    .btn-row button { background: transparent; color: #aaa; border: 1px solid #444; padding: 4px 14px; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
-    .btn-row button.active { color: #fff; border-color: #ff0071; background: rgba(255,0,113,0.15); }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { margin-top: 0; color: #333; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+    .timeline-container {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      height: 600px;
+      overflow: hidden;
+    }
+    .timeline-container canvas { display: block; width: 100%; height: 100%; }
+    .info {
+      margin-top: 15px;
+      padding: 15px;
+      background: #e3f2fd;
+      border-left: 4px solid #2196F3;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
   </style>
 </head>
 <body>
-  <h1>Item Dependencies</h1>
-  <p>Dependency arrows connect items to show relationships. Dependencies are defined separately from items as source → target pairs.</p>
-
-  <div class="demo">
-    <h2>Linear Chain</h2>
-    <div class="btn-row" id="btns-linear"><button class="active" onclick="toggle('linear',false,this)">LTR</button><button onclick="toggle('linear',true,this)">RTL</button></div>
-    <div class="demo-container"><canvas id="demo-linear"></canvas></div>
-  </div>
-  <div class="demo">
-    <h2>Multiple Dependencies</h2>
-    <div class="btn-row" id="btns-multi"><button class="active" onclick="toggle('multi',false,this)">LTR</button><button onclick="toggle('multi',true,this)">RTL</button></div>
-    <div class="demo-container"><canvas id="demo-multi"></canvas></div>
-  </div>
-  <div class="demo">
-    <h2>Cross-Group Dependencies</h2>
-    <div class="btn-row" id="btns-cross"><button class="active" onclick="toggle('cross',false,this)">LTR</button><button onclick="toggle('cross',true,this)">RTL</button></div>
-    <div class="demo-container"><canvas id="demo-cross"></canvas></div>
-  </div>
-  <div class="demo">
-    <h2>Varying Item Sizes</h2>
-    <div class="btn-row" id="btns-sizes"><button class="active" onclick="toggle('sizes',false,this)">LTR</button><button onclick="toggle('sizes',true,this)">RTL</button></div>
-    <div class="demo-container"><canvas id="demo-sizes"></canvas></div>
+  <div class="container">
+    <h1>Mobile App Launch — Dependencies</h1>
+    <p class="subtitle">A realistic mobile app development schedule with dependency arrows showing the critical path from requirements through to app store submission.</p>
+    <div class="timeline-container">
+      <canvas id="timeline"></canvas>
+    </div>
+    <div class="info">
+      <strong>About this example:</strong> Each arrow represents a finish-to-start dependency — the target task cannot begin until the source task is complete.
+      Pan and zoom to explore the full schedule. Dependencies are defined separately from items via the <code>dependencies</code> option.
+    </div>
   </div>
 
   <script>
     var TT = tempis_timeline.TempisTimeline;
-    var base = { item: { borderRadius: 4, fontColor: '#fff' } };
-    var demos = {}, configs = {};
 
-    configs.linear = {
-      responsive: true, verticalFill: 'fill-canvas', style: base,
-      items: [
-        { id: 1, label: 'Research',    start: '2026-01-05', end: '2026-01-12' },
-        { id: 2, label: 'Design',      start: '2026-01-13', end: '2026-01-20' },
-        { id: 3, label: 'Development', start: '2026-01-21', end: '2026-02-04' },
-        { id: 4, label: 'Testing',     start: '2026-02-05', end: '2026-02-12' },
-        { id: 5, label: 'Release',     start: '2026-02-14' }
-      ],
-      dependencies: [
-        { source: 1, target: 2 }, { source: 2, target: 3 },
-        { source: 3, target: 4 }, { source: 4, target: 5 }
-      ],
-      range: { start: '2026-01-01', end: '2026-02-20', position: 'bottom' }
-    };
-
-    configs.multi = {
-      responsive: true, verticalFill: 'fill-canvas', style: base,
+    new TT('#timeline', {
+      responsive: true,
+      verticalFill: 'fill-canvas',
+      selection: 'single',
+      style: { item: { borderRadius: 4, fontColor: '#fff', padding: 8 } },
       categories: [
-        { name: 'prep',  label: 'Preparation', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
-        { name: 'build', label: 'Build',        style: { backgroundColor: '#10b981', fontColor: '#fff' } },
-        { name: 'ship',  label: 'Ship',         style: { backgroundColor: '#f59e0b', fontColor: '#111' } }
+        { name: 'planning',  label: 'Planning',     style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+        { name: 'design',    label: 'Design',        style: { backgroundColor: '#ec4899', fontColor: '#fff' } },
+        { name: 'dev',       label: 'Development',   style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+        { name: 'qa',        label: 'QA',             style: { backgroundColor: '#f59e0b', fontColor: '#111' } },
+        { name: 'release',   label: 'Release',        style: { backgroundColor: '#ef4444', fontColor: '#fff' } },
+        { name: 'milestone', label: 'Milestones',     style: { backgroundColor: '#8b5cf6', fontColor: '#fff' } }
       ],
-      legend: { position: 'bottom' },
+      legend: { position: 'top' },
       items: [
-        { id: 1, label: 'API Design',     start: '2026-02-01', end: '2026-02-10', category: 'prep' },
-        { id: 2, label: 'UI Mockups',     start: '2026-02-03', end: '2026-02-12', category: 'prep' },
-        { id: 3, label: 'Data Model',     start: '2026-02-02', end: '2026-02-08', category: 'prep' },
-        { id: 4, label: 'Implementation', start: '2026-02-13', end: '2026-02-25', category: 'build' },
-        { id: 5, label: 'QA',             start: '2026-02-26', end: '2026-03-05', category: 'build' },
-        { id: 6, label: 'Deploy',         start: '2026-03-06', end: '2026-03-08', category: 'ship' }
+        // Planning
+        { id: 1,  label: 'Requirements Gathering',  start: '2026-01-05', end: '2026-01-16', category: 'planning',  grouping: 'Planning' },
+        { id: 2,  label: 'Technical Specification',  start: '2026-01-19', end: '2026-01-30', category: 'planning',  grouping: 'Planning' },
+        { id: 3,  label: 'Architecture Review',      start: '2026-02-02', end: '2026-02-06', category: 'planning',  grouping: 'Planning' },
+
+        // Design
+        { id: 10, label: 'Wireframes',               start: '2026-01-19', end: '2026-02-06', category: 'design',    grouping: 'Design' },
+        { id: 11, label: 'Visual Design',             start: '2026-02-09', end: '2026-02-27', category: 'design',    grouping: 'Design' },
+        { id: 12, label: 'Design Review & Handoff',   start: '2026-03-02', end: '2026-03-06', category: 'design',    grouping: 'Design' },
+        { id: 13, label: 'Asset Export',              start: '2026-03-09', end: '2026-03-13', category: 'design',    grouping: 'Design' },
+
+        // Development
+        { id: 20, label: 'Project Setup & CI',        start: '2026-02-09', end: '2026-02-13', category: 'dev',       grouping: 'Development' },
+        { id: 21, label: 'Authentication Module',     start: '2026-02-16', end: '2026-03-06', category: 'dev',       grouping: 'Development' },
+        { id: 22, label: 'Core API Integration',      start: '2026-02-16', end: '2026-03-13', category: 'dev',       grouping: 'Development' },
+        { id: 23, label: 'UI Implementation',         start: '2026-03-16', end: '2026-04-10', category: 'dev',       grouping: 'Development' },
+        { id: 24, label: 'Push Notifications',        start: '2026-03-23', end: '2026-04-03', category: 'dev',       grouping: 'Development' },
+        { id: 25, label: 'Offline Mode',              start: '2026-04-06', end: '2026-04-17', category: 'dev',       grouping: 'Development' },
+        { id: 26, label: 'Performance Optimisation',  start: '2026-04-20', end: '2026-04-30', category: 'dev',       grouping: 'Development' },
+
+        // QA
+        { id: 30, label: 'Test Plan',                 start: '2026-03-02', end: '2026-03-13', category: 'qa',        grouping: 'QA' },
+        { id: 31, label: 'Unit & Integration Tests',  start: '2026-04-13', end: '2026-04-24', category: 'qa',        grouping: 'QA' },
+        { id: 32, label: 'UAT',                       start: '2026-04-27', end: '2026-05-08', category: 'qa',        grouping: 'QA' },
+        { id: 33, label: 'Bug Fixes',                 start: '2026-05-11', end: '2026-05-22', category: 'qa',        grouping: 'QA' },
+        { id: 34, label: 'Regression Testing',        start: '2026-05-25', end: '2026-05-29', category: 'qa',        grouping: 'QA' },
+
+        // Release
+        { id: 40, label: 'Beta Build',                start: '2026-05-04', end: '2026-05-08', category: 'release',   grouping: 'Release' },
+        { id: 41, label: 'App Store Submission',       start: '2026-06-01', end: '2026-06-05', category: 'release',   grouping: 'Release' },
+
+        // Milestones
+        { id: 50, label: 'Design Sign-off',           start: '2026-03-06', category: 'milestone', grouping: 'Milestones' },
+        { id: 51, label: 'Feature Complete',           start: '2026-04-30', category: 'milestone', grouping: 'Milestones' },
+        { id: 52, label: 'Release Candidate',          start: '2026-05-29', category: 'milestone', grouping: 'Milestones' },
+        { id: 53, label: 'Launch',                     start: '2026-06-08', category: 'milestone', grouping: 'Milestones' }
       ],
       dependencies: [
-        { source: 1, target: 4 }, { source: 2, target: 4 }, { source: 3, target: 4 },
-        { source: 4, target: 5 }, { source: 5, target: 6 }
-      ],
-      range: { start: '2026-01-28', end: '2026-03-12', position: 'bottom' }
-    };
+        // Planning chain
+        { source: 1,  target: 2 },   // Requirements → Tech Spec
+        { source: 2,  target: 3 },   // Tech Spec → Architecture Review
 
-    configs.cross = {
-      responsive: true, verticalFill: 'fill-canvas', style: base,
-      categories: [
-        { name: 'fe',  label: 'Frontend', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
-        { name: 'be',  label: 'Backend',  style: { backgroundColor: '#f43f5e', fontColor: '#fff' } },
-        { name: 'ops', label: 'DevOps',   style: { backgroundColor: '#10b981', fontColor: '#fff' } }
-      ],
-      legend: { position: 'bottom' },
-      items: [
-        { id: 1, label: 'API Endpoints',  start: '2026-03-01', end: '2026-03-12', category: 'be',  grouping: 'Backend' },
-        { id: 2, label: 'Auth Service',   start: '2026-03-05', end: '2026-03-15', category: 'be',  grouping: 'Backend' },
-        { id: 3, label: 'UI Components',  start: '2026-03-08', end: '2026-03-18', category: 'fe',  grouping: 'Frontend' },
-        { id: 4, label: 'Login Flow',     start: '2026-03-16', end: '2026-03-22', category: 'fe',  grouping: 'Frontend' },
-        { id: 5, label: 'CI Pipeline',    start: '2026-03-10', end: '2026-03-16', category: 'ops', grouping: 'DevOps' },
-        { id: 6, label: 'Staging Deploy', start: '2026-03-23', end: '2026-03-25', category: 'ops', grouping: 'DevOps' }
-      ],
-      dependencies: [
-        { source: 1, target: 3 }, { source: 2, target: 4 }, { source: 3, target: 4 },
-        { source: 1, target: 5 }, { source: 4, target: 6 }, { source: 5, target: 6 }
-      ],
-      range: { start: '2026-02-26', end: '2026-03-28', position: 'bottom' }
-    };
+        // Requirements unlock design
+        { source: 1,  target: 10 },  // Requirements → Wireframes
 
-    configs.sizes = {
-      responsive: true, verticalFill: 'fill-canvas', style: base,
-      items: [
-        { id: 1, label: 'Brief',       start: '2026-04-01', end: '2026-04-03', style: { padding: 4 } },
-        { id: 2, label: 'Exploration', start: '2026-04-04', end: '2026-04-14', style: { padding: 18 } },
-        { id: 3, label: 'Review',      start: '2026-04-10', end: '2026-04-12', style: { padding: 6 } },
-        { id: 4, label: 'Build Phase', start: '2026-04-15', end: '2026-04-28', style: { padding: 22 } },
-        { id: 5, label: 'QA',          start: '2026-04-20', end: '2026-04-24', style: { padding: 8 } },
-        { id: 6, label: 'Sign-off',    start: '2026-04-29', end: '2026-04-30', style: { padding: 4 } }
-      ],
-      dependencies: [
-        { source: 1, target: 2 }, { source: 1, target: 3 },
-        { source: 2, target: 4 }, { source: 3, target: 4 },
-        { source: 2, target: 5 }, { source: 4, target: 6 }, { source: 5, target: 6 }
-      ],
-      range: { start: '2026-03-28', end: '2026-05-04', position: 'bottom' }
-    };
+        // Design chain
+        { source: 10, target: 11 },  // Wireframes → Visual Design
+        { source: 11, target: 12 },  // Visual Design → Design Review
+        { source: 12, target: 13 },  // Design Review → Asset Export
+        { source: 12, target: 50 },  // Design Review → Design Sign-off milestone
 
-    function create(name, rtl) {
-      return new TT('#demo-' + name, Object.assign({}, configs[name], { rtl: !!rtl }));
-    }
-    function toggle(name, rtl, btn) {
-      demos[name].destroy();
-      demos[name] = create(name, rtl);
-      btn.parentElement.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-    }
+        // Architecture unlocks dev setup
+        { source: 3,  target: 20 },  // Architecture Review → Project Setup
 
-    demos.linear = create('linear', false);
-    demos.multi  = create('multi', false);
-    demos.cross  = create('cross', false);
-    demos.sizes  = create('sizes', false);
+        // Dev dependencies
+        { source: 20, target: 21 },  // Project Setup → Auth Module
+        { source: 20, target: 22 },  // Project Setup → Core API
+        { source: 13, target: 23 },  // Asset Export → UI Implementation
+        { source: 22, target: 23 },  // Core API → UI Implementation
+        { source: 21, target: 24 },  // Auth Module → Push Notifications
+        { source: 23, target: 25 },  // UI Implementation → Offline Mode
+        { source: 25, target: 26 },  // Offline Mode → Performance Optimisation
+        { source: 26, target: 51 },  // Performance Optimisation → Feature Complete milestone
+
+        // QA dependencies
+        { source: 2,  target: 30 },  // Tech Spec → Test Plan
+        { source: 23, target: 31 },  // UI Implementation → Unit Tests
+        { source: 31, target: 32 },  // Unit Tests → UAT
+        { source: 32, target: 33 },  // UAT → Bug Fixes
+        { source: 33, target: 34 },  // Bug Fixes → Regression
+        { source: 34, target: 52 },  // Regression → Release Candidate milestone
+
+        // Release dependencies
+        { source: 32, target: 40 },  // UAT → Beta Build
+        { source: 34, target: 41 },  // Regression → App Store Submission
+        { source: 41, target: 53 },  // App Store Submission → Launch milestone
+      ],
+      range: { start: '2026-01-01', end: '2026-06-15', position: 'bottom' }
+    });
   </script>
 </body>
 </html>
