@@ -642,27 +642,32 @@
       verticalFill: 'fill-canvas',
       style: { item: { borderRadius: 4, fontColor: '#fff' } },
       categories: [
-        { name: 'prep',  label: 'Preparation', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
-        { name: 'build', label: 'Build',        style: { backgroundColor: '#10b981', fontColor: '#fff' } },
-        { name: 'ship',  label: 'Ship',         style: { backgroundColor: '#f59e0b', fontColor: '#111' } },
+        { name: 'design', label: 'Design',  style: { backgroundColor: '#ec4899', fontColor: '#fff' } },
+        { name: 'dev',    label: 'Dev',      style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+        { name: 'qa',     label: 'QA',       style: { backgroundColor: '#f59e0b', fontColor: '#111' } },
       ],
       legend: { position: 'bottom' },
       items: [
-        { id: 1, label: 'API Design',     start: '2026-02-01', end: '2026-02-10', category: 'prep' },
-        { id: 2, label: 'UI Mockups',     start: '2026-02-03', end: '2026-02-12', category: 'prep' },
-        { id: 3, label: 'Data Model',     start: '2026-02-02', end: '2026-02-08', category: 'prep' },
-        { id: 4, label: 'Implementation', start: '2026-02-13', end: '2026-02-25', category: 'build' },
-        { id: 5, label: 'QA',             start: '2026-02-26', end: '2026-03-05', category: 'build' },
-        { id: 6, label: 'Deploy',         start: '2026-03-06', end: '2026-03-08', category: 'ship' },
+        { id: 1, label: 'Wireframes',    start: '2026-02-01', end: '2026-02-10', category: 'design', grouping: 'Design' },
+        { id: 2, label: 'Visual Design', start: '2026-02-11', end: '2026-02-20', category: 'design', grouping: 'Design' },
+        { id: 3, label: 'Asset Export',  start: '2026-02-21', end: '2026-02-25', category: 'design', grouping: 'Design' },
+        { id: 4, label: 'API Layer',     start: '2026-02-11', end: '2026-02-25', category: 'dev',    grouping: 'Engineering' },
+        { id: 5, label: 'UI Build',      start: '2026-02-26', end: '2026-03-10', category: 'dev',    grouping: 'Engineering' },
+        { id: 6, label: 'Integration',   start: '2026-03-11', end: '2026-03-18', category: 'dev',    grouping: 'Engineering' },
+        { id: 7, label: 'Test Plan',     start: '2026-02-15', end: '2026-02-25', category: 'qa',     grouping: 'QA' },
+        { id: 8, label: 'Testing',       start: '2026-03-19', end: '2026-03-28', category: 'qa',     grouping: 'QA' },
       ],
       dependencies: [
+        { source: 1, target: 2 },
+        { source: 2, target: 3 },
         { source: 1, target: 4 },
-        { source: 2, target: 4 },
-        { source: 3, target: 4 },
+        { source: 3, target: 5 },
         { source: 4, target: 5 },
         { source: 5, target: 6 },
+        { source: 6, target: 8 },
+        { source: 7, target: 8 },
       ],
-      range: { start: '2026-01-28', end: '2026-03-12', position: 'bottom' }
+      range: { start: '2026-01-28', end: '2026-04-01', position: 'bottom' }
     });
 
     // ── Export demo ──
