@@ -1,7 +1,7 @@
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineBand } from "./TimelineBand";
 import { TimelineItem } from "./TimelineItem";
-import { TempisTimelineStackMode, TempisTimelineScrollbarOptions } from "./TempisTimelineOptions";
+import { TempisTimelineStackMode, TempisTimelineScrollbarOptions, TempisTimelineDependency } from "./TempisTimelineOptions";
 import { RangeTick } from "./TimelineRangeView";
 import { clamp, doDateRangesOverlap, drawClippedText, EasingFunction, GRID_COLOUR, GRID_COLOUR_TRANSPARENT } from "./Utilities";
 
@@ -110,6 +110,9 @@ export class TimelineDataView {
     /** The scrollbar options. */
     private _scrollbarOptions: TempisTimelineScrollbarOptions;
 
+    /** The current dependency definitions. */
+    private _dependencies: TempisTimelineDependency[] = [];
+
     /**
      * Creates a new instance of the TimelineDataView class.
      * @param dataSet The timeline dataset model.
@@ -148,6 +151,14 @@ export class TimelineDataView {
      */
     public setHovering(isHovering: boolean): void {
         this._isHovering = isHovering;
+    }
+
+    /**
+     * Set the dependency definitions.
+     * @param dependencies The dependency definitions.
+     */
+    public setDependencies(dependencies: TempisTimelineDependency[]): void {
+        this._dependencies = dependencies;
     }
 
     /**
@@ -529,6 +540,11 @@ export class TimelineDataView {
         context.lineDashOffset = 0;
         context.lineCap = "butt";
 
+        // We need a third pass to draw dependency arrows between items (only if any dependencies exist).
+        if (this._dependencies.length > 0) {
+            this._drawDependencyArrows(context, scrolledYPosition);
+        }
+
         // Always revert the canvas text align to be left.
         context.textAlign = "left";
     }
@@ -733,6 +749,137 @@ export class TimelineDataView {
                     );
                 }
             }
+        }
+    }
+
+    /**
+     * Draw dependency arrows between items that have dependencies defined.
+     * Uses orthogonal routing with rounded corners:
+     * - Straight line when source and target are on the same row with no overlap.
+     * - Step connector (right → down/up → right) when target is to the right with space.
+     * - S-shaped connector when items overlap horizontally.
+     * @param context The canvas context.
+     * @param scrolledYPosition The y position including scroll offset.
+     */
+    private _drawDependencyArrows(context: CanvasRenderingContext2D, scrolledYPosition: number): void {
+        if (!this._drawPlan) return;
+
+        const ARROW_SIZE = 7;
+        const MARGIN = 12;
+        const RADIUS = 6;
+        const rtl = this._isRTL;
+
+        // Build a lookup map of item ID → draw plan.
+        const planMap = new Map<string | number, DataViewItemDrawPlan>();
+        for (const group of this._drawPlan.groupDrawPlans) {
+            for (const row of group.rows) {
+                for (const plan of row) {
+                    planMap.set(plan.item.id, plan);
+                }
+            }
+        }
+
+        context.strokeStyle = GRID_COLOUR;
+        context.fillStyle = GRID_COLOUR;
+        context.lineWidth = 1.5;
+        context.setLineDash([]);
+
+        for (const dependency of this._dependencies) {
+            const source = planMap.get(dependency.source);
+            const target = planMap.get(dependency.target);
+            if (!source || !target) continue;
+
+            // In LTR: source right edge → target left edge. In RTL: source left edge → target right edge.
+            const sx = rtl ? source.xPositionStart : source.xPositionEnd;
+            const sy = scrolledYPosition + (source.yPositionStart + source.yPositionEnd) / 2;
+            const tx = rtl ? target.xPositionEnd : target.xPositionStart;
+            const ty = scrolledYPosition + (target.yPositionStart + target.yPositionEnd) / 2;
+
+                // Direction multiplier: +1 for LTR (arrows go right), -1 for RTL (arrows go left).
+                const dir = rtl ? -1 : 1;
+
+                // Skip if both endpoints are off-screen.
+                if ((sx < 0 && tx < 0) || (sx > context.canvas.clientWidth && tx > context.canvas.clientWidth)) continue;
+
+                context.beginPath();
+
+                if (sy === ty && (tx - sx) * dir > ARROW_SIZE) {
+                    // Same row, enough gap — straight line.
+                    context.moveTo(sx, sy);
+                    context.lineTo(tx, ty);
+                } else if (sy === ty && (tx - sx) * dir > 0) {
+                    // Same row, gap too small for arrow — skip entirely.
+                    continue;
+                } else if ((tx - sx) * dir > MARGIN * 2) {
+                    // Step connector: horizontal → vertical → horizontal.
+                    const midX = (sx + tx) / 2;
+                    const down = ty > sy;
+                    const r = Math.min(RADIUS, Math.abs(midX - sx), Math.abs(ty - sy) / 2);
+
+                    context.moveTo(sx, sy);
+                    context.lineTo(midX - r * dir, sy);
+                    context.arcTo(midX, sy, midX, sy + (down ? r : -r), r);
+                    context.lineTo(midX, ty + (down ? -r : r));
+                    context.arcTo(midX, ty, midX + r * dir, ty, r);
+                    context.lineTo(tx, ty);
+                } else {
+                    // S-shaped connector.
+                    const down = ty >= sy;
+                    const rawMidY = down
+                        ? scrolledYPosition + (source.yPositionEnd + target.yPositionStart) / 2
+                        : scrolledYPosition + (target.yPositionEnd + source.yPositionStart) / 2;
+                    // Ensure midY is always between sy and ty.
+                    const midY = down
+                        ? Math.max(sy, Math.min(rawMidY, ty))
+                        : Math.min(sy, Math.max(rawMidY, ty));
+                    const stubR = sx + MARGIN * dir;
+                    const stubL = tx - MARGIN * dir;
+                    const horizGap = (stubL - stubR) * dir;
+                    const r = Math.min(RADIUS, Math.abs(midY - sy) / 2, MARGIN / 2);
+
+                    context.moveTo(sx, sy);
+                    // Corner 1: source horizontal → first vertical
+                    context.lineTo(stubR - r * dir, sy);
+                    context.arcTo(stubR, sy, stubR, sy + (down ? r : -r), r);
+
+                    if (Math.abs(horizGap) < r * 2) {
+                        // Gap too small for two arcs + horizontal.
+                        // Use two small arcs with radius = half the gap to smoothly
+                        // connect the two verticals.
+                        var halfGap = Math.max(Math.abs(horizGap) / 2, 0.5);
+                        // First vertical stops short of midY
+                        context.lineTo(stubR, down ? midY - halfGap : midY + halfGap);
+                        // Arc from first vertical towards second vertical
+                        context.arcTo(stubR, midY, stubL, midY, halfGap);
+                        // Arc from horizontal towards second vertical going away from midY
+                        context.arcTo(stubL, midY, stubL, down ? midY + halfGap : midY - halfGap, halfGap);
+                    } else {
+                        // Horizontal direction from stubR to stubL.
+                        var hdir = stubL > stubR ? 1 : -1;
+                        // Corner 2: first vertical → horizontal
+                        context.lineTo(stubR, midY + (down ? -r : r));
+                        context.arcTo(stubR, midY, stubR + r * hdir, midY, r);
+                        // Horizontal segment
+                        context.lineTo(stubL - r * hdir, midY);
+                        // Corner 3: horizontal → second vertical
+                        context.arcTo(stubL, midY, stubL, midY + (down ? r : -r), r);
+                    }
+
+                    // Corner 4: second vertical → target horizontal
+                    context.lineTo(stubL, ty + (down ? -r : r));
+                    context.arcTo(stubL, ty, stubL + r * dir, ty, r);
+                    context.lineTo(tx, ty);
+                }
+
+                context.stroke();
+
+                // Arrowhead pointing in the direction of flow.
+                context.beginPath();
+                context.moveTo(tx, ty);
+                context.lineTo(tx - ARROW_SIZE * dir, ty - ARROW_SIZE / 2);
+                context.lineTo(tx - ARROW_SIZE * dir, ty + ARROW_SIZE / 2);
+                context.closePath();
+                context.fill();
         }
     }
 

@@ -57,6 +57,7 @@ Script tag usage:
 - Categories with interactive legend (filter on click, highlight on hover)
 - Item groupings with custom sort
 - Timeline bands (range markers, point markers, lines)
+- Item dependencies with automatic connector routing and RTL support
 - Per-item style overrides (colors, borders, dash patterns, radius, padding)
 - Tooltips with custom templates, delay, and overflow handling
 - Selection modes: none, single, multi

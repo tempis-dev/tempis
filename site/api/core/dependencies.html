@@ -1,0 +1,76 @@
+<h1>Dependencies</h1>
+<p class="subtitle">Render connector arrows between items to show relationships.</p>
+
+<div class="api-demo"><canvas id="demo-deps"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-deps', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    items: [
+      { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-12' },
+      { id: 2, label: 'Item 2', start: '2026-01-13', end: '2026-01-20' },
+      { id: 3, label: 'Item 3', start: '2026-01-15', end: '2026-01-28' },
+      { id: 4, label: 'Item 4', start: '2026-01-29', end: '2026-02-05' },
+    ],
+    dependencies: [
+      { source: 1, target: 2 },
+      { source: 1, target: 3 },
+      { source: 2, target: 4 },
+      { source: 3, target: 4 },
+    ],
+    range: { start: '2026-01-01', end: '2026-02-10', position: 'bottom' }
+  });
+</script>
+
+<h2>TempisTimelineDependency</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>source</code></td><td><code>string | number</code></td><td>The ID of the source item (arrow starts here).</td></tr>
+    <tr><td><code>target</code></td><td><code>string | number</code></td><td>The ID of the target item (arrow points here).</td></tr>
+  </tbody>
+</table>
+
+<p>Dependencies are defined separately from items as an array of source → target pairs. Each renders a connector arrow from the right edge of the source item to the left edge of the target item.</p>
+
+<h2>Usage</h2>
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  items: [
+    { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-12' },
+    { id: 2, label: 'Item 2', start: '2026-01-13', end: '2026-01-20' },
+    { id: 3, label: 'Item 3', start: '2026-01-15', end: '2026-01-28' },
+    { id: 4, label: 'Item 4', start: '2026-01-29', end: '2026-02-05' },
+  ],
+  dependencies: [
+    { source: 1, target: 2 },
+    { source: 1, target: 3 },
+    { source: 2, target: 4 },
+    { source: 3, target: 4 },
+  ],
+  range: { start: '2026-01-01', end: '2026-02-10', position: 'bottom' }
+});</code></pre>
+
+<h2>Methods</h2>
+
+<h3>setDependencies(dependencies)</h3>
+<p>Replaces all dependencies and redraws. Does not affect item layout — only the connector arrows are updated.</p>
+<pre><code class="language-typescript">timeline.setDependencies([
+  { source: 1, target: 2 },
+  { source: 2, target: 3 },
+]);</code></pre>
+
+<h2>Connector Routing</h2>
+<p>Arrows are routed automatically based on item positions:</p>
+<ul>
+  <li>When the target is to the right of the source with enough space, a step connector is used (horizontal → vertical → horizontal).</li>
+  <li>When items overlap horizontally, an S-shaped connector routes around both items.</li>
+  <li>All corners are rounded.</li>
+  <li>RTL layouts are fully supported — arrows reverse direction automatically.</li>
+</ul>
+
+<h2>RTL Support</h2>
+<p>In RTL mode, connectors route from the source's left edge to the target's right edge, with arrowheads pointing left.</p>

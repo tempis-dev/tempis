@@ -298,6 +298,16 @@
 
     <div class="showcase-row showcase-row-reverse">
       <div class="showcase-text">
+        <h2>Show item dependencies</h2>
+        <p>Define source/target item relationships and the timeline renders connector arrows automatically.</p>
+      </div>
+      <div class="showcase-demo">
+        <canvas id="demo-deps"></canvas>
+      </div>
+    </div>
+
+    <div class="showcase-row">
+      <div class="showcase-text">
         <h2>Export to image</h2>
         <p>One call and you've got a PNG, JPEG, or WebP. Control DPR for crisp retina output.</p>
         <div class="showcase-actions">
@@ -625,6 +635,40 @@
       }
       scheduleNext();
     })();
+
+    // ── Dependencies demo ──
+    new TempisTimeline('#demo-deps', {
+      responsive: true,
+      verticalFill: 'fill-canvas',
+      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      categories: [
+        { name: 'design', label: 'Design',  style: { backgroundColor: '#ec4899', fontColor: '#fff' } },
+        { name: 'dev',    label: 'Dev',      style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+        { name: 'qa',     label: 'QA',       style: { backgroundColor: '#f59e0b', fontColor: '#111' } },
+      ],
+      legend: { position: 'bottom' },
+      items: [
+        { id: 1, label: 'Wireframes',    start: '2026-02-01', end: '2026-02-10', category: 'design', grouping: 'Design' },
+        { id: 2, label: 'Visual Design', start: '2026-02-11', end: '2026-02-20', category: 'design', grouping: 'Design' },
+        { id: 3, label: 'Asset Export',  start: '2026-02-21', end: '2026-02-25', category: 'design', grouping: 'Design' },
+        { id: 4, label: 'API Layer',     start: '2026-02-11', end: '2026-02-25', category: 'dev',    grouping: 'Engineering' },
+        { id: 5, label: 'UI Build',      start: '2026-02-26', end: '2026-03-10', category: 'dev',    grouping: 'Engineering' },
+        { id: 6, label: 'Integration',   start: '2026-03-11', end: '2026-03-18', category: 'dev',    grouping: 'Engineering' },
+        { id: 7, label: 'Test Plan',     start: '2026-02-15', end: '2026-02-25', category: 'qa',     grouping: 'QA' },
+        { id: 8, label: 'Testing',       start: '2026-03-19', end: '2026-03-28', category: 'qa',     grouping: 'QA' },
+      ],
+      dependencies: [
+        { source: 1, target: 2 },
+        { source: 2, target: 3 },
+        { source: 1, target: 4 },
+        { source: 3, target: 5 },
+        { source: 4, target: 5 },
+        { source: 5, target: 6 },
+        { source: 6, target: 8 },
+        { source: 7, target: 8 },
+      ],
+      range: { start: '2026-01-28', end: '2026-04-01', position: 'bottom' }
+    });
 
     // ── Export demo ──
     var exportTimeline = new TempisTimeline('#demo-export', {

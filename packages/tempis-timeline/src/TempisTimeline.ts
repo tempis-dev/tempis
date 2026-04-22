@@ -4,7 +4,8 @@ import {
     TempisTimelineOptions,
     TempisTimelineVerticalFillMode,
     TempisTimelineCategory,
-    TempisTimelineBand
+    TempisTimelineBand,
+    TempisTimelineDependency
 } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineBand } from "./TimelineBand";
@@ -134,6 +135,7 @@ export class TempisTimeline {
             this._options.stackMode ?? "stable",
             this._options.scrollbar
         );
+        this._dataView.setDependencies(this._options.dependencies ?? []);
         this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._isRTL, this._options.range);
         this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._isRTL, this._options.legend);
         this._tooltipView = new TimelineTooltipView(
@@ -334,6 +336,21 @@ export class TempisTimeline {
         this._bands = bands.map((definition) => new TimelineBand(definition));
 
         // Bands are purely visual — no dataset update needed, just redraw.
+        this._draw();
+    }
+
+    /**
+     * Sets the item dependencies and redraws the timeline.
+     * @param dependencies The dependency definitions.
+     */
+    public setDependencies(dependencies: TempisTimelineDependency[]): void {
+        // Update the timeline options with the new dependencies.
+        this._options.dependencies = dependencies;
+
+        // Apply the new dependencies to the data view.
+        this._dataView.setDependencies(dependencies);
+
+        // We will need to redraw.
         this._draw();
     }
 
