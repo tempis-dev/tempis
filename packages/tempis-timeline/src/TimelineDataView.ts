@@ -822,20 +822,47 @@ export class TimelineDataView {
                 } else {
                     // S-shaped connector.
                     const down = ty >= sy;
-                    const midY = down
+                    const rawMidY = down
                         ? scrolledYPosition + (source.yPositionEnd + target.yPositionStart) / 2
                         : scrolledYPosition + (target.yPositionEnd + source.yPositionStart) / 2;
+                    // Ensure midY is always between sy and ty.
+                    const midY = down
+                        ? Math.max(sy, Math.min(rawMidY, ty))
+                        : Math.min(sy, Math.max(rawMidY, ty));
                     const stubR = sx + MARGIN * dir;
                     const stubL = tx - MARGIN * dir;
+                    const horizGap = (stubL - stubR) * dir;
                     const r = Math.min(RADIUS, Math.abs(midY - sy) / 2, MARGIN / 2);
 
                     context.moveTo(sx, sy);
+                    // Corner 1: source horizontal → first vertical
                     context.lineTo(stubR - r * dir, sy);
                     context.arcTo(stubR, sy, stubR, sy + (down ? r : -r), r);
-                    context.lineTo(stubR, midY + (down ? -r : r));
-                    context.arcTo(stubR, midY, stubR - r * dir, midY, r);
-                    context.lineTo(stubL + r * dir, midY);
-                    context.arcTo(stubL, midY, stubL, midY + (down ? r : -r), r);
+
+                    if (Math.abs(horizGap) < r * 2) {
+                        // Gap too small for two arcs + horizontal.
+                        // Use two small arcs with radius = half the gap to smoothly
+                        // connect the two verticals.
+                        var halfGap = Math.max(Math.abs(horizGap) / 2, 0.5);
+                        // First vertical stops short of midY
+                        context.lineTo(stubR, down ? midY - halfGap : midY + halfGap);
+                        // Arc from first vertical towards second vertical
+                        context.arcTo(stubR, midY, stubL, midY, halfGap);
+                        // Arc from horizontal towards second vertical going away from midY
+                        context.arcTo(stubL, midY, stubL, down ? midY + halfGap : midY - halfGap, halfGap);
+                    } else {
+                        // Horizontal direction from stubR to stubL.
+                        var hdir = stubL > stubR ? 1 : -1;
+                        // Corner 2: first vertical → horizontal
+                        context.lineTo(stubR, midY + (down ? -r : r));
+                        context.arcTo(stubR, midY, stubR + r * hdir, midY, r);
+                        // Horizontal segment
+                        context.lineTo(stubL - r * hdir, midY);
+                        // Corner 3: horizontal → second vertical
+                        context.arcTo(stubL, midY, stubL, midY + (down ? r : -r), r);
+                    }
+
+                    // Corner 4: second vertical → target horizontal
                     context.lineTo(stubL, ty + (down ? -r : r));
                     context.arcTo(stubL, ty, stubL + r * dir, ty, r);
                     context.lineTo(tx, ty);
