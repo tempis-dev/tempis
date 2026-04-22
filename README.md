@@ -60,6 +60,7 @@ Or via CDN:
 - Range and point-in-time items with automatic stacking
 - Categories with interactive legend
 - Timeline bands (markers, regions, lines)
+- Item dependencies with automatic connector routing
 - Per-item style overrides (colors, borders, radius, dash patterns)
 - Custom tooltip templates
 - Selection modes: none, single, multi

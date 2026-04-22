@@ -53,6 +53,7 @@ All [`TempisTimelineOptions`](../tempis-timeline/README.md#api) are accepted as 
 | `items` | `TempisTimelineItem[]` | required | Timeline items |
 | `categories` | `TempisTimelineCategory[]` | — | Item categories |
 | `bands` | `TempisTimelineBand[]` | — | Timeline bands |
+| `dependencies` | `TempisTimelineDependency[]` | — | Item dependencies (source → target arrows) |
 | `className` | `string` | — | CSS class for the wrapper div |
 | `wrapperStyle` | `CSSProperties` | — | Inline styles for the wrapper div |
 | `width` | `string \| number` | `"100%"` | Canvas width |
@@ -91,6 +92,7 @@ function App() {
 | `setCategories(categories)` | Replace all categories |
 | `getCategories()` | Get current categories |
 | `setBands(bands)` | Replace all bands |
+| `setDependencies(deps)` | Replace all dependencies |
 | `setSelection(ids)` | Select items by ID |
 | `getSelection()` | Get selected IDs |
 | `clearSelection()` | Clear selection |
