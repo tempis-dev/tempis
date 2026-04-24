@@ -24,6 +24,7 @@ const timeline = new TempisTimeline(canvas, { items: [...] });</code></pre>
     <tr><td><code>selection</code></td><td><code>"none" | "single" | "multi"</code></td><td><code>"none"</code></td><td>Item selection mode.</td></tr>
     <tr><td><code>categories</code></td><td><code>TempisTimelineCategory[]</code></td><td>—</td><td>Item categories.</td></tr>
     <tr><td><code>bands</code></td><td><code>TempisTimelineBand[]</code></td><td>—</td><td>Timeline bands.</td></tr>
+    <tr><td><code>dependencies</code></td><td><code>TempisTimelineDependency[]</code></td><td>—</td><td>Item dependencies rendered as connector arrows.</td></tr>
     <tr><td><code>range</code></td><td><code>TempisTimelineRangeOptions</code></td><td>—</td><td>Range configuration.</td></tr>
     <tr><td><code>legend</code></td><td><code>TempisTimelineLegendOptions</code></td><td>—</td><td>Legend configuration.</td></tr>
     <tr><td><code>tooltip</code></td><td><code>TempisTimelineTooltipOptions</code></td><td>—</td><td>Tooltip configuration.</td></tr>
@@ -34,3 +35,13 @@ const timeline = new TempisTimeline(canvas, { items: [...] });</code></pre>
 </table>
 
 <div class="note">When using <code>responsive: true</code>, the canvas must be inside a container with explicit dimensions. The timeline resizes to fill its parent — if the parent has no width or height, the canvas will collapse to zero.</div>
+
+<h2>Instance Methods</h2>
+
+<h3>redraw()</h3>
+<p>Forces a redraw of the timeline. Call this after resizing the canvas or changing DPR scaling.</p>
+<pre><code class="language-typescript">timeline.redraw();</code></pre>
+
+<h3>destroy()</h3>
+<p>Removes all event listeners, disconnects observers, cancels animations, and clears the canvas. Always call this before removing the timeline from the DOM to prevent memory leaks.</p>
+<pre><code class="language-typescript">timeline.destroy();</code></pre>
