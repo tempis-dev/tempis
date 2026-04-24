@@ -61,12 +61,6 @@ const DEFAULT_GROUP_MARGIN: number = 8;
 /** The minimum amount of available horizontal space required to render a label. */
 const MINIMUM_RENDERED_LABEL_WIDTH: number = 5;
 
-/** The background colour to use for any unfocused items. */
-const UNFOCUSED_ITEM_BACKGROUND_COLOUR = "#d6d6d6ff";
-
-/** The text colour to use for any unfocused items. */
-const UNFOCUSED_ITEM_FONT_COLOUR = "#ffffffff";
-
 export class TimelineDataView {
     /** The underlying dataset model. */
     private readonly _dataSet: TimelineDataSet;
@@ -112,6 +106,10 @@ export class TimelineDataView {
 
     /** The current dependency definitions. */
     private _dependencies: TempisTimelineDependency[] = [];
+
+    /** Reusable offscreen canvas for rendering unfocused items with opacity. */
+    private _offscreenCanvas: HTMLCanvasElement | null = null;
+    private _offscreenContext: CanvasRenderingContext2D | null = null;
 
     /**
      * Creates a new instance of the TimelineDataView class.
@@ -578,13 +576,84 @@ export class TimelineDataView {
             return;
         }
 
-        // If a category is being focused, but this item doesn't belong to that category, then render it with the unfocused item background and font colour.
-        // TODO This should eventually just use a lighter version of item.style.backgroundColor! based on the result of some function.
-        if (this._dataSet.focusedCategory && !this._dataSet.focusedCategory.isDisabled && !itemCategory?.isFocused) {
-            itemBackgroundColor = UNFOCUSED_ITEM_BACKGROUND_COLOUR;
-            itemBorderColor = UNFOCUSED_ITEM_BACKGROUND_COLOUR;
-            itemFontColor = UNFOCUSED_ITEM_FONT_COLOUR;
+        // Determine if this item is unfocused (a category is being highlighted and this item doesn't belong to it).
+        const isUnfocused =
+            !!this._dataSet.focusedCategory &&
+            !this._dataSet.focusedCategory.isDisabled &&
+            !itemCategory?.isFocused;
+        const isPitItem = itemDrawPlan.xPointInTimePosition !== null;
+
+        if (isUnfocused && isPitItem) {
+            // PIT items have overlapping layers (marker line, triangle, box, label).
+            // Render to an offscreen canvas at full opacity, then composite with reduced alpha to avoid visible layering artifacts.
+            const itemLeft = Math.floor(itemDrawPlan.xPositionStart - (itemBorderThickness ?? 0) - 1);
+            const itemTop = Math.floor(scrolledYPosition + itemDrawPlan.yPositionStart - (itemBorderThickness ?? 0) - 1);
+            const itemRight = Math.ceil(itemDrawPlan.xPositionEnd + (itemBorderThickness ?? 0) + 1);
+            const itemBottom = context.canvas.clientHeight;
+            const w = itemRight - itemLeft;
+            const h = itemBottom - itemTop;
+
+            if (!this._offscreenCanvas) {
+                this._offscreenCanvas = document.createElement("canvas");
+                this._offscreenContext = this._offscreenCanvas.getContext("2d")!;
+            }
+            if (this._offscreenCanvas.width < w || this._offscreenCanvas.height < h) {
+                this._offscreenCanvas.width = Math.max(this._offscreenCanvas.width, w);
+                this._offscreenCanvas.height = Math.max(this._offscreenCanvas.height, h);
+            }
+
+            this._offscreenContext!.clearRect(0, 0, w, h);
+            this._offscreenContext!.font = context.font;
+            this._offscreenContext!.textAlign = context.textAlign;
+            this._offscreenContext!.direction = context.direction;
+            this._offscreenContext!.save();
+            this._offscreenContext!.translate(-itemLeft, -itemTop);
+
+            // Draw the item to the offscreen canvas at full opacity.
+            this._drawGroupItemContent(itemDrawPlan, this._offscreenContext!, scrolledYPosition, itemBackgroundColor, itemFontColor, itemBorderColor, itemBorderThickness, itemBorderStyle, itemBorderRadius, itemPadding, context.canvas.clientHeight, context.canvas.clientWidth);
+
+            this._offscreenContext!.restore();
+
+            // Composite onto the main canvas with reduced alpha.
+            const prevAlpha = context.globalAlpha;
+            context.globalAlpha = 0.3;
+            context.drawImage(this._offscreenCanvas, 0, 0, w, h, itemLeft, itemTop, w, h);
+            context.globalAlpha = prevAlpha;
+            return;
         }
+
+        if (isUnfocused) {
+            // Range items have no overlapping layers — globalAlpha is fine.
+            context.globalAlpha = 0.3;
+        }
+
+        this._drawGroupItemContent(itemDrawPlan, context, scrolledYPosition, itemBackgroundColor, itemFontColor, itemBorderColor, itemBorderThickness, itemBorderStyle, itemBorderRadius, itemPadding);
+
+        if (isUnfocused) {
+            context.globalAlpha = 1.0;
+        }
+    }
+
+    /**
+     * Draw the visual content of a single item (PIT marker, rect, border, label).
+     */
+    private _drawGroupItemContent(
+        itemDrawPlan: DataViewItemDrawPlan,
+        context: CanvasRenderingContext2D,
+        scrolledYPosition: number,
+        itemBackgroundColor: string,
+        itemFontColor: string,
+        itemBorderColor: string | undefined,
+        itemBorderThickness: number | undefined,
+        itemBorderStyle: string,
+        itemBorderRadius: number,
+        itemPadding: number,
+        canvasHeight?: number,
+        canvasWidth?: number
+    ): void {
+        const item = itemDrawPlan.item;
+        const effectiveCanvasHeight = canvasHeight ?? context.canvas.clientHeight;
+        const effectiveCanvasWidth = canvasWidth ?? context.canvas.clientWidth;
 
         // If this is a PIT item we should draw the downward marker line.
         if (itemDrawPlan.xPointInTimePosition !== null) {
@@ -631,7 +700,7 @@ export class TimelineDataView {
             // Draw the actual marker line from the item downward to the bottom of the canvas.
             context.beginPath();
             context.moveTo(itemDrawPlan.xPointInTimePosition, scrolledYPosition + itemDrawPlan.yPositionEnd);
-            context.lineTo(itemDrawPlan.xPointInTimePosition, context.canvas.clientHeight);
+            context.lineTo(itemDrawPlan.xPointInTimePosition, effectiveCanvasHeight);
             context.stroke();
 
             // Reset opacity if it was changed
@@ -722,7 +791,7 @@ export class TimelineDataView {
                 // If rendering right-to-left then we will be rendering the label to the right of the item, otherwise the left.
                 const labelStartPositionX = this._isRTL
                     ? Math.floor(
-                          Math.min(context.canvas.clientWidth - itemPadding, itemDrawPlan.xPositionEnd - itemPadding)
+                          Math.min(effectiveCanvasWidth - itemPadding, itemDrawPlan.xPositionEnd - itemPadding)
                       )
                     : Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
 
