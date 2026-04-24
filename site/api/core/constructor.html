@@ -37,11 +37,27 @@ const timeline = new TempisTimeline(canvas, { items: [...] });</code></pre>
 <div class="note">When using <code>responsive: true</code>, the canvas must be inside a container with explicit dimensions. The timeline resizes to fill its parent — if the parent has no width or height, the canvas will collapse to zero.</div>
 
 <h2>Instance Methods</h2>
-
-<h3>redraw()</h3>
-<p>Forces a redraw of the timeline. Call this after resizing the canvas or changing DPR scaling.</p>
-<pre><code class="language-typescript">timeline.redraw();</code></pre>
+<table>
+  <thead><tr><th>Method</th><th>Description</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><code>setItems(items)</code></td><td>Replace all items and redraw.</td><td><a href="#core/items">Items</a></td></tr>
+    <tr><td><code>getItems()</code></td><td>Get current item definitions.</td><td><a href="#core/items">Items</a></td></tr>
+    <tr><td><code>setCategories(categories)</code></td><td>Replace all categories and redraw.</td><td><a href="#core/categories">Categories</a></td></tr>
+    <tr><td><code>getCategories()</code></td><td>Get current category definitions.</td><td><a href="#core/categories">Categories</a></td></tr>
+    <tr><td><code>setBands(bands)</code></td><td>Replace all bands and redraw.</td><td><a href="#core/bands">Bands</a></td></tr>
+    <tr><td><code>setDependencies(deps)</code></td><td>Replace all dependencies and redraw.</td><td><a href="#core/dependencies">Dependencies</a></td></tr>
+    <tr><td><code>focus(options?)</code></td><td>Navigate to an item, date, or range.</td><td><a href="#core/focus">Focus</a></td></tr>
+    <tr><td><code>getRange()</code></td><td>Get the current visible range.</td><td><a href="#core/range">Range</a></td></tr>
+    <tr><td><code>setSelection(ids)</code></td><td>Programmatically select items by ID.</td><td><a href="#core/selection">Selection</a></td></tr>
+    <tr><td><code>getSelection()</code></td><td>Get selected item IDs.</td><td><a href="#core/selection">Selection</a></td></tr>
+    <tr><td><code>clearSelection()</code></td><td>Deselect all items.</td><td><a href="#core/selection">Selection</a></td></tr>
+    <tr><td><code>toImage(options?)</code></td><td>Export as PNG, JPEG, or WebP blob.</td><td><a href="#core/image-export">Image Export</a></td></tr>
+    <tr><td><code>redraw()</code></td><td>Force a redraw.</td><td>—</td></tr>
+    <tr><td><code>destroy()</code></td><td>Clean up all listeners and resources.</td><td>—</td></tr>
+  </tbody>
+</table>
 
 <h3>destroy()</h3>
 <p>Removes all event listeners, disconnects observers, cancels animations, and clears the canvas. Always call this before removing the timeline from the DOM to prevent memory leaks.</p>
 <pre><code class="language-typescript">timeline.destroy();</code></pre>
+<p>In frameworks like React, the <code>&lt;TempisTimeline&gt;</code> component handles this automatically on unmount.</p>
