@@ -62,15 +62,3 @@ const timeline = new TempisTimeline('#canvas', {
   { source: 1, target: 2 },
   { source: 2, target: 3 },
 ]);</code></pre>
-
-<h2>Connector Routing</h2>
-<p>Arrows are routed automatically based on item positions:</p>
-<ul>
-  <li>When the target is to the right of the source with enough space, a step connector is used (horizontal → vertical → horizontal).</li>
-  <li>When items overlap horizontally, an S-shaped connector routes around both items.</li>
-  <li>All corners are rounded.</li>
-  <li>RTL layouts are fully supported — arrows reverse direction automatically.</li>
-</ul>
-
-<h2>RTL Support</h2>
-<p>In RTL mode, connectors route from the source's left edge to the target's right edge, with arrowheads pointing left.</p>

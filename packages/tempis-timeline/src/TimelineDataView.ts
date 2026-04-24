@@ -573,8 +573,8 @@ export class TimelineDataView {
         let itemFontColor = item.style.fontColor!;
         let itemBorderColor = item.style.borderColor;
 
-        // If the item is too small to be rendered then we should just skip it to improve performance.
-        if (itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart < 1) {
+        // If the item is too small to be rendered then we should just skip it.
+        if (!this._isItemVisible(itemDrawPlan)) {
             return;
         }
 
@@ -753,6 +753,15 @@ export class TimelineDataView {
     }
 
     /**
+     * Whether an item draw plan is wide enough to be visually rendered.
+     * @param plan The item draw plan.
+     * @returns Whether the item draw plan is wide enough to be visually rendered.
+     */
+    private _isItemVisible(plan: DataViewItemDrawPlan): boolean {
+        return plan.xPositionEnd - plan.xPositionStart >= 1;
+    }
+
+    /**
      * Draw dependency arrows between items that have dependencies defined.
      * Uses orthogonal routing with rounded corners:
      * - Straight line when source and target are on the same row with no overlap.
@@ -788,6 +797,9 @@ export class TimelineDataView {
             const source = planMap.get(dependency.source);
             const target = planMap.get(dependency.target);
             if (!source || !target) continue;
+
+            // Skip if either item is too small to be visually rendered.
+            if (!this._isItemVisible(source) || !this._isItemVisible(target)) continue;
 
             // In LTR: source right edge → target left edge. In RTL: source left edge → target right edge.
             const sx = rtl ? source.xPositionStart : source.xPositionEnd;
