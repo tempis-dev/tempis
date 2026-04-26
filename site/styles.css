@@ -13,6 +13,7 @@
   --text-muted: #999999;
   --border: #e2e2e5;
   --border-hover: #ccccd0;
+  --bg-code-inline: #555;
   --nav-bg: rgba(255, 255, 255, 0.85);
   --shadow-color: rgba(0, 0, 0, 0.06);
   --shadow-heavy: rgba(0, 0, 0, 0.1);
@@ -37,6 +38,7 @@
     --text-muted: #6b6b6b;
     --border: #2a2a2a;
     --border-hover: #3a3a3a;
+    --bg-code-inline: #333;
     --nav-bg: rgba(17, 17, 17, 0.85);
     --shadow-color: rgba(0, 0, 0, 0.2);
     --shadow-heavy: rgba(0, 0, 0, 0.3);
