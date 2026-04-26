@@ -181,6 +181,9 @@ export interface TempisTimelineProps {
     /** Called when a timeline item is double-clicked. */
     onItemDoubleClick?(id: string | number): void;
 
+    /** Called when a timeline item is right-clicked (context menu). */
+    onItemContextClick?(id: string | number, position: { x: number; y: number }): void;
+
     /** Called when the mouse pointer enters or leaves a timeline item. */
     onItemHover?(id: string | number | null): void;
 
@@ -220,6 +223,7 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
             options = {},
             onItemClick,
             onItemDoubleClick,
+            onItemContextClick,
             onItemHover,
             onSelectionChange,
             onRangeChange,
@@ -230,8 +234,8 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
         const instanceRef = useRef<CoreTimeline | null>(null);
 
         // Store latest callbacks in a ref so we don't recreate the instance when they change.
-        const callbacksRef = useRef({ onItemClick, onItemDoubleClick, onItemHover, onSelectionChange, onRangeChange });
-        callbacksRef.current = { onItemClick, onItemDoubleClick, onItemHover, onSelectionChange, onRangeChange };
+        const callbacksRef = useRef({ onItemClick, onItemDoubleClick, onItemContextClick, onItemHover, onSelectionChange, onRangeChange });
+        callbacksRef.current = { onItemClick, onItemDoubleClick, onItemContextClick, onItemHover, onSelectionChange, onRangeChange };
 
         // Serialise the options object to detect actual value changes,
         // avoiding unnecessary instance recreates from new object references on every render.
@@ -255,6 +259,7 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
                 dependencies,
                 onItemClick: (id) => callbacksRef.current.onItemClick?.(id),
                 onItemDoubleClick: (id) => callbacksRef.current.onItemDoubleClick?.(id),
+                onItemContextClick: (id, pos) => callbacksRef.current.onItemContextClick?.(id, pos),
                 onItemHover: (id) => callbacksRef.current.onItemHover?.(id),
                 onSelectionChange: (changes) => callbacksRef.current.onSelectionChange?.(changes),
                 onRangeChange: (start, end) => callbacksRef.current.onRangeChange?.(start, end),

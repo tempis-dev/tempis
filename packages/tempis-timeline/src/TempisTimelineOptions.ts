@@ -76,6 +76,14 @@ export interface TempisTimelineOptions {
     onItemDoubleClick?(id: string | number): void;
 
     /**
+     * Called when a timeline item is right-clicked (context menu).
+     * The browser's default context menu is suppressed when this callback is provided.
+     * @param id The identifier of the right-clicked item.
+     * @param position The viewport coordinates of the pointer at the time of the right-click.
+     */
+    onItemContextClick?(id: string | number, position: { x: number; y: number }): void;
+
+    /**
      * Called when the mouse pointer enters or leaves a timeline item.
      * @param id The identifier of the item being hovered, or `null` when the pointer leaves all items.
      */
