@@ -3,245 +3,303 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Context Menu</title>
+  <title>Context Menu — Tempis Timeline</title>
   <script src="../lib/tempis_timeline.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #1a1a2e;
-      color: #e0e0e0;
-      min-height: 100vh;
-      padding: 32px 24px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
     }
-
-    h1 {
-      font-size: 1.6em;
-      font-weight: 700;
-      margin-bottom: 6px;
-      color: #fff;
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-
-    .subtitle {
-      font-size: 0.9em;
-      color: #888;
-      margin-bottom: 20px;
-    }
-
-    .canvas-container {
+    h1 { margin-top: 0; color: #333; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+    .timeline-container {
       width: 100%;
-      height: 500px;
-      border-radius: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      height: 550px;
       overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.08);
     }
 
     /* Context menu */
     .ctx-menu {
       position: fixed;
       z-index: 9999;
-      min-width: 180px;
-      background: #252540;
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 8px;
+      min-width: 200px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
       padding: 4px 0;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.15);
       display: none;
+      font-size: 13px;
     }
-
     .ctx-menu.open { display: block; }
-
+    .ctx-menu-header {
+      padding: 8px 14px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ctx-menu-sep { height: 1px; background: #eee; margin: 4px 0; }
     .ctx-menu-item {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 9px 16px;
-      font-size: 0.88em;
-      color: #d0d0d0;
+      padding: 8px 14px;
+      color: #333;
       cursor: pointer;
-      transition: background 0.12s;
+      transition: background 0.1s;
     }
+    .ctx-menu-item:hover { background: #f0f4ff; }
+    .ctx-menu-item.danger { color: #e53935; }
+    .ctx-menu-item.danger:hover { background: #fef2f2; }
+    .ctx-menu-icon { width: 18px; text-align: center; flex-shrink: 0; }
 
-    .ctx-menu-item:hover {
-      background: rgba(255,255,255,0.08);
-      color: #fff;
-    }
-
-    .ctx-menu-item.danger { color: #f87171; }
-    .ctx-menu-item.danger:hover { background: rgba(248,113,113,0.12); }
-
-    .ctx-menu-sep {
-      height: 1px;
-      background: rgba(255,255,255,0.08);
-      margin: 4px 0;
-    }
-
-    /* Toast notification */
+    /* Toast */
     .toast {
       position: fixed;
       bottom: 24px;
       left: 50%;
       transform: translateX(-50%) translateY(80px);
-      background: #252540;
-      color: #e0e0e0;
-      border: 1px solid rgba(255,255,255,0.1);
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 0.85em;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      background: #333;
+      color: #fff;
+      padding: 10px 22px;
+      border-radius: 6px;
+      font-size: 13px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
       opacity: 0;
-      transition: transform 0.3s ease, opacity 0.3s ease;
+      transition: transform 0.25s ease, opacity 0.25s ease;
       z-index: 10000;
       pointer-events: none;
     }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
+    .info {
+      margin-top: 15px;
+      padding: 15px;
+      background: #e3f2fd;
+      border-left: 4px solid #2196F3;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .info code {
+      background: rgba(0,0,0,0.06);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 13px;
     }
   </style>
 </head>
 <body>
-  <h1>Context Menu</h1>
-  <p class="subtitle">Right-click any item to open a custom context menu with actions.</p>
+  <div class="container">
+    <h1>Film Production Schedule</h1>
+    <p class="subtitle">Right-click any task to manage it — reschedule, mark as wrapped, swap crew, or cancel.</p>
 
-  <div class="canvas-container">
-    <canvas id="canvas"></canvas>
+    <div class="timeline-container">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="info">
+      <strong>onItemContextClick Callback</strong><br>
+      The <code>onItemContextClick(id, position)</code> callback fires when a user right-clicks a timeline item.
+      It provides the item <code>id</code> and viewport coordinates (<code>{ x, y }</code>) so you can position a custom menu.
+      The browser's default context menu is automatically suppressed when the callback is provided and the click lands on an item.
+    </div>
   </div>
 
-  <!-- Context menu element -->
+  <!-- Context menu -->
   <div class="ctx-menu" id="ctx-menu">
-    <div class="ctx-menu-item" data-action="edit">✏️ Edit Item</div>
-    <div class="ctx-menu-item" data-action="duplicate">📋 Duplicate</div>
-    <div class="ctx-menu-item" data-action="info">ℹ️ View Details</div>
+    <div class="ctx-menu-header" id="ctx-menu-header"></div>
     <div class="ctx-menu-sep"></div>
-    <div class="ctx-menu-item danger" data-action="delete">🗑️ Delete Item</div>
+    <div class="ctx-menu-item" data-action="wrapped"><span class="ctx-menu-icon">🎬</span> Mark as Wrapped</div>
+    <div class="ctx-menu-item" data-action="postpone"><span class="ctx-menu-icon">📅</span> Postpone 3 Days</div>
+    <div class="ctx-menu-item" data-action="crew"><span class="ctx-menu-icon">👥</span> Swap Crew</div>
+    <div class="ctx-menu-item" data-action="note"><span class="ctx-menu-icon">📝</span> Add Note</div>
+    <div class="ctx-menu-sep"></div>
+    <div class="ctx-menu-item danger" data-action="cancel"><span class="ctx-menu-icon">✕</span> Cancel Task</div>
   </div>
 
-  <!-- Toast element -->
+  <!-- Toast -->
   <div class="toast" id="toast"></div>
-</body>
+
 <script>
-  (function () {
-    // ── State ──
-    var nextId = 100;
-    var contextItemId = null;
-    var menuEl = document.getElementById('ctx-menu');
-    var toastEl = document.getElementById('toast');
-    var toastTimer = null;
+(function () {
+  var menuEl = document.getElementById('ctx-menu');
+  var menuHeader = document.getElementById('ctx-menu-header');
+  var toastEl = document.getElementById('toast');
+  var toastTimer = null;
+  var contextItemId = null;
 
-    // ── Items ──
-    var items = [
-      { id: 1, label: 'Research',       start: '2026-03-01', end: '2026-03-08', grouping: 'Planning' },
-      { id: 2, label: 'Requirements',   start: '2026-03-06', end: '2026-03-14', grouping: 'Planning' },
-      { id: 3, label: 'Wireframes',     start: '2026-03-10', end: '2026-03-18', grouping: 'Design' },
-      { id: 4, label: 'Prototyping',    start: '2026-03-16', end: '2026-03-25', grouping: 'Design' },
-      { id: 5, label: 'Frontend',       start: '2026-03-20', end: '2026-04-05', grouping: 'Development' },
-      { id: 6, label: 'Backend',        start: '2026-03-22', end: '2026-04-08', grouping: 'Development' },
-      { id: 7, label: 'API Integration',start: '2026-04-01', end: '2026-04-10', grouping: 'Development' },
-      { id: 8, label: 'QA Testing',     start: '2026-04-06', end: '2026-04-15', grouping: 'Testing' },
-      { id: 9, label: 'UAT',            start: '2026-04-12', end: '2026-04-18', grouping: 'Testing' },
-      { id: 10, label: 'Launch',        start: '2026-04-18', end: '2026-04-20', grouping: 'Release' },
-    ];
+  var crews = ['A-Unit', 'B-Unit', 'Splinter Unit', 'Second Unit', 'VFX Unit'];
 
-    // ── Timeline ──
-    var tl = new tempis_timeline.TempisTimeline('#canvas', {
-      responsive: true,
-      verticalFill: 'fill-canvas',
-      style: { item: { borderRadius: 4, fontColor: '#fff' } },
-      range: { start: '2026-02-22', end: '2026-04-26', position: 'bottom' },
-      items: items,
+  var categories = [
+    { name: 'preproduction', label: 'Pre-Production' },
+    { name: 'principal',     label: 'Principal Photography' },
+    { name: 'post',          label: 'Post-Production' },
+    { name: 'vfx',           label: 'VFX' },
+    { name: 'sound',         label: 'Sound & Music' },
+    { name: 'delivery',      label: 'Delivery' },
+  ];
 
-      onItemContextClick: function (id, position) {
-        contextItemId = id;
-        showMenu(position.x, position.y);
-      },
+  var items = [
+    { id: 1,  label: 'Location Scouting',       start: '2026-06-01', end: '2026-06-10', grouping: 'Pre-Production', category: 'preproduction' },
+    { id: 2,  label: 'Casting Sessions',         start: '2026-06-05', end: '2026-06-14', grouping: 'Pre-Production', category: 'preproduction' },
+    { id: 3,  label: 'Storyboarding',            start: '2026-06-08', end: '2026-06-18', grouping: 'Pre-Production', category: 'preproduction' },
+    { id: 4,  label: 'Costume & Set Design',     start: '2026-06-12', end: '2026-06-22', grouping: 'Pre-Production', category: 'preproduction' },
+    { id: 5,  label: 'Rehearsals',               start: '2026-06-20', end: '2026-06-28', grouping: 'Pre-Production', category: 'preproduction' },
+    { id: 6,  label: 'Studio Shoot — Act I',     start: '2026-07-01', end: '2026-07-14', grouping: 'Shooting',       category: 'principal' },
+    { id: 7,  label: 'On-Location — Desert',     start: '2026-07-10', end: '2026-07-20', grouping: 'Shooting',       category: 'principal' },
+    { id: 8,  label: 'Studio Shoot — Act II',    start: '2026-07-18', end: '2026-07-30', grouping: 'Shooting',       category: 'principal' },
+    { id: 9,  label: 'Night Shoots',             start: '2026-07-22', end: '2026-07-28', grouping: 'Shooting',       category: 'principal' },
+    { id: 10, label: 'Aerial & Drone Footage',   start: '2026-07-25', end: '2026-08-02', grouping: 'Shooting',       category: 'principal' },
+    { id: 11, label: 'Rough Cut Assembly',        start: '2026-08-01', end: '2026-08-18', grouping: 'Editorial',      category: 'post' },
+    { id: 12, label: 'Director\'s Cut',           start: '2026-08-16', end: '2026-09-01', grouping: 'Editorial',      category: 'post' },
+    { id: 13, label: 'Color Grading',             start: '2026-08-28', end: '2026-09-10', grouping: 'Editorial',      category: 'post' },
+    { id: 14, label: 'CG Environment Build',      start: '2026-07-20', end: '2026-08-20', grouping: 'Visual Effects', category: 'vfx' },
+    { id: 15, label: 'Creature Animation',        start: '2026-08-05', end: '2026-08-28', grouping: 'Visual Effects', category: 'vfx' },
+    { id: 16, label: 'Compositing & Cleanup',     start: '2026-08-22', end: '2026-09-08', grouping: 'Visual Effects', category: 'vfx' },
+    { id: 17, label: 'Dialogue Recording (ADR)',   start: '2026-08-10', end: '2026-08-22', grouping: 'Sound',          category: 'sound' },
+    { id: 18, label: 'Foley & Sound Effects',      start: '2026-08-18', end: '2026-09-02', grouping: 'Sound',          category: 'sound' },
+    { id: 19, label: 'Score Recording',            start: '2026-08-25', end: '2026-09-08', grouping: 'Sound',          category: 'sound' },
+    { id: 20, label: 'Final Mix',                  start: '2026-09-05', end: '2026-09-14', grouping: 'Sound',          category: 'sound' },
+    { id: 21, label: 'DCP Mastering',              start: '2026-09-12', end: '2026-09-18', grouping: 'Delivery',       category: 'delivery' },
+    { id: 22, label: 'Festival Submission',         start: '2026-09-16', end: '2026-09-22', grouping: 'Delivery',       category: 'delivery' },
+  ];
 
-      onItemClick: function () {
-        closeMenu();
-      }
-    });
+  // ── Timeline ──
+  var tl = new tempis_timeline.TempisTimeline('#canvas', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    range: {
+      start: '2026-05-25',
+      end: '2026-09-28',
+      position: 'bottom',
+      zoom: { enabled: true }
+    },
+    legend: { position: 'bottom', alignment: 'center' },
+    categories: categories,
+    items: items,
 
-    // ── Menu helpers ──
-    function showMenu(x, y) {
-      // Keep menu within viewport bounds.
-      var rect = menuEl.getBoundingClientRect();
-      menuEl.classList.add('open');
-      var mw = menuEl.offsetWidth;
-      var mh = menuEl.offsetHeight;
-      if (x + mw > window.innerWidth) x = window.innerWidth - mw - 8;
-      if (y + mh > window.innerHeight) y = window.innerHeight - mh - 8;
-      menuEl.style.left = x + 'px';
-      menuEl.style.top = y + 'px';
-    }
+    onItemContextClick: function (id, position) {
+      contextItemId = id;
+      var item = findItem(id);
+      menuHeader.textContent = item ? item.label : 'Item ' + id;
+      showMenu(position.x, position.y);
+    },
 
-    function closeMenu() {
-      menuEl.classList.remove('open');
-      contextItemId = null;
-    }
-
-    function toast(msg) {
-      toastEl.textContent = msg;
-      toastEl.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2200);
-    }
-
-    function findItem(id) {
-      for (var i = 0; i < items.length; i++) {
-        if (items[i].id === id) return items[i];
-      }
-      return null;
-    }
-
-    // ── Menu actions ──
-    menuEl.addEventListener('click', function (e) {
-      var target = e.target.closest('.ctx-menu-item');
-      if (!target || contextItemId === null) return;
-
-      var action = target.getAttribute('data-action');
-      var item = findItem(contextItemId);
-
-      if (action === 'delete' && item) {
-        items = items.filter(function (i) { return i.id !== contextItemId; });
-        tl.setItems(items);
-        toast('Deleted "' + item.label + '"');
-      }
-
-      if (action === 'duplicate' && item) {
-        var clone = {};
-        for (var k in item) clone[k] = item[k];
-        clone.id = nextId++;
-        clone.label = item.label + ' (copy)';
-        items.push(clone);
-        tl.setItems(items);
-        toast('Duplicated "' + item.label + '"');
-      }
-
-      if (action === 'edit' && item) {
-        var newLabel = prompt('Rename item:', item.label);
-        if (newLabel && newLabel.trim()) {
-          item.label = newLabel.trim();
-          tl.setItems(items);
-          toast('Renamed to "' + item.label + '"');
-        }
-      }
-
-      if (action === 'info' && item) {
-        var start = new Date(item.start).toLocaleDateString();
-        var end = item.end ? new Date(item.end).toLocaleDateString() : '—';
-        toast(item.label + '  ·  ' + start + ' → ' + end + '  ·  ' + (item.grouping || 'No group'));
-      }
-
+    onItemClick: function () {
       closeMenu();
-    });
+    }
+  });
 
-    // Close menu on outside click or scroll.
-    document.addEventListener('mousedown', function (e) {
-      if (!menuEl.contains(e.target)) closeMenu();
-    });
-    document.addEventListener('wheel', function () { closeMenu(); }, { passive: true });
-  })();
+  // ── Helpers ──
+  function findItem(id) {
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].id === id) return items[i];
+    }
+    return null;
+  }
+
+  function showMenu(x, y) {
+    menuEl.classList.add('open');
+    var mw = menuEl.offsetWidth;
+    var mh = menuEl.offsetHeight;
+    if (x + mw > window.innerWidth) x = window.innerWidth - mw - 8;
+    if (y + mh > window.innerHeight) y = window.innerHeight - mh - 8;
+    menuEl.style.left = x + 'px';
+    menuEl.style.top = y + 'px';
+  }
+
+  function closeMenu() {
+    menuEl.classList.remove('open');
+    contextItemId = null;
+  }
+
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2400);
+  }
+
+  function addDays(dateStr, days) {
+    var d = new Date(dateStr);
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
+
+  // ── Menu actions ──
+  menuEl.addEventListener('click', function (e) {
+    var target = e.target.closest('.ctx-menu-item');
+    if (!target || contextItemId === null) return;
+
+    var action = target.getAttribute('data-action');
+    var item = findItem(contextItemId);
+    if (!item) { closeMenu(); return; }
+
+    switch (action) {
+      case 'wrapped':
+        item.style = { backgroundColor: '#43a047', fontColor: '#fff' };
+        tl.setItems(items);
+        toast('"' + item.label + '" marked as wrapped');
+        break;
+
+      case 'postpone':
+        item.start = addDays(item.start, 3);
+        if (item.end) item.end = addDays(item.end, 3);
+        tl.setItems(items);
+        toast('"' + item.label + '" postponed 3 days');
+        break;
+
+      case 'crew':
+        var current = item._crew || 'A-Unit';
+        var next = crews[(crews.indexOf(current) + 1) % crews.length];
+        item._crew = next;
+        toast('"' + item.label + '" reassigned to ' + next);
+        break;
+
+      case 'note':
+        var note = prompt('Add a note to "' + item.label + '":', '');
+        if (note && note.trim()) {
+          toast('Note added to "' + item.label + '"');
+        }
+        break;
+
+      case 'cancel':
+        if (confirm('Cancel "' + item.label + '"?')) {
+          items = items.filter(function (i) { return i.id !== contextItemId; });
+          tl.setItems(items);
+          toast('"' + item.label + '" cancelled');
+        }
+        break;
+    }
+
+    closeMenu();
+  });
+
+  // Close menu on outside click or scroll.
+  document.addEventListener('mousedown', function (e) {
+    if (!menuEl.contains(e.target)) closeMenu();
+  });
+  document.addEventListener('wheel', function () { closeMenu(); }, { passive: true });
+})();
 </script>
+</body>
 </html>
