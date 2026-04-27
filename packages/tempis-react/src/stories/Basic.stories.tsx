@@ -9,6 +9,7 @@ const meta: Meta<typeof TempisTimeline> = {
     args: {
         onItemClick: fn(),
         onItemDoubleClick: fn(),
+        onItemContextClick: fn(),
         onItemHover: fn(),
         onRangeChange: fn(),
     },

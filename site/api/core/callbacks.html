@@ -10,6 +10,7 @@
     var colors = {
       onItemClick: '#ff0071',
       onItemDoubleClick: '#f59e0b',
+      onItemContextClick: '#e879f9',
       onItemHover: '#6366f1',
       onSelectionChange: '#10b981',
       onRangeChange: '#808080'
@@ -34,6 +35,7 @@
       range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' },
       onItemClick: function(id) { log('onItemClick', 'id: ' + id); },
       onItemDoubleClick: function(id) { log('onItemDoubleClick', 'id: ' + id); },
+      onItemContextClick: function(id, pos) { log('onItemContextClick', 'id: ' + id + ' @ (' + pos.x + ', ' + pos.y + ')'); },
       onItemHover: function(id) { log('onItemHover', 'id: ' + (id === null ? 'null' : id)); },
       onSelectionChange: function(changes) {
         log('onSelectionChange', JSON.stringify(changes));
@@ -55,6 +57,7 @@
   <tbody>
     <tr><td><code>onItemClick</code></td><td><code>(id: string | number) =&gt; void</code></td><td>A timeline item is clicked.</td></tr>
     <tr><td><code>onItemDoubleClick</code></td><td><code>(id: string | number) =&gt; void</code></td><td>A timeline item is double-clicked.</td></tr>
+    <tr><td><code>onItemContextClick</code></td><td><code>(id: string | number, position: { x: number; y: number }) =&gt; void</code></td><td>A timeline item is right-clicked. The browser's default context menu is suppressed. Receives the item <code>id</code> and viewport coordinates for positioning a custom menu.</td></tr>
     <tr><td><code>onItemHover</code></td><td><code>(id: string | number | null) =&gt; void</code></td><td>The pointer enters an item (<code>id</code>) or leaves all items (<code>null</code>).</td></tr>
     <tr><td><code>onSelectionChange</code></td><td><code>(changes: SelectionChangeEvent[]) =&gt; void</code></td><td>The selection changes via user interaction. Enables controlled selection — you must call <code>setSelection()</code> to apply changes. See <a href="#core/selection">Selection</a>.</td></tr>
     <tr><td><code>onRangeChange</code></td><td><code>(start: Date, end: Date) =&gt; void</code></td><td>The visible range changes due to panning, zooming, or programmatic update.</td></tr>
@@ -76,6 +79,10 @@
   },
   onItemDoubleClick(id) {
     console.log('Double-clicked:', id);
+  },
+  onItemContextClick(id, position) {
+    console.log('Context-click:', id, 'at', position);
+    // Show a custom context menu at position.x, position.y
   },
   onItemHover(id) {
     console.log('Hover:', id);

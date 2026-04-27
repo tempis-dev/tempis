@@ -104,6 +104,7 @@ export class TempisTimeline {
         pointercancel: ((event: PointerEvent) => void) | null;
         wheel: ((event: WheelEvent) => void) | null;
         dblclick: ((event: MouseEvent) => void) | null;
+        contextmenu: ((event: MouseEvent) => void) | null;
         mouseenter: (() => void) | null;
         mouseleave: (() => void) | null;
     } = {
@@ -113,6 +114,7 @@ export class TempisTimeline {
         pointercancel: null,
         wheel: null,
         dblclick: null,
+        contextmenu: null,
         mouseenter: null,
         mouseleave: null
     };
@@ -468,6 +470,9 @@ export class TempisTimeline {
         if (this._eventHandlers.dblclick) {
             this._canvas.removeEventListener("dblclick", this._eventHandlers.dblclick);
         }
+        if (this._eventHandlers.contextmenu) {
+            this._canvas.removeEventListener("contextmenu", this._eventHandlers.contextmenu);
+        }
         if (this._eventHandlers.mouseenter) {
             this._canvas.removeEventListener("mouseenter", this._eventHandlers.mouseenter);
         }
@@ -809,6 +814,22 @@ export class TempisTimeline {
             }
         };
         this._canvas.addEventListener("dblclick", this._eventHandlers.dblclick, false);
+
+        // Handle right-click (context menu) events for data view items.
+        this._eventHandlers.contextmenu = (evt) => {
+            // Only intercept when the consumer has registered a context-click callback.
+            if (!this._options.onItemContextClick) return;
+
+            // Try to get the item at the right-clicked position.
+            const clickedItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(evt));
+
+            // If we have a clicked item, suppress the default context menu and invoke the handler.
+            if (clickedItem) {
+                evt.preventDefault();
+                this._onItemContextClicked(clickedItem, { x: evt.clientX, y: evt.clientY });
+            }
+        };
+        this._canvas.addEventListener("contextmenu", this._eventHandlers.contextmenu, false);
 
         // Handle mouse enter/leave for scrollbar visibility.
         this._eventHandlers.mouseenter = () => {
@@ -1189,5 +1210,15 @@ export class TempisTimeline {
     private _onItemDoubleClicked(item: TimelineItem): void {
         // Invoke the 'onItemDoubleClick' callback if defined, passing the identifier of the double-clicked item.
         this._options.onItemDoubleClick?.(item.id);
+    }
+
+    /**
+     * Called when an item is right-clicked (context menu).
+     * @param item The right-clicked item.
+     * @param position The viewport coordinates of the pointer.
+     */
+    private _onItemContextClicked(item: TimelineItem, position: { x: number; y: number }): void {
+        // Invoke the 'onItemContextClick' callback if defined.
+        this._options.onItemContextClick?.(item.id, position);
     }
 }
