@@ -594,7 +594,9 @@ footer a:hover {
   .install-section { padding: 60px 24px; }
   .install-section h2 { font-size: 1.8em; }
   .install-row { flex-direction: column; gap: 16px; display: flex; }
-  .install-box { display: flex; }
+  .install-box { display: flex; font-size: 0.85em; }
+  pre { font-size: 0.8em; }
+  code { font-size: 0.8em; }
 }
 
 /* ─── Pricing ─── */
