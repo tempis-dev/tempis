@@ -578,9 +578,9 @@ export class TimelineDataView {
         const itemBorderRadius = item.style.borderRadius!;
         const itemBorderThickness = item.style.borderThickness;
         const itemBorderStyle = item.style.borderStyle ?? "solid";
-        let itemBackgroundColor = item.style.backgroundColor!;
-        let itemFontColor = item.style.fontColor!;
-        let itemBorderColor = item.style.borderColor;
+        const itemBackgroundColor = item.style.backgroundColor!;
+        const itemFontColor = item.style.fontColor!;
+        const itemBorderColor = item.style.borderColor;
 
         // If the item is too small to be rendered then we should just skip it.
         if (!this._isItemVisible(itemDrawPlan)) {
@@ -956,9 +956,8 @@ export class TimelineDataView {
 
                 if (Math.abs(horizGap) < r * 2) {
                     // Gap too small for two arcs + horizontal.
-                    // Use two small arcs with radius = half the gap to smoothly
-                    // connect the two verticals.
-                    var halfGap = Math.max(Math.abs(horizGap) / 2, 0.5);
+                    // Use two small arcs with radius = half the gap to smoothly connect the two verticals.
+                    const halfGap = Math.max(Math.abs(horizGap) / 2, 0.5);
                     // First vertical stops short of midY
                     context.lineTo(stubR, down ? midY - halfGap : midY + halfGap);
                     // Arc from first vertical towards second vertical
@@ -967,7 +966,7 @@ export class TimelineDataView {
                     context.arcTo(stubL, midY, stubL, down ? midY + halfGap : midY - halfGap, halfGap);
                 } else {
                     // Horizontal direction from stubR to stubL.
-                    var hdir = stubL > stubR ? 1 : -1;
+                    const hdir = stubL > stubR ? 1 : -1;
                     // Corner 2: first vertical → horizontal
                     context.lineTo(stubR, midY + (down ? -r : r));
                     context.arcTo(stubR, midY, stubR + r * hdir, midY, r);
