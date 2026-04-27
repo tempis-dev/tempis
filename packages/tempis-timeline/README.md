@@ -105,6 +105,7 @@ new TempisTimeline(context: string | HTMLCanvasElement, options: TempisTimelineO
 |----------|-----------|
 | `onItemClick` | `(id: string \| number) => void` |
 | `onItemDoubleClick` | `(id: string \| number) => void` |
+| `onItemContextClick` | `(id: string \| number, position: { x: number; y: number }) => void` |
 | `onItemHover` | `(id: string \| number \| null) => void` |
 | `onSelectionChange` | `(changes: SelectionChangeEvent[]) => void` |
 | `onRangeChange` | `(start: Date, end: Date) => void` |
