@@ -355,10 +355,18 @@ nav .nav-github:hover {
   font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
   font-size: 1.05em;
   margin-bottom: 16px;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 .install-box .prompt {
   color: var(--primary);
+}
+
+.install-row {
+  display: inline-flex;
+  gap: 24px;
 }
 
 /* ─── Content pages ─── */
@@ -585,6 +593,8 @@ footer a:hover {
   .page-wrapper { padding: 40px 24px 60px; }
   .install-section { padding: 60px 24px; }
   .install-section h2 { font-size: 1.8em; }
+  .install-row { flex-direction: column; gap: 16px; display: flex; }
+  .install-box { display: flex; }
 }
 
 /* ─── Pricing ─── */

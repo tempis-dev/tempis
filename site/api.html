@@ -52,18 +52,56 @@
     .api-content code:not(pre code) {
       background: rgba(128, 128, 128, 0.25); padding: 2px 6px; border-radius: 4px; font-size: 0.9em;
     }
-    .api-content table { width: 100%; border-collapse: collapse; margin: 0 0 24px; font-size: 0.92em; }
+    .api-content table { width: 100%; border-collapse: collapse; margin: 0 0 24px; font-size: 0.92em; overflow-x: auto; display: block; }
     .api-content th { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--border); font-weight: 600; }
     .api-content td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
     .api-content td code { font-size: 0.88em; }
     .api-content td:first-child code { color: var(--text) !important; }
     .api-demo { border-radius: 8px; border: 1px solid var(--border); margin: 0 0 24px; overflow: hidden; }
     .api-demo canvas { display: block; width: 100%; height: 250px; }
-</style>
-  <style>
+
+    /* ── Bottom sheet (mobile API nav) ── */
+    .api-fab {
+      display: none; position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+      width: 48px; height: 48px; border-radius: 50%; border: none;
+      background: var(--primary); color: #fff; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      font-size: 20px; line-height: 48px; text-align: center;
+    }
+    .api-sheet-overlay {
+      display: none; position: fixed; inset: 0; z-index: 1001;
+      background: rgba(0,0,0,0.4);
+    }
+    .api-sheet-overlay.open { display: block; }
+    .api-sheet {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 1002;
+      background: var(--bg); border-radius: 16px 16px 0 0;
+      max-height: 70vh; overflow-y: auto;
+      transform: translateY(100%); transition: transform 0.3s ease;
+      padding: 16px 20px 32px;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
+    }
+    .api-sheet.open { transform: translateY(0); }
+    .api-sheet .sheet-handle {
+      width: 36px; height: 4px; border-radius: 2px;
+      background: rgba(128,128,128,0.4); margin: 0 auto 16px;
+    }
+    .api-sheet .sidebar-heading {
+      font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.12em;
+      font-weight: 800; opacity: 0.5; margin: 16px 0 8px; padding: 0 4px;
+    }
+    .api-sheet .sidebar-heading.pink { color: #ff0071; opacity: 1; }
+    .api-sheet .sidebar-heading.blue { color: #61dafb; opacity: 1; }
+    .api-sheet a {
+      display: block; padding: 8px 12px; border-radius: 6px;
+      text-decoration: none; color: var(--text-secondary); font-size: 0.92em;
+    }
+    .api-sheet a:hover { background: var(--hover-bg); color: var(--text); }
+
     @media (max-width: 768px) {
       .api-sidebar { display: none; }
-      .api-content { padding: 32px 20px 60px; }
+      .api-content { padding: 32px 20px 80px; }
+      .api-fab { display: block; }
     }
   </style>
 </head>
@@ -127,6 +165,47 @@
       <div id="api-page"></div>
     </main>
   </div>
+
+  <!-- Mobile bottom sheet nav -->
+  <button class="api-fab" onclick="document.querySelector('.api-sheet').classList.add('open');document.querySelector('.api-sheet-overlay').classList.add('open');" aria-label="Navigation">☰</button>
+  <div class="api-sheet-overlay" onclick="document.querySelector('.api-sheet').classList.remove('open');this.classList.remove('open');"></div>
+  <div class="api-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sidebar-heading pink"><span style="color:var(--text)">@tempis/</span>timeline</div>
+    <a href="#core/getting-started" onclick="closeSheet()">Getting Started</a>
+    <a href="#core/constructor" onclick="closeSheet()">Constructor</a>
+    <a href="#core/items" onclick="closeSheet()">Items</a>
+    <a href="#core/categories" onclick="closeSheet()">Categories</a>
+    <a href="#core/bands" onclick="closeSheet()">Bands</a>
+    <a href="#core/range" onclick="closeSheet()">Range</a>
+    <a href="#core/selection" onclick="closeSheet()">Selection</a>
+    <a href="#core/focus" onclick="closeSheet()">Focus</a>
+    <a href="#core/tooltips" onclick="closeSheet()">Tooltips</a>
+    <a href="#core/legend" onclick="closeSheet()">Legend</a>
+    <a href="#core/grouping" onclick="closeSheet()">Grouping</a>
+    <a href="#core/styling" onclick="closeSheet()">Styling</a>
+    <a href="#core/scrollbar" onclick="closeSheet()">Scrollbar</a>
+    <a href="#core/layout" onclick="closeSheet()">Vertical Fill &amp; Stacking</a>
+    <a href="#core/rtl" onclick="closeSheet()">RTL</a>
+    <a href="#core/image-export" onclick="closeSheet()">Image Export</a>
+    <a href="#core/date-adapters" onclick="closeSheet()">Date Adapters</a>
+    <a href="#core/color-palette" onclick="closeSheet()">Color Palette</a>
+    <a href="#core/callbacks" onclick="closeSheet()">Callbacks</a>
+    <a href="#core/dependencies" onclick="closeSheet()">Dependencies</a>
+    <div class="sidebar-heading blue"><span style="color:var(--text)">@tempis/</span>react</div>
+    <a href="#react/getting-started" onclick="closeSheet()">Getting Started</a>
+    <a href="#react/props" onclick="closeSheet()">Component Props</a>
+    <a href="#react/options" onclick="closeSheet()">Options</a>
+    <a href="#react/ref" onclick="closeSheet()">Ref API</a>
+    <a href="#react/reactive-data" onclick="closeSheet()">Reactive Data</a>
+    <a href="#react/ssr" onclick="closeSheet()">SSR &amp; Next.js</a>
+  </div>
+  <script>
+    function closeSheet() {
+      document.querySelector('.api-sheet').classList.remove('open');
+      document.querySelector('.api-sheet-overlay').classList.remove('open');
+    }
+  </script>
 
   <script>
     var contentEl = document.getElementById('api-page');
