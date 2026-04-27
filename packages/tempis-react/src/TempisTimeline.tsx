@@ -1,10 +1,4 @@
-import {
-    useRef,
-    useEffect,
-    useImperativeHandle,
-    forwardRef,
-    type CSSProperties,
-} from "react";
+import { useRef, useEffect, useImperativeHandle, forwardRef, type CSSProperties } from "react";
 import {
     TempisTimeline as CoreTimeline,
     type TempisTimelineOptions,
@@ -20,7 +14,7 @@ import {
     type TempisTimelineScrollbarOptions,
     type ImageGenerationOptions,
     type FocusOptions,
-    type SelectionChangeEvent,
+    type SelectionChangeEvent
 } from "@tempis/timeline";
 
 /**
@@ -209,119 +203,127 @@ export interface TempisTimelineProps {
 /**
  * The TempisTimeline component.
  */
-export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>(
-    function TempisTimeline(
-        {
-            className,
-            wrapperStyle,
-            width = "100%",
-            height = 300,
+export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>(function TempisTimeline(
+    {
+        className,
+        wrapperStyle,
+        width = "100%",
+        height = 300,
+        items,
+        categories,
+        bands,
+        dependencies,
+        options = {},
+        onItemClick,
+        onItemDoubleClick,
+        onItemContextClick,
+        onItemHover,
+        onSelectionChange,
+        onRangeChange
+    },
+    ref
+) {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const instanceRef = useRef<CoreTimeline | null>(null);
+
+    // Store latest callbacks in a ref so we don't recreate the instance when they change.
+    const callbacksRef = useRef({
+        onItemClick,
+        onItemDoubleClick,
+        onItemContextClick,
+        onItemHover,
+        onSelectionChange,
+        onRangeChange
+    });
+    callbacksRef.current = {
+        onItemClick,
+        onItemDoubleClick,
+        onItemContextClick,
+        onItemHover,
+        onSelectionChange,
+        onRangeChange
+    };
+
+    // Serialise the options object to detect actual value changes,
+    // avoiding unnecessary instance recreates from new object references on every render.
+    const optionsKey = JSON.stringify(options);
+
+    // Create / destroy the core instance.
+    useEffect(() => {
+        // Guard against SSR environments.
+        if (typeof window === "undefined") {
+            console.warn("[TempisTimeline] Skipping initialisation — no window (SSR environment).");
+            return;
+        }
+
+        if (!canvasRef.current) return;
+
+        const timeline = new CoreTimeline(canvasRef.current, {
+            ...options,
             items,
             categories,
             bands,
             dependencies,
-            options = {},
-            onItemClick,
-            onItemDoubleClick,
-            onItemContextClick,
-            onItemHover,
-            onSelectionChange,
-            onRangeChange,
-        },
-        ref
-    ) {
-        const canvasRef = useRef<HTMLCanvasElement>(null);
-        const instanceRef = useRef<CoreTimeline | null>(null);
+            onItemClick: (id) => callbacksRef.current.onItemClick?.(id),
+            onItemDoubleClick: (id) => callbacksRef.current.onItemDoubleClick?.(id),
+            onItemContextClick: (id, pos) => callbacksRef.current.onItemContextClick?.(id, pos),
+            onItemHover: (id) => callbacksRef.current.onItemHover?.(id),
+            onSelectionChange: (changes) => callbacksRef.current.onSelectionChange?.(changes),
+            onRangeChange: (start, end) => callbacksRef.current.onRangeChange?.(start, end)
+        });
 
-        // Store latest callbacks in a ref so we don't recreate the instance when they change.
-        const callbacksRef = useRef({ onItemClick, onItemDoubleClick, onItemContextClick, onItemHover, onSelectionChange, onRangeChange });
-        callbacksRef.current = { onItemClick, onItemDoubleClick, onItemContextClick, onItemHover, onSelectionChange, onRangeChange };
+        instanceRef.current = timeline;
 
-        // Serialise the options object to detect actual value changes,
-        // avoiding unnecessary instance recreates from new object references on every render.
-        const optionsKey = JSON.stringify(options);
+        return () => {
+            timeline.destroy();
+            instanceRef.current = null;
+        };
+    }, [optionsKey]);
 
-        // Create / destroy the core instance.
-        useEffect(() => {
-            // Guard against SSR environments.
-            if (typeof window === "undefined") {
-                console.warn("[TempisTimeline] Skipping initialisation — no window (SSR environment).");
-                return;
-            }
+    // Sync items.
+    useEffect(() => {
+        instanceRef.current?.setItems(items);
+    }, [items]);
 
-            if (!canvasRef.current) return;
+    // Sync categories.
+    useEffect(() => {
+        if (categories) instanceRef.current?.setCategories(categories);
+    }, [categories]);
 
-            const timeline = new CoreTimeline(canvasRef.current, {
-                ...options,
-                items,
-                categories,
-                bands,
-                dependencies,
-                onItemClick: (id) => callbacksRef.current.onItemClick?.(id),
-                onItemDoubleClick: (id) => callbacksRef.current.onItemDoubleClick?.(id),
-                onItemContextClick: (id, pos) => callbacksRef.current.onItemContextClick?.(id, pos),
-                onItemHover: (id) => callbacksRef.current.onItemHover?.(id),
-                onSelectionChange: (changes) => callbacksRef.current.onSelectionChange?.(changes),
-                onRangeChange: (start, end) => callbacksRef.current.onRangeChange?.(start, end),
-            });
+    // Sync bands.
+    useEffect(() => {
+        if (bands) instanceRef.current?.setBands(bands);
+    }, [bands]);
 
-            instanceRef.current = timeline;
+    // Sync dependencies.
+    useEffect(() => {
+        if (dependencies) instanceRef.current?.setDependencies(dependencies);
+    }, [dependencies]);
 
-            return () => {
-                timeline.destroy();
-                instanceRef.current = null;
-            };
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [optionsKey]);
+    // We need to expose the imperative methods for the instance ref.
+    useImperativeHandle(ref, () => ({
+        focus: (opts) => instanceRef.current?.focus(opts),
+        getRange: () => instanceRef.current!.getRange(),
+        setItems: (i) => instanceRef.current?.setItems(i),
+        getItems: () => instanceRef.current?.getItems() ?? [],
+        setCategories: (c) => instanceRef.current?.setCategories(c),
+        getCategories: () => instanceRef.current?.getCategories() ?? [],
+        setBands: (b) => instanceRef.current?.setBands(b),
+        setDependencies: (d) => instanceRef.current?.setDependencies(d),
+        setSelection: (ids) => instanceRef.current?.setSelection(ids),
+        getSelection: () => instanceRef.current?.getSelection() ?? [],
+        clearSelection: () => instanceRef.current?.clearSelection(),
+        toImage: (opts) => instanceRef.current!.toImage(opts),
+        redraw: () => instanceRef.current?.redraw(),
+        getInstance: () => instanceRef.current,
+        getCanvas: () => canvasRef.current
+    }));
 
-        // Sync items.
-        useEffect(() => {
-            instanceRef.current?.setItems(items);
-        }, [items]);
-
-        // Sync categories.
-        useEffect(() => {
-            if (categories) instanceRef.current?.setCategories(categories);
-        }, [categories]);
-
-        // Sync bands.
-        useEffect(() => {
-            if (bands) instanceRef.current?.setBands(bands);
-        }, [bands]);
-
-        // Sync dependencies.
-        useEffect(() => {
-            if (dependencies) instanceRef.current?.setDependencies(dependencies);
-        }, [dependencies]);
-
-        // We need to expose the imperative methods for the instance ref.
-        useImperativeHandle(ref, () => ({
-            focus: (opts) => instanceRef.current?.focus(opts),
-            getRange: () => instanceRef.current!.getRange(),
-            setItems: (i) => instanceRef.current?.setItems(i),
-            getItems: () => instanceRef.current?.getItems() ?? [],
-            setCategories: (c) => instanceRef.current?.setCategories(c),
-            getCategories: () => instanceRef.current?.getCategories() ?? [],
-            setBands: (b) => instanceRef.current?.setBands(b),
-            setDependencies: (d) => instanceRef.current?.setDependencies(d),
-            setSelection: (ids) => instanceRef.current?.setSelection(ids),
-            getSelection: () => instanceRef.current?.getSelection() ?? [],
-            clearSelection: () => instanceRef.current?.clearSelection(),
-            toImage: (opts) => instanceRef.current!.toImage(opts),
-            redraw: () => instanceRef.current?.redraw(),
-            getInstance: () => instanceRef.current,
-            getCanvas: () => canvasRef.current,
-        }));
-
-        return (
-            <div className={className} style={wrapperStyle}>
-                <canvas
-                    ref={canvasRef}
-                    style={{ width, height, display: "block" }}
-                />
-            </div>
-        );
-    }
-);
+    return (
+        <div className={className} style={wrapperStyle}>
+            <canvas ref={canvasRef} style={{ width, height, display: "block" }} />
+        </div>
+    );
+});
 
 TempisTimeline.displayName = "TempisTimeline";

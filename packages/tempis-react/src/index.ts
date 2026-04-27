@@ -18,7 +18,7 @@ export type {
     TempisTimelineScrollbarOptions,
     ImageGenerationOptions,
     SelectionChangeEvent,
-    FocusOptions,
+    FocusOptions
 } from "@tempis/timeline";
 
 export { AdapterRegistry } from "@tempis/timeline";

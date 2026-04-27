@@ -7,7 +7,7 @@ const items = [
     { id: 2, label: "Task B", start: "2026-03-05", end: "2026-03-15", grouping: "Team 1" },
     { id: 3, label: "Task C", start: "2026-03-08", end: "2026-03-20", grouping: "Team 2" },
     { id: 4, label: "Task D", start: "2026-03-12", end: "2026-03-22", grouping: "Team 2" },
-    { id: 5, label: "Deadline", start: "2026-03-25", grouping: "Team 2" },
+    { id: 5, label: "Deadline", start: "2026-03-25", grouping: "Team 2" }
 ];
 
 const meta: Meta<typeof TempisTimeline> = {
@@ -16,8 +16,8 @@ const meta: Meta<typeof TempisTimeline> = {
     parameters: { layout: "padded" },
     args: {
         onItemClick: fn(),
-        onSelectionChange: fn(),
-    },
+        onSelectionChange: fn()
+    }
 };
 export default meta;
 
@@ -30,9 +30,9 @@ export const SingleSelect: Story = {
         options: {
             responsive: true,
             selection: "single",
-            range: { start: "2026-02-25", end: "2026-04-01", position: "bottom" },
-        },
-    },
+            range: { start: "2026-02-25", end: "2026-04-01", position: "bottom" }
+        }
+    }
 };
 
 export const MultiSelect: Story = {
@@ -42,9 +42,9 @@ export const MultiSelect: Story = {
         options: {
             responsive: true,
             selection: "multi",
-            range: { start: "2026-02-25", end: "2026-04-01", position: "bottom" },
-        },
-    },
+            range: { start: "2026-02-25", end: "2026-04-01", position: "bottom" }
+        }
+    }
 };
 
 export const NoSelection: Story = {
@@ -54,7 +54,7 @@ export const NoSelection: Story = {
         options: {
             responsive: true,
             selection: "none",
-            range: { start: "2026-02-25", end: "2026-04-01", position: "bottom" },
-        },
-    },
+            range: { start: "2026-02-25", end: "2026-04-01", position: "bottom" }
+        }
+    }
 };

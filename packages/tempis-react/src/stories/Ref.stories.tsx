@@ -6,7 +6,7 @@ import type { TempisTimelineRef, TempisTimelineItem } from "../index";
 const meta: Meta<typeof TempisTimeline> = {
     title: "Ref API/Ref API",
     component: TempisTimeline,
-    parameters: { layout: "padded" },
+    parameters: { layout: "padded" }
 };
 export default meta;
 
@@ -19,7 +19,7 @@ function FocusDemo() {
     const items: TempisTimelineItem[] = [
         { id: "design", label: "Design Sprint", start: "2026-04-01", end: "2026-04-14", grouping: "Product" },
         { id: "build", label: "Build", start: "2026-04-10", end: "2026-05-05", grouping: "Engineering" },
-        { id: "launch", label: "Launch", start: "2026-05-10", grouping: "Product" },
+        { id: "launch", label: "Launch", start: "2026-05-10", grouping: "Product" }
     ];
 
     return (
@@ -34,9 +34,7 @@ function FocusDemo() {
                 <button onClick={() => ref.current?.focus({ id: "launch", animate: true, duration: 600 })}>
                     Focus Launch
                 </button>
-                <button onClick={() => ref.current?.focus({ animate: true, duration: 800 })}>
-                    Show All
-                </button>
+                <button onClick={() => ref.current?.focus({ animate: true, duration: 800 })}>Show All</button>
             </div>
             <TempisTimeline
                 ref={ref}
@@ -44,7 +42,7 @@ function FocusDemo() {
                 items={items}
                 options={{
                     responsive: true,
-                    range: { start: "2026-03-25", end: "2026-05-15", position: "bottom" },
+                    range: { start: "2026-03-25", end: "2026-05-15", position: "bottom" }
                 }}
             />
         </div>
@@ -61,7 +59,7 @@ function SelectionDemo() {
         { id: 1, label: "Task A", start: "2026-03-01", end: "2026-03-10", grouping: "Sprint 1" },
         { id: 2, label: "Task B", start: "2026-03-05", end: "2026-03-15", grouping: "Sprint 1" },
         { id: 3, label: "Task C", start: "2026-03-10", end: "2026-03-20", grouping: "Sprint 2" },
-        { id: 4, label: "Task D", start: "2026-03-15", end: "2026-03-25", grouping: "Sprint 2" },
+        { id: 4, label: "Task D", start: "2026-03-15", end: "2026-03-25", grouping: "Sprint 2" }
     ];
 
     return (
@@ -79,7 +77,7 @@ function SelectionDemo() {
                 options={{
                     responsive: true,
                     selection: "multi",
-                    range: { start: "2026-02-25", end: "2026-04-01", position: "bottom" },
+                    range: { start: "2026-02-25", end: "2026-04-01", position: "bottom" }
                 }}
             />
         </div>
