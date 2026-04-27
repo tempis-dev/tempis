@@ -2,7 +2,20 @@ import { TempisTimelineDateAdapter, DateInput, TimeInstant, Unit } from "./Tempi
 
 const SHORT_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const FULL_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const FULL_MONTHS = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+];
 
 /**
  * Default date adapter implementation using native JavaScript Date objects.
@@ -143,20 +156,34 @@ export class NativeDateAdapter implements TempisTimelineDateAdapter {
 
         return p.replace(/YYYY|MMMM|MMM|MM|D|ddd|HH|hh|mm|ss|SSS|A|a/g, (token: string): string => {
             switch (token) {
-                case "YYYY": return String(d.getFullYear());
-                case "MMMM": return FULL_MONTHS[d.getMonth()];
-                case "MMM":  return SHORT_MONTHS[d.getMonth()];
-                case "MM":   return String(d.getMonth() + 1).padStart(2, "0");
-                case "D":    return String(d.getDate());
-                case "ddd":  return SHORT_DAYS[d.getDay()];
-                case "HH":   return String(d.getHours()).padStart(2, "0");
-                case "hh":   return String(d.getHours() % 12 || 12).padStart(2, "0");
-                case "mm":   return String(d.getMinutes()).padStart(2, "0");
-                case "ss":   return String(d.getSeconds()).padStart(2, "0");
-                case "SSS":  return String(d.getMilliseconds()).padStart(3, "0");
-                case "A":    return d.getHours() < 12 ? "AM" : "PM";
-                case "a":    return d.getHours() < 12 ? "am" : "pm";
-                default:     return token;
+                case "YYYY":
+                    return String(d.getFullYear());
+                case "MMMM":
+                    return FULL_MONTHS[d.getMonth()];
+                case "MMM":
+                    return SHORT_MONTHS[d.getMonth()];
+                case "MM":
+                    return String(d.getMonth() + 1).padStart(2, "0");
+                case "D":
+                    return String(d.getDate());
+                case "ddd":
+                    return SHORT_DAYS[d.getDay()];
+                case "HH":
+                    return String(d.getHours()).padStart(2, "0");
+                case "hh":
+                    return String(d.getHours() % 12 || 12).padStart(2, "0");
+                case "mm":
+                    return String(d.getMinutes()).padStart(2, "0");
+                case "ss":
+                    return String(d.getSeconds()).padStart(2, "0");
+                case "SSS":
+                    return String(d.getMilliseconds()).padStart(3, "0");
+                case "A":
+                    return d.getHours() < 12 ? "AM" : "PM";
+                case "a":
+                    return d.getHours() < 12 ? "am" : "pm";
+                default:
+                    return token;
             }
         });
     }

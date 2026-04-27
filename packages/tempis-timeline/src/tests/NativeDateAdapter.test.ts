@@ -298,7 +298,20 @@ describe("NativeDateAdapter.format", () => {
     // ── All months ──
 
     it("formats all 12 months correctly (MMMM)", () => {
-        const expected = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const expected = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        ];
         for (let m = 0; m < 12; m++) {
             const d = new Date(2026, m, 1).getTime();
             expect(adapter.format(d, "MMMM")).toBe(expected[m]);

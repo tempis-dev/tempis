@@ -492,11 +492,7 @@ export class TimelineRangeView {
             context.textBaseline = "middle";
             context.fillStyle = GRID_COLOUR;
             context.beginPath();
-            context.fillText(
-                majorTickLabel,
-                labelXPosition,
-                majorTicksYPosition + rangeContainerHeight / 4 + 1
-            );
+            context.fillText(majorTickLabel, labelXPosition, majorTicksYPosition + rangeContainerHeight / 4 + 1);
             context.stroke();
         }
     }

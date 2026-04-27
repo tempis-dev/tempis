@@ -1,9 +1,20 @@
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineBand } from "./TimelineBand";
 import { TimelineItem } from "./TimelineItem";
-import { TempisTimelineStackMode, TempisTimelineScrollbarOptions, TempisTimelineDependency } from "./TempisTimelineOptions";
+import {
+    TempisTimelineStackMode,
+    TempisTimelineScrollbarOptions,
+    TempisTimelineDependency
+} from "./TempisTimelineOptions";
 import { RangeTick } from "./TimelineRangeView";
-import { clamp, doDateRangesOverlap, drawClippedText, EasingFunction, GRID_COLOUR, GRID_COLOUR_TRANSPARENT } from "./Utilities";
+import {
+    clamp,
+    doDateRangesOverlap,
+    drawClippedText,
+    EasingFunction,
+    GRID_COLOUR,
+    GRID_COLOUR_TRANSPARENT
+} from "./Utilities";
 
 export interface DataViewDrawPlan {
     /** The height that is required to draw all groups and items within the specified date range. */
@@ -578,16 +589,16 @@ export class TimelineDataView {
 
         // Determine if this item is unfocused (a category is being highlighted and this item doesn't belong to it).
         const isUnfocused =
-            !!this._dataSet.focusedCategory &&
-            !this._dataSet.focusedCategory.isDisabled &&
-            !itemCategory?.isFocused;
+            !!this._dataSet.focusedCategory && !this._dataSet.focusedCategory.isDisabled && !itemCategory?.isFocused;
         const isPitItem = itemDrawPlan.xPointInTimePosition !== null;
 
         if (isUnfocused && isPitItem) {
             // PIT items have overlapping layers (marker line, triangle, box, label).
             // Render to an offscreen canvas at full opacity, then composite with reduced alpha to avoid visible layering artifacts.
             const itemLeft = Math.floor(itemDrawPlan.xPositionStart - (itemBorderThickness ?? 0) - 1);
-            const itemTop = Math.floor(scrolledYPosition + itemDrawPlan.yPositionStart - (itemBorderThickness ?? 0) - 1);
+            const itemTop = Math.floor(
+                scrolledYPosition + itemDrawPlan.yPositionStart - (itemBorderThickness ?? 0) - 1
+            );
             const itemRight = Math.ceil(itemDrawPlan.xPositionEnd + (itemBorderThickness ?? 0) + 1);
             const itemBottom = context.canvas.clientHeight;
             const w = itemRight - itemLeft;
@@ -610,7 +621,20 @@ export class TimelineDataView {
             this._offscreenContext!.translate(-itemLeft, -itemTop);
 
             // Draw the item to the offscreen canvas at full opacity.
-            this._drawGroupItemContent(itemDrawPlan, this._offscreenContext!, scrolledYPosition, itemBackgroundColor, itemFontColor, itemBorderColor, itemBorderThickness, itemBorderStyle, itemBorderRadius, itemPadding, context.canvas.clientHeight, context.canvas.clientWidth);
+            this._drawGroupItemContent(
+                itemDrawPlan,
+                this._offscreenContext!,
+                scrolledYPosition,
+                itemBackgroundColor,
+                itemFontColor,
+                itemBorderColor,
+                itemBorderThickness,
+                itemBorderStyle,
+                itemBorderRadius,
+                itemPadding,
+                context.canvas.clientHeight,
+                context.canvas.clientWidth
+            );
 
             this._offscreenContext!.restore();
 
@@ -627,7 +651,18 @@ export class TimelineDataView {
             context.globalAlpha = 0.3;
         }
 
-        this._drawGroupItemContent(itemDrawPlan, context, scrolledYPosition, itemBackgroundColor, itemFontColor, itemBorderColor, itemBorderThickness, itemBorderStyle, itemBorderRadius, itemPadding);
+        this._drawGroupItemContent(
+            itemDrawPlan,
+            context,
+            scrolledYPosition,
+            itemBackgroundColor,
+            itemFontColor,
+            itemBorderColor,
+            itemBorderThickness,
+            itemBorderStyle,
+            itemBorderRadius,
+            itemPadding
+        );
 
         if (isUnfocused) {
             context.globalAlpha = 1.0;
@@ -790,9 +825,7 @@ export class TimelineDataView {
                 // Calculate the actual x position of the label, we should attempt to keep this in the bounds of the view.
                 // If rendering right-to-left then we will be rendering the label to the right of the item, otherwise the left.
                 const labelStartPositionX = this._isRTL
-                    ? Math.floor(
-                          Math.min(effectiveCanvasWidth - itemPadding, itemDrawPlan.xPositionEnd - itemPadding)
-                      )
+                    ? Math.floor(Math.min(effectiveCanvasWidth - itemPadding, itemDrawPlan.xPositionEnd - itemPadding))
                     : Math.floor(Math.max(itemPadding, itemDrawPlan.xPositionStart + itemPadding));
 
                 // Calculate the max item label width.
@@ -876,91 +909,89 @@ export class TimelineDataView {
             const tx = rtl ? target.xPositionEnd : target.xPositionStart;
             const ty = scrolledYPosition + (target.yPositionStart + target.yPositionEnd) / 2;
 
-                // Direction multiplier: +1 for LTR (arrows go right), -1 for RTL (arrows go left).
-                const dir = rtl ? -1 : 1;
+            // Direction multiplier: +1 for LTR (arrows go right), -1 for RTL (arrows go left).
+            const dir = rtl ? -1 : 1;
 
-                // Skip if both endpoints are off-screen.
-                if ((sx < 0 && tx < 0) || (sx > context.canvas.clientWidth && tx > context.canvas.clientWidth)) continue;
+            // Skip if both endpoints are off-screen.
+            if ((sx < 0 && tx < 0) || (sx > context.canvas.clientWidth && tx > context.canvas.clientWidth)) continue;
 
-                context.beginPath();
+            context.beginPath();
 
-                if (sy === ty && (tx - sx) * dir > ARROW_SIZE) {
-                    // Same row, enough gap — straight line.
-                    context.moveTo(sx, sy);
-                    context.lineTo(tx, ty);
-                } else if (sy === ty && (tx - sx) * dir > 0) {
-                    // Same row, gap too small for arrow — skip entirely.
-                    continue;
-                } else if ((tx - sx) * dir > MARGIN * 2) {
-                    // Step connector: horizontal → vertical → horizontal.
-                    const midX = (sx + tx) / 2;
-                    const down = ty > sy;
-                    const r = Math.min(RADIUS, Math.abs(midX - sx), Math.abs(ty - sy) / 2);
+            if (sy === ty && (tx - sx) * dir > ARROW_SIZE) {
+                // Same row, enough gap — straight line.
+                context.moveTo(sx, sy);
+                context.lineTo(tx, ty);
+            } else if (sy === ty && (tx - sx) * dir > 0) {
+                // Same row, gap too small for arrow — skip entirely.
+                continue;
+            } else if ((tx - sx) * dir > MARGIN * 2) {
+                // Step connector: horizontal → vertical → horizontal.
+                const midX = (sx + tx) / 2;
+                const down = ty > sy;
+                const r = Math.min(RADIUS, Math.abs(midX - sx), Math.abs(ty - sy) / 2);
 
-                    context.moveTo(sx, sy);
-                    context.lineTo(midX - r * dir, sy);
-                    context.arcTo(midX, sy, midX, sy + (down ? r : -r), r);
-                    context.lineTo(midX, ty + (down ? -r : r));
-                    context.arcTo(midX, ty, midX + r * dir, ty, r);
-                    context.lineTo(tx, ty);
+                context.moveTo(sx, sy);
+                context.lineTo(midX - r * dir, sy);
+                context.arcTo(midX, sy, midX, sy + (down ? r : -r), r);
+                context.lineTo(midX, ty + (down ? -r : r));
+                context.arcTo(midX, ty, midX + r * dir, ty, r);
+                context.lineTo(tx, ty);
+            } else {
+                // S-shaped connector.
+                const down = ty >= sy;
+                const rawMidY = down
+                    ? scrolledYPosition + (source.yPositionEnd + target.yPositionStart) / 2
+                    : scrolledYPosition + (target.yPositionEnd + source.yPositionStart) / 2;
+                // Ensure midY is always between sy and ty.
+                const midY = down ? Math.max(sy, Math.min(rawMidY, ty)) : Math.min(sy, Math.max(rawMidY, ty));
+                const stubR = sx + MARGIN * dir;
+                const stubL = tx - MARGIN * dir;
+                const horizGap = (stubL - stubR) * dir;
+                const r = Math.min(RADIUS, Math.abs(midY - sy) / 2, MARGIN / 2);
+
+                context.moveTo(sx, sy);
+                // Corner 1: source horizontal → first vertical
+                context.lineTo(stubR - r * dir, sy);
+                context.arcTo(stubR, sy, stubR, sy + (down ? r : -r), r);
+
+                if (Math.abs(horizGap) < r * 2) {
+                    // Gap too small for two arcs + horizontal.
+                    // Use two small arcs with radius = half the gap to smoothly
+                    // connect the two verticals.
+                    var halfGap = Math.max(Math.abs(horizGap) / 2, 0.5);
+                    // First vertical stops short of midY
+                    context.lineTo(stubR, down ? midY - halfGap : midY + halfGap);
+                    // Arc from first vertical towards second vertical
+                    context.arcTo(stubR, midY, stubL, midY, halfGap);
+                    // Arc from horizontal towards second vertical going away from midY
+                    context.arcTo(stubL, midY, stubL, down ? midY + halfGap : midY - halfGap, halfGap);
                 } else {
-                    // S-shaped connector.
-                    const down = ty >= sy;
-                    const rawMidY = down
-                        ? scrolledYPosition + (source.yPositionEnd + target.yPositionStart) / 2
-                        : scrolledYPosition + (target.yPositionEnd + source.yPositionStart) / 2;
-                    // Ensure midY is always between sy and ty.
-                    const midY = down
-                        ? Math.max(sy, Math.min(rawMidY, ty))
-                        : Math.min(sy, Math.max(rawMidY, ty));
-                    const stubR = sx + MARGIN * dir;
-                    const stubL = tx - MARGIN * dir;
-                    const horizGap = (stubL - stubR) * dir;
-                    const r = Math.min(RADIUS, Math.abs(midY - sy) / 2, MARGIN / 2);
-
-                    context.moveTo(sx, sy);
-                    // Corner 1: source horizontal → first vertical
-                    context.lineTo(stubR - r * dir, sy);
-                    context.arcTo(stubR, sy, stubR, sy + (down ? r : -r), r);
-
-                    if (Math.abs(horizGap) < r * 2) {
-                        // Gap too small for two arcs + horizontal.
-                        // Use two small arcs with radius = half the gap to smoothly
-                        // connect the two verticals.
-                        var halfGap = Math.max(Math.abs(horizGap) / 2, 0.5);
-                        // First vertical stops short of midY
-                        context.lineTo(stubR, down ? midY - halfGap : midY + halfGap);
-                        // Arc from first vertical towards second vertical
-                        context.arcTo(stubR, midY, stubL, midY, halfGap);
-                        // Arc from horizontal towards second vertical going away from midY
-                        context.arcTo(stubL, midY, stubL, down ? midY + halfGap : midY - halfGap, halfGap);
-                    } else {
-                        // Horizontal direction from stubR to stubL.
-                        var hdir = stubL > stubR ? 1 : -1;
-                        // Corner 2: first vertical → horizontal
-                        context.lineTo(stubR, midY + (down ? -r : r));
-                        context.arcTo(stubR, midY, stubR + r * hdir, midY, r);
-                        // Horizontal segment
-                        context.lineTo(stubL - r * hdir, midY);
-                        // Corner 3: horizontal → second vertical
-                        context.arcTo(stubL, midY, stubL, midY + (down ? r : -r), r);
-                    }
-
-                    // Corner 4: second vertical → target horizontal
-                    context.lineTo(stubL, ty + (down ? -r : r));
-                    context.arcTo(stubL, ty, stubL + r * dir, ty, r);
-                    context.lineTo(tx, ty);
+                    // Horizontal direction from stubR to stubL.
+                    var hdir = stubL > stubR ? 1 : -1;
+                    // Corner 2: first vertical → horizontal
+                    context.lineTo(stubR, midY + (down ? -r : r));
+                    context.arcTo(stubR, midY, stubR + r * hdir, midY, r);
+                    // Horizontal segment
+                    context.lineTo(stubL - r * hdir, midY);
+                    // Corner 3: horizontal → second vertical
+                    context.arcTo(stubL, midY, stubL, midY + (down ? r : -r), r);
                 }
 
-                context.stroke();
+                // Corner 4: second vertical → target horizontal
+                context.lineTo(stubL, ty + (down ? -r : r));
+                context.arcTo(stubL, ty, stubL + r * dir, ty, r);
+                context.lineTo(tx, ty);
+            }
 
-                // Arrowhead pointing in the direction of flow.
-                context.beginPath();
-                context.moveTo(tx, ty);
-                context.lineTo(tx - ARROW_SIZE * dir, ty - ARROW_SIZE / 2);
-                context.lineTo(tx - ARROW_SIZE * dir, ty + ARROW_SIZE / 2);
-                context.closePath();
-                context.fill();
+            context.stroke();
+
+            // Arrowhead pointing in the direction of flow.
+            context.beginPath();
+            context.moveTo(tx, ty);
+            context.lineTo(tx - ARROW_SIZE * dir, ty - ARROW_SIZE / 2);
+            context.lineTo(tx - ARROW_SIZE * dir, ty + ARROW_SIZE / 2);
+            context.closePath();
+            context.fill();
         }
     }
 

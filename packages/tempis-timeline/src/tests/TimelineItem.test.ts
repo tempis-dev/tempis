@@ -5,10 +5,7 @@ describe("TimelineItem", () => {
     const style = { ...DEFAULT_ITEM_STYLE };
 
     it("constructs a range item", () => {
-        const item = new TimelineItem(
-            { id: 1, start: "2026-01-10", end: "2026-01-20", label: "Task" },
-            style
-        );
+        const item = new TimelineItem({ id: 1, start: "2026-01-10", end: "2026-01-20", label: "Task" }, style);
         expect(item.id).toBe(1);
         expect(item.label).toBe("Task");
         expect(item.start).toBeInstanceOf(Date);
@@ -17,10 +14,7 @@ describe("TimelineItem", () => {
     });
 
     it("constructs a PIT item (no end)", () => {
-        const item = new TimelineItem(
-            { id: "pit-1", start: "2026-03-15T12:00:00Z" },
-            style
-        );
+        const item = new TimelineItem({ id: "pit-1", start: "2026-03-15T12:00:00Z" }, style);
         expect(item.id).toBe("pit-1");
         expect(item.end).toBeNull();
     });
@@ -36,10 +30,7 @@ describe("TimelineItem", () => {
     });
 
     it("reads category from definition", () => {
-        const item = new TimelineItem(
-            { id: 1, start: "2026-01-01", category: "urgent" },
-            style
-        );
+        const item = new TimelineItem({ id: 1, start: "2026-01-01", category: "urgent" }, style);
         expect(item.category).toBe("urgent");
     });
 
@@ -55,10 +46,7 @@ describe("TimelineItem", () => {
     });
 
     it("reads selected from definition", () => {
-        const item = new TimelineItem(
-            { id: 1, start: "2026-01-01", selected: true },
-            style
-        );
+        const item = new TimelineItem({ id: 1, start: "2026-01-01", selected: true }, style);
         expect(item.isSelected).toBe(true);
     });
 

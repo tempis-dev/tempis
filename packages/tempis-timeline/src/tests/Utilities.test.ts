@@ -54,10 +54,10 @@ describe("defaults", () => {
         const result = defaults(itemStyle, categoryStyle, globalStyle, defaultStyle);
 
         expect(result).toEqual({
-            fontColor: "#0f0",       // from item
+            fontColor: "#0f0", // from item
             backgroundColor: "#f00", // from category
-            padding: 12,             // from global
-            borderRadius: 5          // from default
+            padding: 12, // from global
+            borderRadius: 5 // from default
         });
     });
 });
