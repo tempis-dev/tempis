@@ -51,3 +51,63 @@ function ProjectTimeline() {
     /&gt;
   );
 }</code></pre>
+
+<h2>Reactive Data</h2>
+<p>The <code>items</code>, <code>categories</code>, <code>bands</code>, and <code>dependencies</code> props are synced to the core instance via <code>useEffect</code>. When a prop changes, the component calls the corresponding setter on the existing instance — no destroy/recreate needed.</p>
+
+<h3>Dynamic Add / Remove</h3>
+<pre><code class="language-tsx">import { useState } from 'react';
+import { TempisTimeline } from '@tempis/react';
+
+function App() {
+  const [items, setItems] = useState([
+    { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-10' },
+  ]);
+
+  function addItem() {
+    setItems(prev =&gt; [
+      ...prev,
+      { id: prev.length + 1, label: `Item ${prev.length + 1}`, start: '2026-02-12', end: '2026-02-20' }
+    ]);
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={addItem}&gt;Add Item&lt;/button&gt;
+      &lt;TempisTimeline
+        items={items}
+        options={{ responsive: true, range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' } }}
+        height={300}
+      /&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<h3>Toggle Categories</h3>
+<pre><code class="language-tsx">import { useState } from 'react';
+import { TempisTimeline } from '@tempis/react';
+
+function App() {
+  const allCategories = [
+    { name: 'cat-a', label: 'Category A', style: { backgroundColor: '#6366f1' } },
+    { name: 'cat-b', label: 'Category B', style: { backgroundColor: '#f43f5e' } },
+  ];
+  const [categories, setCategories] = useState(allCategories);
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={() =&gt; setCategories(prev =&gt;
+        prev.length === 2 ? prev.slice(0, 1) : allCategories
+      )}&gt;Toggle Category B&lt;/button&gt;
+      &lt;TempisTimeline
+        items={[
+          { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-14', category: 'cat-a' },
+          { id: 2, label: 'Item 2', start: '2026-02-05', end: '2026-02-12', category: 'cat-b' },
+        ]}
+        categories={categories}
+        options={{ responsive: true, legend: { position: 'top' }, range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' } }}
+        height={300}
+      /&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
