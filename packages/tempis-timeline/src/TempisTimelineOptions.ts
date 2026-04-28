@@ -259,7 +259,7 @@ export interface TempisTimelineItemStyle {
     borderThickness?: number;
 
     /** The border style. Defaults to "solid". */
-    borderStyle?: "solid" | "dashed" | "dotted" | "dash-dot" | "long-dash";
+    borderStyle?: TempisTimelineLineStyle;
 
     /** The border radius. */
     borderRadius?: number;
@@ -447,4 +447,31 @@ export interface TempisTimelineDependency {
 
     /** The ID of the target item (arrow points here). */
     target: string | number;
+
+    /** The optional style overrides for this dependency's connector arrow. */
+    style?: TempisTimelineDependencyStyle;
 }
+
+/**
+ * Style options for a dependency connector arrow.
+ */
+export interface TempisTimelineDependencyStyle {
+    /** The colour of the connector line and arrowhead. */
+    color?: string;
+
+    /** The line thickness in pixels. Defaults to 1.5. */
+    lineWidth?: number;
+
+    /** The line style. Defaults to "solid". */
+    lineStyle?: TempisTimelineLineStyle;
+}
+
+/**
+ * Line style for borders and connectors.
+ * - `"solid"` — continuous line (default).
+ * - `"dashed"` — evenly spaced dashes.
+ * - `"dotted"` — small round dots.
+ * - `"dash-dot"` — alternating dashes and dots.
+ * - `"long-dash"` — longer dashes with wider gaps.
+ */
+export type TempisTimelineLineStyle = "solid" | "dashed" | "dotted" | "dash-dot" | "long-dash";

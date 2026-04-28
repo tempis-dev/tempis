@@ -765,20 +765,7 @@ export class TimelineDataView {
 
             // Apply the border style (solid, dashed, dotted, dash-dot, long-dash).
             const prevLineCap = context.lineCap;
-            if (itemBorderStyle === "dashed") {
-                context.setLineDash([8, 4]);
-            } else if (itemBorderStyle === "dotted") {
-                // Use round line caps so each tiny dash renders as a circle.
-                context.lineCap = "round";
-                context.setLineDash([0.5, itemBorderThickness * 2.5]);
-            } else if (itemBorderStyle === "dash-dot") {
-                context.lineCap = "round";
-                context.setLineDash([8, 4, 0.5, 4]);
-            } else if (itemBorderStyle === "long-dash") {
-                context.setLineDash([14, 6]);
-            } else {
-                context.setLineDash([]);
-            }
+            this._applyLineStyle(context, itemBorderStyle, itemBorderThickness);
 
             context.beginPath();
             context.roundRect(
@@ -864,6 +851,28 @@ export class TimelineDataView {
     }
 
     /**
+     * Apply a line style to the canvas context.
+     * @param context The canvas context.
+     * @param style The line style.
+     * @param lineWidth The current line width (used for dotted spacing).
+     */
+    private _applyLineStyle(context: CanvasRenderingContext2D, style: string, lineWidth: number = 1): void {
+        if (style === "dashed") {
+            context.setLineDash([8, 4]);
+        } else if (style === "dotted") {
+            context.lineCap = "round";
+            context.setLineDash([0.5, lineWidth * 2.5]);
+        } else if (style === "dash-dot") {
+            context.lineCap = "round";
+            context.setLineDash([8, 4, 0.5, 4]);
+        } else if (style === "long-dash") {
+            context.setLineDash([14, 6]);
+        } else {
+            context.setLineDash([]);
+        }
+    }
+
+    /**
      * Draw dependency arrows between items that have dependencies defined.
      * Uses orthogonal routing with rounded corners:
      * - Straight line when source and target are on the same row with no overlap.
@@ -902,6 +911,13 @@ export class TimelineDataView {
 
             // Skip if either item is too small to be visually rendered.
             if (!this._isItemVisible(source) || !this._isItemVisible(target)) continue;
+
+            // Apply per-dependency style or fall back to defaults.
+            const depColor = dependency.style?.color ?? GRID_COLOUR;
+            context.strokeStyle = depColor;
+            context.fillStyle = depColor;
+            context.lineWidth = dependency.style?.lineWidth ?? 1.5;
+            this._applyLineStyle(context, dependency.style?.lineStyle ?? "solid", dependency.style?.lineWidth ?? 1.5);
 
             // In LTR: source right edge → target left edge. In RTL: source left edge → target right edge.
             const sx = rtl ? source.xPositionStart : source.xPositionEnd;
