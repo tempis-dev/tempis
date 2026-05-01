@@ -768,6 +768,21 @@ footer a:hover {
   line-height: 1.65;
 }
 
+.pricing-contact {
+  text-align: center;
+  padding: 60px 32px 0;
+}
+.pricing-contact h2 {
+  font-size: 1.6em;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.pricing-contact p {
+  color: var(--text-secondary);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
 @media (max-width: 768px) {
   .pricing-grid { grid-template-columns: 1fr; }
   .faq-grid { grid-template-columns: 1fr; }
