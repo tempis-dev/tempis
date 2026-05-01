@@ -25,7 +25,10 @@
 
 <h2>Reactive vs Structural</h2>
 <p><code>items</code>, <code>categories</code>, and <code>bands</code> are reactive — changes are synced to the existing instance via <code>useEffect</code> without recreating it. The <code>options</code> prop is structural — when its serialised value changes, the entire timeline instance is destroyed and recreated.</p>
+<p>The <code>dependencies</code> prop is also reactive, just like <code>items</code>, <code>categories</code>, and <code>bands</code> — changes are synced to the existing instance without a recreate.</p>
 <p>Callbacks are stored in a ref and never trigger a recreate, so you can safely pass inline arrow functions.</p>
+
+<div class="note">Avoid putting callbacks inside the <code>options</code> object — use the dedicated callback props instead. Callbacks in <code>options</code> would trigger unnecessary recreates.</div>
 
 <h2>Example</h2>
 <pre><code class="language-tsx">import { TempisTimeline } from '@tempis/react';

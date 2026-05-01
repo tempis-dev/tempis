@@ -11,9 +11,14 @@
     <tr><td><code>label</code></td><td><code>string</code></td><td>Display label.</td></tr>
     <tr><td><code>grouping</code></td><td><code>string</code></td><td>Group name for row organisation.</td></tr>
     <tr><td><code>category</code></td><td><code>string</code></td><td>Category name (must match a defined category).</td></tr>
+    <tr><td><code>selected</code></td><td><code>boolean</code></td><td>Whether the item is initially selected.</td></tr>
     <tr><td><code>style</code></td><td><code>TempisTimelineItemStyle</code></td><td>Per-item style overrides.</td></tr>
   </tbody>
 </table>
+
+<div class="note">Item IDs must be unique across the entire timeline. Duplicate IDs will cause unexpected behaviour with selection, focus, and dependency rendering.</div>
+
+<div class="note">Dates can be ISO strings (<code>'2026-01-15'</code>), Unix timestamps in milliseconds, or <code>Date</code> objects.</div>
 
 <h2>Range Items vs Point-in-Time</h2>
 <p>Items with both <code>start</code> and <code>end</code> render as horizontal bars. Items with only <code>start</code> render as point-in-time markers with a downward triangle.</p>

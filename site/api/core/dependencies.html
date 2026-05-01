@@ -23,6 +23,8 @@
   });
 </script>
 
+<div class="note">Connectors are only drawn when both the source and target items are visible in the current view. Panning one item off-screen will hide the connector.</div>
+
 <h2>TempisTimelineDependency</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
@@ -42,8 +44,6 @@
     <tr><td><code>lineStyle</code></td><td><code>TempisTimelineLineStyle</code></td><td><code>"solid"</code></td><td>Line style: <code>solid</code>, <code>dashed</code>, <code>dotted</code>, <code>dash-dot</code>, or <code>long-dash</code>.</td></tr>
   </tbody>
 </table>
-
-<p>Dependencies are defined separately from items as an array of source → target pairs. Each renders a connector arrow from the right edge of the source item to the left edge of the target item.</p>
 
 <h2>Usage</h2>
 <pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';

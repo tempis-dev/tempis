@@ -35,8 +35,12 @@
     <tr><td><code>min</code></td><td><code>string | number | Date</code></td><td>—</td><td>Earliest date the user can scroll to.</td></tr>
     <tr><td><code>max</code></td><td><code>string | number | Date</code></td><td>—</td><td>Latest date the user can scroll to.</td></tr>
     <tr><td><code>zoom</code></td><td><code>TempisTimelineRangeZoomOptions</code></td><td>—</td><td>Zoom configuration (see below).</td></tr>
+    <tr><td><code>minorUnit</code></td><td><code>TempisTimelineRangeUnitOptions</code></td><td>—</td><td>Minor tick label font and format overrides.</td></tr>
+    <tr><td><code>majorUnit</code></td><td><code>TempisTimelineRangeUnitOptions</code></td><td>—</td><td>Major tick label font and format overrides.</td></tr>
   </tbody>
 </table>
+
+<div class="note">If <code>start</code> and <code>end</code> are omitted, the timeline automatically fits to show all items.</div>
 
 <h3>Zoom Options</h3>
 <table>
@@ -49,6 +53,8 @@
     <tr><td><code>pinchSensitivity</code></td><td><code>number</code></td><td><code>1.0</code></td><td>Touch pinch zoom speed multiplier.</td></tr>
   </tbody>
 </table>
+
+<div class="note">Setting <code>zoom.min</code> prevents users from zooming in too far (e.g. to millisecond level), while <code>zoom.max</code> prevents zooming out beyond a useful range.</div>
 
 <h2>Example</h2>
 <pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {

@@ -9,6 +9,8 @@
 <h2>CDN</h2>
 <pre><code class="language-html">&lt;script src="https://unpkg.com/@tempis/timeline/dist/tempis_timeline.min.js"&gt;&lt;/script&gt;</code></pre>
 
+<div class="note">The CDN build exposes a global <code>tempis_timeline</code> object. Access the constructor via <code>tempis_timeline.TempisTimeline</code>.</div>
+
 <h2>Minimal Example</h2>
 <div class="api-demo"><canvas id="demo-getting-started"></canvas></div>
 <script>
@@ -51,3 +53,11 @@ const timeline = new TempisTimeline('#canvas', {
     range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
   });
 &lt;/script&gt;</code></pre>
+
+<h2>What's Next</h2>
+<p>Now that you have a basic timeline rendering, explore these pages to build on it:</p>
+<ul>
+  <li><a href="#core/items">Items</a> — range events, point-in-time markers, and per-item styling.</li>
+  <li><a href="#core/categories">Categories</a> — colour-code items and add a legend.</li>
+  <li><a href="#core/selection">Selection</a> — let users select items interactively.</li>
+</ul>

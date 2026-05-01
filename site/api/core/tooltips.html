@@ -28,6 +28,8 @@
   });
 </script>
 
+<div class="note">The default tooltip shows the item label and date range. Provide a <code>template</code> function to fully customise the content.</div>
+
 <h2>TempisTimelineTooltipOptions</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
@@ -40,6 +42,13 @@
     <tr><td><code>shouldShow</code></td><td><code>(id) =&gt; boolean</code></td><td>—</td><td>Predicate controlling whether a tooltip appears for a given item.</td></tr>
   </tbody>
 </table>
+
+<p>The <code>overflowBehavior</code> options are:</p>
+<ul>
+  <li><code>"none"</code> — no repositioning; the tooltip may be clipped.</li>
+  <li><code>"canvas"</code> — the tooltip flips to stay within the canvas bounds.</li>
+  <li><code>"viewport"</code> — the tooltip flips to stay within the browser viewport.</li>
+</ul>
 
 <h2>Custom Template</h2>
 <p>The <code>template</code> function receives the item ID and should return an HTML string or <code>HTMLElement</code>. Return <code>null</code> to fall back to the default tooltip.</p>

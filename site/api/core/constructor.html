@@ -31,6 +31,7 @@ const timeline = new TempisTimeline(canvas, { items: [...] });</code></pre>
     <tr><td><code>style</code></td><td><code>TempisTimelineStyleOptions</code></td><td>—</td><td>Style overrides.</td></tr>
     <tr><td><code>scrollbar</code></td><td><code>TempisTimelineScrollbarOptions</code></td><td>—</td><td>Scrollbar options.</td></tr>
     <tr><td><code>grouping</code></td><td><code>TempisTimelineGroupingOptions</code></td><td>—</td><td>Grouping options.</td></tr>
+    <tr><td><code>accessibility</code></td><td><code>TempisTimelineAccessibilityOptions</code></td><td>—</td><td>Accessibility options (keyboard, ARIA).</td></tr>
   </tbody>
 </table>
 
@@ -59,5 +60,6 @@ const timeline = new TempisTimeline(canvas, { items: [...] });</code></pre>
 
 <h3>destroy()</h3>
 <p>Removes all event listeners, disconnects observers, cancels animations, and clears the canvas. Always call this before removing the timeline from the DOM to prevent memory leaks.</p>
+<div class="note">In single-page applications, always call <code>destroy()</code> when removing the timeline from the DOM to prevent memory leaks from orphaned event listeners and resize observers.</div>
 <pre><code class="language-typescript">timeline.destroy();</code></pre>
 <p>In frameworks like React, the <code>&lt;TempisTimeline&gt;</code> component handles this automatically on unmount.</p>

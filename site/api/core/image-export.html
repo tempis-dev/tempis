@@ -1,6 +1,8 @@
 <h1>Image Export</h1>
 <p class="subtitle">Export the current timeline view as a PNG, JPEG, or WebP image.</p>
 
+<div class="note">The exported image captures the current view exactly as rendered, including any visible bands, selection outlines, and dependency connectors.</div>
+
 <h2>toImage(options?)</h2>
 <p>Returns a <code>Promise&lt;Blob&gt;</code> containing the rendered timeline image. Throws if the timeline has been destroyed.</p>
 
@@ -16,6 +18,8 @@
     <tr><td><code>backgroundColor</code></td><td><code>string</code></td><td>transparent</td><td>Background fill colour (e.g. <code>"#ffffff"</code>).</td></tr>
   </tbody>
 </table>
+
+<div class="note">Use <code>dpr: 2</code> or higher for crisp exports on high-DPI displays or for print.</div>
 
 <h2>Example — Download as PNG</h2>
 <pre><code class="language-typescript">async function downloadTimeline() {

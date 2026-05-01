@@ -23,6 +23,8 @@
   });
 </script>
 
+<div class="note">If the user has enabled <code>prefers-reduced-motion</code> in their OS settings, animations are automatically skipped — the timeline jumps to the target position instantly.</div>
+
 <h2>FocusOptions</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
@@ -39,6 +41,8 @@
 
 <p>Calling <code>focus()</code> with no arguments centres the timeline on the full range of all items.</p>
 <p>Note: calling <code>focus()</code> clears any active tooltip.</p>
+
+<p>When <code>zoom</code> is set to <code>"auto"</code>, the timeline only zooms if the target item occupies more than 80% of the current visible range. Otherwise it keeps the current zoom level and centres on the item.</p>
 
 <h2>Focus by Item</h2>
 <pre><code class="language-typescript">timeline.focus({ id: 42, animate: true, duration: 800 });</code></pre>

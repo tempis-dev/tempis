@@ -26,6 +26,8 @@
 <h2>Usage Pattern</h2>
 <p>The component uses <code>forwardRef</code> and <code>useImperativeHandle</code> to expose the ref methods. Create a ref with <code>useRef</code> and pass it to the component.</p>
 
+<div class="note">The ref is <code>null</code> until the component mounts and the timeline instance is created. Always use optional chaining (<code>ref.current?.focus(...)</code>) when calling ref methods.</div>
+
 <h2>Example — Focus Buttons</h2>
 <pre><code class="language-tsx">import { useRef } from 'react';
 import { TempisTimeline, type TempisTimelineRef } from '@tempis/react';

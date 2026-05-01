@@ -13,6 +13,8 @@
 
 <h2>How Categories Pick Colours</h2>
 <p>When a category does not specify a <code>backgroundColor</code> in its <code>style</code>, the timeline assigns it the next colour from the global palette. Colours are assigned in the order categories appear, cycling back to the start when the palette is exhausted.</p>
+
+<div class="note">The default palette provides 10 distinct colours. If you have more than 10 categories without explicit colours, the palette cycles back to the beginning.</div>
 <p>Setting a new palette affects all timelines created after the call. Existing instances are not automatically updated — call <code>redraw()</code> or recreate the instance to apply the new palette.</p>
 
 <h2>Example</h2>

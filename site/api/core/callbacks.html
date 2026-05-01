@@ -64,6 +64,8 @@
   </tbody>
 </table>
 
+<div class="note">The <code>onRangeChange</code> callback fires frequently during panning and zooming. If you're doing expensive work in response (like fetching data), consider debouncing it.</div>
+
 <h2>Example</h2>
 <pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
   responsive: true,

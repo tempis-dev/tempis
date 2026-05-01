@@ -35,9 +35,9 @@
 <table>
   <thead><tr><th>Mode</th><th>Description</th></tr></thead>
   <tbody>
-    <tr><td><code>"content"</code></td><td>The timeline height is determined by its content. It takes up only as much vertical space as needed to render all visible items. This is the default.</td></tr>
-    <tr><td><code>"fill-canvas"</code></td><td>The timeline expands to fill the full height of the canvas element, regardless of content height.</td></tr>
-    <tr><td><code>"grow-canvas"</code></td><td>The canvas element itself grows to match the required content height. Useful when the timeline is inside a scrollable container.</td></tr>
+    <tr><td><code>"content"</code></td><td>The timeline height is determined by its content. It takes up only as much vertical space as needed to render all visible items. Best for timelines embedded in scrollable pages. This is the default.</td></tr>
+    <tr><td><code>"fill-canvas"</code></td><td>The timeline expands to fill the full height of the canvas element, regardless of content height. Best for dashboard widgets and fixed-height containers.</td></tr>
+    <tr><td><code>"grow-canvas"</code></td><td>The canvas element itself grows to match the required content height. Best when the timeline is inside a scrollable container and you want all content visible without an internal scrollbar.</td></tr>
   </tbody>
 </table>
 

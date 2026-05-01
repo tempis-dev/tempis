@@ -19,8 +19,12 @@
 TempisTimeline.registerDateAdapter(myAdapter);</code></pre>
 <p>Internally this calls <code>AdapterRegistry.register()</code>. If no adapter is registered, a built-in <code>NativeDateAdapter</code> using the browser's <code>Date</code> and <code>Intl</code> APIs is used automatically.</p>
 
+<div class="note">A registered adapter applies globally to all timeline instances. Register it once before creating any timelines.</div>
+
 <h2>Built-in Native Adapter</h2>
 <p>The default adapter works with the local timezone and supports standard format tokens. No installation required — it is used out of the box.</p>
+
+<div class="note">The built-in adapter uses the browser's local timezone. If you need timezone-aware rendering (e.g. showing events in UTC or a specific timezone), register a custom adapter using a library like Luxon or Day.js.</div>
 
 <h2>Example — Luxon Adapter Skeleton</h2>
 <pre><code class="language-typescript">import { DateTime } from 'luxon';
