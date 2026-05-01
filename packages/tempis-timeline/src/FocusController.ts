@@ -89,7 +89,11 @@ export class FocusController {
         const zoom = options?.zoom ?? "auto";
 
         // Respect the user's reduced motion preference.
-        if (animate && typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+        if (
+            animate &&
+            typeof window !== "undefined" &&
+            window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+        ) {
             animate = false;
         }
 

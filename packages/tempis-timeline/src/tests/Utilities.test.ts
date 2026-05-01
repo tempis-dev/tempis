@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { defaults, isNullOrUndefined, isValidDate, clamp, doDateRangesOverlap } from "../Utilities";
+import {
+    defaults,
+    isNullOrUndefined,
+    isValidDate,
+    clamp,
+    doDateRangesOverlap,
+    GRID_COLOUR,
+    GRID_COLOUR_TRANSPARENT
+} from "../Utilities";
 
 describe("defaults", () => {
     it("returns undefined for no arguments", () => {
@@ -108,5 +116,19 @@ describe("doDateRangesOverlap", () => {
 
     it("detects overlap at exact boundary", () => {
         expect(doDateRangesOverlap(d("2026-01-01"), d("2026-01-10"), d("2026-01-10"), d("2026-01-15"))).toBe(true);
+    });
+});
+
+describe("GRID_COLOUR constants", () => {
+    it("GRID_COLOUR is a valid hex colour", () => {
+        expect(GRID_COLOUR).toMatch(/^#[0-9a-fA-F]{6}$/);
+    });
+
+    it("GRID_COLOUR_TRANSPARENT is an rgba string", () => {
+        expect(GRID_COLOUR_TRANSPARENT).toMatch(/^rgba\(\d+,\s*\d+,\s*\d+,\s*[\d.]+\)$/);
+    });
+
+    it("GRID_COLOUR is grey (#808080)", () => {
+        expect(GRID_COLOUR).toBe("#808080");
     });
 });

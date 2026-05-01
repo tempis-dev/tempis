@@ -47,3 +47,30 @@ describe("DEFAULT_BAND_STYLE", () => {
         expect(DEFAULT_BAND_STYLE.opacity).toBeLessThanOrEqual(1);
     });
 });
+
+describe("TimelineBand — border styles", () => {
+    it("accepts borderColor in style", () => {
+        const band = new TimelineBand({
+            start: "2026-01-01",
+            style: { borderColor: "#ff0000" }
+        });
+        expect(band.style.borderColor).toBe("#ff0000");
+    });
+
+    it("accepts borderThickness in style", () => {
+        const band = new TimelineBand({
+            start: "2026-01-01",
+            style: { borderThickness: 2 }
+        });
+        expect(band.style.borderThickness).toBe(2);
+    });
+
+    it("preserves other defaults when setting border style", () => {
+        const band = new TimelineBand({
+            start: "2026-01-01",
+            style: { borderColor: "#00ff00" }
+        });
+        expect(band.style.color).toBe(DEFAULT_BAND_STYLE.color);
+        expect(band.style.opacity).toBe(DEFAULT_BAND_STYLE.opacity);
+    });
+});

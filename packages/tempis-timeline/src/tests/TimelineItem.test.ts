@@ -88,3 +88,60 @@ describe("DEFAULT_ITEM_STYLE", () => {
         expect(DEFAULT_ITEM_STYLE.borderRadius).toBeGreaterThanOrEqual(0);
     });
 });
+
+describe("TimelineItem — border styles", () => {
+    const baseStyle = { ...DEFAULT_ITEM_STYLE };
+
+    it("accepts borderColor in style", () => {
+        const itemStyle = { ...baseStyle, borderColor: "#ff0000" };
+        const item = new TimelineItem({ id: 1, start: "2026-01-01", label: "Test" }, itemStyle);
+        expect(item.style.borderColor).toBe("#ff0000");
+    });
+
+    it("accepts borderThickness in style", () => {
+        const itemStyle = { ...baseStyle, borderThickness: 3 };
+        const item = new TimelineItem({ id: 1, start: "2026-01-01", label: "Test" }, itemStyle);
+        expect(item.style.borderThickness).toBe(3);
+    });
+
+    it("accepts borderStyle solid in style", () => {
+        const itemStyle = { ...baseStyle, borderStyle: "solid" as const };
+        const item = new TimelineItem({ id: 1, start: "2026-01-01", label: "Test" }, itemStyle);
+        expect(item.style.borderStyle).toBe("solid");
+    });
+
+    it("accepts borderStyle dashed in style", () => {
+        const itemStyle = { ...baseStyle, borderStyle: "dashed" as const };
+        const item = new TimelineItem({ id: 1, start: "2026-01-01", label: "Test" }, itemStyle);
+        expect(item.style.borderStyle).toBe("dashed");
+    });
+
+    it("accepts borderStyle dotted in style", () => {
+        const itemStyle = { ...baseStyle, borderStyle: "dotted" as const };
+        const item = new TimelineItem({ id: 1, start: "2026-01-01", label: "Test" }, itemStyle);
+        expect(item.style.borderStyle).toBe("dotted");
+    });
+
+    it("accepts borderStyle dash-dot in style", () => {
+        const itemStyle = { ...baseStyle, borderStyle: "dash-dot" as const };
+        const item = new TimelineItem({ id: 1, start: "2026-01-01", label: "Test" }, itemStyle);
+        expect(item.style.borderStyle).toBe("dash-dot");
+    });
+
+    it("accepts borderStyle long-dash in style", () => {
+        const itemStyle = { ...baseStyle, borderStyle: "long-dash" as const };
+        const item = new TimelineItem({ id: 1, start: "2026-01-01", label: "Test" }, itemStyle);
+        expect(item.style.borderStyle).toBe("long-dash");
+    });
+
+    it("defaults borderStyle to undefined when not set", () => {
+        const item = new TimelineItem({ id: 1, start: "2026-01-01", label: "Test" }, baseStyle);
+        expect(item.style.borderStyle).toBeUndefined();
+    });
+
+    it("accepts borderRadius in style", () => {
+        const itemStyle = { ...baseStyle, borderRadius: 10 };
+        const item = new TimelineItem({ id: 1, start: "2026-01-01", label: "Test" }, itemStyle);
+        expect(item.style.borderRadius).toBe(10);
+    });
+});
