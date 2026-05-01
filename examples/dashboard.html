@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fleet Dashboard — Tempis Timeline</title>
+  <script src="../lib/tempis_timeline.js"></script>
+  <style>
+    :root {
+      --bg: #f5f6fa;
+      --card: #ffffff;
+      --border: #e8eaf0;
+      --text: #1a1a2e;
+      --text-secondary: #6b7280;
+      --primary: #4f46e5;
+      --primary-light: #eef2ff;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius: 12px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; overflow: hidden; height: 100vh; }
+
+    /* Top bar */
+    .topbar { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
+    .topbar h1 { font-size: 1.1em; font-weight: 700; }
+    .topbar .spacer { flex: 1; }
+    .topbar select, .topbar input { padding: 6px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; background: var(--bg); }
+
+    /* Grid layout */
+    .dashboard { display: grid; grid-template-columns: 1fr 320px; grid-template-rows: auto 1fr; gap: 16px; padding: 16px 24px; height: calc(100vh - 53px); overflow: hidden; }
+
+    /* KPI row */
+    .kpi-row { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .kpi { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; }
+    .kpi .label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+    .kpi .value { font-size: 1.8em; font-weight: 800; line-height: 1; }
+    .kpi .change { font-size: 12px; margin-top: 6px; }
+    .kpi .change.up { color: var(--success); }
+    .kpi .change.down { color: var(--danger); }
+    .kpi .mini-chart { display: flex; align-items: flex-end; gap: 3px; height: 32px; margin-top: 10px; }
+    .kpi .mini-chart .bar { width: 100%; border-radius: 3px 3px 0 0; background: var(--primary); opacity: 0.2; }
+    .kpi .mini-chart .bar.active { opacity: 1; }
+
+    /* Timeline card */
+    .timeline-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+    .timeline-card .card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .timeline-card .card-header h2 { font-size: 0.95em; font-weight: 700; }
+    .timeline-card .card-header .spacer { flex: 1; }
+    .timeline-card .card-header button { background: var(--primary-light); color: var(--primary); border: none; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600; }
+    .timeline-card .card-header button:hover { background: var(--primary); color: #fff; }
+    .timeline-body { flex: 1; min-height: 0; }
+    .timeline-body canvas { display: block; width: 100%; height: 100%; }
+
+    /* Sidebar */
+    .sidebar { display: flex; flex-direction: column; gap: 16px; overflow-y: auto; min-height: 0; }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.2); border-radius: 2px; }
+    .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.4); }
+
+    /* Detail card */
+    .detail-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+    .detail-card h3 { font-size: 0.9em; font-weight: 700; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); }
+    .detail-card .empty { color: var(--text-secondary); font-size: 13px; text-align: center; padding: 20px 0; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 11px; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.03em; margin-bottom: 3px; }
+    .field .val { font-size: 14px; font-weight: 500; }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+    .field select, .field input { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; margin-top: 4px; }
+    .save-btn { width: 100%; padding: 8px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+    .save-btn:hover { background: #4338ca; }
+
+    /* Activity list */
+    .activity-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+    .activity-text { font-size: 13px; line-height: 1.4; }
+    .activity-text .time { color: var(--text-secondary); font-size: 11px; }
+
+    /* Donut chart */
+    .donut-wrap { display: flex; align-items: center; gap: 16px; }
+    .donut { position: relative; width: 80px; height: 80px; }
+    .donut svg { transform: rotate(-90deg); }
+    .donut .center-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; }
+    .donut-legend { font-size: 12px; }
+    .donut-legend div { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .donut-legend .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    @media (max-width: 900px) {
+      .dashboard { grid-template-columns: 1fr; height: auto; }
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .timeline-body { min-height: 350px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h1>🚛 Fleet Maintenance</h1>
+    <div class="spacer"></div>
+    <label style="font-size:12px;color:var(--text-secondary);">Region</label>
+    <select id="region" onchange="filterRegion()">
+      <option value="all">All Regions</option>
+      <option value="north">North</option>
+      <option value="south">South</option>
+      <option value="east">East</option>
+    </select>
+    <label style="font-size:12px;color:var(--text-secondary);">Range</label>
+    <button onclick="tl.focus({ range: ['2026-01-01','2026-04-01'], animate: true })" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--border);padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;">Q1</button>
+    <button onclick="tl.focus({ range: ['2026-04-01','2026-07-01'], animate: true })" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--border);padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;">Q2</button>
+    <button onclick="tl.focus({ animate: true })" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--border);padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;">All</button>
+  </div>
+
+  <div class="dashboard">
+    <!-- KPI Row -->
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="label">Active Vehicles</div>
+        <div class="value">47</div>
+        <div class="change up">↑ 3 from last month</div>
+        <div class="mini-chart" id="chart-vehicles"></div>
+      </div>
+      <div class="kpi">
+        <div class="label">Scheduled Services</div>
+        <div class="value">23</div>
+        <div class="change down">↓ 2 overdue</div>
+        <div class="mini-chart" id="chart-services"></div>
+      </div>
+      <div class="kpi">
+        <div class="label">Avg. Downtime</div>
+        <div class="value">1.8d</div>
+        <div class="change up">↑ 12% improvement</div>
+        <div class="mini-chart" id="chart-downtime"></div>
+      </div>
+      <div class="kpi">
+        <div class="label">Compliance Rate</div>
+        <div class="value">94%</div>
+        <div class="change up">↑ 2% from last quarter</div>
+        <div class="mini-chart" id="chart-compliance"></div>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline-card">
+      <div class="card-header">
+        <h2>Maintenance Schedule</h2>
+        <div class="spacer"></div>
+        <button onclick="tl.clearSelection(); selectedItem=null; updateDetail();">Clear</button>
+      </div>
+      <div class="timeline-body">
+        <canvas id="timeline"></canvas>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Detail panel -->
+      <div class="detail-card" id="detail-panel">
+        <h3>Task Details</h3>
+        <div class="empty" id="detail-empty">Select a task on the timeline</div>
+        <div id="detail-form" style="display:none;">
+          <div class="field"><label>Vehicle</label><div class="val" id="d-vehicle"></div></div>
+          <div class="field"><label>Service</label><div class="val" id="d-service"></div></div>
+          <div class="field"><label>Scheduled</label><div class="val" id="d-dates"></div></div>
+          <div class="field"><label>Status</label>
+            <select id="d-status" onchange="updateStatus()">
+              <option value="scheduled">Scheduled</option>
+              <option value="in-progress">In Progress</option>
+              <option value="complete">Complete</option>
+              <option value="overdue">Overdue</option>
+            </select>
+          </div>
+          <div class="field"><label>Assigned To</label>
+            <select id="d-assignee">
+              <option>Mike R.</option>
+              <option>Sarah K.</option>
+              <option>James T.</option>
+              <option>Unassigned</option>
+            </select>
+          </div>
+          <div class="field"><label>Notes</label>
+            <input type="text" id="d-notes" placeholder="Add a note...">
+          </div>
+          <button class="save-btn" onclick="saveItem()">Save Changes</button>
+        </div>
+      </div>
+
+      <!-- Fleet status donut -->
+      <div class="detail-card">
+        <h3>Fleet Status</h3>
+        <div class="donut-wrap">
+          <div class="donut">
+            <svg width="80" height="80" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e8eaf0" stroke-width="3"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#10b981" stroke-width="3" stroke-dasharray="65 35" stroke-linecap="round"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f59e0b" stroke-width="3" stroke-dasharray="20 80" stroke-dashoffset="-65" stroke-linecap="round"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="9 91" stroke-dashoffset="-85" stroke-linecap="round"/>
+            </svg>
+            <div class="center-label">47</div>
+          </div>
+          <div class="donut-legend">
+            <div><span class="dot" style="background:#10b981"></span> Operational (31)</div>
+            <div><span class="dot" style="background:#f59e0b"></span> In Service (12)</div>
+            <div><span class="dot" style="background:#ef4444"></span> Out of Service (4)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent activity -->
+      <div class="detail-card">
+        <h3>Recent Activity</h3>
+        <div class="activity-item">
+          <div class="activity-icon" style="background:#eef2ff;color:#4f46e5;">🔧</div>
+          <div class="activity-text">Truck #12 brake service completed<br><span class="time">2 hours ago</span></div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon" style="background:#fef3c7;color:#f59e0b;">⚠️</div>
+          <div class="activity-text">Van #08 oil change overdue by 3 days<br><span class="time">5 hours ago</span></div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon" style="background:#d1fae5;color:#10b981;">✅</div>
+          <div class="activity-text">Truck #03 annual inspection passed<br><span class="time">Yesterday</span></div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon" style="background:#fee2e2;color:#ef4444;">🚨</div>
+          <div class="activity-text">Van #15 engine warning — service scheduled<br><span class="time">Yesterday</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var TT = tempis_timeline.TempisTimeline;
+    var selectedItem = null;
+    var itemNotes = {};     // id → note string
+    var itemAssignees = {}; // id → assignee name
+
+    // Mini bar charts
+    function miniChart(id, data, activeIdx) {
+      var el = document.getElementById(id);
+      var max = Math.max.apply(null, data);
+      data.forEach(function(v, i) {
+        var bar = document.createElement('div');
+        bar.className = 'bar' + (i === activeIdx ? ' active' : '');
+        bar.style.height = Math.round((v / max) * 100) + '%';
+        el.appendChild(bar);
+      });
+    }
+    miniChart('chart-vehicles', [38,40,42,41,44,45,47], 6);
+    miniChart('chart-services', [18,22,19,25,20,21,23], 6);
+    miniChart('chart-downtime', [3.2,2.8,2.5,2.1,2.0,1.9,1.8], 6);
+    miniChart('chart-compliance', [88,89,90,91,92,93,94], 6);
+
+    var allItems = [
+      // Trucks — North
+      { id: 1,  label: 'Truck #01 — Oil Change',       start: '2026-01-12', end: '2026-01-14', category: 'routine',   grouping: 'Trucks', region: 'north' },
+      { id: 2,  label: 'Truck #03 — Annual Inspection', start: '2026-01-19', end: '2026-01-23', category: 'inspection', grouping: 'Trucks', region: 'north' },
+      { id: 3,  label: 'Truck #05 — Brake Service',     start: '2026-01-20', end: '2026-01-24', category: 'repair',    grouping: 'Trucks', region: 'north', style: { borderColor: '#d32f2f', borderThickness: 3, borderStyle: 'solid' } },
+      { id: 4,  label: 'Truck #01 — Tyre Rotation',     start: '2026-02-10', end: '2026-02-12', category: 'routine',   grouping: 'Trucks', region: 'north' },
+      { id: 5,  label: 'Truck #07 — Transmission',      start: '2026-02-16', end: '2026-02-27', category: 'repair',    grouping: 'Trucks', region: 'north' },
+      { id: 6,  label: 'Truck #12 — Brake Service',     start: '2026-02-18', end: '2026-02-21', category: 'repair',    grouping: 'Trucks', region: 'north' },
+      { id: 7,  label: 'Truck #09 — Oil Change',        start: '2026-03-09', end: '2026-03-11', category: 'routine',   grouping: 'Trucks', region: 'north' },
+      { id: 8,  label: 'Truck #03 — Tyre Rotation',     start: '2026-03-16', end: '2026-03-18', category: 'routine',   grouping: 'Trucks', region: 'north' },
+
+      // Vans — South
+      { id: 10, label: 'Van #02 — Oil Change',          start: '2026-01-08', end: '2026-01-10', category: 'routine',   grouping: 'Vans', region: 'south' },
+      { id: 11, label: 'Van #04 — MOT',                 start: '2026-01-13', end: '2026-01-16', category: 'inspection', grouping: 'Vans', region: 'south' },
+      { id: 12, label: 'Van #06 — Brake Pads',          start: '2026-01-14', end: '2026-01-17', category: 'repair',    grouping: 'Vans', region: 'south' },
+      { id: 13, label: 'Van #08 — Oil Change',          start: '2026-02-03', end: '2026-02-05', category: 'routine',   grouping: 'Vans', region: 'south', style: { borderColor: '#d32f2f', borderThickness: 3, borderStyle: 'solid' } },
+      { id: 14, label: 'Van #10 — Suspension',          start: '2026-02-10', end: '2026-02-18', category: 'repair',    grouping: 'Vans', region: 'south' },
+      { id: 15, label: 'Van #15 — Engine Diagnostic',   start: '2026-02-12', end: '2026-02-17', category: 'repair',    grouping: 'Vans', region: 'south', style: { borderColor: '#d32f2f', borderThickness: 3, borderStyle: 'solid' } },
+      { id: 16, label: 'Van #02 — Annual Inspection',   start: '2026-03-23', end: '2026-03-27', category: 'inspection', grouping: 'Vans', region: 'south' },
+
+      // Equipment — East
+      { id: 20, label: 'Forklift #A — Hydraulic Check',  start: '2026-01-15', end: '2026-01-17', category: 'routine',   grouping: 'Equipment', region: 'east' },
+      { id: 21, label: 'Crane #B — Annual Cert',         start: '2026-01-20', end: '2026-01-24', category: 'inspection', grouping: 'Equipment', region: 'east' },
+      { id: 22, label: 'Forklift #C — Tyre Replace',     start: '2026-01-22', end: '2026-01-24', category: 'repair',    grouping: 'Equipment', region: 'east' },
+      { id: 23, label: 'Forklift #A — Battery Replace',  start: '2026-02-17', end: '2026-02-20', category: 'repair',    grouping: 'Equipment', region: 'east' },
+      { id: 24, label: 'Crane #B — Cable Inspection',    start: '2026-03-09', end: '2026-03-12', category: 'inspection', grouping: 'Equipment', region: 'east' },
+    ];
+
+    var dependencies = [
+      // Trucks: oil change before tyre rotation, brake leads to transmission
+      { source: 1, target: 4 },
+      { source: 3, target: 5, style: { color: '#ef4444' } },
+      // Vans: oil change before inspection, suspension before engine diag
+      { source: 10, target: 16, style: { color: '#4f46e5', lineStyle: 'dashed' } },
+      { source: 14, target: 15, style: { color: '#ef4444' } },
+      // Equipment: hydraulic check before battery, cert before cable
+      { source: 20, target: 23 },
+      { source: 21, target: 24, style: { color: '#4f46e5', lineStyle: 'dashed' } },
+    ];
+
+    var currentItems = allItems.slice();
+
+    var tl = new TT('#timeline', {
+      responsive: true,
+      verticalFill: 'fill-canvas',
+      selection: 'single',
+      style: { item: { borderRadius: 10, fontColor: '#fff', padding: 12 } },
+      categories: [
+        { name: 'routine',    label: 'Routine',    style: { backgroundColor: '#4f46e5', fontColor: '#fff' } },
+        { name: 'inspection', label: 'Inspection',  style: { backgroundColor: '#0ea5e9', fontColor: '#fff' } },
+        { name: 'repair',     label: 'Repair',      style: { backgroundColor: '#f59e0b', fontColor: '#fff' } },
+      ],
+      legend: { position: 'bottom', markerStyle: 'circle' },
+      items: currentItems,
+      dependencies: dependencies,
+      bands: [
+        { start: '2026-02-16', end: '2026-02-20', style: { color: '#4f46e5', opacity: 0.06 } },
+        { start: '2026-03-30', style: { color: '#10b981', borderColor: '#10b981', borderThickness: 1 } },
+      ],
+      range: { start: '2026-01-01', end: '2026-04-01', position: 'bottom' },
+      tooltip: {
+        overflowBehavior: 'viewport',
+        template: function(id) {
+          var item = currentItems.find(function(i) { return i.id === id; });
+          if (!item) return null;
+          var parts = item.label.split('—');
+          var vehicle = parts[0] ? parts[0].trim() : '';
+          var service = parts[1] ? parts[1].trim() : item.label;
+          var days = item.end ? Math.round((new Date(item.end) - new Date(item.start)) / 86400000) : 0;
+          var isOverdue = item.style && item.style.borderColor === '#d32f2f';
+          var isInProgress = item.style && item.style.borderColor === '#f57c00';
+          var isComplete = item.style && item.style.borderColor === '#388e3c';
+          var status = isOverdue ? 'Overdue' : isInProgress ? 'In Progress' : isComplete ? 'Complete' : 'Scheduled';
+          var statusColor = isOverdue ? '#d32f2f' : isInProgress ? '#f57c00' : isComplete ? '#388e3c' : '#4f46e5';
+          var catColors = { routine: '#4f46e5', inspection: '#0ea5e9', repair: '#f59e0b' };
+          var catColor = catColors[item.category] || '#888';
+          var note = itemNotes[item.id];
+          var assignee = itemAssignees[item.id];
+          var noteHtml = note ? '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #eee;color:#666;font-size:12px;font-style:italic;">📝 ' + note + '</div>' : '';
+          var assigneeHtml = assignee ? '<div style="margin-top:' + (note ? '4' : '8') + 'px;' + (note ? '' : 'padding-top:8px;border-top:1px solid #eee;') + 'color:#666;font-size:12px;">👤 ' + assignee + '</div>' : '';
+          return '<div style="padding:12px 16px;font-family:Inter,sans-serif;font-size:13px;min-width:200px;background:#fff;color:#1a1a2e;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);">' +
+            '<div style="font-weight:700;font-size:14px;margin-bottom:4px;">' + vehicle + '</div>' +
+            '<div style="margin-bottom:10px;color:#666;">' + service + '</div>' +
+            '<div style="display:flex;gap:20px;margin-bottom:8px;">' +
+              '<div><span style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:0.04em;">Duration</span><br><strong>' + (days > 0 ? days + ' days' : 'Milestone') + '</strong></div>' +
+              '<div><span style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:0.04em;">Region</span><br><strong style="text-transform:capitalize;">' + (item.region || '—') + '</strong></div>' +
+            '</div>' +
+            '<div style="display:flex;align-items:center;gap:8px;padding-top:8px;border-top:1px solid #eee;">' +
+              '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + statusColor + ';"></span>' +
+              '<span style="font-weight:600;">' + status + '</span>' +
+              '<span style="margin-left:auto;background:' + catColor + ';color:#fff;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600;">' + item.category + '</span>' +
+            '</div>' +
+            noteHtml +
+            assigneeHtml +
+          '</div>';
+        }
+      },
+      onSelectionChange: function(changes) {
+        var sel = changes.find(function(c) { return c.selected; });
+        if (sel) {
+          selectedItem = currentItems.find(function(i) { return i.id === sel.id; });
+          tl.setSelection([sel.id]);
+        } else {
+          selectedItem = null;
+          tl.setSelection([]);
+        }
+        updateDetail();
+      }
+    });
+
+    function updateDetail() {
+      var empty = document.getElementById('detail-empty');
+      var form = document.getElementById('detail-form');
+      if (!selectedItem) { empty.style.display = ''; form.style.display = 'none'; return; }
+      empty.style.display = 'none'; form.style.display = '';
+      document.getElementById('d-vehicle').textContent = selectedItem.grouping + ' — ' + selectedItem.label.split('—')[0].trim();
+      document.getElementById('d-service').textContent = selectedItem.label.split('—')[1] ? selectedItem.label.split('—')[1].trim() : selectedItem.label;
+      document.getElementById('d-dates').textContent = selectedItem.start + (selectedItem.end ? ' → ' + selectedItem.end : '');
+      var isOverdue = selectedItem.style && selectedItem.style.borderColor === '#d32f2f';
+      var isInProgress = selectedItem.style && selectedItem.style.borderColor === '#f57c00';
+      var isComplete = selectedItem.style && selectedItem.style.borderColor === '#388e3c';
+      document.getElementById('d-status').value = isOverdue ? 'overdue' : isInProgress ? 'in-progress' : isComplete ? 'complete' : 'scheduled';
+      document.getElementById('d-notes').value = itemNotes[selectedItem.id] || '';
+      document.getElementById('d-assignee').value = itemAssignees[selectedItem.id] || 'Unassigned';
+    }
+
+    function saveItem() {
+      if (!selectedItem) return;
+      var note = document.getElementById('d-notes').value.trim();
+      if (note) itemNotes[selectedItem.id] = note;
+      else delete itemNotes[selectedItem.id];
+      var assignee = document.getElementById('d-assignee').value;
+      if (assignee && assignee !== 'Unassigned') itemAssignees[selectedItem.id] = assignee;
+      else delete itemAssignees[selectedItem.id];
+      updateStatus();
+    }
+
+    function updateStatus() {
+      if (!selectedItem) return;
+      var val = document.getElementById('d-status').value;
+      if (val === 'overdue') selectedItem.style = { borderColor: '#d32f2f', borderThickness: 3, borderStyle: 'solid' };
+      else if (val === 'in-progress') selectedItem.style = { borderColor: '#f57c00', borderThickness: 3, borderStyle: 'solid' };
+      else if (val === 'complete') selectedItem.style = { borderColor: '#388e3c', borderThickness: 3, borderStyle: 'solid' };
+      else delete selectedItem.style;
+      tl.setItems(currentItems);
+      tl.setSelection([selectedItem.id]);
+    }
+
+    function filterRegion() {
+      var region = document.getElementById('region').value;
+      currentItems = region === 'all' ? allItems.slice() : allItems.filter(function(i) { return i.region === region; });
+      tl.setItems(currentItems);
+      selectedItem = null;
+      updateDetail();
+    }
+  </script>
+</body>
+</html>
