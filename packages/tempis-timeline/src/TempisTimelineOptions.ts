@@ -7,6 +7,9 @@ export interface TempisTimelineOptions {
     /** Whether the canvas should resize to match the dimensions of its parent container. */
     responsive?: boolean;
 
+    /** The timeline accessibility options. */
+    accessibility?: TempisTimelineAccessibilityOptions;
+
     /**
      * The vertical fill mode which defines how the timeline should fill the vertical space. Defaults to `"content"`
      * - `"content"` – The timeline height is determined purely by its content and will only take up as much vertical space as required to render all visible items.
@@ -191,6 +194,11 @@ export interface TempisTimelineStyleOptions {
 
     /** The default item options to use in rendering items, overriding the library item style defaults only. */
     item?: TempisTimelineItemStyle;
+}
+
+export interface TempisTimelineAccessibilityOptions {
+    /** An accessible label for the timeline canvas element. If provided, sets the `aria-label` attribute on the canvas. */
+    ariaLabel?: string;
 }
 
 export interface TempisTimelineScrollbarOptions {

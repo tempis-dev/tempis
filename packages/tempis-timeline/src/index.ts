@@ -13,7 +13,8 @@ import {
     TempisTimelineTooltipOptions,
     TempisTimelineStyleOptions,
     TempisTimelineGroupingOptions,
-    TempisTimelineScrollbarOptions
+    TempisTimelineScrollbarOptions,
+    TempisTimelineAccessibilityOptions
 } from "./TempisTimelineOptions";
 import { SelectionChangeEvent } from "./Event";
 import { AdapterRegistry } from "./AdapterRegistry";
@@ -37,6 +38,7 @@ export type {
     TempisTimelineStyleOptions,
     TempisTimelineGroupingOptions,
     TempisTimelineScrollbarOptions,
+    TempisTimelineAccessibilityOptions,
     ImageGenerationOptions,
     TempisTimelineDateAdapter,
     SelectionChangeEvent,

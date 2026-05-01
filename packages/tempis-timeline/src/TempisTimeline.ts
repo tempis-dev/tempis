@@ -130,6 +130,11 @@ export class TempisTimeline {
         this._canvas = this._getCanvas(context);
         this._font = new TimelineFont(this._options.style?.font);
 
+        // Apply the canvas aria-label if one was provided in the options.
+        if (this._options.accessibility?.ariaLabel) {
+            this._canvas.setAttribute("aria-label", this._options.accessibility.ariaLabel);
+        }
+
         this._dataSet = new TimelineDataSet(this._options);
         this._dataView = new TimelineDataView(
             this._dataSet,
