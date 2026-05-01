@@ -83,10 +83,15 @@ export class FocusController {
         this._rangeView.cancelAnimation();
         this._dataView.cancelAnimation();
 
-        const animate = options?.animate ?? false;
+        let animate = options?.animate ?? false;
         const duration = options?.duration ?? 500;
         const easing = options?.easing ?? "easeInOut";
         const zoom = options?.zoom ?? "auto";
+
+        // Respect the user's reduced motion preference.
+        if (animate && typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+            animate = false;
+        }
 
         if (!options || (!options.id && !options.date && !options.range)) {
             // No specific target was defined, focus on the full range

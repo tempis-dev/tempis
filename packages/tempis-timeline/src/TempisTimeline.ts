@@ -107,6 +107,7 @@ export class TempisTimeline {
         contextmenu: ((event: MouseEvent) => void) | null;
         mouseenter: (() => void) | null;
         mouseleave: (() => void) | null;
+        keydown: ((event: KeyboardEvent) => void) | null;
     } = {
         pointerdown: null,
         pointermove: null,
@@ -116,7 +117,8 @@ export class TempisTimeline {
         dblclick: null,
         contextmenu: null,
         mouseenter: null,
-        mouseleave: null
+        mouseleave: null,
+        keydown: null
     };
 
     /**
@@ -130,10 +132,8 @@ export class TempisTimeline {
         this._canvas = this._getCanvas(context);
         this._font = new TimelineFont(this._options.style?.font);
 
-        // Apply the canvas aria-label if one was provided in the options.
-        if (this._options.accessibility?.ariaLabel) {
-            this._canvas.setAttribute("aria-label", this._options.accessibility.ariaLabel);
-        }
+        // Apply accessibility attributes to the canvas.
+        this._applyCanvasAccessibilityAttributes();
 
         this._dataSet = new TimelineDataSet(this._options);
         this._dataView = new TimelineDataView(
@@ -484,6 +484,9 @@ export class TempisTimeline {
         if (this._eventHandlers.mouseleave) {
             this._canvas.removeEventListener("mouseleave", this._eventHandlers.mouseleave);
         }
+        if (this._eventHandlers.keydown) {
+            this._canvas.removeEventListener("keydown", this._eventHandlers.keydown);
+        }
 
         // Disconnect the resize observer if it exists
         if (this._canvasContainerResizeObserver) {
@@ -526,6 +529,25 @@ export class TempisTimeline {
         }
 
         throw new Error("whatcha doing this isn't a valid value!");
+    }
+
+    /**
+     * Applies accessibility-related attributes to the canvas element.
+     */
+    private _applyCanvasAccessibilityAttributes(): void {
+        const keyboardEnabled = this._options.accessibility?.keyboard !== false;
+
+        if (keyboardEnabled && !this._canvas.hasAttribute("tabindex")) {
+            this._canvas.setAttribute("tabindex", "0");
+        }
+
+        if (!this._canvas.hasAttribute("role")) {
+            this._canvas.setAttribute("role", "img");
+        }
+
+        if (this._options.accessibility?.ariaLabel) {
+            this._canvas.setAttribute("aria-label", this._options.accessibility.ariaLabel);
+        }
     }
 
     /**
@@ -855,6 +877,60 @@ export class TempisTimeline {
             this._draw();
         };
         this._canvas.addEventListener("mouseleave", this._eventHandlers.mouseleave);
+
+        // Handle keyboard events for pan and zoom when the canvas is focused.
+        const keyboardEnabled = this._options.accessibility?.keyboard !== false;
+        if (keyboardEnabled) {
+            const PAN_STEP_FRACTION = this._options.accessibility?.keyboardPanStep ?? 0.1;
+            const ZOOM_STEP = this._options.accessibility?.keyboardZoomStep ?? 0.5;
+            const SCROLL_STEP = 40; // Vertical scroll pixels per keypress.
+
+            this._eventHandlers.keydown = (event) => {
+                // Only handle keys when the canvas itself is focused.
+                if (document.activeElement !== this._canvas) return;
+
+                // Don't interfere with modifier key combos (Ctrl+C, etc.).
+                if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+                const panPixels = this._canvas.clientWidth * PAN_STEP_FRACTION;
+
+                switch (event.key) {
+                    case "ArrowLeft":
+                        event.preventDefault();
+                        this._rangeView.moveRange(this._isRTL ? panPixels : -panPixels);
+                        this._draw();
+                        break;
+                    case "ArrowRight":
+                        event.preventDefault();
+                        this._rangeView.moveRange(this._isRTL ? -panPixels : panPixels);
+                        this._draw();
+                        break;
+                    case "ArrowUp":
+                        event.preventDefault();
+                        this._dataView.scrollByYMovement(SCROLL_STEP);
+                        this._draw();
+                        break;
+                    case "ArrowDown":
+                        event.preventDefault();
+                        this._dataView.scrollByYMovement(-SCROLL_STEP);
+                        this._draw();
+                        break;
+                    case "+":
+                    case "=":
+                        event.preventDefault();
+                        this._rangeView.zoomRange(-ZOOM_STEP, this._canvas.clientWidth / 2);
+                        this._draw();
+                        break;
+                    case "-":
+                    case "_":
+                        event.preventDefault();
+                        this._rangeView.zoomRange(ZOOM_STEP, this._canvas.clientWidth / 2);
+                        this._draw();
+                        break;
+                }
+            };
+            this._canvas.addEventListener("keydown", this._eventHandlers.keydown);
+        }
     }
 
     /**

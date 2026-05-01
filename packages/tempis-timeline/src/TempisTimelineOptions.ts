@@ -199,6 +199,15 @@ export interface TempisTimelineStyleOptions {
 export interface TempisTimelineAccessibilityOptions {
     /** An accessible label for the timeline canvas element. If provided, sets the `aria-label` attribute on the canvas. */
     ariaLabel?: string;
+
+    /** Whether keyboard navigation (arrow keys to pan, +/- to zoom) is enabled. Defaults to `true`. */
+    keyboard?: boolean;
+
+    /** The fraction of the visible range to pan per arrow key press. Defaults to `0.1` (10%). */
+    keyboardPanStep?: number;
+
+    /** The zoom intensity per +/- key press. Higher values zoom faster. Defaults to `0.5`. */
+    keyboardZoomStep?: number;
 }
 
 export interface TempisTimelineScrollbarOptions {
