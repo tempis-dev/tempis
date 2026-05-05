@@ -34,6 +34,9 @@ export interface DataViewGroupDrawPlan {
     /** The row stacks of all visible items in this group that need to be rendered. */
     rows: DataViewItemDrawPlan[][];
 
+    /** Whether this group is collapsed. */
+    isCollapsed: boolean;
+
     yPositionStart: number;
 
     yPositionEnd: number;
@@ -118,9 +121,6 @@ export class TimelineDataView {
     /** The current dependency definitions. */
     private _dependencies: TempisTimelineDependency[] = [];
 
-    /** The set of collapsed group names. */
-    private _collapsedGroups: Set<string> = new Set();
-
     /** Whether groups are collapsible. */
     private _collapsible: boolean = false;
 
@@ -183,8 +183,11 @@ export class TimelineDataView {
      * @param group The group name to collapse.
      */
     public collapseGroup(group: string): void {
-        this._collapsedGroups.add(group);
-        this._cachedStableRowStructure = null;
+        const grouping = this._dataSet.groupings.find((g) => g.group === group);
+        if (grouping) {
+            grouping.isCollapsed = true;
+            this._cachedStableRowStructure = null;
+        }
     }
 
     /**
@@ -192,8 +195,11 @@ export class TimelineDataView {
      * @param group The group name to expand.
      */
     public expandGroup(group: string): void {
-        this._collapsedGroups.delete(group);
-        this._cachedStableRowStructure = null;
+        const grouping = this._dataSet.groupings.find((g) => g.group === group);
+        if (grouping) {
+            grouping.isCollapsed = false;
+            this._cachedStableRowStructure = null;
+        }
     }
 
     /**
@@ -201,12 +207,11 @@ export class TimelineDataView {
      * @param group The group name to toggle.
      */
     public toggleGroup(group: string): void {
-        if (this._collapsedGroups.has(group)) {
-            this._collapsedGroups.delete(group);
-        } else {
-            this._collapsedGroups.add(group);
+        const grouping = this._dataSet.groupings.find((g) => g.group === group);
+        if (grouping) {
+            grouping.isCollapsed = !grouping.isCollapsed;
+            this._cachedStableRowStructure = null;
         }
-        this._cachedStableRowStructure = null;
     }
 
     /**
@@ -214,7 +219,8 @@ export class TimelineDataView {
      * @param group The group name to check.
      */
     public isGroupCollapsed(group: string): boolean {
-        return this._collapsedGroups.has(group);
+        const grouping = this._dataSet.groupings.find((g) => g.group === group);
+        return grouping?.isCollapsed ?? false;
     }
 
     /** Returns whether groups are collapsible. */
@@ -583,13 +589,12 @@ export class TimelineDataView {
 
                 // Draw collapse/expand indicator if groups are collapsible.
                 if (this._collapsible) {
-                    const isCollapsed = this._collapsedGroups.has(groupDrawPlan.label);
                     const indicatorSize = 5;
                     const indicatorX = this._isRTL ? labelX - indicatorSize : labelX + indicatorSize;
                     const indicatorY = labelY + 5;
 
                     context.beginPath();
-                    if (isCollapsed) {
+                    if (groupDrawPlan.isCollapsed) {
                         // Right-pointing triangle (collapsed)
                         const dir = this._isRTL ? -1 : 1;
                         context.moveTo(indicatorX - indicatorSize * dir, indicatorY - indicatorSize);
@@ -1210,10 +1215,11 @@ export class TimelineDataView {
             }
 
             // If this group is collapsed, add it to the plan with no items so the label still renders.
-            if (this._collapsedGroups.has(grouping.group)) {
+            if (grouping.isCollapsed) {
                 groupDrawPlans.push({
                     label: grouping.group,
                     rows: [],
+                    isCollapsed: true,
                     yPositionStart: 0,
                     yPositionEnd: 0
                 });
@@ -1315,6 +1321,7 @@ export class TimelineDataView {
             groupDrawPlans.push({
                 label: grouping.group,
                 rows: itemDrawPlanStacks,
+                isCollapsed: false,
                 yPositionStart: 0,
                 yPositionEnd: 0
             });
@@ -1426,10 +1433,11 @@ export class TimelineDataView {
             }
 
             // If this group is collapsed, add it to the plan with no items so the label still renders.
-            if (this._collapsedGroups.has(grouping.group)) {
+            if (grouping.isCollapsed) {
                 groupDrawPlans.push({
                     label: grouping.group,
                     rows: [],
+                    isCollapsed: true,
                     yPositionStart: 0,
                     yPositionEnd: 0
                 });
@@ -1499,6 +1507,7 @@ export class TimelineDataView {
             groupDrawPlans.push({
                 label: grouping.group,
                 rows: itemDrawPlanStacks,
+                isCollapsed: false,
                 yPositionStart: 0,
                 yPositionEnd: 0
             });
