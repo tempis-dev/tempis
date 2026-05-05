@@ -830,6 +830,9 @@ export class TempisTimeline {
                     if (clickedGroup) {
                         this._dataView.toggleGroup(clickedGroup);
                         this._draw();
+                        if (this._options.onGroupToggle) {
+                            this._options.onGroupToggle(clickedGroup, this._dataView.isGroupCollapsed(clickedGroup));
+                        }
                     } else {
                         // If we did not click on an item or group, we will invoke the canvas click handler.
                         this._onCanvasClicked();

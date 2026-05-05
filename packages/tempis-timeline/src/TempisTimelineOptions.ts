@@ -107,6 +107,13 @@ export interface TempisTimelineOptions {
      * @param end The end date of the visible range.
      */
     onRangeChange?(start: Date, end: Date): void;
+
+    /**
+     * Called when a group is collapsed or expanded via user interaction (clicking the group header).
+     * @param group The name of the group that was toggled.
+     * @param collapsed Whether the group is now collapsed.
+     */
+    onGroupToggle?(group: string, collapsed: boolean): void;
 }
 
 /**
