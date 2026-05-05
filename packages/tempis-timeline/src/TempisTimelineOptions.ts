@@ -240,6 +240,9 @@ export interface TempisTimelineGroupingOptions {
      * If not provided, groups are ordered by first encounter in the items array.
      */
     sort?: (a: string, b: string) => number;
+
+    /** Whether groups can be collapsed by clicking their header. Defaults to `false`. */
+    collapsible?: boolean;
 }
 
 export interface TempisTimelineFont {
@@ -407,6 +410,9 @@ export interface TempisTimelineItem {
 
     /** A flag defining whether the item is selected. */
     selected?: boolean;
+
+    /** The item progress as a value between 0 and 1. Renders as a fill bar inside range items. Ignored for point-in-time items. */
+    progress?: number;
 }
 
 /**

@@ -118,6 +118,12 @@ export class TimelineDataView {
     /** The current dependency definitions. */
     private _dependencies: TempisTimelineDependency[] = [];
 
+    /** The set of collapsed group names. */
+    private _collapsedGroups: Set<string> = new Set();
+
+    /** Whether groups are collapsible. */
+    private _collapsible: boolean = false;
+
     /** Reusable offscreen canvas for rendering unfocused items with opacity. */
     private _offscreenCanvas: HTMLCanvasElement | null = null;
     private _offscreenContext: CanvasRenderingContext2D | null = null;
@@ -133,12 +139,14 @@ export class TimelineDataView {
         dataSet: TimelineDataSet,
         isRTL: boolean,
         stackMode: TempisTimelineStackMode,
-        scrollbarOptions?: TempisTimelineScrollbarOptions
+        scrollbarOptions?: TempisTimelineScrollbarOptions,
+        collapsible?: boolean
     ) {
         this._dataSet = dataSet;
         this._isRTL = isRTL;
         this._stackMode = stackMode;
         this._scrollbarOptions = scrollbarOptions ?? {};
+        this._collapsible = collapsible ?? false;
 
         // Register a callback to invalidate cached row structure when dataset changes.
         this._dataSet.registerUpdateCallback(() => {
@@ -168,6 +176,50 @@ export class TimelineDataView {
      */
     public setDependencies(dependencies: TempisTimelineDependency[]): void {
         this._dependencies = dependencies;
+    }
+
+    /**
+     * Collapse a group so its items are hidden.
+     * @param group The group name to collapse.
+     */
+    public collapseGroup(group: string): void {
+        this._collapsedGroups.add(group);
+        this._cachedStableRowStructure = null;
+    }
+
+    /**
+     * Expand a previously collapsed group.
+     * @param group The group name to expand.
+     */
+    public expandGroup(group: string): void {
+        this._collapsedGroups.delete(group);
+        this._cachedStableRowStructure = null;
+    }
+
+    /**
+     * Toggle the collapsed state of a group.
+     * @param group The group name to toggle.
+     */
+    public toggleGroup(group: string): void {
+        if (this._collapsedGroups.has(group)) {
+            this._collapsedGroups.delete(group);
+        } else {
+            this._collapsedGroups.add(group);
+        }
+        this._cachedStableRowStructure = null;
+    }
+
+    /**
+     * Returns whether a group is currently collapsed.
+     * @param group The group name to check.
+     */
+    public isGroupCollapsed(group: string): boolean {
+        return this._collapsedGroups.has(group);
+    }
+
+    /** Returns whether groups are collapsible. */
+    public get isCollapsible(): boolean {
+        return this._collapsible;
     }
 
     /**
@@ -280,6 +332,32 @@ export class TimelineDataView {
         }
 
         // We did not find an item at the specified point.
+        return null;
+    }
+
+    /**
+     * Gets the group label at the specified point, or null if there is no group label at that point.
+     * Only returns a result when groups are collapsible.
+     * @param point The point at which to check for a group label.
+     * @returns The group name at the specified point, or null.
+     */
+    public getGroupLabelAtPoint(point: { x: number; y: number }): string | null {
+        if (!this._drawPlan || !this._collapsible) {
+            return null;
+        }
+
+        for (const groupDrawPlan of this._drawPlan.groupDrawPlans) {
+            if (!groupDrawPlan.label) continue;
+
+            // The group label area is from yPositionStart to yPositionStart + label height (approx 20px).
+            const labelTop = groupDrawPlan.yPositionStart + this._scrollYOffset + this._lastDrawYPosition;
+            const labelBottom = labelTop + 20;
+
+            if (point.y >= labelTop && point.y <= labelBottom) {
+                return groupDrawPlan.label;
+            }
+        }
+
         return null;
     }
 
@@ -492,21 +570,49 @@ export class TimelineDataView {
             if (groupDrawPlan.label) {
                 context.textBaseline = "top";
                 context.fillStyle = GRID_COLOUR;
-                context.beginPath();
+
+                const labelY = scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN;
+                let labelX: number;
+
                 // If rendering right-to-left then the group labels will be rendered to the right of the canvas, otherwise left.
                 if (this._isRTL) {
-                    context.fillText(
-                        groupDrawPlan.label,
-                        context.canvas.clientWidth - DEFAULT_GROUP_LABEL_MARGIN,
-                        scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN
-                    );
+                    labelX = context.canvas.clientWidth - DEFAULT_GROUP_LABEL_MARGIN;
                 } else {
-                    context.fillText(
-                        groupDrawPlan.label,
-                        DEFAULT_GROUP_LABEL_MARGIN,
-                        scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN
-                    );
+                    labelX = DEFAULT_GROUP_LABEL_MARGIN;
                 }
+
+                // Draw collapse/expand indicator if groups are collapsible.
+                if (this._collapsible) {
+                    const isCollapsed = this._collapsedGroups.has(groupDrawPlan.label);
+                    const indicatorSize = 5;
+                    const indicatorX = this._isRTL ? labelX - indicatorSize : labelX + indicatorSize;
+                    const indicatorY = labelY + 5;
+
+                    context.beginPath();
+                    if (isCollapsed) {
+                        // Right-pointing triangle (collapsed)
+                        const dir = this._isRTL ? -1 : 1;
+                        context.moveTo(indicatorX - indicatorSize * dir, indicatorY - indicatorSize);
+                        context.lineTo(indicatorX + indicatorSize * dir, indicatorY);
+                        context.lineTo(indicatorX - indicatorSize * dir, indicatorY + indicatorSize);
+                    } else {
+                        // Down-pointing triangle (expanded)
+                        context.moveTo(indicatorX - indicatorSize, indicatorY - indicatorSize / 2);
+                        context.lineTo(indicatorX + indicatorSize, indicatorY - indicatorSize / 2);
+                        context.lineTo(indicatorX, indicatorY + indicatorSize);
+                    }
+                    context.fill();
+
+                    // Offset the label to the right of the indicator.
+                    if (this._isRTL) {
+                        labelX -= indicatorSize * 2 + 6;
+                    } else {
+                        labelX += indicatorSize * 2 + 6;
+                    }
+                }
+
+                context.beginPath();
+                context.fillText(groupDrawPlan.label, labelX, labelY);
                 context.stroke();
             }
 
@@ -757,6 +863,39 @@ export class TimelineDataView {
             Math.max(0, itemBorderRadius - fillInset)
         );
         context.fill();
+
+        // Draw the progress fill if the item has a progress value and is a range item.
+        if (item.progress !== null && item.end) {
+            const itemWidth = itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - fillInset * 2;
+            const progressWidth = itemWidth * item.progress;
+
+            if (progressWidth > 0) {
+                context.save();
+                // Clip to the item shape so the progress fill respects border radius.
+                context.beginPath();
+                context.roundRect(
+                    itemDrawPlan.xPositionStart + fillInset,
+                    scrolledYPosition + itemDrawPlan.yPositionStart + fillInset,
+                    itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - fillInset * 2,
+                    itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - fillInset * 2,
+                    Math.max(0, itemBorderRadius - fillInset)
+                );
+                context.clip();
+
+                // Draw the progress fill as a semi-transparent overlay.
+                context.fillStyle = "rgba(255, 255, 255, 0.2)";
+                const progressX = this._isRTL
+                    ? itemDrawPlan.xPositionEnd - fillInset - progressWidth
+                    : itemDrawPlan.xPositionStart + fillInset;
+                context.fillRect(
+                    progressX,
+                    scrolledYPosition + itemDrawPlan.yPositionStart + fillInset,
+                    progressWidth,
+                    itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - fillInset * 2
+                );
+                context.restore();
+            }
+        }
 
         // Draw the item border if a border thickness and border color are configured.
         if (itemBorderThickness && itemBorderColor) {
@@ -1070,6 +1209,17 @@ export class TimelineDataView {
                 continue;
             }
 
+            // If this group is collapsed, add it to the plan with no items so the label still renders.
+            if (this._collapsedGroups.has(grouping.group)) {
+                groupDrawPlans.push({
+                    label: grouping.group,
+                    rows: [],
+                    yPositionStart: 0,
+                    yPositionEnd: 0
+                });
+                continue;
+            }
+
             const itemDrawPlanStacks: DataViewItemDrawPlan[][] = [[]];
 
             // Populate the item draw plan stacks for this group.
@@ -1272,6 +1422,17 @@ export class TimelineDataView {
             // Get the cached row assignments for this grouping
             const rowAssignments = this._cachedStableRowStructure!.get(grouping.group);
             if (!rowAssignments || rowAssignments.size === 0) {
+                continue;
+            }
+
+            // If this group is collapsed, add it to the plan with no items so the label still renders.
+            if (this._collapsedGroups.has(grouping.group)) {
+                groupDrawPlans.push({
+                    label: grouping.group,
+                    rows: [],
+                    yPositionStart: 0,
+                    yPositionEnd: 0
+                });
                 continue;
             }
 

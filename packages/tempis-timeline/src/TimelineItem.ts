@@ -1,5 +1,5 @@
 import { TempisTimelineItemStyle, TempisTimelineItem as TimelineItemDefinition } from "./TempisTimelineOptions";
-import { parseDate } from "./Utilities";
+import { isNullOrUndefined, parseDate } from "./Utilities";
 
 /**
  * The default item style.
@@ -21,6 +21,7 @@ export class TimelineItem {
     private readonly _label: string;
     private readonly _start: Date;
     private readonly _end: Date | null;
+    private readonly _progress: number | null;
     private readonly _style: TempisTimelineItemStyle;
 
     /** Whether the item is currently selected. */
@@ -38,6 +39,7 @@ export class TimelineItem {
         this._label = definition.label ?? "";
         this._start = parseDate(definition.start);
         this._end = definition.end ? parseDate(definition.end) : null;
+        this._progress = isNullOrUndefined(this._definition.progress) ? null : this._definition.progress;
         this._style = style;
         this._isSelected = !!definition.selected;
     }
@@ -83,5 +85,10 @@ export class TimelineItem {
     }
     public set isSelected(value: boolean) {
         this._isSelected = value;
+    }
+
+    /** Gets the item progress (0–1), or null if no progress is defined. */
+    public get progress(): number | null {
+        return this._progress == null ? null : Math.max(0, Math.min(1, this._progress));
     }
 }

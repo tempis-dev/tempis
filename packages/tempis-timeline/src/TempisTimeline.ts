@@ -140,7 +140,8 @@ export class TempisTimeline {
             this._dataSet,
             this._isRTL,
             this._options.stackMode ?? "stable",
-            this._options.scrollbar
+            this._options.scrollbar,
+            this._options.grouping?.collapsible
         );
         this._dataView.setDependencies(this._options.dependencies ?? []);
         this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._isRTL, this._options.range);
@@ -359,6 +360,41 @@ export class TempisTimeline {
 
         // We will need to redraw.
         this._draw();
+    }
+
+    /**
+     * Collapse a group so its items are hidden.
+     * @param group The group name to collapse.
+     */
+    public collapseGroup(group: string): void {
+        this._dataView.collapseGroup(group);
+        this._draw();
+    }
+
+    /**
+     * Expand a previously collapsed group.
+     * @param group The group name to expand.
+     */
+    public expandGroup(group: string): void {
+        this._dataView.expandGroup(group);
+        this._draw();
+    }
+
+    /**
+     * Toggle the collapsed state of a group.
+     * @param group The group name to toggle.
+     */
+    public toggleGroup(group: string): void {
+        this._dataView.toggleGroup(group);
+        this._draw();
+    }
+
+    /**
+     * Returns whether a group is currently collapsed.
+     * @param group The group name to check.
+     */
+    public isGroupCollapsed(group: string): boolean {
+        return this._dataView.isGroupCollapsed(group);
     }
 
     /**
@@ -781,16 +817,23 @@ export class TempisTimeline {
             // We will check if the pointer has moved less than the drag pixel threshold.
             if (Math.sqrt(dx * dx + dy * dy) < dragPixelThreshold) {
                 // Try to find the item at the clicked position.
-                const clickedItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
+                const clickPosition = getMouseOrPointerPosition(event);
+                const clickedItem = this._dataView.getItemAtPoint(clickPosition);
 
                 // Did we actually click on an item?
                 if (clickedItem) {
                     // Handle the item click.
                     this._onItemClicked(clickedItem);
                 } else {
-                    // If we did not click on an item, we will invoke the canvas click handler.
-                    // This is used to handle clicks on the canvas when no items are clicked.
-                    this._onCanvasClicked();
+                    // Check if we clicked on a collapsible group label.
+                    const clickedGroup = this._dataView.getGroupLabelAtPoint(clickPosition);
+                    if (clickedGroup) {
+                        this._dataView.toggleGroup(clickedGroup);
+                        this._draw();
+                    } else {
+                        // If we did not click on an item or group, we will invoke the canvas click handler.
+                        this._onCanvasClicked();
+                    }
                 }
             }
 
