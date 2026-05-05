@@ -589,30 +589,36 @@ export class TimelineDataView {
 
                 // Draw collapse/expand indicator if groups are collapsible.
                 if (this._collapsible) {
-                    const indicatorSize = 5;
-                    const indicatorX = this._isRTL ? labelX - indicatorSize : labelX + indicatorSize;
-                    const indicatorY = labelY + 5;
+                    const s = 3;
+                    const indicatorX = this._isRTL ? labelX - s : labelX + s;
+                    const indicatorY = labelY + 6;
 
+                    context.save();
+                    context.lineWidth = 1.5;
+                    context.lineJoin = "round";
+                    context.lineCap = "round";
+                    context.strokeStyle = GRID_COLOUR;
                     context.beginPath();
                     if (groupDrawPlan.isCollapsed) {
-                        // Right-pointing triangle (collapsed)
+                        // Right-pointing chevron (collapsed)
                         const dir = this._isRTL ? -1 : 1;
-                        context.moveTo(indicatorX - indicatorSize * dir, indicatorY - indicatorSize);
-                        context.lineTo(indicatorX + indicatorSize * dir, indicatorY);
-                        context.lineTo(indicatorX - indicatorSize * dir, indicatorY + indicatorSize);
+                        context.moveTo(indicatorX - s * 0.5 * dir, indicatorY - s);
+                        context.lineTo(indicatorX + s * 0.5 * dir, indicatorY);
+                        context.lineTo(indicatorX - s * 0.5 * dir, indicatorY + s);
                     } else {
-                        // Down-pointing triangle (expanded)
-                        context.moveTo(indicatorX - indicatorSize, indicatorY - indicatorSize / 2);
-                        context.lineTo(indicatorX + indicatorSize, indicatorY - indicatorSize / 2);
-                        context.lineTo(indicatorX, indicatorY + indicatorSize);
+                        // Down-pointing chevron (expanded)
+                        context.moveTo(indicatorX - s, indicatorY - s * 0.5);
+                        context.lineTo(indicatorX, indicatorY + s * 0.5);
+                        context.lineTo(indicatorX + s, indicatorY - s * 0.5);
                     }
-                    context.fill();
+                    context.stroke();
+                    context.restore();
 
                     // Offset the label to the right of the indicator.
                     if (this._isRTL) {
-                        labelX -= indicatorSize * 2 + 6;
+                        labelX -= s * 2 + 6;
                     } else {
-                        labelX += indicatorSize * 2 + 6;
+                        labelX += s * 2 + 6;
                     }
                 }
 
