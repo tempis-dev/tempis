@@ -195,6 +195,7 @@
     },
     legend: { position: 'top' },
     grouping: {
+      collapsible: true,
       sort: (a, b) => {
         const order = ['API Gateway', 'Database Cluster', 'Worker Nodes', 'CDN / Edge', 'Message Queue'];
         return order.indexOf(a) - order.indexOf(b);

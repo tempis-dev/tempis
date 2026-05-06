@@ -55,10 +55,11 @@ Script tag usage:
 - Canvas rendering — no DOM nodes per item
 - Range and point-in-time items with automatic stacking
 - Categories with interactive legend (filter on click, highlight on hover)
-- Item groupings with custom sort
+- Item groupings with custom sort and collapsible headers
 - Timeline bands (range markers, point markers, lines)
 - Item dependencies with automatic connector routing and RTL support
 - Per-item style overrides (colors, borders, dash patterns, radius, padding)
+- Progress indicator on range items
 - Tooltips with custom templates, delay, and overflow handling
 - Selection modes: none, single, multi
 - Animated focus with configurable easing
@@ -71,6 +72,7 @@ Script tag usage:
 - Pluggable date adapters (native, Luxon, Day.js, etc.)
 - Global color palette API
 - Configurable scrollbar styling
+- Accessibility: keyboard navigation, ARIA attributes, reduced motion support
 - 100% TypeScript with full declarations
 
 ## API
@@ -90,6 +92,11 @@ new TempisTimeline(context: string | HTMLCanvasElement, options: TempisTimelineO
 | `setCategories(categories)` | Replace all categories and redraw |
 | `getCategories()` | Get current category definitions |
 | `setBands(bands)` | Replace all bands and redraw |
+| `setDependencies(deps)` | Replace all dependencies and redraw |
+| `collapseGroup(group)` | Collapse a group by name |
+| `expandGroup(group)` | Expand a collapsed group |
+| `toggleGroup(group)` | Toggle a group's collapsed state |
+| `isGroupCollapsed(group)` | Check if a group is collapsed |
 | `focus(options?)` | Navigate to an item, date, or range with animation |
 | `getRange()` | Current visible range as `{ start, end }` |
 | `setSelection(ids)` | Programmatically select items by ID |
@@ -109,6 +116,7 @@ new TempisTimeline(context: string | HTMLCanvasElement, options: TempisTimelineO
 | `onItemHover` | `(id: string \| number \| null) => void` |
 | `onSelectionChange` | `(changes: SelectionChangeEvent[]) => void` |
 | `onRangeChange` | `(start: Date, end: Date) => void` |
+| `onGroupToggle` | `(group: string, collapsed: boolean) => void` |
 
 ### Image Export
 

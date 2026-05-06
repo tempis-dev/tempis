@@ -13,7 +13,8 @@
       onItemContextClick: '#e879f9',
       onItemHover: '#6366f1',
       onSelectionChange: '#10b981',
-      onRangeChange: '#808080'
+      onRangeChange: '#808080',
+      onGroupToggle: '#0ea5e9'
     };
     function log(name, args) {
       var line = document.createElement('div');
@@ -26,6 +27,7 @@
       verticalFill: 'fill-canvas',
       selection: 'multi',
       style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      grouping: { collapsible: true },
       items: [
         { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-10', grouping: 'Group 1' },
         { id: 2, label: 'Item 2', start: '2026-02-05', end: '2026-02-15', grouping: 'Group 1' },
@@ -46,7 +48,8 @@
         });
         tl.setSelection(sel);
       },
-      onRangeChange: function(start, end) { log('onRangeChange', start.toISOString().slice(0,10) + ' → ' + end.toISOString().slice(0,10)); }
+      onRangeChange: function(start, end) { log('onRangeChange', start.toISOString().slice(0,10) + ' → ' + end.toISOString().slice(0,10)); },
+      onGroupToggle: function(group, collapsed) { log('onGroupToggle', 'group: ' + group + ' collpsed: ' + collapsed); }
     });
   })();
 </script>
@@ -61,6 +64,7 @@
     <tr><td><code>onItemHover</code></td><td><code>(id: string | number | null) =&gt; void</code></td><td>The pointer enters an item (<code>id</code>) or leaves all items (<code>null</code>).</td></tr>
     <tr><td><code>onSelectionChange</code></td><td><code>(changes: SelectionChangeEvent[]) =&gt; void</code></td><td>The selection changes via user interaction. Enables controlled selection — you must call <code>setSelection()</code> to apply changes. See <a href="#core/selection">Selection</a>.</td></tr>
     <tr><td><code>onRangeChange</code></td><td><code>(start: Date, end: Date) =&gt; void</code></td><td>The visible range changes due to panning, zooming, or programmatic update.</td></tr>
+    <tr><td><code>onGroupToggle</code></td><td><code>(group: string, collapsed: boolean) =&gt; void</code></td><td>A group header is clicked to collapse or expand. Only fires when <code>grouping.collapsible</code> is <code>true</code>.</td></tr>
   </tbody>
 </table>
 
