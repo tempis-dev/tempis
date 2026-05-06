@@ -14,7 +14,7 @@ const PADDING_Y = 8;
  * with a viewport indicator and item position markers.
  */
 export class TimelineMinimapView {
-    private readonly _options: TempisTimelineMinimapOptions;
+    private readonly _options: TempisTimelineMinimapOptions | null;
     private readonly _dataSet: TimelineDataSet;
     private readonly _rangeView: TimelineRangeView;
     private readonly _isRTL: boolean;
@@ -34,17 +34,17 @@ export class TimelineMinimapView {
         this._dataSet = dataSet;
         this._rangeView = rangeView;
         this._isRTL = isRTL;
-        this._options = options ?? {};
+        this._options = options ?? null;
     }
 
-    /** Whether the minimap is enabled. */
+    /** Whether the minimap is enabled (options were provided). */
     public get isEnabled(): boolean {
-        return this._options.enabled === true;
+        return this._options !== null;
     }
 
     /** The height of the minimap bar. */
     public get height(): number {
-        return this.isEnabled ? (this._options.height ?? DEFAULT_HEIGHT) : 0;
+        return this.isEnabled ? (this._options!.height ?? DEFAULT_HEIGHT) : 0;
     }
 
     /** Whether the user is currently dragging the minimap. */
@@ -63,8 +63,8 @@ export class TimelineMinimapView {
 
         this._lastDrawY = yPosition;
         const height = this.height;
-        const bgColor = this._options.backgroundColor ?? DEFAULT_BG;
-        const viewportColor = this._options.viewportColor ?? DEFAULT_VIEWPORT_COLOR;
+        const bgColor = this._options!.backgroundColor ?? DEFAULT_BG;
+        const viewportColor = this._options!.viewportColor ?? DEFAULT_VIEWPORT_COLOR;
 
         // Ensure no line dash state leaks from previous rendering.
         context.setLineDash([]);

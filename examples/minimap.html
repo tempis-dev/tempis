@@ -70,7 +70,7 @@
     <p class="subtitle">A compact overview bar for navigating large timelines.</p>
 
     <div class="info-box">
-      The minimap shows the full data range at the bottom of the canvas. The highlighted area represents the current viewport. Click or drag anywhere on the minimap to navigate. Enable with <code>minimap: { enabled: true }</code>.
+      The minimap shows the full data range at the bottom of the canvas. The highlighted area represents the current viewport. Click or drag anywhere on the minimap to navigate. Enable by providing a <code>minimap</code> config object.
     </div>
 
     <div class="controls">
@@ -136,7 +136,7 @@
       verticalFill: 'fill-canvas',
       style: { item: { borderRadius: 6, fontColor: '#fff', padding: 8 } },
       grouping: { collapsible: true },
-      minimap: { enabled: true, height: 44 },
+      minimap: { height: 44 },
       categories: [
         { name: 'feature',  label: 'Feature',        style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
         { name: 'ops',      label: 'Operations',     style: { backgroundColor: '#0ea5e9', fontColor: '#fff' } },

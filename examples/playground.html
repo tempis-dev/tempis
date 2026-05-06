@@ -887,10 +887,9 @@
         visibility: document.getElementById('scrollbarVisibility').value,
         color: document.getElementById('scrollbarColor').value + '4D'
       },
-      minimap: {
-        enabled: document.getElementById('minimapEnabled').checked,
-        height: parseInt(document.getElementById('minimapHeight').value) || 40
-      },
+      minimap: document.getElementById('minimapEnabled').checked
+        ? { height: parseInt(document.getElementById('minimapHeight').value) || 40 }
+        : undefined,
       range: {
         position: document.getElementById('rangePosition').value,
         fixed: document.getElementById('rangeFixed').checked,

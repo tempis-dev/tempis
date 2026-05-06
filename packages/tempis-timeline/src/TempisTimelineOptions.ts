@@ -207,9 +207,6 @@ export interface TempisTimelineStyleOptions {
 }
 
 export interface TempisTimelineMinimapOptions {
-    /** Whether the minimap is enabled. Defaults to `false`. */
-    enabled?: boolean;
-
     /** The height of the minimap bar in pixels. Defaults to `40`. */
     height?: number;
 
