@@ -7,22 +7,61 @@
   <title>Progress Indicator — Tempis Timeline</title>
   <script src="../lib/tempis_timeline.js"></script>
   <style>
-    :root { --bg: #0f0f0f; --card: #1a1a1a; --border: #2a2a2a; --text: #e8e8e8; --muted: #888; --accent: #6366f1; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 32px 24px; }
-    .container { max-width: 1100px; margin: 0 auto; }
-    h1 { font-size: 1.6em; font-weight: 800; margin-bottom: 6px; }
-    .subtitle { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
-    .card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-    .card-header h2 { font-size: 0.9em; font-weight: 700; }
-    .card-header .spacer { flex: 1; }
-    .card-header button { background: rgba(99,102,241,0.15); color: var(--accent); border: none; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600; }
-    .card-header button:hover { background: var(--accent); color: #fff; }
-    .timeline-wrap { height: 420px; }
-    .timeline-wrap canvas { display: block; width: 100%; height: 100%; }
-    .info { background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.2); border-radius: 10px; padding: 14px 18px; font-size: 13px; line-height: 1.6; color: #bbb; margin-bottom: 24px; }
-    .info code { background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { margin-top: 0; color: #333; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+    .timeline-container {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .timeline-container canvas {
+      display: block;
+      width: 100%;
+      height: 500px;
+    }
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .controls button {
+      padding: 6px 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .controls button:hover { background: #f0f0f0; }
+    .info-box {
+      background: #f0f4ff;
+      border: 1px solid #d0d8f0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #444;
+      margin-bottom: 16px;
+    }
+    .info-box code { background: #e0e8f8; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
   </style>
 </head>
 <body>
@@ -30,20 +69,18 @@
     <h1>📊 Progress Indicator</h1>
     <p class="subtitle">Show completion progress as a fill bar inside range items.</p>
 
-    <div class="info">
-      Each item has a <code>progress</code> property (0–1) that renders as a lighter fill from the left edge. The fill respects border radius and works in RTL mode. Point-in-time items ignore the progress value.
+    <div class="info-box">
+      Set <code>progress</code> (0–1) on any range item to render a lighter fill from the left edge. The fill respects border radius and is ignored for point-in-time items. Use the buttons below to simulate progress updates.
     </div>
 
-    <div class="card">
-      <div class="card-header">
-        <h2>Sprint Progress</h2>
-        <div class="spacer"></div>
-        <button onclick="randomiseProgress()">Randomise</button>
-        <button onclick="incrementProgress()">+10%</button>
-      </div>
-      <div class="timeline-wrap">
-        <canvas id="timeline"></canvas>
-      </div>
+    <div class="controls">
+      <button onclick="incrementProgress()">+10% All</button>
+      <button onclick="randomiseProgress()">Randomise</button>
+      <button onclick="resetProgress()">Reset</button>
+    </div>
+
+    <div class="timeline-container">
+      <canvas id="timeline"></canvas>
     </div>
   </div>
 
@@ -51,60 +88,80 @@
     var TT = tempis_timeline.TempisTimeline;
 
     var items = [
-      { id: 1,  label: 'API Design',           start: '2026-02-03', end: '2026-02-14', grouping: 'Backend',  category: 'complete',    progress: 1.0 },
-      { id: 2,  label: 'Database Schema',       start: '2026-02-10', end: '2026-02-21', grouping: 'Backend',  category: 'complete',    progress: 1.0 },
-      { id: 3,  label: 'Auth Service',          start: '2026-02-17', end: '2026-03-07', grouping: 'Backend',  category: 'in-progress', progress: 0.65 },
-      { id: 4,  label: 'Payment Integration',   start: '2026-03-02', end: '2026-03-20', grouping: 'Backend',  category: 'in-progress', progress: 0.3 },
-      { id: 5,  label: 'Notification Service',  start: '2026-03-16', end: '2026-03-28', grouping: 'Backend',  category: 'planned',     progress: 0 },
+      // Research
+      { id: 1,  label: 'Market Analysis',        start: '2026-02-03', end: '2026-02-14', grouping: 'Research',     category: 'complete',  progress: 1.0 },
+      { id: 2,  label: 'User Interviews',        start: '2026-02-10', end: '2026-02-21', grouping: 'Research',     category: 'complete',  progress: 1.0 },
+      { id: 3,  label: 'Competitor Audit',        start: '2026-02-17', end: '2026-02-28', grouping: 'Research',     category: 'active',    progress: 0.75 },
 
-      { id: 10, label: 'Component Library',     start: '2026-02-03', end: '2026-02-21', grouping: 'Frontend', category: 'complete',    progress: 1.0 },
-      { id: 11, label: 'Dashboard UI',          start: '2026-02-17', end: '2026-03-07', grouping: 'Frontend', category: 'in-progress', progress: 0.8 },
-      { id: 12, label: 'Settings Page',         start: '2026-02-24', end: '2026-03-07', grouping: 'Frontend', category: 'in-progress', progress: 0.45 },
-      { id: 13, label: 'Checkout Flow',         start: '2026-03-09', end: '2026-03-21', grouping: 'Frontend', category: 'planned',     progress: 0 },
-      { id: 14, label: 'Mobile Responsive',     start: '2026-03-16', end: '2026-03-28', grouping: 'Frontend', category: 'planned',     progress: 0 },
+      // Design
+      { id: 10, label: 'Wireframes',             start: '2026-02-10', end: '2026-02-28', grouping: 'Design',       category: 'active',    progress: 0.6 },
+      { id: 11, label: 'Visual Design',          start: '2026-02-24', end: '2026-03-14', grouping: 'Design',       category: 'active',    progress: 0.35 },
+      { id: 12, label: 'Prototype',              start: '2026-03-09', end: '2026-03-21', grouping: 'Design',       category: 'pending',   progress: 0 },
 
-      { id: 20, label: 'Unit Tests',            start: '2026-02-10', end: '2026-03-14', grouping: 'QA',       category: 'in-progress', progress: 0.55 },
-      { id: 21, label: 'Integration Tests',     start: '2026-03-02', end: '2026-03-21', grouping: 'QA',       category: 'in-progress', progress: 0.2 },
-      { id: 22, label: 'Performance Audit',     start: '2026-03-17', end: '2026-03-28', grouping: 'QA',       category: 'planned',     progress: 0 },
+      // Development
+      { id: 20, label: 'Core Architecture',      start: '2026-02-17', end: '2026-03-07', grouping: 'Development',  category: 'active',    progress: 0.8 },
+      { id: 21, label: 'Feature Build',          start: '2026-03-03', end: '2026-03-28', grouping: 'Development',  category: 'active',    progress: 0.2 },
+      { id: 22, label: 'API Integration',        start: '2026-03-10', end: '2026-03-28', grouping: 'Development',  category: 'pending',   progress: 0 },
+      { id: 23, label: 'Performance Tuning',     start: '2026-03-24', end: '2026-04-04', grouping: 'Development',  category: 'pending',   progress: 0 },
 
-      { id: 30, label: 'Sprint Start',          start: '2026-02-03', grouping: 'Milestones', category: 'milestone' },
-      { id: 31, label: 'Mid-Sprint Review',     start: '2026-02-28', grouping: 'Milestones', category: 'milestone' },
-      { id: 32, label: 'Sprint End',            start: '2026-03-28', grouping: 'Milestones', category: 'milestone' },
+      // Testing
+      { id: 30, label: 'Unit Tests',             start: '2026-03-03', end: '2026-03-28', grouping: 'Testing',      category: 'active',    progress: 0.45 },
+      { id: 31, label: 'Integration Tests',      start: '2026-03-17', end: '2026-04-04', grouping: 'Testing',      category: 'pending',   progress: 0 },
+      { id: 32, label: 'UAT',                    start: '2026-03-31', end: '2026-04-11', grouping: 'Testing',      category: 'pending',   progress: 0 },
+
+      // Milestones
+      { id: 40, label: 'Kickoff',                start: '2026-02-03', grouping: 'Milestones', category: 'milestone' },
+      { id: 41, label: 'Design Review',          start: '2026-03-14', grouping: 'Milestones', category: 'milestone' },
+      { id: 42, label: 'Beta Release',           start: '2026-04-04', grouping: 'Milestones', category: 'milestone' },
     ];
 
     var tl = new TT('#timeline', {
       responsive: true,
       verticalFill: 'fill-canvas',
       style: { item: { borderRadius: 6, fontColor: '#fff', padding: 8 } },
+      grouping: { collapsible: true },
       categories: [
-        { name: 'complete',    label: 'Complete',    style: { backgroundColor: '#10b981', fontColor: '#fff' } },
-        { name: 'in-progress', label: 'In Progress', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
-        { name: 'planned',     label: 'Planned',     style: { backgroundColor: '#374151', fontColor: '#9ca3af' } },
-        { name: 'milestone',   label: 'Milestone',   style: { backgroundColor: '#f59e0b', fontColor: '#111' } },
+        { name: 'complete',  label: 'Complete',   style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+        { name: 'active',    label: 'Active',     style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+        { name: 'pending',   label: 'Pending',    style: { backgroundColor: '#94a3b8', fontColor: '#fff' } },
+        { name: 'milestone', label: 'Milestone',  style: { backgroundColor: '#f59e0b', fontColor: '#111' } },
       ],
       legend: { position: 'top', markerStyle: 'circle' },
-      grouping: { collapsible: true },
       items: items,
       bands: [
-        { start: '2026-02-28', style: { color: '#f59e0b', borderColor: '#f59e0b', borderThickness: 1 } },
+        { start: '2026-03-14', style: { color: '#f59e0b', borderColor: '#f59e0b', borderThickness: 1 } },
       ],
-      range: { start: '2026-01-27', end: '2026-04-04', position: 'bottom' }
+      range: { start: '2026-01-27', end: '2026-04-14', position: 'bottom' }
     });
-
-    function randomiseProgress() {
-      items.forEach(function(item) {
-        if (item.end && item.category !== 'complete' && item.category !== 'milestone') {
-          item.progress = Math.round(Math.random() * 100) / 100;
-        }
-      });
-      tl.setItems(items);
-    }
 
     function incrementProgress() {
       items.forEach(function(item) {
         if (item.end && item.progress !== undefined && item.progress < 1 && item.category !== 'milestone') {
           item.progress = Math.min(1, Math.round((item.progress + 0.1) * 100) / 100);
           if (item.progress >= 1) item.category = 'complete';
+          else if (item.progress > 0) item.category = 'active';
+        }
+      });
+      tl.setItems(items);
+    }
+
+    function randomiseProgress() {
+      items.forEach(function(item) {
+        if (item.end && item.category !== 'milestone') {
+          item.progress = Math.round(Math.random() * 100) / 100;
+          if (item.progress >= 1) item.category = 'complete';
+          else if (item.progress > 0) item.category = 'active';
+          else item.category = 'pending';
+        }
+      });
+      tl.setItems(items);
+    }
+
+    function resetProgress() {
+      items.forEach(function(item) {
+        if (item.end && item.category !== 'milestone') {
+          item.progress = 0;
+          item.category = 'pending';
         }
       });
       tl.setItems(items);
