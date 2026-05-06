@@ -1350,6 +1350,13 @@ export class TimelineDataView {
                 positionY += 2 * DEFAULT_GROUP_LABEL_MARGIN;
             }
 
+            // If the group is collapsed, skip item margins and rows entirely.
+            if (groupDrawPlan.isCollapsed) {
+                groupDrawPlan.yPositionEnd = positionY;
+                positionY += 1;
+                continue;
+            }
+
             // We want to stick a little bit of a margin at the top of the group, but below the label
             positionY += DEFAULT_GROUP_MARGIN;
 
@@ -1529,6 +1536,13 @@ export class TimelineDataView {
                 const groupLabelMetrics = context.measureText(groupDrawPlan.label);
                 positionY += groupLabelMetrics.actualBoundingBoxAscent + groupLabelMetrics.actualBoundingBoxDescent;
                 positionY += 2 * DEFAULT_GROUP_LABEL_MARGIN;
+            }
+
+            // If the group is collapsed, skip item margins and rows entirely.
+            if (groupDrawPlan.isCollapsed) {
+                groupDrawPlan.yPositionEnd = positionY;
+                positionY += 1;
+                continue;
             }
 
             positionY += DEFAULT_GROUP_MARGIN;

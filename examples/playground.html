@@ -491,6 +491,13 @@
     </div>
     
     <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="collapsible">
+        <label for="collapsible">Collapsible Groups</label>
+      </div>
+    </div>
+    
+    <div class="control-group">
       <label>Scrollbar Visibility</label>
       <select id="scrollbarVisibility">
         <option value="always">Always</option>
@@ -889,6 +896,7 @@
       categories: generateCategories(categoryCount),
       items,
       grouping: {
+        collapsible: document.getElementById('collapsible').checked,
         sort: (a, b) => a.localeCompare(b)
       },
     };
