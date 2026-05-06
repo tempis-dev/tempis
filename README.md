@@ -19,7 +19,7 @@
 
 ## Highlights
 
-- Canvas rendering — no DOM nodes per item, smooth at 5,000+ items
+- Canvas rendering — no DOM nodes per item, virtualised rendering for consistent performance at any scale
 - Range and point-in-time items with automatic stacking
 - Progress indicator on range items
 - Categories with interactive legend
