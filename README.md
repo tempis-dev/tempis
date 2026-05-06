@@ -6,7 +6,7 @@
 
 <p align="center">
   A fast, zero-dependency, canvas-rendered timeline library.<br>
-  Handles thousands of items, touch &amp; keyboard input, RTL, image export, and more — in under 15 KB.
+  Handles thousands of items, touch &amp; keyboard input, RTL, image export, and more.
 </p>
 
 <p align="center">
@@ -17,21 +17,43 @@
 
 ---
 
+## Highlights
+
+- Canvas rendering — no DOM nodes per item, smooth at 5,000+ items
+- Range and point-in-time items with automatic stacking
+- Progress indicator on range items
+- Categories with interactive legend
+- Collapsible groups with programmatic control
+- Timeline bands (markers, regions, lines)
+- Item dependencies with automatic connector routing
+- Per-item style overrides (colors, borders, radius, dash patterns)
+- Custom tooltip templates
+- Selection modes: none, single, multi
+- Animated focus with configurable easing
+- Zoom, pan, touch pinch, keyboard navigation
+- Three vertical fill modes, two stack modes
+- RTL layout
+- Image export (PNG, JPEG, WebP) with DPR control
+- Pluggable date adapters (native, Luxon, Day.js, etc.)
+- Global color palette API
+- Accessibility: keyboard navigation, ARIA attributes, reduced motion
+- 100% TypeScript with full declarations
+
 ## Packages
 
 | Package | Description |
 |---------|-------------|
-| [`tempis-timeline`](packages/tempis-timeline) | Core timeline library — canvas rendering, interactions, adapters |
-| `tempis-react` *(coming soon)* | React wrapper with declarative props and hooks |
+| [`@tempis/timeline`](packages/tempis-timeline) | Core timeline library — canvas rendering, interactions, adapters |
+| [`@tempis/react`](packages/tempis-react) | React wrapper with declarative props, reactive data, and imperative ref API |
 
 ## Quick Start
 
 ```bash
-npm install tempis-timeline
+npm install @tempis/timeline
 ```
 
 ```typescript
-import { TempisTimeline } from 'tempis-timeline';
+import { TempisTimeline } from '@tempis/timeline';
 
 const timeline = new TempisTimeline('#canvas', {
   responsive: true,
@@ -48,30 +70,11 @@ const timeline = new TempisTimeline('#canvas', {
 Or via CDN:
 
 ```html
-<script src="https://unpkg.com/tempis-timeline/dist/tempis_timeline.min.js"></script>
+<script src="https://unpkg.com/@tempis/timeline/dist/tempis_timeline.min.js"></script>
 <script>
   new tempis_timeline.TempisTimeline('#canvas', { /* ... */ });
 </script>
 ```
-
-## Highlights
-
-- Canvas rendering — no DOM nodes per item, smooth at 5,000+ items
-- Range and point-in-time items with automatic stacking
-- Categories with interactive legend
-- Timeline bands (markers, regions, lines)
-- Item dependencies with automatic connector routing
-- Per-item style overrides (colors, borders, radius, dash patterns)
-- Custom tooltip templates
-- Selection modes: none, single, multi
-- Animated focus with configurable easing
-- Zoom, pan, touch pinch, keyboard navigation
-- Three vertical fill modes, two stack modes
-- RTL layout
-- Image export (PNG, JPEG, WebP) with DPR control
-- Pluggable date adapters (native, Luxon, Day.js, etc.)
-- Global color palette API
-- 100% TypeScript with full declarations
 
 ## Repo Structure
 
@@ -79,7 +82,7 @@ Or via CDN:
 tempis/
 ├── packages/
 │   ├── tempis-timeline/   Core library
-│   └── tempis-react/      React wrapper (wip)
+│   └── tempis-react/      React wrapper
 ├── examples/              Interactive HTML demos
 ├── site/                  Documentation site
 ├── scripts/               Build tooling
@@ -87,9 +90,19 @@ tempis/
 └── dist/                  Distribution output (gitignored)
 ```
 
+## Development
+
+```bash
+npm install
+npm run dev          # Watch + dev server on :8080
+npm run build        # Build all packages
+npm run build:site   # Build the documentation site
+npm test             # Lint + unit tests
+```
+
 ## Examples
 
-The [`examples/`](examples/) directory has 30+ interactive demos covering everything from basic usage to stress tests, real-time streaming, custom tooltips, RTL, image export, and more. Run `npm run dev` and browse them at `http://localhost:8080/examples/`.
+The [`examples/`](examples/) directory has 35+ interactive demos covering basic usage, dashboards, dependencies, progress indicators, real-time streaming, custom tooltips, RTL, image export, and more. Run `npm run dev` and browse them at `http://localhost:8080/examples/`.
 
 ## License
 
