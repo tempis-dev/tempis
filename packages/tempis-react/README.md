@@ -96,6 +96,8 @@ function App() {
 | `setSelection(ids)` | Select items by ID |
 | `getSelection()` | Get selected IDs |
 | `clearSelection()` | Clear selection |
+| `setGroupCollapsed(group, collapsed?)` | Set or toggle a group's collapsed state |
+| `isGroupCollapsed(group)` | Check if a group is collapsed |
 | `toImage(options?)` | Export as image blob |
 | `redraw()` | Force a redraw |
 | `getInstance()` | Access the underlying core instance |

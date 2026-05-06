@@ -17,27 +17,26 @@
 
 ---
 
-## Highlights
+## ✨ Key Features
 
-- Canvas rendering — no DOM nodes per item, virtualised rendering for consistent performance at any scale
-- Range and point-in-time items with automatic stacking
-- Progress indicator on range items
-- Categories with interactive legend
-- Collapsible groups with programmatic control
-- Timeline bands (markers, regions, lines)
-- Item dependencies with automatic connector routing
-- Per-item style overrides (colors, borders, radius, dash patterns)
-- Custom tooltip templates
-- Selection modes: none, single, multi
-- Animated focus with configurable easing
-- Zoom, pan, touch pinch, keyboard navigation
-- Three vertical fill modes, two stack modes
-- RTL layout
-- Image export (PNG, JPEG, WebP) with DPR control
-- Pluggable date adapters (native, Luxon, Day.js, etc.)
-- Global color palette API
-- Accessibility: keyboard navigation, ARIA attributes, reduced motion
-- 100% TypeScript with full declarations
+🔷 **Virtualised Canvas Rendering** – no DOM nodes per item, consistent performance at any scale<br>
+🔷 **Range & Point-in-Time Items** – horizontal bars and milestone markers with automatic stacking<br>
+🔷 **Progress Indicator** – show completion as a fill bar inside range items<br>
+🔷 **Categories & Interactive Legend** – colour-code items, filter on click, highlight on hover<br>
+🔷 **Collapsible Groups** – click headers to collapse swimlanes, programmatic control via API<br>
+🔷 **Item Dependencies** – finish-to-start connector arrows with automatic routing and styling<br>
+🔷 **Per-Item Styling** – override colours, borders, dash patterns, and radius on individual items<br>
+🔷 **Custom Tooltips** – rich HTML templates with overflow handling and conditional display<br>
+🔷 **Selection Modes** – none, single, or multi-select with controlled and uncontrolled patterns<br>
+🔷 **Animated Focus** – pan and zoom to any item, date, or range with configurable easing<br>
+🔷 **Touch & Keyboard** – pinch-to-zoom, arrow key navigation, and full accessibility support<br>
+🔷 **Timeline Bands** – highlight time ranges or mark deadlines with background regions and lines<br>
+🔷 **RTL Layout** – full right-to-left support for Arabic, Hebrew, and other RTL languages<br>
+🔷 **Image Export** – download as PNG, JPEG, or WebP with DPR and background colour control<br>
+🔷 **Date Adapters** – plug in Luxon, Day.js, or any library for timezone and locale support<br>
+🔷 **React Wrapper** – declarative props, reactive data, imperative ref API, automatic cleanup<br>
+🔷 **Accessibility** – keyboard navigation, ARIA attributes, and automatic reduced motion support<br>
+🔷 **TypeScript-First** – full type definitions, IntelliSense, and typed callbacks out of the box
 
 ## Packages
 
