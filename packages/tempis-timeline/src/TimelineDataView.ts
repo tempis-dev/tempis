@@ -992,12 +992,37 @@ export class TimelineDataView {
     }
 
     /**
-     * Whether an item draw plan is wide enough to be visually rendered.
+     * Determines whether an item should be rendered based on its size and position.
+     *
+     * Items are culled (skipped) when:
+     * - They are too narrow to be visually meaningful (less than 1px wide).
+     * - They are vertically off-screen due to scrolling.
+     *
+     * Vertical culling rules:
+     * - Range items: culled when fully above OR fully below the visible area.
+     * - PIT items: only culled when fully BELOW the visible area. PIT items above the viewport still
+     *   need to render because their vertical drop line extends downward through the visible area.
+     *
      * @param plan The item draw plan.
-     * @returns Whether the item draw plan is wide enough to be visually rendered.
+     * @returns Whether the item should be rendered.
      */
     private _isItemVisible(plan: DataViewItemDrawPlan): boolean {
-        return plan.xPositionEnd - plan.xPositionStart >= 1;
+        // Is the item too narrow to see for the current window range?
+        if (plan.xPositionEnd - plan.xPositionStart < 1) return false;
+
+        // Vertical position relative to the viewport (accounting for scroll offset).
+        const scrolledTop = plan.yPositionStart + this._scrollYOffset;
+        const scrolledBottom = plan.yPositionEnd + this._scrollYOffset;
+        const isPit = plan.xPointInTimePosition !== null;
+
+        // Fully below the visible area — safe to cull for both range and PIT items.
+        if (scrolledTop > this._lastDrawHeight) return false;
+
+        // Fully above the visible area — only safe to cull for range items.
+        // PIT items have a drop line that extends to the bottom of the canvas so they must still render even when their box is above the viewport.
+        if (!isPit && scrolledBottom < 0) return false;
+
+        return true;
     }
 
     /**
