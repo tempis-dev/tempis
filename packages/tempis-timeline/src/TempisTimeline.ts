@@ -1270,6 +1270,11 @@ export class TempisTimeline {
             totalHeight += this._legendView.calculateRequiredHeight();
         }
 
+        // Add height for minimap if enabled.
+        if (this._minimapView.isEnabled) {
+            totalHeight += this._minimapView.height;
+        }
+
         return totalHeight;
     }
 

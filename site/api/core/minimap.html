@@ -1,0 +1,49 @@
+<h1>Minimap</h1>
+<p class="subtitle">A compact overview bar for navigating large timelines.</p>
+
+<h2>Overview</h2>
+<p>The minimap renders a thin horizontal bar at the bottom of the canvas showing the full data range. Coloured indicators mark where items exist in time, and a highlighted rectangle shows the current viewport position. Click or drag the minimap to navigate.</p>
+
+<div class="note">The minimap always shows all items regardless of category filtering or group collapse state. It represents the full dataset for navigation purposes.</div>
+
+<h2>TempisTimelineMinimapOptions</h2>
+<p>Provide a <code>minimap</code> config object to enable the minimap. Omit it entirely to disable.</p>
+
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>height</code></td><td><code>number</code></td><td><code>40</code></td><td>Height of the minimap bar in pixels.</td></tr>
+    <tr><td><code>backgroundColor</code></td><td><code>string</code></td><td><code>"rgba(128,128,128,0.06)"</code></td><td>Background colour of the minimap area.</td></tr>
+    <tr><td><code>viewportColor</code></td><td><code>string</code></td><td><code>"rgba(128,128,128,0.15)"</code></td><td>Colour of the viewport indicator overlay.</td></tr>
+  </tbody>
+</table>
+
+<h2>Example</h2>
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  minimap: { height: 44 },
+  items: [
+    { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-02-15', grouping: 'Group 1' },
+    { id: 2, label: 'Item 2', start: '2026-02-10', end: '2026-03-20', grouping: 'Group 1' },
+    { id: 3, label: 'Item 3', start: '2026-03-01', end: '2026-04-10', grouping: 'Group 2' },
+    { id: 4, label: 'Item 4', start: '2026-04-05', end: '2026-05-15', grouping: 'Group 2' },
+  ],
+  range: { start: '2026-01-01', end: '2026-03-01', position: 'bottom' }
+});</code></pre>
+
+<h2>Behaviour</h2>
+<ul>
+  <li><strong>Click</strong> anywhere on the minimap to jump the viewport to that position.</li>
+  <li><strong>Drag</strong> the minimap to scrub through the timeline continuously.</li>
+  <li>The viewport indicator shows the currently visible range relative to the full data extent.</li>
+  <li>Item indicators use their background colour, grouped by row to reflect the timeline's grouping structure.</li>
+  <li>The minimap respects RTL mode — time flows right-to-left when <code>rtl: true</code>.</li>
+</ul>
+
+<div class="note">The minimap is hidden during image export via <code>toImage()</code>. Exported images show only the timeline content without navigation chrome.</div>
+
+<h2>When to Use</h2>
+<p>The minimap is most useful when the timeline spans a large time range and users frequently zoom into specific sections. It provides spatial context — users can always see where they are relative to the full dataset.</p>
+<p>For timelines that show all data at once without zooming, the minimap adds little value and can be omitted.</p>

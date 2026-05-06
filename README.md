@@ -36,6 +36,7 @@
 🔷 **Animated Focus** – pan and zoom to any item, date, or range with configurable easing<br>
 🔷 **Touch & Keyboard** – pinch-to-zoom, arrow key navigation, and full accessibility support<br>
 🔷 **Timeline Bands** – highlight time ranges or mark deadlines with background regions and lines<br>
+🔷 **Minimap** – compact overview bar with click/drag navigation for large timelines<br>
 🔷 **RTL Layout** – full right-to-left support for Arabic, Hebrew, and other RTL languages<br>
 🔷 **Image Export** – download as PNG, JPEG, or WebP with DPR and background colour control<br>
 🔷 **Date Adapters** – plug in Luxon, Day.js, or any library for timezone and locale support<br>
