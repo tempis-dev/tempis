@@ -107,6 +107,13 @@ export interface TempisTimelineOptions {
      * @param end The end date of the visible range.
      */
     onRangeChange?(start: Date, end: Date): void;
+
+    /**
+     * Called when a group is collapsed or expanded via user interaction (clicking the group header).
+     * @param group The name of the group that was toggled.
+     * @param collapsed Whether the group is now collapsed.
+     */
+    onGroupToggle?(group: string, collapsed: boolean): void;
 }
 
 /**
@@ -240,6 +247,9 @@ export interface TempisTimelineGroupingOptions {
      * If not provided, groups are ordered by first encounter in the items array.
      */
     sort?: (a: string, b: string) => number;
+
+    /** Whether groups can be collapsed by clicking their header. Defaults to `false`. */
+    collapsible?: boolean;
 }
 
 export interface TempisTimelineFont {
@@ -407,6 +417,9 @@ export interface TempisTimelineItem {
 
     /** A flag defining whether the item is selected. */
     selected?: boolean;
+
+    /** The item progress as a value between 0 and 1. Renders as a fill bar inside range items. Ignored for point-in-time items. */
+    progress?: number;
 }
 
 /**

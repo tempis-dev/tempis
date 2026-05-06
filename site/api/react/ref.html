@@ -16,6 +16,8 @@
     <tr><td><code>setSelection</code></td><td><code>(ids) =&gt; void</code></td><td>Set selected item IDs.</td></tr>
     <tr><td><code>getSelection</code></td><td><code>() =&gt; (string | number)[]</code></td><td>Get selected item IDs.</td></tr>
     <tr><td><code>clearSelection</code></td><td><code>() =&gt; void</code></td><td>Clear all selections.</td></tr>
+    <tr><td><code>setGroupCollapsed</code></td><td><code>(group: string, collapsed?: boolean) =&gt; void</code></td><td>Set or toggle a group's collapsed state.</td></tr>
+    <tr><td><code>isGroupCollapsed</code></td><td><code>(group: string) =&gt; boolean</code></td><td>Check if a group is collapsed.</td></tr>
     <tr><td><code>toImage</code></td><td><code>(options?) =&gt; Promise&lt;Blob&gt;</code></td><td>Export as image.</td></tr>
     <tr><td><code>redraw</code></td><td><code>() =&gt; void</code></td><td>Force a redraw.</td></tr>
     <tr><td><code>getInstance</code></td><td><code>() =&gt; CoreTimeline | null</code></td><td>Access the underlying core instance.</td></tr>

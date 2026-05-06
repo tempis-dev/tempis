@@ -143,6 +143,7 @@
     },
     legend: { position: 'top' },
     grouping: {
+      collapsible: true,
       sort: (a, b) => {
         const order = ['Planning', 'Design', 'Backend', 'Frontend', 'QA', 'Release'];
         return order.indexOf(a) - order.indexOf(b);

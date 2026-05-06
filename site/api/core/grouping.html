@@ -1,17 +1,52 @@
 <h1>Grouping</h1>
-<p class="subtitle">Organise items into labelled rows with optional custom sort order.</p>
+<p class="subtitle">Organise items into labelled rows with optional custom sort order and collapse.</p>
 
 <h2>TempisTimelineGroupingOptions</h2>
 <table>
-  <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
   <tbody>
-    <tr><td><code>sort</code></td><td><code>(a: string, b: string) =&gt; number</code></td><td>Comparator function for group ordering. Receives two group names. If omitted, groups appear in the order they are first encountered in the items array.</td></tr>
+    <tr><td><code>sort</code></td><td><code>(a: string, b: string) =&gt; number</code></td><td>—</td><td>Comparator function for group ordering. Receives two group names. If omitted, groups appear in the order they are first encountered in the items array.</td></tr>
+    <tr><td><code>collapsible</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Whether groups can be collapsed by clicking their header. A chevron indicator appears next to each group label.</td></tr>
   </tbody>
 </table>
 
 <p>Items are assigned to groups via the <code>grouping</code> property on each item. Items sharing the same <code>grouping</code> value are rendered in the same row section.</p>
 
 <div class="note">Items without a <code>grouping</code> property are placed in a default unnamed group. If all items have groupings, no unnamed group appears.</div>
+
+<h2>Collapsible Groups</h2>
+<p>When <code>collapsible</code> is <code>true</code>, each group header displays a chevron indicator. Click the header to collapse or expand the group. Collapsed groups hide their items and take up minimal vertical space.</p>
+
+<h3>Methods</h3>
+<table>
+  <thead><tr><th>Method</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>setGroupCollapsed(group, collapsed?)</code></td><td>Set or toggle the collapsed state of a group. Pass <code>true</code> to collapse, <code>false</code> to expand, or omit the second argument to toggle.</td></tr>
+    <tr><td><code>isGroupCollapsed(group)</code></td><td>Returns whether a group is currently collapsed.</td></tr>
+  </tbody>
+</table>
+
+<h3>Callback</h3>
+<p><code>onGroupToggle(group: string, collapsed: boolean)</code> fires when a user clicks a group header to collapse or expand it. It does not fire for programmatic calls to <code>setGroupCollapsed()</code>.</p>
+
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  grouping: { collapsible: true },
+  items: [
+    { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-15', grouping: 'Group 1' },
+    { id: 2, label: 'Item 2', start: '2026-01-08', end: '2026-01-20', grouping: 'Group 2' },
+  ],
+  range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' },
+  onGroupToggle(group, collapsed) {
+    console.log(group, collapsed ? 'collapsed' : 'expanded');
+  }
+});
+
+// Programmatic control
+timeline.setGroupCollapsed('Group 1', true);   // collapse
+timeline.setGroupCollapsed('Group 1', false);  // expand
+timeline.setGroupCollapsed('Group 1');          // toggle
+timeline.isGroupCollapsed('Group 1');           // check state</code></pre>
 
 <h2>Example</h2>
 <div class="api-demo"><canvas id="demo-grouping"></canvas></div>
@@ -20,6 +55,7 @@
     responsive: true,
     verticalFill: 'fill-canvas',
     style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    grouping: { collapsible: true, sort: function(a, b) { return a.localeCompare(b); } },
     items: [
       { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-15', grouping: 'Group 3' },
       { id: 2, label: 'Item 2', start: '2026-01-08', end: '2026-01-20', grouping: 'Group 1' },
@@ -28,14 +64,17 @@
       { id: 5, label: 'Item 5', start: '2026-01-10', end: '2026-01-22', grouping: 'Group 3' },
       { id: 6, label: 'Item 6', start: '2026-01-20', end: '2026-01-30', grouping: 'Group 2' },
     ],
-    grouping: {
-      sort: function(a, b) { return a.localeCompare(b); }
-    },
     range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
   });
 </script>
 <pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
   responsive: true,
+  grouping: {
+    collapsible: true,
+    sort(a, b) {
+      return a.localeCompare(b);
+    }
+  },
   items: [
     { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-15', grouping: 'Group 3' },
     { id: 2, label: 'Item 2', start: '2026-01-08', end: '2026-01-20', grouping: 'Group 1' },
@@ -44,10 +83,5 @@
     { id: 5, label: 'Item 5', start: '2026-01-10', end: '2026-01-22', grouping: 'Group 3' },
     { id: 6, label: 'Item 6', start: '2026-01-20', end: '2026-01-30', grouping: 'Group 2' },
   ],
-  grouping: {
-    sort(a, b) {
-      return a.localeCompare(b);
-    }
-  },
   range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
 });</code></pre>

@@ -72,6 +72,7 @@
         position: 'bottom'
       },
       legend: { position: 'bottom' },
+      grouping: { collapsible: true },
       style: { item: { borderRadius: 4, fontColor: '#fff' } },
       categories: [
         { name: 'deploy',   label: 'Deployments', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
@@ -361,6 +362,7 @@
       responsive: true,
       verticalFill: 'fill-canvas',
       style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      grouping: { collapsible: true },
       categories: [
         { name: 'prep',     label: 'Preparation', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
         { name: 'filming',  label: 'Filming',     style: { backgroundColor: '#ff0071', fontColor: '#fff' } },
@@ -430,6 +432,7 @@
       responsive: true,
       verticalFill: 'fill-canvas',
       style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      grouping: { collapsible: true },
       categories: [
         { name: 'flight', label: 'Flights', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
         { name: 'layover', label: 'Layovers', style: { backgroundColor: '#f59e0b', fontColor: '#111' } },
@@ -456,6 +459,7 @@
       responsive: true,
       verticalFill: 'fill-canvas',
       style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      grouping: { collapsible: true },
       categories: [
         { name: 'session',  label: 'Sessions',  style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
         { name: 'social',   label: 'Social',     style: { backgroundColor: '#ff0071', fontColor: '#fff' } },
@@ -603,7 +607,7 @@
         responsive: true,
         verticalFill: 'fill-canvas',
         style: { item: { borderRadius: 4 } },
-        grouping: { sort: function(a, b) { return a === 'ACME' ? -1 : 1; } },
+        grouping: { collapsible: true, sort: function(a, b) { return a === 'ACME' ? -1 : 1; } },
         range: {
           start: new Date(now - 10000).toISOString(),
           end: new Date(now + 5000).toISOString(),
@@ -641,6 +645,7 @@
       responsive: true,
       verticalFill: 'fill-canvas',
       style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      grouping: { collapsible: true },
       categories: [
         { name: 'design', label: 'Design',  style: { backgroundColor: '#ec4899', fontColor: '#fff' } },
         { name: 'dev',    label: 'Dev',      style: { backgroundColor: '#10b981', fontColor: '#fff' } },
@@ -675,6 +680,7 @@
       responsive: true,
       verticalFill: 'fill-canvas',
       style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      grouping: { collapsible: true },
       categories: [
         { name: 'stage',    label: 'Stages',    style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
         { name: 'headline', label: 'Headliners', style: { backgroundColor: '#ff0071', fontColor: '#fff' } },

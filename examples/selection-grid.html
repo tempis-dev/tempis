@@ -187,7 +187,7 @@ const timeline = new TempisTimeline('#canvas', {
     position: 'top'
   },
   legend: { position: 'bottom' },
-  grouping: { sort: (a, b) => a.localeCompare(b) },
+  grouping: { collapsible: true, sort: (a, b) => a.localeCompare(b) },
   categories,
   tooltip: { enabled: true, delay: 200 },
   onItemHover: (id) => {

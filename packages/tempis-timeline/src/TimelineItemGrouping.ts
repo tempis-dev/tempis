@@ -11,6 +11,9 @@ export class TimelineItemGrouping {
     /** The group items. */
     private readonly _items: TimelineItem[];
 
+    /** Whether the group is collapsed. */
+    private _isCollapsed: boolean = false;
+
     /**
      * Creates a new instance of the TimelineItemGrouping class.
      * @param group The group name.
@@ -38,6 +41,14 @@ export class TimelineItemGrouping {
     /** Gets the selected group items. */
     public get selectedItems(): TimelineItem[] {
         return this.items.filter((item) => item.isSelected);
+    }
+
+    /** Gets or sets whether the group is collapsed. */
+    public get isCollapsed(): boolean {
+        return this._isCollapsed;
+    }
+    public set isCollapsed(value: boolean) {
+        this._isCollapsed = value;
     }
 
     /**
