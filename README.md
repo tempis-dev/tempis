@@ -17,7 +17,7 @@
 
 ---
 
-## Higlights
+## Highlights
 
 🔷 **Virtualised Canvas Rendering** – no DOM nodes per item, consistent performance at any scale<br>
 🔷 **Range & Point-in-Time Items** – horizontal bars and milestone markers with automatic stacking<br>
@@ -106,3 +106,7 @@ The [`examples/`](examples/) directory has 35+ interactive demos covering basic 
 ## License
 
 Free for non-commercial use. Commercial use requires a paid license — see [LICENSE](packages/tempis-timeline/LICENSE) for details.
+
+## Need Help?
+
+Got a question or found a bug? Open an issue or start a discussion on the [Tempis GitHub repository](https://github.com/nicktempis/tempis-timeline).
