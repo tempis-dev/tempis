@@ -17,6 +17,11 @@
 
 ---
 
+<p align="center">
+  <br>
+  <img src="resources/tempis-preview.png" alt="Tempis Timeline" width="900">
+</p>
+
 ## Highlights
 
 🔷 **Virtualised Canvas Rendering** – no DOM nodes per item, consistent performance at any scale<br>
