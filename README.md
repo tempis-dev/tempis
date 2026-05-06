@@ -24,13 +24,13 @@
 
 ## Highlights
 
-🔷 **Virtualised Canvas Rendering** – no DOM nodes per item, consistent performance at any scale<br>
+🔷 **Virtualised Canvas Rendering** – no DOM nodes per item, smooth performance for thousands of items<br>
 🔷 **Range & Point-in-Time Items** – horizontal bars and milestone markers with automatic stacking<br>
-🔷 **Progress Indicator** – show completion as a fill bar inside range items<br>
 🔷 **Categories & Interactive Legend** – colour-code items, filter on click, highlight on hover<br>
 🔷 **Collapsible Groups** – click headers to collapse swimlanes, programmatic control via API<br>
 🔷 **Item Dependencies** – finish-to-start connector arrows with automatic routing and styling<br>
 🔷 **Per-Item Styling** – override colours, borders, dash patterns, and radius on individual items<br>
+🔷 **Progress Indicator** – show completion as a fill bar inside range items<br>
 🔷 **Custom Tooltips** – rich HTML templates with overflow handling and conditional display<br>
 🔷 **Selection Modes** – none, single, or multi-select with controlled and uncontrolled patterns<br>
 🔷 **Animated Focus** – pan and zoom to any item, date, or range with configurable easing<br>
