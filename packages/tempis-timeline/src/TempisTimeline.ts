@@ -607,7 +607,6 @@ export class TempisTimeline {
     private _createCanvasEventHandlers() {
         // Prevent default touch gestures like scroll/pinch.
         this._canvas.style.touchAction = "none";
-        this._canvas.style.cursor = "grab";
 
         // The drag threshold is the minimum distance that the pointer must move before we consider it a drag.
         const dragPixelThreshold = 10;
@@ -683,7 +682,6 @@ export class TempisTimeline {
 
                 isPointerDown = true;
                 this._dataView.setPanning(true);
-                this._canvas.style.cursor = "grabbing";
 
                 // Get the mouse position on the canvas so that we can calculate the movement later.
                 startX = event.clientX;
@@ -747,25 +745,15 @@ export class TempisTimeline {
 
             // There is nothing to do if the pointer is not currently down.
             if (!isPointerDown) {
-                // Check if hovering an item for cursor and callback.
-                const hoveredItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
-                const hoveredId = hoveredItem?.id ?? null;
+                // Fire the onItemHover callback if the hovered item has changed.
+                if (this._options.onItemHover) {
+                    const hoveredItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
+                    const hoveredId = hoveredItem?.id ?? null;
 
-                // Update cursor based on whether we're over an item or a collapsible group label.
-                if (hoveredItem) {
-                    this._canvas.style.cursor = "pointer";
-                } else if (
-                    this._dataView.isCollapsible &&
-                    this._dataView.getGroupLabelAtPoint(getMouseOrPointerPosition(event))
-                ) {
-                    this._canvas.style.cursor = "pointer";
-                } else {
-                    this._canvas.style.cursor = "grab";
-                }
-
-                if (this._options.onItemHover && hoveredId !== lastHoveredItemId) {
-                    lastHoveredItemId = hoveredId;
-                    this._options.onItemHover(hoveredId);
+                    if (hoveredId !== lastHoveredItemId) {
+                        lastHoveredItemId = hoveredId;
+                        this._options.onItemHover(hoveredId);
+                    }
                 }
                 return;
             }
@@ -795,7 +783,6 @@ export class TempisTimeline {
             if (this._minimapView.isDragging) {
                 const pos = getMouseOrPointerPosition(event);
                 this._minimapView.handlePointer(pos.x, pos.y, "up", this._canvas.clientWidth);
-                this._canvas.style.cursor = "grab";
                 this._draw();
                 return;
             }
@@ -837,7 +824,6 @@ export class TempisTimeline {
 
             isPointerDown = false;
             this._dataView.setPanning(false);
-            this._canvas.style.cursor = "grab";
             this._draw(); // Redraw to update scrollbar visibility
 
             // Work out the distance that the pointer has moved since it was pressed down.
