@@ -259,7 +259,7 @@ nav .nav-github:hover {
 
 .demo-container {
   width: 100%;
-  height: 500px;
+  height: 540px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
