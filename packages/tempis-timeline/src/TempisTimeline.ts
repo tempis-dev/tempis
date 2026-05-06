@@ -52,6 +52,11 @@ interface DrawOptions {
      * When true, the scrollbar is not rendered.
      */
     hideScrollbar?: boolean;
+
+    /**
+     * When true, the minimap is not rendered.
+     */
+    hideMinimap?: boolean;
 }
 
 export class TempisTimeline {
@@ -429,8 +434,8 @@ export class TempisTimeline {
             throw new Error("Cannot export image: timeline has been destroyed.");
         }
 
-        // Render a clean frame without the scrollbar.
-        this._draw({ hideScrollbar: true });
+        // Render a clean frame without the scrollbar or minimap.
+        this._draw({ hideScrollbar: true, hideMinimap: true });
 
         const dpr = options?.dpr ?? 1;
         const type = options?.type ?? "image/png";
@@ -1126,8 +1131,8 @@ export class TempisTimeline {
             dataViewMaxHeight -= legendViewHeight;
         }
 
-        // If the minimap is enabled, reduce the max height of the data view to account for it.
-        if (this._minimapView.isEnabled) {
+        // If the minimap is enabled (and not hidden for export), reduce the max height of the data view to account for it.
+        if (this._minimapView.isEnabled && !options?.hideMinimap) {
             dataViewMaxHeight -= this._minimapView.height;
         }
 
@@ -1192,8 +1197,8 @@ export class TempisTimeline {
             renderOffsetY += legendViewHeight;
         }
 
-        // Render the minimap if enabled.
-        if (this._minimapView.isEnabled) {
+        // Render the minimap if enabled (and not hidden for export).
+        if (this._minimapView.isEnabled && !options?.hideMinimap) {
             this._minimapView.draw(context, renderOffsetY, this._canvas.clientWidth);
             renderOffsetY += this._minimapView.height;
         }

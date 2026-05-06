@@ -66,6 +66,9 @@ export class TimelineMinimapView {
         const bgColor = this._options.backgroundColor ?? DEFAULT_BG;
         const viewportColor = this._options.viewportColor ?? DEFAULT_VIEWPORT_COLOR;
 
+        // Ensure no line dash state leaks from previous rendering.
+        context.setLineDash([]);
+
         // Draw background.
         context.fillStyle = bgColor;
         context.fillRect(0, yPosition, width, height);
