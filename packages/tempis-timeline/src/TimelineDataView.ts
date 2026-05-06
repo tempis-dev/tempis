@@ -589,8 +589,8 @@ export class TimelineDataView {
 
                 // Draw collapse/expand indicator if groups are collapsible.
                 if (this._collapsible) {
-                    const s = 3;
-                    const indicatorX = this._isRTL ? labelX - s : labelX + s;
+                    const chevronSize = 4;
+                    const indicatorX = this._isRTL ? labelX - chevronSize : labelX + chevronSize;
                     const indicatorY = labelY + 6;
 
                     context.save();
@@ -602,23 +602,23 @@ export class TimelineDataView {
                     if (groupDrawPlan.isCollapsed) {
                         // Right-pointing chevron (collapsed)
                         const dir = this._isRTL ? -1 : 1;
-                        context.moveTo(indicatorX - s * 0.5 * dir, indicatorY - s);
-                        context.lineTo(indicatorX + s * 0.5 * dir, indicatorY);
-                        context.lineTo(indicatorX - s * 0.5 * dir, indicatorY + s);
+                        context.moveTo(indicatorX - chevronSize * 0.5 * dir, indicatorY - chevronSize);
+                        context.lineTo(indicatorX + chevronSize * 0.5 * dir, indicatorY);
+                        context.lineTo(indicatorX - chevronSize * 0.5 * dir, indicatorY + chevronSize);
                     } else {
                         // Down-pointing chevron (expanded)
-                        context.moveTo(indicatorX - s, indicatorY - s * 0.5);
-                        context.lineTo(indicatorX, indicatorY + s * 0.5);
-                        context.lineTo(indicatorX + s, indicatorY - s * 0.5);
+                        context.moveTo(indicatorX - chevronSize, indicatorY - chevronSize * 0.5);
+                        context.lineTo(indicatorX, indicatorY + chevronSize * 0.5);
+                        context.lineTo(indicatorX + chevronSize, indicatorY - chevronSize * 0.5);
                     }
                     context.stroke();
                     context.restore();
 
                     // Offset the label to the right of the indicator.
                     if (this._isRTL) {
-                        labelX -= s * 2 + 6;
+                        labelX -= chevronSize * 2 + 6;
                     } else {
-                        labelX += s * 2 + 6;
+                        labelX += chevronSize * 2 + 6;
                     }
                 }
 
