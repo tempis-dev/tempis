@@ -13,6 +13,7 @@ import { TimelineDataView } from "./TimelineDataView";
 import { TimelineFont } from "./TimelineFont";
 import { TimelineItem } from "./TimelineItem";
 import { TimelineRangeView } from "./TimelineRangeView";
+import { TimelineMinimapView } from "./TimelineMinimapView";
 import { TimelineTooltipView } from "./TimelineTooltipView";
 import { TimelineLegendView } from "./TimelineLegendView";
 import { SelectionChangeEvent } from "./Event";
@@ -74,6 +75,9 @@ export class TempisTimeline {
 
     /** The timeline legend view. */
     private readonly _legendView: TimelineLegendView;
+
+    /** The timeline minimap view. */
+    private readonly _minimapView: TimelineMinimapView;
 
     /** The timeline tooltip view. */
     private readonly _tooltipView: TimelineTooltipView;
@@ -146,6 +150,7 @@ export class TempisTimeline {
         this._dataView.setDependencies(this._options.dependencies ?? []);
         this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._isRTL, this._options.range);
         this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._isRTL, this._options.legend);
+        this._minimapView = new TimelineMinimapView(this._dataSet, this._rangeView, this._isRTL, this._options.minimap);
         this._tooltipView = new TimelineTooltipView(
             this._canvas,
             this._dataView,
@@ -602,6 +607,7 @@ export class TempisTimeline {
     private _createCanvasEventHandlers() {
         // Prevent default touch gestures like scroll/pinch.
         this._canvas.style.touchAction = "none";
+        this._canvas.style.cursor = "grab";
 
         // The drag threshold is the minimum distance that the pointer must move before we consider it a drag.
         const dragPixelThreshold = 10;
@@ -667,8 +673,17 @@ export class TempisTimeline {
 
             // Single pointer - start panning.
             if (activePointers.size === 1) {
+                // Check if the click is on the minimap first.
+                const pos = getMouseOrPointerPosition(event);
+                if (this._minimapView.handlePointer(pos.x, pos.y, "down", this._canvas.clientWidth)) {
+                    this._canvas.setPointerCapture(event.pointerId);
+                    this._draw();
+                    return;
+                }
+
                 isPointerDown = true;
                 this._dataView.setPanning(true);
+                this._canvas.style.cursor = "grabbing";
 
                 // Get the mouse position on the canvas so that we can calculate the movement later.
                 startX = event.clientX;
@@ -722,17 +737,35 @@ export class TempisTimeline {
             }
 
             // Single pointer panning.
+            // Handle minimap dragging if active.
+            if (this._minimapView.isDragging) {
+                const pos = getMouseOrPointerPosition(event);
+                this._minimapView.handlePointer(pos.x, pos.y, "move", this._canvas.clientWidth);
+                this._draw();
+                return;
+            }
+
             // There is nothing to do if the pointer is not currently down.
             if (!isPointerDown) {
-                // Fire the onItemHover callback if the hovered item has changed.
-                if (this._options.onItemHover) {
-                    const hoveredItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
-                    const hoveredId = hoveredItem?.id ?? null;
+                // Check if hovering an item for cursor and callback.
+                const hoveredItem = this._dataView.getItemAtPoint(getMouseOrPointerPosition(event));
+                const hoveredId = hoveredItem?.id ?? null;
 
-                    if (hoveredId !== lastHoveredItemId) {
-                        lastHoveredItemId = hoveredId;
-                        this._options.onItemHover(hoveredId);
-                    }
+                // Update cursor based on whether we're over an item or a collapsible group label.
+                if (hoveredItem) {
+                    this._canvas.style.cursor = "pointer";
+                } else if (
+                    this._dataView.isCollapsible &&
+                    this._dataView.getGroupLabelAtPoint(getMouseOrPointerPosition(event))
+                ) {
+                    this._canvas.style.cursor = "pointer";
+                } else {
+                    this._canvas.style.cursor = "grab";
+                }
+
+                if (this._options.onItemHover && hoveredId !== lastHoveredItemId) {
+                    lastHoveredItemId = hoveredId;
+                    this._options.onItemHover(hoveredId);
                 }
                 return;
             }
@@ -757,6 +790,15 @@ export class TempisTimeline {
         this._eventHandlers.pointerup = (event) => {
             // Remove this pointer from tracking.
             activePointers.delete(event.pointerId);
+
+            // Handle minimap drag end.
+            if (this._minimapView.isDragging) {
+                const pos = getMouseOrPointerPosition(event);
+                this._minimapView.handlePointer(pos.x, pos.y, "up", this._canvas.clientWidth);
+                this._canvas.style.cursor = "grab";
+                this._draw();
+                return;
+            }
 
             // If we're ending a pinch gesture, reset pinch state.
             if (activePointers.size < 2) {
@@ -795,6 +837,7 @@ export class TempisTimeline {
 
             isPointerDown = false;
             this._dataView.setPanning(false);
+            this._canvas.style.cursor = "grab";
             this._draw(); // Redraw to update scrollbar visibility
 
             // Work out the distance that the pointer has moved since it was pressed down.
@@ -1097,6 +1140,11 @@ export class TempisTimeline {
             dataViewMaxHeight -= legendViewHeight;
         }
 
+        // If the minimap is enabled, reduce the max height of the data view to account for it.
+        if (this._minimapView.isEnabled) {
+            dataViewMaxHeight -= this._minimapView.height;
+        }
+
         /**
          * The rendering of the views starts here and is done in the following order:
          * 1. Legend view (if configured 'top' or 'both')
@@ -1156,6 +1204,12 @@ export class TempisTimeline {
         if (this._legendView.position === "bottom") {
             this._legendView.draw(context, renderOffsetY);
             renderOffsetY += legendViewHeight;
+        }
+
+        // Render the minimap if enabled.
+        if (this._minimapView.isEnabled) {
+            this._minimapView.draw(context, renderOffsetY, this._canvas.clientWidth);
+            renderOffsetY += this._minimapView.height;
         }
 
         // Clear the canvas from below the bottom of the bottom range view or bottom of the timeline or the bottom of the legend.

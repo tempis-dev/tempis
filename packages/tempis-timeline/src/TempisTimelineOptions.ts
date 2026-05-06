@@ -36,6 +36,9 @@ export interface TempisTimelineOptions {
     /** The scrollbar visibility options. */
     scrollbar?: TempisTimelineScrollbarOptions;
 
+    /** The minimap options. */
+    minimap?: TempisTimelineMinimapOptions;
+
     /** The timeline grouping options. */
     grouping?: TempisTimelineGroupingOptions;
 
@@ -201,6 +204,20 @@ export interface TempisTimelineStyleOptions {
 
     /** The default item options to use in rendering items, overriding the library item style defaults only. */
     item?: TempisTimelineItemStyle;
+}
+
+export interface TempisTimelineMinimapOptions {
+    /** Whether the minimap is enabled. Defaults to `false`. */
+    enabled?: boolean;
+
+    /** The height of the minimap bar in pixels. Defaults to `40`. */
+    height?: number;
+
+    /** The background colour of the minimap area. Defaults to a subtle grey. */
+    backgroundColor?: string;
+
+    /** The colour of the viewport indicator. Defaults to a semi-transparent accent. */
+    viewportColor?: string;
 }
 
 export interface TempisTimelineAccessibilityOptions {

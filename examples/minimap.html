@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="../images/logo.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minimap — Tempis Timeline</title>
+  <script src="../lib/tempis_timeline.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { margin-top: 0; color: #333; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+    .timeline-container {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .timeline-container canvas {
+      display: block;
+      width: 100%;
+      height: 550px;
+    }
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .controls button {
+      padding: 6px 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .controls button:hover { background: #f0f0f0; }
+    .info-box {
+      background: #f0f4ff;
+      border: 1px solid #d0d8f0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #444;
+      margin-bottom: 16px;
+    }
+    .info-box code { background: #e0e8f8; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🗺️ Minimap</h1>
+    <p class="subtitle">A compact overview bar for navigating large timelines.</p>
+
+    <div class="info-box">
+      The minimap shows the full data range at the bottom of the canvas. The highlighted area represents the current viewport. Click or drag anywhere on the minimap to navigate. Enable with <code>minimap: { enabled: true }</code>.
+    </div>
+
+    <div class="controls">
+      <button onclick="tl.focus({ range: ['2026-01-01', '2026-04-01'], animate: true })">Q1</button>
+      <button onclick="tl.focus({ range: ['2026-04-01', '2026-07-01'], animate: true })">Q2</button>
+      <button onclick="tl.focus({ range: ['2026-07-01', '2026-10-01'], animate: true })">Q3</button>
+      <button onclick="tl.focus({ range: ['2026-10-01', '2027-01-01'], animate: true })">Q4</button>
+      <button onclick="tl.focus({ animate: true })">Full Year</button>
+    </div>
+
+    <div class="timeline-container">
+      <canvas id="timeline"></canvas>
+    </div>
+  </div>
+
+  <script>
+    var TT = tempis_timeline.TempisTimeline;
+
+    var items = [
+      // Engineering
+      { id: 1,  label: 'Platform Rewrite',       start: '2026-01-12', end: '2026-03-20', grouping: 'Engineering', category: 'feature', progress: 0.85 },
+      { id: 2,  label: 'API v3',                 start: '2026-02-16', end: '2026-04-10', grouping: 'Engineering', category: 'feature', progress: 0.6 },
+      { id: 3,  label: 'Search Overhaul',        start: '2026-04-06', end: '2026-06-05', grouping: 'Engineering', category: 'feature', progress: 0.3 },
+      { id: 4,  label: 'Real-time Events',       start: '2026-06-15', end: '2026-08-08', grouping: 'Engineering', category: 'feature', progress: 0 },
+      { id: 5,  label: 'GraphQL Migration',      start: '2026-08-17', end: '2026-10-10', grouping: 'Engineering', category: 'feature', progress: 0 },
+      { id: 6,  label: 'Performance Sprint',     start: '2026-10-19', end: '2026-11-28', grouping: 'Engineering', category: 'feature', progress: 0 },
+
+      // Infrastructure
+      { id: 10, label: 'K8s Upgrade',            start: '2026-01-19', end: '2026-02-20', grouping: 'Infrastructure', category: 'ops', progress: 1.0 },
+      { id: 11, label: 'Multi-Region',           start: '2026-03-02', end: '2026-05-15', grouping: 'Infrastructure', category: 'ops', progress: 0.5 },
+      { id: 12, label: 'Edge Caching',           start: '2026-05-25', end: '2026-07-18', grouping: 'Infrastructure', category: 'ops', progress: 0 },
+      { id: 13, label: 'Disaster Recovery',      start: '2026-08-03', end: '2026-09-12', grouping: 'Infrastructure', category: 'ops', progress: 0 },
+      { id: 14, label: 'Cost Optimisation',      start: '2026-10-05', end: '2026-11-14', grouping: 'Infrastructure', category: 'ops', progress: 0 },
+
+      // Design
+      { id: 20, label: 'Design System v2',       start: '2026-01-05', end: '2026-03-06', grouping: 'Design', category: 'design', progress: 0.9 },
+      { id: 21, label: 'Dashboard Redesign',     start: '2026-03-09', end: '2026-05-01', grouping: 'Design', category: 'design', progress: 0.4 },
+      { id: 22, label: 'Mobile App Refresh',     start: '2026-05-11', end: '2026-07-03', grouping: 'Design', category: 'design', progress: 0 },
+      { id: 23, label: 'Onboarding Flow',        start: '2026-07-13', end: '2026-08-22', grouping: 'Design', category: 'design', progress: 0 },
+      { id: 24, label: 'Accessibility Audit',    start: '2026-09-07', end: '2026-10-17', grouping: 'Design', category: 'design', progress: 0 },
+
+      // Security
+      { id: 30, label: 'SOC2 Certification',     start: '2026-01-26', end: '2026-04-17', grouping: 'Security', category: 'security', progress: 0.7 },
+      { id: 31, label: 'Pen Testing',            start: '2026-04-27', end: '2026-06-06', grouping: 'Security', category: 'security', progress: 0.2 },
+      { id: 32, label: 'SSO Rollout',            start: '2026-06-22', end: '2026-08-01', grouping: 'Security', category: 'security', progress: 0 },
+      { id: 33, label: 'Zero Trust',             start: '2026-09-14', end: '2026-11-07', grouping: 'Security', category: 'security', progress: 0 },
+
+      // Data
+      { id: 40, label: 'Data Lake Migration',    start: '2026-02-02', end: '2026-04-24', grouping: 'Data', category: 'data', progress: 0.55 },
+      { id: 41, label: 'ML Pipeline',            start: '2026-05-04', end: '2026-07-25', grouping: 'Data', category: 'data', progress: 0 },
+      { id: 42, label: 'Analytics v2',           start: '2026-08-10', end: '2026-10-31', grouping: 'Data', category: 'data', progress: 0 },
+      { id: 43, label: 'Data Governance',        start: '2026-11-03', end: '2026-12-19', grouping: 'Data', category: 'data', progress: 0 },
+
+      // Milestones
+      { id: 50, label: 'Q1 Review',              start: '2026-03-31', grouping: 'Milestones', category: 'milestone' },
+      { id: 51, label: 'Q2 Review',              start: '2026-06-30', grouping: 'Milestones', category: 'milestone' },
+      { id: 52, label: 'Q3 Review',              start: '2026-09-30', grouping: 'Milestones', category: 'milestone' },
+      { id: 53, label: 'Annual Planning',        start: '2026-12-15', grouping: 'Milestones', category: 'milestone' },
+    ];
+
+    var tl = new TT('#timeline', {
+      responsive: true,
+      verticalFill: 'fill-canvas',
+      style: { item: { borderRadius: 6, fontColor: '#fff', padding: 8 } },
+      grouping: { collapsible: true },
+      minimap: { enabled: true, height: 44 },
+      categories: [
+        { name: 'feature',  label: 'Feature',        style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+        { name: 'ops',      label: 'Operations',     style: { backgroundColor: '#0ea5e9', fontColor: '#fff' } },
+        { name: 'design',   label: 'Design',         style: { backgroundColor: '#ec4899', fontColor: '#fff' } },
+        { name: 'security', label: 'Security',       style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+        { name: 'data',     label: 'Data',           style: { backgroundColor: '#f59e0b', fontColor: '#111' } },
+        { name: 'milestone', label: 'Milestone',     style: { backgroundColor: '#8b5cf6', fontColor: '#fff' } },
+      ],
+      legend: { position: 'top', markerStyle: 'circle' },
+      items: items,
+      bands: [
+        { start: '2026-03-31', style: { color: '#8b5cf6', borderColor: '#8b5cf6', borderThickness: 1 } },
+        { start: '2026-06-30', style: { color: '#8b5cf6', borderColor: '#8b5cf6', borderThickness: 1 } },
+        { start: '2026-09-30', style: { color: '#8b5cf6', borderColor: '#8b5cf6', borderThickness: 1 } },
+      ],
+      range: { start: '2026-01-01', end: '2026-05-01', position: 'bottom' }
+    });
+  </script>
+</body>
+</html>
