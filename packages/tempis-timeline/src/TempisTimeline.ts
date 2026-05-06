@@ -363,29 +363,18 @@ export class TempisTimeline {
     }
 
     /**
-     * Collapse a group so its items are hidden.
-     * @param group The group name to collapse.
+     * Set the collapsed state of a group. If no state is provided, toggles the current state.
+     * @param group The group name.
+     * @param collapsed Whether the group should be collapsed. Omit to toggle.
      */
-    public collapseGroup(group: string): void {
-        this._dataView.collapseGroup(group);
-        this._draw();
-    }
-
-    /**
-     * Expand a previously collapsed group.
-     * @param group The group name to expand.
-     */
-    public expandGroup(group: string): void {
-        this._dataView.expandGroup(group);
-        this._draw();
-    }
-
-    /**
-     * Toggle the collapsed state of a group.
-     * @param group The group name to toggle.
-     */
-    public toggleGroup(group: string): void {
-        this._dataView.toggleGroup(group);
+    public setGroupCollapsed(group: string, collapsed?: boolean): void {
+        if (collapsed === undefined) {
+            this._dataView.toggleGroup(group);
+        } else if (collapsed) {
+            this._dataView.collapseGroup(group);
+        } else {
+            this._dataView.expandGroup(group);
+        }
         this._draw();
     }
 

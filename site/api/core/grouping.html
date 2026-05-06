@@ -21,15 +21,13 @@
 <table>
   <thead><tr><th>Method</th><th>Description</th></tr></thead>
   <tbody>
-    <tr><td><code>collapseGroup(group)</code></td><td>Collapse a group by name.</td></tr>
-    <tr><td><code>expandGroup(group)</code></td><td>Expand a previously collapsed group.</td></tr>
-    <tr><td><code>toggleGroup(group)</code></td><td>Toggle the collapsed state of a group.</td></tr>
+    <tr><td><code>setGroupCollapsed(group, collapsed?)</code></td><td>Set or toggle the collapsed state of a group. Pass <code>true</code> to collapse, <code>false</code> to expand, or omit the second argument to toggle.</td></tr>
     <tr><td><code>isGroupCollapsed(group)</code></td><td>Returns whether a group is currently collapsed.</td></tr>
   </tbody>
 </table>
 
 <h3>Callback</h3>
-<p><code>onGroupToggle(group: string, collapsed: boolean)</code> fires when a user clicks a group header to collapse or expand it. It does not fire for programmatic calls to <code>collapseGroup()</code> or <code>expandGroup()</code>.</p>
+<p><code>onGroupToggle(group: string, collapsed: boolean)</code> fires when a user clicks a group header to collapse or expand it. It does not fire for programmatic calls to <code>setGroupCollapsed()</code>.</p>
 
 <pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
   responsive: true,
@@ -42,7 +40,13 @@
   onGroupToggle(group, collapsed) {
     console.log(group, collapsed ? 'collapsed' : 'expanded');
   }
-});</code></pre>
+});
+
+// Programmatic control
+timeline.setGroupCollapsed('Group 1', true);   // collapse
+timeline.setGroupCollapsed('Group 1', false);  // expand
+timeline.setGroupCollapsed('Group 1');          // toggle
+timeline.isGroupCollapsed('Group 1');           // check state</code></pre>
 
 <h2>Example</h2>
 <div class="api-demo"><canvas id="demo-grouping"></canvas></div>

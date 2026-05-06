@@ -93,9 +93,7 @@ new TempisTimeline(context: string | HTMLCanvasElement, options: TempisTimelineO
 | `getCategories()` | Get current category definitions |
 | `setBands(bands)` | Replace all bands and redraw |
 | `setDependencies(deps)` | Replace all dependencies and redraw |
-| `collapseGroup(group)` | Collapse a group by name |
-| `expandGroup(group)` | Expand a collapsed group |
-| `toggleGroup(group)` | Toggle a group's collapsed state |
+| `setGroupCollapsed(group, collapsed?)` | Set or toggle a group's collapsed state |
 | `isGroupCollapsed(group)` | Check if a group is collapsed |
 | `focus(options?)` | Navigate to an item, date, or range with animation |
 | `getRange()` | Current visible range as `{ start, end }` |
