@@ -17,7 +17,7 @@
 
 ---
 
-## ✨ Key Features
+## Higlights
 
 🔷 **Virtualised Canvas Rendering** – no DOM nodes per item, consistent performance at any scale<br>
 🔷 **Range & Point-in-Time Items** – horizontal bars and milestone markers with automatic stacking<br>
