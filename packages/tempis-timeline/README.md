@@ -72,6 +72,7 @@ Script tag usage:
 - Pluggable date adapters (native, Luxon, Day.js, etc.)
 - Global color palette API
 - Configurable scrollbar styling
+- Minimap overview bar with click/drag navigation
 - Accessibility: keyboard navigation, ARIA attributes, reduced motion support
 - 100% TypeScript with full declarations
 

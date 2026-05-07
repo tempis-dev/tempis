@@ -13,6 +13,7 @@ import { TimelineDataView } from "./TimelineDataView";
 import { TimelineFont } from "./TimelineFont";
 import { TimelineItem } from "./TimelineItem";
 import { TimelineRangeView } from "./TimelineRangeView";
+import { TimelineMinimapView } from "./TimelineMinimapView";
 import { TimelineTooltipView } from "./TimelineTooltipView";
 import { TimelineLegendView } from "./TimelineLegendView";
 import { SelectionChangeEvent } from "./Event";
@@ -51,6 +52,11 @@ interface DrawOptions {
      * When true, the scrollbar is not rendered.
      */
     hideScrollbar?: boolean;
+
+    /**
+     * When true, the minimap is not rendered.
+     */
+    hideMinimap?: boolean;
 }
 
 export class TempisTimeline {
@@ -74,6 +80,9 @@ export class TempisTimeline {
 
     /** The timeline legend view. */
     private readonly _legendView: TimelineLegendView;
+
+    /** The timeline minimap view. */
+    private readonly _minimapView: TimelineMinimapView;
 
     /** The timeline tooltip view. */
     private readonly _tooltipView: TimelineTooltipView;
@@ -146,6 +155,7 @@ export class TempisTimeline {
         this._dataView.setDependencies(this._options.dependencies ?? []);
         this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._isRTL, this._options.range);
         this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._isRTL, this._options.legend);
+        this._minimapView = new TimelineMinimapView(this._dataSet, this._rangeView, this._isRTL, this._options.minimap);
         this._tooltipView = new TimelineTooltipView(
             this._canvas,
             this._dataView,
@@ -424,8 +434,8 @@ export class TempisTimeline {
             throw new Error("Cannot export image: timeline has been destroyed.");
         }
 
-        // Render a clean frame without the scrollbar.
-        this._draw({ hideScrollbar: true });
+        // Render a clean frame without the scrollbar or minimap.
+        this._draw({ hideScrollbar: true, hideMinimap: true });
 
         const dpr = options?.dpr ?? 1;
         const type = options?.type ?? "image/png";
@@ -667,6 +677,14 @@ export class TempisTimeline {
 
             // Single pointer - start panning.
             if (activePointers.size === 1) {
+                // Check if the click is on the minimap first.
+                const pos = getMouseOrPointerPosition(event);
+                if (this._minimapView.handlePointer(pos.x, pos.y, "down", this._canvas.clientWidth)) {
+                    this._canvas.setPointerCapture(event.pointerId);
+                    this._draw();
+                    return;
+                }
+
                 isPointerDown = true;
                 this._dataView.setPanning(true);
 
@@ -722,6 +740,14 @@ export class TempisTimeline {
             }
 
             // Single pointer panning.
+            // Handle minimap dragging if active.
+            if (this._minimapView.isDragging) {
+                const pos = getMouseOrPointerPosition(event);
+                this._minimapView.handlePointer(pos.x, pos.y, "move", this._canvas.clientWidth);
+                this._draw();
+                return;
+            }
+
             // There is nothing to do if the pointer is not currently down.
             if (!isPointerDown) {
                 // Fire the onItemHover callback if the hovered item has changed.
@@ -757,6 +783,14 @@ export class TempisTimeline {
         this._eventHandlers.pointerup = (event) => {
             // Remove this pointer from tracking.
             activePointers.delete(event.pointerId);
+
+            // Handle minimap drag end.
+            if (this._minimapView.isDragging) {
+                const pos = getMouseOrPointerPosition(event);
+                this._minimapView.handlePointer(pos.x, pos.y, "up", this._canvas.clientWidth);
+                this._draw();
+                return;
+            }
 
             // If we're ending a pinch gesture, reset pinch state.
             if (activePointers.size < 2) {
@@ -1097,6 +1131,11 @@ export class TempisTimeline {
             dataViewMaxHeight -= legendViewHeight;
         }
 
+        // If the minimap is enabled (and not hidden for export), reduce the max height of the data view to account for it.
+        if (this._minimapView.isEnabled && !options?.hideMinimap) {
+            dataViewMaxHeight -= this._minimapView.height;
+        }
+
         /**
          * The rendering of the views starts here and is done in the following order:
          * 1. Legend view (if configured 'top' or 'both')
@@ -1156,6 +1195,12 @@ export class TempisTimeline {
         if (this._legendView.position === "bottom") {
             this._legendView.draw(context, renderOffsetY);
             renderOffsetY += legendViewHeight;
+        }
+
+        // Render the minimap if enabled (and not hidden for export).
+        if (this._minimapView.isEnabled && !options?.hideMinimap) {
+            this._minimapView.draw(context, renderOffsetY, this._canvas.clientWidth);
+            renderOffsetY += this._minimapView.height;
         }
 
         // Clear the canvas from below the bottom of the bottom range view or bottom of the timeline or the bottom of the legend.
@@ -1223,6 +1268,11 @@ export class TempisTimeline {
         // Add height for bottom legend if configured.
         if (this._legendView.position === "bottom") {
             totalHeight += this._legendView.calculateRequiredHeight();
+        }
+
+        // Add height for minimap if enabled.
+        if (this._minimapView.isEnabled) {
+            totalHeight += this._minimapView.height;
         }
 
         return totalHeight;

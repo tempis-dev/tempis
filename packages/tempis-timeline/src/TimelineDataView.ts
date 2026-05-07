@@ -804,7 +804,7 @@ export class TimelineDataView {
         canvasWidth?: number
     ): void {
         const item = itemDrawPlan.item;
-        const effectiveCanvasHeight = canvasHeight ?? context.canvas.clientHeight;
+        const effectiveCanvasHeight = canvasHeight ?? this._lastDrawYPosition + this._lastDrawHeight;
         const effectiveCanvasWidth = canvasWidth ?? context.canvas.clientWidth;
 
         // If this is a PIT item we should draw the downward marker line.

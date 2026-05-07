@@ -21,6 +21,8 @@
 
 <div class="note">Use <code>dpr: 2</code> or higher for crisp exports on high-DPI displays or for print.</div>
 
+<div class="note">The minimap and scrollbar are automatically hidden during export. The exported image contains only the timeline content.</div>
+
 <h2>Example — Download as PNG</h2>
 <pre><code class="language-typescript">async function downloadTimeline() {
   const blob = await timeline.toImage({
