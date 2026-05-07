@@ -115,4 +115,4 @@ Free for non-commercial use. Commercial use requires a paid license — see [LIC
 
 ## Need Help?
 
-Got a question or found a bug? Open an issue or start a discussion on the [Tempis GitHub repository](https://github.com/nicktempis/tempis-timeline).
+Do you have a question or have you found a bug? Open an issue or start a discussion on the [Tempis GitHub repository](https://github.com/nicktempis/tempis-timeline).
