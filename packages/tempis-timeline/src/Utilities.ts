@@ -1,14 +1,9 @@
 import { AdapterRegistry } from "./AdapterRegistry";
 
 /**
- * The neutral grey used for all grid chrome: minor tick lines, unit labels, group separators, group labels, and legend labels.
+ * The default neutral grey used for grid lines, axis labels, group labels, and separators.
  */
 export const GRID_COLOUR = "#808080";
-
-/**
- * The default scrollbar colour — the grid colour with 50% transparency.
- */
-export const GRID_COLOUR_TRANSPARENT = "rgba(128, 128, 128, 0.5)";
 
 /**
  * Easing function names for animations.

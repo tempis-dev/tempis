@@ -6,7 +6,7 @@ import {
 } from "./TempisTimelineOptions";
 import { TimelineDataSet } from "./TimelineDataSet";
 import { TimelineItemCategory } from "./TimelineItemCategory";
-import { drawClippedText, isNullOrUndefined, GRID_COLOUR } from "./Utilities";
+import { drawClippedText, isNullOrUndefined } from "./Utilities";
 
 export interface LegendViewDrawPlan {
     /** The height of the view. */
@@ -59,6 +59,9 @@ export class TimelineLegendView {
     /** The flag defining whether the timeline is being rendered right-to-left. */
     private readonly _isRTL: boolean;
 
+    /** The grid colour for label rendering. */
+    private readonly _gridColor: string;
+
     /** The timeline legend options. */
     private readonly _options: TempisTimelineLegendOptions;
 
@@ -91,17 +94,20 @@ export class TimelineLegendView {
      * @param canvas The timeline canvas.
      * @param dataSet The timeline dataset model.
      * @param isRTL Whether the timeline is being rendered right-to-left.
+     * @param gridColor The grid colour for legend labels.
      * @param options The timeline legend options.
      */
     public constructor(
         canvas: HTMLCanvasElement,
         dataSet: TimelineDataSet,
         isRTL: boolean,
+        gridColor: string,
         options: TempisTimelineLegendOptions = {}
     ) {
         this._canvas = canvas;
         this._dataSet = dataSet;
         this._isRTL = isRTL;
+        this._gridColor = gridColor;
         this._options = options;
 
         this._createCanvasEventHandlers();
@@ -260,7 +266,7 @@ export class TimelineLegendView {
             context.fill();
 
             // Draw the category label clipped to the available legend view width.
-            context.fillStyle = GRID_COLOUR;
+            context.fillStyle = this._gridColor;
             context.textBaseline = "middle";
             // If right-to-left then the label will be drawn to the left of the marker.
             if (this._isRTL) {

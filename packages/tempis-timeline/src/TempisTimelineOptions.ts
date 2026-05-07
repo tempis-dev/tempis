@@ -204,6 +204,9 @@ export interface TempisTimelineStyleOptions {
 
     /** The default item options to use in rendering items, overriding the library item style defaults only. */
     item?: TempisTimelineItemStyle;
+
+    /** The colour used for all grid lines, axis labels, group labels, and separators. Defaults to `"#808080"`. */
+    gridColor?: string;
 }
 
 export interface TempisTimelineMinimapOptions {

@@ -7,14 +7,7 @@ import {
     TempisTimelineDependency
 } from "./TempisTimelineOptions";
 import { RangeTick } from "./TimelineRangeView";
-import {
-    clamp,
-    doDateRangesOverlap,
-    drawClippedText,
-    EasingFunction,
-    GRID_COLOUR,
-    GRID_COLOUR_TRANSPARENT
-} from "./Utilities";
+import { clamp, doDateRangesOverlap, drawClippedText, EasingFunction } from "./Utilities";
 
 export interface DataViewDrawPlan {
     /** The height that is required to draw all groups and items within the specified date range. */
@@ -124,6 +117,9 @@ export class TimelineDataView {
     /** Whether groups are collapsible. */
     private _collapsible: boolean = false;
 
+    /** The grid colour for all chrome rendering. */
+    private _gridColor: string;
+
     /** Reusable offscreen canvas for rendering unfocused items with opacity. */
     private _offscreenCanvas: HTMLCanvasElement | null = null;
     private _offscreenContext: CanvasRenderingContext2D | null = null;
@@ -133,18 +129,22 @@ export class TimelineDataView {
      * @param dataSet The timeline dataset model.
      * @param isRTL Whether the timeline is being rendered right-to-left.
      * @param stackMode The stack mode controlling how items are vertically arranged.
+     * @param gridColor The grid colour for lines, labels, and separators.
      * @param scrollbarOptions The scrollbar options.
+     * @param collapsible Whether groups are collapsible.
      */
     public constructor(
         dataSet: TimelineDataSet,
         isRTL: boolean,
         stackMode: TempisTimelineStackMode,
+        gridColor: string,
         scrollbarOptions?: TempisTimelineScrollbarOptions,
         collapsible?: boolean
     ) {
         this._dataSet = dataSet;
         this._isRTL = isRTL;
         this._stackMode = stackMode;
+        this._gridColor = gridColor;
         this._scrollbarOptions = scrollbarOptions ?? {};
         this._collapsible = collapsible ?? false;
 
@@ -452,7 +452,7 @@ export class TimelineDataView {
         height: number
     ): void {
         context.lineWidth = 1;
-        context.strokeStyle = GRID_COLOUR;
+        context.strokeStyle = this._gridColor;
         context.setLineDash([3, 3]); /* dashes are 5px and spaces are 3px */
         context.beginPath();
 
@@ -519,7 +519,7 @@ export class TimelineDataView {
         const scrollRatio = Math.abs(this._scrollYOffset) / (this._drawPlan.height - height);
         const thumbY = yPosition + scrollbarMargin + scrollRatio * scrollableHeight;
 
-        const scrollbarColor = this._scrollbarOptions.color ?? GRID_COLOUR_TRANSPARENT;
+        const scrollbarColor = this._scrollbarOptions.color ?? this._gridColor;
 
         // Draw scrollbar track (subtle background)
         context.save();
@@ -531,10 +531,13 @@ export class TimelineDataView {
         context.restore();
 
         // Draw scrollbar thumb
+        context.save();
+        context.globalAlpha = 0.5;
         context.fillStyle = scrollbarColor;
         context.beginPath();
         context.roundRect(scrollbarX, thumbY, scrollbarWidth, thumbHeight, scrollbarWidth / 2);
         context.fill();
+        context.restore();
     }
 
     /**
@@ -564,7 +567,7 @@ export class TimelineDataView {
             // If this is not our first group then we should draw a group separator line.
             if (groupDrawPlanIndex > 0) {
                 context.lineWidth = 0.5;
-                context.strokeStyle = GRID_COLOUR;
+                context.strokeStyle = this._gridColor;
                 context.beginPath();
                 const separatorY = Math.round(scrolledYPosition + groupDrawPlan.yPositionStart - 1) + 0.5;
                 context.moveTo(0, separatorY);
@@ -575,7 +578,7 @@ export class TimelineDataView {
             // Draw the group label if we have one.
             if (groupDrawPlan.label) {
                 context.textBaseline = "top";
-                context.fillStyle = GRID_COLOUR;
+                context.fillStyle = this._gridColor;
 
                 const labelY = scrolledYPosition + groupDrawPlan.yPositionStart + DEFAULT_GROUP_LABEL_MARGIN;
                 let labelX: number;
@@ -597,7 +600,7 @@ export class TimelineDataView {
                     context.lineWidth = 1.5;
                     context.lineJoin = "round";
                     context.lineCap = "round";
-                    context.strokeStyle = GRID_COLOUR;
+                    context.strokeStyle = this._gridColor;
                     context.beginPath();
                     if (groupDrawPlan.isCollapsed) {
                         // Right-pointing chevron (collapsed)
@@ -1074,8 +1077,8 @@ export class TimelineDataView {
             }
         }
 
-        context.strokeStyle = GRID_COLOUR;
-        context.fillStyle = GRID_COLOUR;
+        context.strokeStyle = this._gridColor;
+        context.fillStyle = this._gridColor;
         context.lineWidth = 1.5;
         context.setLineDash([]);
 
@@ -1088,7 +1091,7 @@ export class TimelineDataView {
             if (!this._isItemVisible(source) || !this._isItemVisible(target)) continue;
 
             // Apply per-dependency style or fall back to defaults.
-            const depColor = dependency.style?.color ?? GRID_COLOUR;
+            const depColor = dependency.style?.color ?? this._gridColor;
             context.strokeStyle = depColor;
             context.fillStyle = depColor;
             context.lineWidth = dependency.style?.lineWidth ?? 1.5;

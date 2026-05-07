@@ -21,6 +21,7 @@ import { TempisTimelineDateAdapter } from "./TempisTimelineDateAdapter";
 import { AdapterRegistry } from "./AdapterRegistry";
 import { FocusController, FocusOptions } from "./FocusController";
 import { ColorPalette } from "./ColorPalette";
+import { GRID_COLOUR } from "./Utilities";
 
 /**
  * The options for exporting the timeline as an image.
@@ -149,12 +150,25 @@ export class TempisTimeline {
             this._dataSet,
             this._isRTL,
             this._options.stackMode ?? "stable",
+            this._gridColor,
             this._options.scrollbar,
             this._options.grouping?.collapsible
         );
         this._dataView.setDependencies(this._options.dependencies ?? []);
-        this._rangeView = new TimelineRangeView(this._canvas, this._dataSet, this._isRTL, this._options.range);
-        this._legendView = new TimelineLegendView(this._canvas, this._dataSet, this._isRTL, this._options.legend);
+        this._rangeView = new TimelineRangeView(
+            this._canvas,
+            this._dataSet,
+            this._isRTL,
+            this._gridColor,
+            this._options.range
+        );
+        this._legendView = new TimelineLegendView(
+            this._canvas,
+            this._dataSet,
+            this._isRTL,
+            this._gridColor,
+            this._options.legend
+        );
         this._minimapView = new TimelineMinimapView(this._dataSet, this._rangeView, this._isRTL, this._options.minimap);
         this._tooltipView = new TimelineTooltipView(
             this._canvas,
@@ -247,6 +261,11 @@ export class TempisTimeline {
     /** Gets whether the timeline is rendering right-to-left. */
     private get _isRTL(): boolean {
         return this._options.rtl ?? false;
+    }
+
+    /** Gets the resolved grid colour for grid lines, labels, and separators. */
+    private get _gridColor(): string {
+        return this._options.style?.gridColor ?? GRID_COLOUR;
     }
 
     /** Gets the vertical fill mode. */
