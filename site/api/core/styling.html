@@ -88,3 +88,41 @@
   ],
   range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
 });</code></pre>
+
+<h2>Grid Colour</h2>
+<p>Use <code>gridColor</code> to change the colour of all grid lines, axis labels, group labels, and separators. This is useful when embedding the timeline on coloured or dark backgrounds.</p>
+
+<div class="api-demo"><canvas id="demo-grid-color"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-grid-color', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: {
+      gridColor: '#6366f1',
+      item: { borderRadius: 6, fontColor: '#fff', padding: 8 }
+    },
+    grouping: { collapsible: true },
+    items: [
+      { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-14', grouping: 'Group 1' },
+      { id: 2, label: 'Item 2', start: '2026-02-08', end: '2026-02-22', grouping: 'Group 1' },
+      { id: 3, label: 'Item 3', start: '2026-02-05', end: '2026-02-18', grouping: 'Group 2' },
+      { id: 4, label: 'Item 4', start: '2026-02-15', end: '2026-02-28', grouping: 'Group 2' },
+    ],
+    range: { start: '2026-01-25', end: '2026-03-05', position: 'bottom' }
+  });
+</script>
+
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  style: {
+    gridColor: '#6366f1',
+    item: { borderRadius: 6, fontColor: '#fff', padding: 8 }
+  },
+  items: [
+    { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-14', grouping: 'Group 1' },
+    { id: 2, label: 'Item 2', start: '2026-02-08', end: '2026-02-22', grouping: 'Group 1' },
+    { id: 3, label: 'Item 3', start: '2026-02-05', end: '2026-02-18', grouping: 'Group 2' },
+    { id: 4, label: 'Item 4', start: '2026-02-15', end: '2026-02-28', grouping: 'Group 2' },
+  ],
+  range: { start: '2026-01-25', end: '2026-03-05', position: 'bottom' }
+});</code></pre>
