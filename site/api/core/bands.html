@@ -1,0 +1,97 @@
+<h1>Bands</h1>
+<p class="subtitle">Highlight time ranges or mark specific dates with background bands.</p>
+
+<div class="api-demo"><canvas id="demo-bands"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-bands', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    categories: [
+      { name: 'cat-a',  label: 'Category A',  style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+      { name: 'cat-b',  label: 'Category B',  style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+      { name: 'cat-c',  label: 'Category C',  style: { backgroundColor: '#f59e0b', fontColor: '#111' } },
+    ],
+    legend: { position: 'bottom' },
+    items: [
+      { id: 1,  label: 'Item 1',        start: '2026-03-01', end: '2026-03-14', category: 'cat-a', grouping: 'Group 1' },
+      { id: 2,  label: 'Item 2',        start: '2026-03-15', end: '2026-03-28', category: 'cat-a', grouping: 'Group 1' },
+      { id: 3,  label: 'Item 3',        start: '2026-03-10', end: '2026-03-13', category: 'cat-a', grouping: 'Group 1' },
+      { id: 4,  label: 'Item 4',        start: '2026-03-05', end: '2026-03-07', category: 'cat-b', grouping: 'Group 2' },
+      { id: 5,  label: 'Item 5',        start: '2026-03-08', end: '2026-03-09', category: 'cat-b', grouping: 'Group 2' },
+      { id: 6,  label: 'Item 6',        start: '2026-03-20', end: '2026-03-22', category: 'cat-b', grouping: 'Group 2' },
+      { id: 7,  label: 'Item 7',        start: '2026-03-23', end: '2026-03-24', category: 'cat-b', grouping: 'Group 2' },
+      { id: 8,  label: 'Item 8',        start: '2026-03-08', end: '2026-03-10', category: 'cat-a', grouping: 'Group 3' },
+      { id: 9,  label: 'Item 9',        start: '2026-03-18', end: '2026-03-20', category: 'cat-a', grouping: 'Group 3' },
+      { id: 10, label: 'Event 1',       start: '2026-03-11', category: 'cat-c', grouping: 'Group 1' },
+      { id: 11, label: 'Event 2',       start: '2026-03-09', category: 'cat-c', grouping: 'Group 2' },
+    ],
+    bands: [
+      { start: '2026-03-10', end: '2026-03-12', style: { color: '#ef4444', opacity: 0.35 } },
+      { start: '2026-03-17', end: '2026-03-18', style: { color: '#3b82f6', opacity: 0.3 } },
+      { start: '2026-03-28', style: { color: '#f59e0b', borderColor: '#f59e0b', borderThickness: 2 } },
+      { start: '2026-03-07', style: { color: '#10b981', borderColor: '#10b981', borderThickness: 2 } },
+    ],
+    range: { start: '2026-02-27', end: '2026-04-02', position: 'bottom' }
+  });
+</script>
+
+<h2>TempisTimelineBand</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>start</code></td><td><code>string | number | Date</code></td><td>Band start date (required).</td></tr>
+    <tr><td><code>end</code></td><td><code>string | number | Date</code></td><td>Band end date. Omit for a point-in-time band.</td></tr>
+    <tr><td><code>style.color</code></td><td><code>string</code></td><td>Fill colour of the band.</td></tr>
+    <tr><td><code>style.borderColor</code></td><td><code>string</code></td><td>Border colour.</td></tr>
+    <tr><td><code>style.borderThickness</code></td><td><code>number</code></td><td>Border thickness in pixels.</td></tr>
+    <tr><td><code>style.opacity</code></td><td><code>number</code></td><td>Band opacity (0–1).</td></tr>
+  </tbody>
+</table>
+
+<div class="note">Bands are rendered behind items, so they work well as background highlights. They span the full height of the timeline regardless of which groups are visible.</div>
+
+<h2>Range Bands vs Point-in-Time Bands</h2>
+<p>Bands with both <code>start</code> and <code>end</code> render as shaded rectangular regions spanning the full height of the timeline. Bands with only <code>start</code> render as a vertical line at that date — useful for deadlines or milestones.</p>
+<p>Point-in-time bands work well as deadline markers — use a bold <code>borderColor</code> and <code>borderThickness</code> to make them stand out against the item layer.</p>
+
+<h2>Methods</h2>
+
+<h3>setBands(bands)</h3>
+<p>Replaces all bands and redraws the timeline.</p>
+<pre><code class="language-typescript">timeline.setBands([
+  { start: '2026-03-10', end: '2026-03-12', style: { color: '#fbbf24', opacity: 0.2 } }
+]);</code></pre>
+
+<h2>Example</h2>
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  categories: [
+    { name: 'cat-a', label: 'Category A', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+    { name: 'cat-b', label: 'Category B', style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+    { name: 'cat-c', label: 'Category C', style: { backgroundColor: '#f59e0b', fontColor: '#111' } },
+  ],
+  legend: { position: 'bottom' },
+  items: [
+    { id: 1,  label: 'Item 1',  start: '2026-03-01', end: '2026-03-14', category: 'cat-a', grouping: 'Group 1' },
+    { id: 2,  label: 'Item 2',  start: '2026-03-15', end: '2026-03-28', category: 'cat-a', grouping: 'Group 1' },
+    { id: 3,  label: 'Item 3',  start: '2026-03-10', end: '2026-03-13', category: 'cat-a', grouping: 'Group 1' },
+    { id: 4,  label: 'Item 4',  start: '2026-03-05', end: '2026-03-07', category: 'cat-b', grouping: 'Group 2' },
+    { id: 5,  label: 'Item 5',  start: '2026-03-08', end: '2026-03-09', category: 'cat-b', grouping: 'Group 2' },
+    { id: 6,  label: 'Item 6',  start: '2026-03-20', end: '2026-03-22', category: 'cat-b', grouping: 'Group 2' },
+    { id: 7,  label: 'Item 7',  start: '2026-03-23', end: '2026-03-24', category: 'cat-b', grouping: 'Group 2' },
+    { id: 8,  label: 'Item 8',  start: '2026-03-08', end: '2026-03-10', category: 'cat-a', grouping: 'Group 3' },
+    { id: 9,  label: 'Item 9',  start: '2026-03-18', end: '2026-03-20', category: 'cat-a', grouping: 'Group 3' },
+    { id: 10, label: 'Event 1', start: '2026-03-11', category: 'cat-c', grouping: 'Group 1' },
+    { id: 11, label: 'Event 2', start: '2026-03-09', category: 'cat-c', grouping: 'Group 2' },
+  ],
+  bands: [
+    { start: '2026-03-10', end: '2026-03-12', style: { color: '#ef4444', opacity: 0.35 } },
+    { start: '2026-03-17', end: '2026-03-18', style: { color: '#3b82f6', opacity: 0.3 } },
+    { start: '2026-03-28', style: { color: '#f59e0b', borderColor: '#f59e0b', borderThickness: 2 } },
+    { start: '2026-03-07', style: { color: '#10b981', borderColor: '#10b981', borderThickness: 2 } },
+  ],
+  range: { start: '2026-02-27', end: '2026-04-02', position: 'bottom' }
+});</code></pre>

@@ -1,0 +1,55 @@
+<h1>Date Adapters</h1>
+<p class="subtitle">Plug in custom date libraries for timezone and locale support.</p>
+
+<h2>TempisTimelineDateAdapter</h2>
+<p>A date adapter must implement four methods:</p>
+<table>
+  <thead><tr><th>Method</th><th>Signature</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>parse</code></td><td><code>(input: DateInput) =&gt; number | null</code></td><td>Parse a Date, ISO string, or timestamp into epoch milliseconds.</td></tr>
+    <tr><td><code>startOf</code></td><td><code>(instant: number, unit: Unit) =&gt; number</code></td><td>Snap a timestamp to the start of the given unit.</td></tr>
+    <tr><td><code>add</code></td><td><code>(instant: number, unit: Unit, amount: number) =&gt; number</code></td><td>Add calendar units to a timestamp.</td></tr>
+    <tr><td><code>format</code></td><td><code>(instant: number, pattern: string) =&gt; string</code></td><td>Format a timestamp using a pattern string.</td></tr>
+  </tbody>
+</table>
+
+<h2>Registering an Adapter</h2>
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+TempisTimeline.registerDateAdapter(myAdapter);</code></pre>
+<p>Internally this calls <code>AdapterRegistry.register()</code>. If no adapter is registered, a built-in <code>NativeDateAdapter</code> using the browser's <code>Date</code> and <code>Intl</code> APIs is used automatically.</p>
+
+<div class="note">A registered adapter applies globally to all timeline instances. Register it once before creating any timelines.</div>
+
+<h2>Built-in Native Adapter</h2>
+<p>The default adapter works with the local timezone and supports standard format tokens. No installation required — it is used out of the box.</p>
+
+<div class="note">The built-in adapter uses the browser's local timezone. If you need timezone-aware rendering (e.g. showing events in UTC or a specific timezone), register a custom adapter using a library like Luxon or Day.js.</div>
+
+<h2>Example — Luxon Adapter Skeleton</h2>
+<pre><code class="language-typescript">import { DateTime } from 'luxon';
+import { TempisTimeline } from '@tempis/timeline';
+import type { TempisTimelineDateAdapter } from '@tempis/timeline';
+
+const luxonAdapter: TempisTimelineDateAdapter = {
+  parse(input) {
+    if (input instanceof Date) return input.getTime();
+    if (typeof input === 'number') return input;
+    const dt = DateTime.fromISO(input, { zone: 'America/New_York' });
+    return dt.isValid ? dt.toMillis() : null;
+  },
+  startOf(instant, unit) {
+    return DateTime.fromMillis(instant, { zone: 'America/New_York' })
+      .startOf(unit).toMillis();
+  },
+  add(instant, unit, amount) {
+    return DateTime.fromMillis(instant, { zone: 'America/New_York' })
+      .plus({ [unit + 's']: amount }).toMillis();
+  },
+  format(instant, pattern) {
+    return DateTime.fromMillis(instant, { zone: 'America/New_York' })
+      .toFormat(pattern);
+  }
+};
+
+TempisTimeline.registerDateAdapter(luxonAdapter);</code></pre>

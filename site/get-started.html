@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Get Started — Tempis Timeline</title>
+  <link rel="icon" type="image/png" href="images/logo.png">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="Tempis">
+        Tempis
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="get-started.html" class="active">Get Started</a></li>
+        <li><a href="examples.html">Examples</a></li>
+        <li><a href="api.html">API</a></li>
+        <li><a href="pricing.html">Pricing</a></li>
+      </ul>
+      <a href="https://github.com/tempis-dev/tempis" class="nav-github" aria-label="GitHub">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      </a>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.mobile-menu').classList.add('open');document.querySelector('.mobile-menu-overlay').classList.add('active');">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </nav>
+  <div class="mobile-menu-overlay" onclick="document.querySelector('.mobile-menu').classList.remove('open');this.classList.remove('active');"></div>
+  <div class="mobile-menu">
+    <button class="mobile-menu-close" aria-label="Close menu" onclick="this.parentElement.classList.remove('open');document.querySelector('.mobile-menu-overlay').classList.remove('active');">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <a href="index.html">Home</a>
+    <a href="get-started.html">Get Started</a>
+    <a href="examples.html">Examples</a>
+    <a href="api.html">API</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="https://github.com/tempis-dev/tempis" class="mobile-menu-github" aria-label="GitHub"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
+  </div>
+
+  <div class="page-wrapper">
+    <h1>Get Started</h1>
+    <p>Up and running with Tempis in a few minutes. Choose your path — use the core library directly, or drop in the React component.</p>
+
+    <h2>Core Library</h2>
+
+    <h3>Install</h3>
+    <p>Install the core library via npm:</p>
+    <div class="install-box">
+      <span class="prompt">$</span> npm install <span style="color: #ff0071; font-weight: 600;">@tempis/timeline</span>
+    </div>
+
+    <h3>CDN</h3>
+    <p>Or include it directly in your HTML via a CDN script tag:</p>
+<pre><code class="language-html">&lt;script src="https://unpkg.com/@tempis/timeline/dist/tempis_timeline.min.js"&gt;&lt;/script&gt;</code></pre>
+
+    <h3>Usage</h3>
+    <p>Create a canvas element and initialise the timeline:</p>
+<pre><code class="language-html">&lt;canvas id="timeline"&gt;&lt;/canvas&gt;
+
+&lt;script&gt;
+  import { TempisTimeline } from '@tempis/timeline';
+
+  const timeline = new TempisTimeline('#timeline', {
+    responsive: true,
+    items: [
+      { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-15', grouping: 'Group 1' },
+      { id: 2, label: 'Item 2', start: '2026-01-12', end: '2026-01-28', grouping: 'Group 1' },
+      { id: 3, label: 'Event 1', start: '2026-01-30', grouping: 'Group 1' },
+      { id: 4, label: 'Item 3', start: '2026-01-08', end: '2026-01-25', grouping: 'Group 2' },
+    ],
+    range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+  });
+&lt;/script&gt;</code></pre>
+
+    <div class="note">When using <code>responsive: true</code>, the canvas must be inside a container with explicit dimensions. The timeline resizes to fill its parent — if the parent has no width or height, the canvas will collapse to zero.</div>
+
+    <h3>Categories</h3>
+    <p>Colour-code items and filter them via an interactive legend:</p>
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+const timeline = new TempisTimeline('#timeline', {
+  responsive: true,
+  legend: { position: 'top' },
+  categories: [
+    { name: 'cat-a', label: 'Category A', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+    { name: 'cat-b', label: 'Category B', style: { backgroundColor: '#f43f5e', fontColor: '#fff' } },
+  ],
+  items: [
+    { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-14', category: 'cat-a' },
+    { id: 2, label: 'Item 2', start: '2026-02-05', end: '2026-02-12', category: 'cat-b' },
+  ],
+  range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' }
+});</code></pre>
+
+    <h3>Updating Data</h3>
+    <p>Replace items, categories, or bands at any time — the timeline redraws automatically:</p>
+<pre><code class="language-typescript">timeline.setItems(newItems);
+timeline.setCategories(newCategories);
+timeline.setBands(newBands);</code></pre>
+
+    <h3>Focus &amp; Navigation</h3>
+    <p>Programmatically pan and zoom to any item, date, or range:</p>
+<pre><code class="language-typescript">// Animate to a specific item
+timeline.focus({ id: 1, animate: true, duration: 500 });
+
+// Jump to a date
+timeline.focus({ date: '2026-06-15' });
+
+// Focus on a date range
+timeline.focus({ range: ['2026-01-01', '2026-12-31'], animate: true });</code></pre>
+
+    <h3>Cleanup</h3>
+    <p>Always destroy the timeline when you're done to prevent memory leaks:</p>
+<pre><code class="language-typescript">timeline.destroy();</code></pre>
+
+    <h2>React</h2>
+
+    <h3>Install</h3>
+    <div class="install-box" style="margin-bottom: 12px;">
+      <span class="prompt">$</span> npm install <span style="color: #61dafb; font-weight: 600;">@tempis/react</span> <span style="color: #ff0071; font-weight: 600;">@tempis/timeline</span>
+    </div>
+    <p><code>@tempis/timeline</code> is a peer dependency and must be installed alongside the React wrapper.</p>
+
+    <h3>Usage</h3>
+    <p>Import the component and pass your data as props. The timeline renders into a canvas inside a wrapper div:</p>
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/react';
+
+function App() {
+  return (
+    &lt;TempisTimeline
+      items={[
+        { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-15', grouping: 'Group 1' },
+        { id: 2, label: 'Item 2', start: '2026-01-12', end: '2026-01-28', grouping: 'Group 1' },
+        { id: 3, label: 'Item 3', start: '2026-01-08', end: '2026-01-25', grouping: 'Group 2' },
+      ]}
+      options={{
+        responsive: true,
+        range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+      }}
+      onItemClick={(id) =&gt; console.log('Clicked', id)}
+      height={400}
+    /&gt;
+  );
+}</code></pre>
+
+    <div class="note">When using <code>responsive: true</code>, the component must be inside a container with explicit dimensions. The timeline resizes to fill its parent — if the parent has no width or height, the canvas will collapse to zero.</div>
+
+    <h3>Ref API</h3>
+    <p>Access imperative methods via a ref:</p>
+<pre><code class="language-typescript">import { useRef } from 'react';
+import { TempisTimeline, type TempisTimelineRef } from '@tempis/react';
+
+function App() {
+  const ref = useRef&lt;TempisTimelineRef&gt;(null);
+
+  return (
+    &lt;&gt;
+      &lt;button onClick={() =&gt; ref.current?.focus({ id: 1, animate: true })}&gt;
+        Focus Item 1
+      &lt;/button&gt;
+      &lt;TempisTimeline
+        ref={ref}
+        items={items}
+        options={{ responsive: true, range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' } }}
+      /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+    <h3>Reactive Data</h3>
+    <p>The <code>items</code>, <code>categories</code>, and <code>bands</code> props sync automatically when they change — no manual <code>setItems()</code> calls needed.</p>
+<pre><code class="language-typescript">const [items, setItems] = useState([
+  { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-10' },
+]);
+
+// Adding an item re-renders the timeline automatically
+setItems(prev =&gt; [...prev, { id: 2, label: 'Item 2', start: '2026-02-12', end: '2026-02-20' }]);</code></pre>
+
+    <h2>Next Steps</h2>
+    <p>Explore the <a href="api.html">API reference</a> for the full list of options, methods, and callbacks. Check out the <a href="examples.html">interactive examples</a> to see what's possible.</p>
+
+    <h2>Get Help</h2>
+    <p>Got a question or found a bug? Open an issue or start a discussion on the <a href="https://github.com/tempis-dev/tempis/issues" target="_blank" rel="noopener">Tempis GitHub repository</a>.</p>
+  </div>
+
+  <footer>
+    <p>Tempis Timeline is source-available. Free for non-commercial use. <a href="pricing.html">Commercial licence</a> required for business use.</p>
+  </footer>
+  <script>hljs.highlightAll();</script>
+</body>
+</html>

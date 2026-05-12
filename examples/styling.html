@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="../images/logo.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Styling</title>
+  <script src="../lib/tempis_timeline.js"></script>
+</head>
+<style>
+  html {
+    background-color: #ebebeb;
+  }
+  .canvas-container {
+    width: 100%;
+    height: 600px;
+    resize: both;
+    overflow: hidden;
+  }
+</style>
+<body>
+  <div class="canvas-container">
+    <canvas id="canvas">
+  </div>
+</body>
+<script>
+  // Create our timeline options.
+  const timelineOptions = {
+    responsive: true,
+    range: {
+      position: "bottom",
+      minimum: null,
+      maximum: null,
+    },
+    zoom: {
+      enabled: true
+    },
+    style: {
+      font: {
+        size: 14
+      },
+      item: {
+        // These custom item styles override the application item style defaults and apply to all items.
+        backgroundColor: "#522694",
+        fontColor: "#a9f70c",
+        padding: undefined,
+        borderColor: undefined,
+        borderThickness: undefined,
+        borderRadius: undefined
+      },
+      legend: {
+
+      }
+    },
+    categories: [
+      {
+        name: "lazy-activity",
+        label: "Lazy Activity",
+        style: {
+          // These item styles override the custom item styles defined at 'options.style.item' for any items linked to this category via 'item.category'.
+          // This background colour is the source of truth for which colour to use in the corresponding legend key.
+          backgroundColor: "#2ecc71",
+          fontColor: "#FFFFFF",
+        }
+      }
+    ],
+    items: [
+      { 
+        id: 0,
+        label: "Sleeping",
+        start: new Date("Thu Jan 23 2025 00:00:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 08:30:00 GMT+0000"),
+        grouping: "Nik's Day",
+        category: "lazy-activity"
+      },
+      { 
+        id: 1,
+        label: "Working",
+        start: new Date("Thu Jan 23 2025 09:00:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 17:00:00 GMT+0000"),
+        grouping: "Nik's Day",
+        style: {
+          // These are the highest-priority item styles and override any custom item styles and any category styles (including backgroundColour)
+          backgroundColor: "#A91D3A",
+          fontColor: "#8dbde0",
+          padding: undefined,
+          borderColor: undefined,
+          borderThickness: undefined,
+          borderRadius: undefined
+        },
+        category: "Office"
+      },
+      { 
+        id: 2,
+        label: "Eating",
+        start: new Date("Thu Jan 23 2025 17:15:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 18:00:00 GMT+0000"),
+        grouping: "Nik's Day"
+      },
+      { 
+        id: 3,
+        label: "Playing",
+        start: new Date("Thu Jan 23 2025 18:30:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 21:00:00 GMT+0000"),
+        grouping: "Nik's Day"
+      },
+      { 
+        id: 4,
+        label: "Sleeping",
+        start: new Date("Thu Jan 23 2025 21:10:00 GMT+0000"),
+        end: new Date("Thu Jan 24 2025 00:00:00 GMT+0000"),
+        grouping: "Nik's Day",
+        category: "lazy-activity"
+      },
+      { 
+        id: 5,
+        label: "Snoring",
+        start: new Date("Thu Jan 23 2025 02:30:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 07:30:00 GMT+0000"),
+        grouping: "Nik's Day",
+        category: "lazy-activity",
+        style: {
+          borderColor: "#FF00aa",
+          backgroundColor: "#FFFFFF",
+          fontColor: "#FF00aa",
+          borderThickness: 2,
+          borderRadius: 50
+        },
+      },
+      { 
+        id: 6,
+        label: "Stubbed Toe, like, really bad",
+        start: new Date("Thu Jan 23 2025 11:32:30 GMT+0000"),
+        grouping: "Becky's Day"
+      },
+      { 
+        id: 6,
+        label: "Made Sandwich",
+        start: new Date("Thu Jan 23 2025 15:12:30 GMT+0000"),
+        grouping: "Becky's Day",
+        style: {
+          borderColor: "#FF00aa",
+          backgroundColor: "#FFFFFF",
+          fontColor: "#FF00aa",
+          borderThickness: 2,
+          borderRadius: 50
+        }
+      },
+      { 
+        id: 7,
+        label: "Sleeping",
+        start: new Date("Thu Jan 23 2025 00:00:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 11:30:00 GMT+0000"),
+        grouping: "Tilly's Day",
+        category: "lazy-activity"
+      },
+      { 
+        id: 8,
+        label: "Sniffing",
+        start: new Date("Thu Jan 23 2025 11:35:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 13:45:00 GMT+0000"),
+        grouping: "Tilly's Day"
+      },
+      { 
+        id: 9,
+        label: "Eating",
+        start: new Date("Thu Jan 23 2025 13:05:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 13:45:00 GMT+0000"),
+        grouping: "Tilly's Day"
+      },
+      { 
+        id: 10,
+        label: "Sleeping",
+        start: new Date("Thu Jan 23 2025 14:00:00 GMT+0000"),
+        end: new Date("Thu Jan 24 2025 00:00:00 GMT+0000"),
+        grouping: "Tilly's Day",
+        category: "lazy-activity"
+      },
+    ]
+  };
+
+  // Create our timeline and stick a reference to it on the window for easy access.
+  window["timeline"] = new tempis_timeline.TempisTimeline("#canvas", timelineOptions);
+</script>
+</html>

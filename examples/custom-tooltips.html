@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="../images/logo.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Tooltips — Project Tracker</title>
+  <script src="../lib/tempis_timeline.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { margin-top: 0; color: #333; }
+    .subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+    .timeline-container {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      height: 600px;
+      overflow: hidden;
+    }
+    .info {
+      margin-top: 15px;
+      padding: 15px;
+      background: #e3f2fd;
+      border-left: 4px solid #2196F3;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Project Tracker — Q1 2025 Sprint</h1>
+    <p class="subtitle">Hover over items to see task details, assignees, and progress.</p>
+    <div class="timeline-container">
+      <canvas id="canvas"></canvas>
+    </div>
+    <div class="info">
+      <strong>Custom Tooltip Templates</strong><br>
+      This demo uses the <code>tooltip.template</code> API to render rich tooltip cards with assignee details, status indicators, priority levels, and progress bars. Each tooltip is a styled HTML string returned by the template function.
+    </div>
+  </div>
+<script>
+
+  // Rich item metadata keyed by id.
+  const taskData = {
+    1:  { assignee: 'Sarah Chen',     role: 'Product Lead',     status: 'complete', progress: 100, priority: 'high',   description: 'Define sprint goals, user stories, and acceptance criteria for the Q1 release.' },
+    2:  { assignee: 'Sarah Chen',     role: 'Product Lead',     status: 'complete', progress: 100, priority: 'medium', description: 'Gather input from stakeholders and finalize the feature backlog.' },
+    3:  { assignee: 'Alex Rivera',    role: 'UX Designer',      status: 'complete', progress: 100, priority: 'high',   description: 'Create low-fidelity wireframes for the new dashboard layout.' },
+    4:  { assignee: 'Alex Rivera',    role: 'UX Designer',      status: 'complete', progress: 100, priority: 'high',   description: 'Produce high-fidelity mockups with the updated design system.' },
+    5:  { assignee: 'Alex Rivera',    role: 'UX Designer',      status: 'complete', progress: 100, priority: 'medium', description: 'Build interactive Figma prototype for usability testing.' },
+    6:  { assignee: 'Jordan Park',    role: 'Backend Engineer', status: 'complete', progress: 100, priority: 'high',   description: 'Design and implement REST API endpoints for the new features.' },
+    7:  { assignee: 'Jordan Park',    role: 'Backend Engineer', status: 'complete', progress: 100, priority: 'high',   description: 'Write migration scripts and update the database schema.' },
+    8:  { assignee: 'Jordan Park',    role: 'Backend Engineer', status: 'in-progress', progress: 75, priority: 'medium', description: 'Integrate Stripe payment processing and webhook handling.' },
+    9:  { assignee: 'Maya Johnson',   role: 'Frontend Engineer', status: 'complete', progress: 100, priority: 'high',  description: 'Build reusable React components for the new dashboard.' },
+    10: { assignee: 'Maya Johnson',   role: 'Frontend Engineer', status: 'in-progress', progress: 60, priority: 'high', description: 'Connect frontend components to the backend API layer.' },
+    11: { assignee: 'Maya Johnson',   role: 'Frontend Engineer', status: 'not-started', progress: 0, priority: 'medium', description: 'Implement responsive layouts and cross-browser testing.' },
+    12: { assignee: 'Chris Lee',      role: 'QA Engineer',      status: 'in-progress', progress: 40, priority: 'high',   description: 'Write and execute test cases for all new API endpoints.' },
+    13: { assignee: 'Chris Lee',      role: 'QA Engineer',      status: 'not-started', progress: 0, priority: 'high',    description: 'End-to-end testing of the full user flow with Cypress.' },
+    14: { assignee: 'Chris Lee',      role: 'QA Engineer',      status: 'not-started', progress: 0, priority: 'medium',  description: 'Load testing and performance benchmarking under simulated traffic.' },
+    15: { assignee: 'Sarah Chen',     role: 'Product Lead',     status: 'not-started', progress: 0, priority: 'high',    description: 'Coordinate staged rollout to beta users, then general availability.' },
+    // PIT milestones
+    20: { assignee: 'Team',           role: '',                 status: 'complete', progress: 100, priority: 'high',   description: 'Sprint kickoff meeting. Goals and assignments confirmed.' },
+    21: { assignee: 'Alex Rivera',    role: 'UX Designer',      status: 'complete', progress: 100, priority: 'high',   description: 'Design review approved by stakeholders.' },
+    22: { assignee: 'Jordan Park',    role: 'Backend Engineer', status: 'complete', progress: 100, priority: 'high',   description: 'All API endpoints deployed and passing health checks.' },
+    23: { assignee: 'Chris Lee',      role: 'QA Engineer',      status: 'not-started', progress: 0, priority: 'high',  description: 'QA sign-off confirming all test suites pass.' },
+    24: { assignee: 'Sarah Chen',     role: 'Product Lead',     status: 'not-started', progress: 0, priority: 'high',  description: 'Sprint retrospective and handoff to operations.' },
+    25: { assignee: 'Maya Johnson',   role: 'Frontend Engineer', status: 'in-progress', progress: 50, priority: 'medium', description: 'Code review for all frontend PRs before merge.' },
+    26: { assignee: 'Jordan Park',    role: 'Backend Engineer', status: 'in-progress', progress: 80, priority: 'high', description: 'Security audit of authentication and payment flows.' },
+  };
+
+  function formatDate(d) {
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function formatDateTime(d) {
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+
+  const statusLabels = { 'complete': 'Complete', 'in-progress': 'In Progress', 'not-started': 'Not Started' };
+  const statusColors = { 'complete': '#00a67e', 'in-progress': '#4c63d2', 'not-started': '#a0a0a0' };
+  const priorityColors = { 'high': '#d63384', 'medium': '#f0a500', 'low': '#a0a0a0' };
+
+  // Items array — a realistic project sprint timeline.
+  const items = [
+    // Planning
+    { id: 1,  label: 'Sprint Planning',       start: '2025-01-06T09:00:00', end: '2025-01-08T17:00:00', category: 'planning', grouping: 'Planning' },
+    { id: 2,  label: 'Backlog Refinement',    start: '2025-01-07T09:00:00', end: '2025-01-09T17:00:00', category: 'planning', grouping: 'Planning' },
+    { id: 20, label: 'Sprint Kickoff',        start: '2025-01-06T09:00:00', category: 'milestone', grouping: 'Planning' },
+
+    // Design
+    { id: 3,  label: 'Wireframes',            start: '2025-01-09T09:00:00', end: '2025-01-14T17:00:00', category: 'design', grouping: 'Design' },
+    { id: 4,  label: 'Visual Mockups',        start: '2025-01-13T09:00:00', end: '2025-01-17T17:00:00', category: 'design', grouping: 'Design' },
+    { id: 5,  label: 'Prototype',             start: '2025-01-16T09:00:00', end: '2025-01-21T17:00:00', category: 'design', grouping: 'Design' },
+    { id: 21, label: 'Design Approved',       start: '2025-01-21T17:00:00', category: 'milestone', grouping: 'Design' },
+
+    // Backend
+    { id: 6,  label: 'API Development',       start: '2025-01-14T09:00:00', end: '2025-01-24T17:00:00', category: 'dev', grouping: 'Backend' },
+    { id: 7,  label: 'Database Migration',    start: '2025-01-15T09:00:00', end: '2025-01-20T17:00:00', category: 'dev', grouping: 'Backend' },
+    { id: 8,  label: 'Payment Integration',   start: '2025-01-22T09:00:00', end: '2025-02-03T17:00:00', category: 'dev', grouping: 'Backend' },
+    { id: 22, label: 'API Ready',             start: '2025-01-24T17:00:00', category: 'milestone', grouping: 'Backend' },
+    { id: 26, label: 'Security Audit',        start: '2025-01-28T10:00:00', category: 'milestone', grouping: 'Backend' },
+
+    // Frontend
+    { id: 9,  label: 'UI Components',         start: '2025-01-20T09:00:00', end: '2025-01-29T17:00:00', category: 'dev', grouping: 'Frontend' },
+    { id: 10, label: 'API Integration',       start: '2025-01-27T09:00:00', end: '2025-02-05T17:00:00', category: 'dev', grouping: 'Frontend' },
+    { id: 11, label: 'Responsive Polish',     start: '2025-02-03T09:00:00', end: '2025-02-07T17:00:00', category: 'dev', grouping: 'Frontend' },
+    { id: 25, label: 'Code Review',           start: '2025-02-04T14:00:00', category: 'milestone', grouping: 'Frontend' },
+
+    // QA
+    { id: 12, label: 'API Testing',           start: '2025-01-27T09:00:00', end: '2025-02-03T17:00:00', category: 'qa', grouping: 'QA' },
+    { id: 13, label: 'E2E Testing',           start: '2025-02-03T09:00:00', end: '2025-02-10T17:00:00', category: 'qa', grouping: 'QA' },
+    { id: 14, label: 'Performance Testing',   start: '2025-02-06T09:00:00', end: '2025-02-11T17:00:00', category: 'qa', grouping: 'QA' },
+    { id: 23, label: 'QA Sign-off',           start: '2025-02-11T17:00:00', category: 'milestone', grouping: 'QA' },
+
+    // Release
+    { id: 15, label: 'Staged Rollout',        start: '2025-02-10T09:00:00', end: '2025-02-14T17:00:00', category: 'release', grouping: 'Release' },
+    { id: 24, label: 'Sprint Complete',       start: '2025-02-14T17:00:00', category: 'milestone', grouping: 'Release' },
+  ];
+
+  window["timeline"] = new tempis_timeline.TempisTimeline("#canvas", {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    selection: 'single',
+    range: {
+      start: '2025-01-05T00:00:00',
+      end: '2025-02-02T00:00:00',
+      position: 'bottom'
+    },
+    legend: { position: 'top' },
+    grouping: {
+      collapsible: true,
+      sort: (a, b) => {
+        const order = ['Planning', 'Design', 'Backend', 'Frontend', 'QA', 'Release'];
+        return order.indexOf(a) - order.indexOf(b);
+      }
+    },
+    categories: [
+      { name: 'planning',  label: 'Planning',   style: { backgroundColor: '#4c63d2', fontColor: '#fff' } },
+      { name: 'design',    label: 'Design',      style: { backgroundColor: '#9b59b6', fontColor: '#fff' } },
+      { name: 'dev',       label: 'Development', style: { backgroundColor: '#00a67e', fontColor: '#fff' } },
+      { name: 'qa',        label: 'QA',          style: { backgroundColor: '#f0a500', fontColor: '#2d3748' } },
+      { name: 'release',   label: 'Release',     style: { backgroundColor: '#d63384', fontColor: '#fff' } },
+      { name: 'milestone', label: 'Milestones',  style: { backgroundColor: '#1a1a2e', fontColor: '#fff' } }
+    ],
+    tooltip: {
+      enabled: true,
+      delay: 200,
+      overflowBehavior: 'viewport',
+      template: (id) => {
+        const task = taskData[id];
+        if (!task) return null;
+
+        const item = items.find(i => i.id === id);
+        if (!item) return null;
+
+        const isPIT = !item.end;
+        const dateStr = isPIT
+          ? formatDateTime(new Date(item.start))
+          : `${formatDate(new Date(item.start))} — ${formatDate(new Date(item.end))}`;
+
+        const statusColor = statusColors[task.status] || '#999';
+        const priorityColor = priorityColors[task.priority] || '#999';
+
+        const progressBar = task.status !== 'not-started' && !isPIT ? `
+          <div style="margin-top:10px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+              <span style="color:#666;">Progress</span>
+              <span style="font-weight:600;">${task.progress}%</span>
+            </div>
+            <div style="height:6px;background:#e8e8e8;border-radius:3px;overflow:hidden;">
+              <div style="height:100%;width:${task.progress}%;background:${statusColor};border-radius:3px;transition:width 0.3s;"></div>
+            </div>
+          </div>` : '';
+
+        return `
+          <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;width:280px;padding:14px 16px;line-height:1.4;background:#fff;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.15);border:1px solid #e0e0e0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${statusColor};flex-shrink:0;"></span>
+              <span style="font-weight:700;font-size:16px;color:#1a1a2e;">${item.label}</span>
+            </div>
+            <div style="font-size:14px;color:#666;margin-bottom:10px;">${dateStr}</div>
+            <p style="font-size:14px;color:#444;margin:0 0 10px;line-height:1.5;">${task.description}</p>
+            <div style="display:flex;gap:12px;font-size:13px;margin-bottom:2px;">
+              <div>
+                <span style="color:#999;">Assignee</span><br>
+                <span style="font-weight:600;color:#1a1a2e;">${task.assignee}</span>
+                ${task.role ? `<span style="color:#999;"> · ${task.role}</span>` : ''}
+              </div>
+            </div>
+            <div style="display:flex;gap:16px;margin-top:10px;font-size:13px;">
+              <div>
+                <span style="color:#999;">Status</span><br>
+                <span style="font-weight:600;color:${statusColor};">${statusLabels[task.status]}</span>
+              </div>
+              <div>
+                <span style="color:#999;">Priority</span><br>
+                <span style="font-weight:600;color:${priorityColor};">${task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}</span>
+              </div>
+            </div>
+            ${progressBar}
+          </div>`;
+      }
+    },
+    items
+  });
+</script>
+</body>
+</html>

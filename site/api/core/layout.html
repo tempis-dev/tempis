@@ -1,0 +1,71 @@
+<h1>Vertical Fill &amp; Stack Modes</h1>
+<p class="subtitle">Control how the timeline fills vertical space and how items are stacked.</p>
+
+<div class="api-demo"><canvas id="demo-layout"></canvas></div>
+<p style="margin: 0 0 6px; font-size: 0.8em; font-weight: 600; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.08em;">Vertical Fill</p>
+<div class="btn-group" style="display: flex; gap: 8px; margin: 0 0 16px;">
+  <button class="btn btn-outline btn-sm" onclick="window._layoutConfig.verticalFill='content'; window._layoutDemo.destroy(); window._layoutDemo = new tempis_timeline.TempisTimeline('#demo-layout', Object.assign({}, window._layoutBase, window._layoutConfig));">Content</button>
+  <button class="btn btn-outline btn-sm" onclick="window._layoutConfig.verticalFill='fill-canvas'; window._layoutDemo.destroy(); window._layoutDemo = new tempis_timeline.TempisTimeline('#demo-layout', Object.assign({}, window._layoutBase, window._layoutConfig));">Fill Canvas</button>
+  <button class="btn btn-outline btn-sm" onclick="window._layoutConfig.verticalFill='grow-canvas'; window._layoutDemo.destroy(); window._layoutDemo = new tempis_timeline.TempisTimeline('#demo-layout', Object.assign({}, window._layoutBase, window._layoutConfig));">Grow Canvas</button>
+</div>
+<p style="margin: 0 0 6px; font-size: 0.8em; font-weight: 600; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.08em;">Stack Mode</p>
+<div class="btn-group" style="display: flex; gap: 8px; margin: 0 0 16px;">
+  <button class="btn btn-outline btn-sm" onclick="window._layoutConfig.stackMode='compact'; window._layoutDemo.destroy(); window._layoutDemo = new tempis_timeline.TempisTimeline('#demo-layout', Object.assign({}, window._layoutBase, window._layoutConfig));">Compact</button>
+  <button class="btn btn-outline btn-sm" onclick="window._layoutConfig.stackMode='stable'; window._layoutDemo.destroy(); window._layoutDemo = new tempis_timeline.TempisTimeline('#demo-layout', Object.assign({}, window._layoutBase, window._layoutConfig));">Stable</button>
+</div>
+<script>
+  window._layoutBase = {
+    responsive: true,
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    items: [
+      { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-15', grouping: 'Group 1' },
+      { id: 2, label: 'Item 2', start: '2026-01-12', end: '2026-01-25', grouping: 'Group 1' },
+      { id: 3, label: 'Item 3', start: '2026-01-08', end: '2026-01-20', grouping: 'Group 2' },
+      { id: 4, label: 'Item 4', start: '2026-01-18', end: '2026-01-30', grouping: 'Group 2' },
+      { id: 5, label: 'Item 5', start: '2026-01-03', end: '2026-01-14', grouping: 'Group 3' },
+      { id: 6, label: 'Item 6', start: '2026-01-16', end: '2026-01-28', grouping: 'Group 3' }
+    ],
+    range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+  };
+  window._layoutConfig = { verticalFill: 'fill-canvas', stackMode: 'stable' };
+  window._layoutDemo = new tempis_timeline.TempisTimeline('#demo-layout', Object.assign({}, window._layoutBase, window._layoutConfig));
+</script>
+
+<h2>Vertical Fill Modes</h2>
+<table>
+  <thead><tr><th>Mode</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>"content"</code></td><td>The timeline height is determined by its content. It takes up only as much vertical space as needed to render all visible items. Best for timelines embedded in scrollable pages. This is the default.</td></tr>
+    <tr><td><code>"fill-canvas"</code></td><td>The timeline expands to fill the full height of the canvas element, regardless of content height. Best for dashboard widgets and fixed-height containers.</td></tr>
+    <tr><td><code>"grow-canvas"</code></td><td>The canvas element itself grows to match the required content height. Best when the timeline is inside a scrollable container and you want all content visible without an internal scrollbar.</td></tr>
+  </tbody>
+</table>
+
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  verticalFill: 'fill-canvas',
+  items: [
+    { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-15' },
+  ],
+  range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+});</code></pre>
+
+<h2>Stack Modes</h2>
+<table>
+  <thead><tr><th>Mode</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>"compact"</code></td><td>Items are stacked based on visible items only. More compact, but items may shift position when panning. Point-in-time labels are adjusted to fit within canvas bounds. Layout updates on every pan.</td></tr>
+    <tr><td><code>"stable"</code></td><td>All items are included in the layout calculation. Items maintain stable positions when panning. Point-in-time labels are always centred on their timestamp. Layout only updates on zoom or data changes. This is the default.</td></tr>
+  </tbody>
+</table>
+
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  stackMode: 'compact',
+  items: [
+    { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-19', grouping: 'Group 1' },
+    { id: 2, label: 'Item 2', start: '2026-01-20', end: '2026-02-02', grouping: 'Group 1' },
+    { id: 3, label: 'Item 3', start: '2026-01-08', end: '2026-01-22', grouping: 'Group 2' },
+  ],
+  range: { start: '2026-01-01', end: '2026-02-15', position: 'bottom' }
+});</code></pre>

@@ -1,0 +1,69 @@
+<h1>Categories</h1>
+<p class="subtitle">Colour-code items and filter them via an interactive legend.</p>
+
+<div class="api-demo"><canvas id="demo-categories"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-categories', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    categories: [
+      { name: 'cat-a', label: 'Category A', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+      { name: 'cat-b', label: 'Category B', style: { backgroundColor: '#f43f5e', fontColor: '#fff' } },
+      { name: 'cat-c', label: 'Category C', style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+    ],
+    legend: { position: 'top' },
+    items: [
+      { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-14', category: 'cat-a' },
+      { id: 2, label: 'Item 2', start: '2026-02-05', end: '2026-02-12', category: 'cat-b' },
+      { id: 3, label: 'Item 3', start: '2026-02-10', end: '2026-02-20', category: 'cat-c' },
+      { id: 4, label: 'Item 4', start: '2026-02-15', end: '2026-03-01', category: 'cat-a' },
+      { id: 5, label: 'Item 5', start: '2026-02-18', end: '2026-03-05', category: 'cat-c' },
+    ],
+    range: { start: '2026-01-25', end: '2026-03-10', position: 'bottom' }
+  });
+</script>
+
+<h2>TempisTimelineCategory</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>name</code></td><td><code>string</code></td><td>Unique identifier referenced by items.</td></tr>
+    <tr><td><code>label</code></td><td><code>string</code></td><td>Display label in the legend.</td></tr>
+    <tr><td><code>style</code></td><td><code>TempisTimelineItemStyle</code></td><td>Style applied to all items in this category.</td></tr>
+  </tbody>
+</table>
+
+<div class="note">An item's <code>category</code> value must match the <code>name</code> of a defined category. Items referencing an undefined category will still render but won't receive category styling.</div>
+
+<p>Category styles sit between global styles and per-item styles in the precedence chain. Global <code>style.item</code> is applied first, then category <code>style</code> overrides it, and finally per-item <code>style</code> takes highest priority.</p>
+
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  categories: [
+    { name: 'cat-a', label: 'Category A', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+    { name: 'cat-b', label: 'Category B', style: { backgroundColor: '#f43f5e', fontColor: '#fff' } },
+    { name: 'cat-c', label: 'Category C', style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+  ],
+  legend: { position: 'top' },
+  items: [
+    { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-14', category: 'cat-a' },
+    { id: 2, label: 'Item 2', start: '2026-02-05', end: '2026-02-12', category: 'cat-b' },
+    { id: 3, label: 'Item 3', start: '2026-02-10', end: '2026-02-20', category: 'cat-c' },
+    { id: 4, label: 'Item 4', start: '2026-02-15', end: '2026-03-01', category: 'cat-a' },
+    { id: 5, label: 'Item 5', start: '2026-02-18', end: '2026-03-05', category: 'cat-c' },
+  ],
+  range: { start: '2026-01-25', end: '2026-03-10', position: 'bottom' }
+});</code></pre>
+
+<h2>Methods</h2>
+
+<h3>setCategories(categories)</h3>
+<p>Replaces all categories and redraws.</p>
+
+<h3>getCategories()</h3>
+<p>Returns the current category definitions.</p>
+
+<h2>Colour Palette</h2>
+<p>Categories without an explicit <code>backgroundColor</code> are assigned colours from the global palette. See <a href="#core/color-palette">Color Palette</a>.</p>

@@ -1,0 +1,176 @@
+<h1>Styling</h1>
+<p class="subtitle">Customise the look of the timeline, items, and text.</p>
+
+<div class="api-demo"><canvas id="demo-styling"></canvas></div>
+<script>
+  window._stylingDemo = new tempis_timeline.TempisTimeline('#demo-styling', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    items: [
+      { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-15', grouping: 'Group 1', style: { backgroundColor: '#6366f1' } },
+      { id: 2, label: 'Item 2', start: '2026-01-12', end: '2026-01-25', grouping: 'Group 1', style: { backgroundColor: '#f43f5e', borderColor: '#be123c', borderThickness: 2, borderStyle: 'solid' } },
+      { id: 3, label: 'Item 3', start: '2026-01-08', end: '2026-01-20', grouping: 'Group 2', style: { backgroundColor: '#10b981' } },
+      { id: 4, label: 'Item 4', start: '2026-01-18', end: '2026-01-30', grouping: 'Group 2', style: { backgroundColor: '#f59e0b', borderColor: '#d97706', borderThickness: 2, borderStyle: 'dashed' } },
+      { id: 5, label: 'Item 5', start: '2026-01-03', end: '2026-01-14', grouping: 'Group 3', style: { backgroundColor: '#8b5cf6', borderColor: '#7c3aed', borderThickness: 2, borderStyle: 'solid', borderRadius: 12 } }
+    ],
+    range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+  });
+</script>
+
+<h2>TempisTimelineStyleOptions</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>font</code></td><td><code>TempisTimelineFont</code></td><td>Default font settings (size, family, style, weight, lineHeight).</td></tr>
+    <tr><td><code>item</code></td><td><code>TempisTimelineItemStyle</code></td><td>Default item style overrides applied to all items.</td></tr>
+    <tr><td><code>gridColor</code></td><td><code>string</code></td><td>Colour for all grid lines, unit labels, group labels, and separators. Defaults to <code>"#808080"</code>.</td></tr>
+  </tbody>
+</table>
+
+<h2>TempisTimelineFont</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>family</code></td><td><code>string</code></td><td><code>"Helvetica, Arial, sans-serif"</code></td><td>Font family string.</td></tr>
+    <tr><td><code>size</code></td><td><code>number</code></td><td><code>14</code></td><td>Font size in pixels.</td></tr>
+    <tr><td><code>weight</code></td><td><code>string | number</code></td><td><code>"normal"</code></td><td>Font weight.</td></tr>
+    <tr><td><code>style</code></td><td><code>string</code></td><td><code>"normal"</code></td><td>Font style (normal, italic).</td></tr>
+    <tr><td><code>lineHeight</code></td><td><code>string</code></td><td>—</td><td>CSS line-height value.</td></tr>
+  </tbody>
+</table>
+
+<h2>TempisTimelineItemStyle</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>backgroundColor</code></td><td><code>string</code></td><td>palette colour</td><td>Item background colour.</td></tr>
+    <tr><td><code>fontColor</code></td><td><code>string</code></td><td>—</td><td>Item label colour.</td></tr>
+    <tr><td><code>padding</code></td><td><code>number</code></td><td>—</td><td>Inner padding in pixels.</td></tr>
+    <tr><td><code>borderColor</code></td><td><code>string</code></td><td>—</td><td>Border colour.</td></tr>
+    <tr><td><code>borderThickness</code></td><td><code>number</code></td><td>—</td><td>Border width in pixels.</td></tr>
+    <tr><td><code>borderStyle</code></td><td><code>TempisTimelineLineStyle</code></td><td><code>"solid"</code></td><td>Border line style: <code>solid</code>, <code>dashed</code>, <code>dotted</code>, <code>dash-dot</code>, or <code>long-dash</code>.</td></tr>
+    <tr><td><code>borderRadius</code></td><td><code>number</code></td><td>—</td><td>Corner radius in pixels.</td></tr>
+  </tbody>
+</table>
+
+<h2>Style Precedence</h2>
+<p>Styles are resolved in the following order. Each level overrides the one below it:</p>
+
+<div style="display: flex; flex-direction: column; gap: 0; margin: 20px 0 24px; font-size: 13px;">
+  <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255, 0, 113, 0.1); border: 1px solid rgba(255, 0, 113, 0.25); border-radius: 10px 10px 4px 4px;">
+    <span style="font-weight: 700; color: #ff0071; font-size: 18px; width: 24px; text-align: center;">1</span>
+    <span><strong>Per-item</strong> <code>style</code> — highest priority, set on individual items</span>
+  </div>
+  <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-left: 24px; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 4px;">
+    <span style="font-weight: 700; color: #6366f1; font-size: 18px; width: 24px; text-align: center;">2</span>
+    <span><strong>Category</strong> <code>style</code> — applied to all items in a category</span>
+  </div>
+  <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-left: 48px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 4px;">
+    <span style="font-weight: 700; color: #10b981; font-size: 18px; width: 24px; text-align: center;">3</span>
+    <span><strong>Global</strong> <code>style.item</code> — from the constructor options</span>
+  </div>
+  <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-left: 72px; background: rgba(128, 128, 128, 0.06); border: 1px solid rgba(128, 128, 128, 0.15); border-radius: 4px 4px 10px 10px;">
+    <span style="font-weight: 700; color: #808080; font-size: 18px; width: 24px; text-align: center;">4</span>
+    <span><strong>Library defaults</strong> — built-in fallback values</span>
+  </div>
+</div>
+
+<h2>Example — Dark Theme</h2>
+<div class="api-demo" style="background: #0f172a; border-radius: 10px;"><canvas id="demo-dark-theme"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-dark-theme', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: {
+      gridColor: '#64748b',
+      font: { family: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace", size: 12, weight: 500 },
+      item: {
+        backgroundColor: '#1e293b',
+        fontColor: '#e2e8f0',
+        borderColor: '#475569',
+        borderThickness: 1,
+        borderStyle: 'solid',
+        borderRadius: 50,
+        padding: 10
+      }
+    },
+    categories: [
+      { name: 'primary', label: 'Primary', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+      { name: 'accent',  label: 'Accent',  style: { backgroundColor: '#ec4899', fontColor: '#fff' } },
+      { name: 'muted',   label: 'Muted',   style: { backgroundColor: '#1e293b', fontColor: '#94a3b8', borderColor: '#334155' } },
+    ],
+    legend: { position: 'top', markerStyle: 'circle' },
+    items: [
+      { id: 1, label: 'Authentication',  start: '2026-01-05', end: '2026-01-18', category: 'primary' },
+      { id: 2, label: 'Dashboard',       start: '2026-01-14', end: '2026-01-28', category: 'primary' },
+      { id: 3, label: 'Notifications',   start: '2026-01-10', end: '2026-01-20', category: 'accent' },
+      { id: 4, label: 'Settings',        start: '2026-01-22', end: '2026-02-01', category: 'accent' },
+      { id: 5, label: 'Documentation',   start: '2026-01-08', end: '2026-01-25', category: 'muted' },
+      { id: 6, label: 'Testing',         start: '2026-01-20', end: '2026-02-01', category: 'muted' },
+    ],
+    range: { start: '2026-01-01', end: '2026-02-05', position: 'bottom' }
+  });
+</script>
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  style: {
+    font: { family: 'Inter, sans-serif', size: 13, weight: 500 },
+    item: {
+      backgroundColor: '#334155',
+      fontColor: '#f1f5f9',
+      borderColor: '#475569',
+      borderThickness: 1,
+      borderStyle: 'solid',
+      borderRadius: 6,
+      padding: 6
+    }
+  },
+  items: [
+    { id: 1, label: 'Item 1',    start: '2026-01-05', end: '2026-01-15' },
+    { id: 2, label: 'Item 2', start: '2026-01-12', end: '2026-01-28' },
+    {
+      id: 3, label: 'Item 3 (Styled)', start: '2026-01-20', end: '2026-01-22',
+      style: { backgroundColor: '#dc2626', borderStyle: 'dashed' }
+    },
+  ],
+  range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+});</code></pre>
+
+<h2>Grid Colour</h2>
+<p>Use <code>gridColor</code> to change the colour of all grid lines, axis labels, group labels, and separators. This is useful when embedding the timeline on coloured or dark backgrounds.</p>
+
+<div class="api-demo"><canvas id="demo-grid-color"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-grid-color', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: {
+      gridColor: '#6366f1',
+      item: { borderRadius: 6, fontColor: '#fff', padding: 8 }
+    },
+    grouping: { collapsible: true },
+    items: [
+      { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-14', grouping: 'Group 1' },
+      { id: 2, label: 'Item 2', start: '2026-02-08', end: '2026-02-22', grouping: 'Group 1' },
+      { id: 3, label: 'Item 3', start: '2026-02-05', end: '2026-02-18', grouping: 'Group 2' },
+      { id: 4, label: 'Item 4', start: '2026-02-15', end: '2026-02-28', grouping: 'Group 2' },
+    ],
+    range: { start: '2026-01-25', end: '2026-03-05', position: 'bottom' }
+  });
+</script>
+
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  style: {
+    gridColor: '#6366f1',
+    item: { borderRadius: 6, fontColor: '#fff', padding: 8 }
+  },
+  items: [
+    { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-14', grouping: 'Group 1' },
+    { id: 2, label: 'Item 2', start: '2026-02-08', end: '2026-02-22', grouping: 'Group 1' },
+    { id: 3, label: 'Item 3', start: '2026-02-05', end: '2026-02-18', grouping: 'Group 2' },
+    { id: 4, label: 'Item 4', start: '2026-02-15', end: '2026-02-28', grouping: 'Group 2' },
+  ],
+  range: { start: '2026-01-25', end: '2026-03-05', position: 'bottom' }
+});</code></pre>

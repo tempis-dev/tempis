@@ -1,0 +1,68 @@
+<h1>Constructor</h1>
+<p class="subtitle">Create a new timeline instance.</p>
+
+<pre><code class="language-typescript">new TempisTimeline(context: string | HTMLCanvasElement, options: TempisTimelineOptions)</code></pre>
+
+<p>The <code>context</code> parameter accepts either a CSS selector string pointing to a <code>&lt;canvas&gt;</code> element, or a direct reference to one.</p>
+
+<pre><code class="language-typescript">// Using a selector
+const timeline = new TempisTimeline('#my-canvas', { items: [...] });
+
+// Using an element reference
+const canvas = document.getElementById('my-canvas') as HTMLCanvasElement;
+const timeline = new TempisTimeline(canvas, { items: [...] });</code></pre>
+
+<h2>TempisTimelineOptions</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>items</code></td><td><code>TempisTimelineItem[]</code></td><td>required</td><td>The items to display.</td></tr>
+    <tr><td><code>responsive</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Whether to automatically resize the canvas to match parent container dimensions.</td></tr>
+    <tr><td><code>verticalFill</code></td><td><code>"content" | "fill-canvas" | "grow-canvas"</code></td><td><code>"content"</code></td><td>Defines how the timeline fills vertical space.</td></tr>
+    <tr><td><code>rtl</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Whether to use right-to-left rendering.</td></tr>
+    <tr><td><code>stackMode</code></td><td><code>"compact" | "stable"</code></td><td><code>"stable"</code></td><td>The item stacking behaviour.</td></tr>
+    <tr><td><code>selection</code></td><td><code>"none" | "single" | "multi"</code></td><td><code>"none"</code></td><td>Item selection mode.</td></tr>
+    <tr><td><code>categories</code></td><td><code>TempisTimelineCategory[]</code></td><td>—</td><td>Item categories.</td></tr>
+    <tr><td><code>bands</code></td><td><code>TempisTimelineBand[]</code></td><td>—</td><td>Timeline bands.</td></tr>
+    <tr><td><code>dependencies</code></td><td><code>TempisTimelineDependency[]</code></td><td>—</td><td>Item dependencies rendered as connector arrows.</td></tr>
+    <tr><td><code>range</code></td><td><code>TempisTimelineRangeOptions</code></td><td>—</td><td>Range configuration.</td></tr>
+    <tr><td><code>legend</code></td><td><code>TempisTimelineLegendOptions</code></td><td>—</td><td>Legend configuration.</td></tr>
+    <tr><td><code>tooltip</code></td><td><code>TempisTimelineTooltipOptions</code></td><td>—</td><td>Tooltip configuration.</td></tr>
+    <tr><td><code>style</code></td><td><code>TempisTimelineStyleOptions</code></td><td>—</td><td>Style overrides.</td></tr>
+    <tr><td><code>scrollbar</code></td><td><code>TempisTimelineScrollbarOptions</code></td><td>—</td><td>Scrollbar options.</td></tr>
+    <tr><td><code>grouping</code></td><td><code>TempisTimelineGroupingOptions</code></td><td>—</td><td>Grouping options.</td></tr>
+    <tr><td><code>accessibility</code></td><td><code>TempisTimelineAccessibilityOptions</code></td><td>—</td><td>Accessibility options (keyboard, ARIA).</td></tr>
+    <tr><td><code>minimap</code></td><td><code>TempisTimelineMinimapOptions</code></td><td>—</td><td>Minimap overview bar. Provide to enable.</td></tr>
+  </tbody>
+</table>
+
+<div class="note">When using <code>responsive: true</code>, the canvas must be inside a container with explicit dimensions. The timeline resizes to fill its parent — if the parent has no width or height, the canvas will collapse to zero.</div>
+
+<h2>Instance Methods</h2>
+<table>
+  <thead><tr><th>Method</th><th>Description</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><code>setItems(items)</code></td><td>Replace all items and redraw.</td><td><a href="#core/items">Items</a></td></tr>
+    <tr><td><code>getItems()</code></td><td>Get current item definitions.</td><td><a href="#core/items">Items</a></td></tr>
+    <tr><td><code>setCategories(categories)</code></td><td>Replace all categories and redraw.</td><td><a href="#core/categories">Categories</a></td></tr>
+    <tr><td><code>getCategories()</code></td><td>Get current category definitions.</td><td><a href="#core/categories">Categories</a></td></tr>
+    <tr><td><code>setBands(bands)</code></td><td>Replace all bands and redraw.</td><td><a href="#core/bands">Bands</a></td></tr>
+    <tr><td><code>setDependencies(deps)</code></td><td>Replace all dependencies and redraw.</td><td><a href="#core/dependencies">Dependencies</a></td></tr>
+    <tr><td><code>setGroupCollapsed(group, collapsed?)</code></td><td>Set or toggle a group's collapsed state.</td><td><a href="#core/grouping">Grouping</a></td></tr>
+    <tr><td><code>isGroupCollapsed(group)</code></td><td>Check if a group is collapsed.</td><td><a href="#core/grouping">Grouping</a></td></tr>
+    <tr><td><code>focus(options?)</code></td><td>Navigate to an item, date, or range.</td><td><a href="#core/focus">Focus</a></td></tr>
+    <tr><td><code>getRange()</code></td><td>Get the current visible range.</td><td><a href="#core/range">Range</a></td></tr>
+    <tr><td><code>setSelection(ids)</code></td><td>Programmatically select items by ID.</td><td><a href="#core/selection">Selection</a></td></tr>
+    <tr><td><code>getSelection()</code></td><td>Get selected item IDs.</td><td><a href="#core/selection">Selection</a></td></tr>
+    <tr><td><code>clearSelection()</code></td><td>Deselect all items.</td><td><a href="#core/selection">Selection</a></td></tr>
+    <tr><td><code>toImage(options?)</code></td><td>Export as PNG, JPEG, or WebP blob.</td><td><a href="#core/image-export">Image Export</a></td></tr>
+    <tr><td><code>redraw()</code></td><td>Force a redraw.</td><td>—</td></tr>
+    <tr><td><code>destroy()</code></td><td>Clean up all listeners and resources.</td><td>—</td></tr>
+  </tbody>
+</table>
+
+<h3>destroy()</h3>
+<p>Removes all event listeners, disconnects observers, cancels animations, and clears the canvas. Always call this before removing the timeline from the DOM to prevent memory leaks.</p>
+<div class="note">In single-page applications, always call <code>destroy()</code> when removing the timeline from the DOM to prevent memory leaks from orphaned event listeners and resize observers.</div>
+<pre><code class="language-typescript">timeline.destroy();</code></pre>
+<p>In frameworks like React, the <code>&lt;TempisTimeline&gt;</code> component handles this automatically on unmount.</p>

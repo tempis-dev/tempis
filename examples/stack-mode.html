@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="../images/logo.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stack Mode Comparison</title>
+  <script src="../lib/tempis_timeline.js"></script>
+</head>
+<style>
+  html {
+    background-color: #ebebeb;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+  body {
+    margin: 20px;
+  }
+  .controls {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .control-group {
+    margin-bottom: 15px;
+  }
+  .control-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+  }
+  .control-group p {
+    margin: 5px 0 10px 0;
+    font-size: 14px;
+    color: #666;
+  }
+  .radio-group {
+    display: flex;
+    gap: 20px;
+  }
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .radio-option input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+  .radio-option label {
+    margin: 0;
+    font-weight: normal;
+    cursor: pointer;
+  }
+  .canvas-container {
+    width: 100%;
+    height: 600px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+  .info {
+    background: #e3f2fd;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border-left: 4px solid #2196F3;
+  }
+  .info h3 {
+    margin: 0 0 10px 0;
+    color: #1976D2;
+  }
+  .info ul {
+    margin: 5px 0;
+    padding-left: 20px;
+  }
+  .info li {
+    margin: 5px 0;
+    color: #555;
+  }
+  .mode-description {
+    background: #fff3cd;
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-top: 10px;
+    border-left: 4px solid #ffc107;
+    font-size: 14px;
+  }
+</style>
+<body>
+  <div class="controls">
+    <div class="control-group">
+      <label>Stack Mode</label>
+      <p>Choose how items are vertically arranged:</p>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input type="radio" id="compact" name="stackMode" value="compact">
+          <label for="compact">Compact (dynamic layout)</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" id="stable" name="stackMode" value="stable" checked>
+          <label for="stable">Stable (fixed layout)</label>
+        </div>
+      </div>
+      <div class="mode-description" id="modeDescription">
+        <strong>Stable Mode:</strong> ALL items included in layout. PIT labels always centered on timestamp. Layout cached and only updates on zoom/data changes. No shuffling when panning.
+      </div>
+    </div>
+  </div>
+
+  <div class="canvas-container">
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <div class="info">
+    <h3>Try This:</h3>
+    <ul>
+      <li><strong>Pan the timeline</strong> left and right to see how items behave in different modes</li>
+      <li><strong>Compact mode:</strong> Items dynamically repack based on visible items. PIT labels stay within canvas bounds.</li>
+      <li><strong>Stable mode:</strong> All items included in layout. PIT labels always centered on timestamp. No shuffling when panning.</li>
+      <li><strong>Zoom in/out</strong> using mouse wheel - stable mode recalculates layout on zoom changes</li>
+    </ul>
+  </div>
+</body>
+<script>
+  // Generate test data with overlapping items and PIT items
+  function generateItems() {
+    const items = [];
+    const groups = ['Project Alpha', 'Project Beta', 'Project Gamma'];
+    const baseDate = new Date('2024-01-01T00:00:00');
+    let id = 0;
+
+    groups.forEach((group, groupIndex) => {
+      // Create range items
+      for (let i = 0; i < 15; i++) {
+        const startDay = Math.floor(Math.random() * 50);
+        const durationDays = Math.floor(Math.random() * 12) + 3;
+        
+        const start = new Date(baseDate);
+        start.setDate(start.getDate() + startDay);
+        
+        const end = new Date(start);
+        end.setDate(end.getDate() + durationDays);
+
+        items.push({
+          id: id++,
+          label: `Item ${id}`,
+          start: start,
+          end: end,
+          grouping: group,
+          style: {
+            backgroundColor: groupIndex === 0 ? '#4CAF50' : groupIndex === 1 ? '#2196F3' : '#FF9800',
+            fontColor: '#ffffff'
+          }
+        });
+      }
+
+      // Create point-in-time items
+      for (let i = 0; i < 8; i++) {
+        const day = Math.floor(Math.random() * 60);
+        const date = new Date(baseDate);
+        date.setDate(date.getDate() + day);
+
+        items.push({
+          id: id++,
+          label: `Item ${id}`,
+          start: date,
+          grouping: group,
+          style: {
+            backgroundColor: '#E91E63',
+            fontColor: '#ffffff',
+            borderColor: '#C2185B',
+            borderThickness: 2
+          }
+        });
+      }
+    });
+
+    return items;
+  }
+
+  // Create initial timeline with stable mode (default)
+  let currentMode = 'stable';
+  const items = generateItems();
+
+  const timelineOptions = {
+    responsive: true,
+    stackMode: currentMode,
+    range: {
+      position: "bottom",
+      start: new Date('2024-01-01'),
+      end: new Date('2024-03-01')
+    },
+    font: {
+      size: 13
+    },
+    items: items
+  };
+
+  let timeline = new tempis_timeline.TempisTimeline("#canvas", timelineOptions);
+  window["timeline"] = timeline;
+
+  // Update mode description
+  function updateModeDescription(mode) {
+    const description = document.getElementById('modeDescription');
+    if (mode === 'compact') {
+      description.innerHTML = '<strong>Compact Mode:</strong> Only visible items are included in layout. PIT labels adjust to fit canvas. Layout updates when panning. More space-efficient.';
+    } else {
+      description.innerHTML = '<strong>Stable Mode:</strong> ALL items included in layout. PIT labels always centered on timestamp. Layout cached and only updates on zoom/data changes. No shuffling when panning.';
+    }
+  }
+
+  // Handle mode changes
+  document.querySelectorAll('input[name="stackMode"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      currentMode = e.target.value;
+      
+      // Destroy the old timeline to clean up event listeners
+      if (timeline) {
+        timeline.destroy();
+      }
+      
+      // Recreate timeline with new stack mode
+      timelineOptions.stackMode = currentMode;
+      timeline = new tempis_timeline.TempisTimeline("#canvas", timelineOptions);
+      window["timeline"] = timeline;
+      
+      updateModeDescription(currentMode);
+      console.log(`Switched to ${currentMode} stack mode`);
+    });
+  });
+</script>
+</html>

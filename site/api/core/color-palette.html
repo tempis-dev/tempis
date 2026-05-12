@@ -1,0 +1,42 @@
+<h1>Color Palette</h1>
+<p class="subtitle">Control the default colours assigned to categories.</p>
+
+<h2>Methods</h2>
+
+<h3>setGlobalPalette(palette)</h3>
+<p>Replaces the global colour palette. Categories without an explicit <code>backgroundColor</code> cycle through these colours in order.</p>
+<pre><code class="language-typescript">TempisTimeline.setGlobalPalette(['#264653', '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51']);</code></pre>
+
+<h3>getGlobalPalette()</h3>
+<p>Returns the current palette array.</p>
+<pre><code class="language-typescript">const palette = TempisTimeline.getGlobalPalette();</code></pre>
+
+<h2>How Categories Pick Colours</h2>
+<p>When a category does not specify a <code>backgroundColor</code> in its <code>style</code>, the timeline assigns it the next colour from the global palette. Colours are assigned in the order categories appear, cycling back to the start when the palette is exhausted.</p>
+
+<div class="note">The default palette provides 10 distinct colours. If you have more than 10 categories without explicit colours, the palette cycles back to the beginning.</div>
+<p>Setting a new palette affects all timelines created after the call. Existing instances are not automatically updated — call <code>redraw()</code> or recreate the instance to apply the new palette.</p>
+
+<h2>Example</h2>
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+// Set a custom palette before creating the timeline
+TempisTimeline.setGlobalPalette([
+  '#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#ef4444'
+]);
+
+const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  categories: [
+    { name: 'cat-a', label: 'Category A' },   // gets #6366f1
+    { name: 'cat-b', label: 'Category B' },       // gets #ec4899
+    { name: 'cat-c', label: 'Category C' },        // gets #14b8a6
+  ],
+  legend: { position: 'top' },
+  items: [
+    { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-10', category: 'cat-a' },
+    { id: 2, label: 'Item 2', start: '2026-02-05', end: '2026-02-18', category: 'cat-b' },
+    { id: 3, label: 'Item 3', start: '2026-02-12', end: '2026-02-22', category: 'cat-c' },
+  ],
+  range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' }
+});</code></pre>

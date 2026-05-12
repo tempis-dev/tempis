@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tempis Timeline — Canvas-powered timeline for the web</title>
+  <link rel="icon" type="image/png" href="images/logo.png">
+  <link rel="stylesheet" href="styles.css">
+  <script src="lib/tempis_timeline.js"></script>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="Tempis">
+        Tempis
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="get-started.html">Get Started</a></li>
+        <li><a href="examples.html">Examples</a></li>
+        <li><a href="api.html">API</a></li>
+        <li><a href="pricing.html">Pricing</a></li>
+      </ul>
+      <a href="https://github.com/tempis-dev/tempis" class="nav-github" aria-label="GitHub">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      </a>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.mobile-menu').classList.add('open');document.querySelector('.mobile-menu-overlay').classList.add('active');">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </nav>
+  <div class="mobile-menu-overlay" onclick="document.querySelector('.mobile-menu').classList.remove('open');this.classList.remove('active');"></div>
+  <div class="mobile-menu">
+    <button class="mobile-menu-close" aria-label="Close menu" onclick="this.parentElement.classList.remove('open');document.querySelector('.mobile-menu-overlay').classList.remove('active');">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <a href="index.html">Home</a>
+    <a href="get-started.html">Get Started</a>
+    <a href="examples.html">Examples</a>
+    <a href="api.html">API</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="https://github.com/tempis-dev/tempis" class="mobile-menu-github" aria-label="GitHub"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
+  </div>
+
+  <section class="hero">
+    <h1>A simple, flexible<br><span>timeline</span> for the web</h1>
+    <p>Lightweight canvas-rendered timelines with smooth interactions, touch support, and no dependencies.</p>
+    <div class="hero-buttons">
+      <a href="get-started.html" class="btn btn-primary">Get Started</a>
+      <a href="https://github.com/tempis-dev/tempis" class="btn btn-outline">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </section>
+
+  <section class="demo-section">
+    <div class="demo-container">
+      <canvas id="hero-demo"></canvas>
+    </div>
+  </section>
+
+  <script>
+    const { TempisTimeline } = tempis_timeline;
+    new TempisTimeline('#hero-demo', {
+      responsive: true,
+      verticalFill: 'fill-canvas',
+      range: {
+        start: '2024-03-14T06:00:00',
+        end: '2024-03-14T18:00:00',
+        position: 'bottom'
+      },
+      legend: { position: 'bottom' },
+      grouping: { collapsible: true },
+      minimap: {},
+      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      categories: [
+        { name: 'deploy',   label: 'Deployments', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+        { name: 'incident', label: 'Incidents',    style: { backgroundColor: '#ff0071', fontColor: '#fff' } },
+        { name: 'alert',    label: 'Alerts',       style: { backgroundColor: '#f59e0b', fontColor: '#111' } },
+        { name: 'task',     label: 'Maintenance',  style: { backgroundColor: '#10b981', fontColor: '#fff' } }
+      ],
+      items: [
+
+        // ── March 12 (Tue) — routine release, overlapping DB maintenance ──
+        { id: 200, label: 'v2.3.0 → Staging',       start: '2024-03-12T07:00:00', end: '2024-03-12T08:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 201, label: 'Staging Smoke Tests',     start: '2024-03-12T07:30:00', end: '2024-03-12T09:00:00', category: 'task',     grouping: 'Releases' },
+        { id: 202, label: 'v2.3.0 → Production',    start: '2024-03-12T10:00:00', end: '2024-03-12T11:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 203, label: 'Canary Analysis',         start: '2024-03-12T10:30:00', end: '2024-03-12T11:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 204, label: 'Deploy Complete',         start: '2024-03-12T11:35:00', category: 'alert', grouping: 'Releases' },
+        { id: 205, label: 'CDN Cache Purge',         start: '2024-03-12T11:00:00', end: '2024-03-12T12:30:00', category: 'task',     grouping: 'API' },
+        { id: 206, label: 'WAF Rule Update',         start: '2024-03-12T11:30:00', end: '2024-03-12T12:30:00', category: 'task',     grouping: 'API' },
+        { id: 207, label: 'Auth Service Restart',    start: '2024-03-12T12:00:00', end: '2024-03-12T13:00:00', category: 'task',     grouping: 'API' },
+        { id: 208, label: 'Slow Query Alert',        start: '2024-03-12T14:00:00', category: 'alert', grouping: 'Database' },
+        { id: 209, label: 'Index Rebuild',           start: '2024-03-12T14:00:00', end: '2024-03-12T16:00:00', category: 'task',     grouping: 'Database' },
+        { id: 210, label: 'Table Partition',         start: '2024-03-12T14:30:00', end: '2024-03-12T17:00:00', category: 'task',     grouping: 'Database' },
+        { id: 211, label: 'Stats Refresh',           start: '2024-03-12T15:00:00', end: '2024-03-12T16:30:00', category: 'task',     grouping: 'Database' },
+        { id: 212, label: 'Deadlock Detected',       start: '2024-03-12T15:30:00', category: 'alert', grouping: 'Database' },
+
+        // ── March 13 (Wed) — memory leak incident, heavy API overlap ──
+        { id: 300, label: 'v2.3.1 Patch',           start: '2024-03-13T07:30:00', end: '2024-03-13T09:00:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 301, label: 'Feature Flag Rollout',   start: '2024-03-13T08:00:00', end: '2024-03-13T09:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 302, label: 'Load Balancer Config',   start: '2024-03-13T09:00:00', end: '2024-03-13T11:00:00', category: 'task',     grouping: 'API' },
+        { id: 303, label: 'TLS Certificate Swap',   start: '2024-03-13T09:30:00', end: '2024-03-13T10:30:00', category: 'task',     grouping: 'API' },
+        { id: 304, label: 'Rate Limit Tuning',      start: '2024-03-13T10:00:00', end: '2024-03-13T11:30:00', category: 'task',     grouping: 'API' },
+        { id: 305, label: 'Memory Leak Detected',   start: '2024-03-13T11:00:00', end: '2024-03-13T14:00:00', category: 'incident', grouping: 'API' },
+        { id: 306, label: 'Gateway Timeouts',       start: '2024-03-13T11:30:00', end: '2024-03-13T13:00:00', category: 'incident', grouping: 'API' },
+        { id: 307, label: 'OOM Kill',               start: '2024-03-13T11:15:00', category: 'alert', grouping: 'API' },
+        { id: 308, label: 'Pod Restart',            start: '2024-03-13T11:20:00', category: 'alert', grouping: 'API' },
+        { id: 309, label: 'Heap Dump Captured',     start: '2024-03-13T11:45:00', category: 'alert', grouping: 'API' },
+        { id: 310, label: 'Circuit Breaker Open',   start: '2024-03-13T12:00:00', category: 'alert', grouping: 'API' },
+        { id: 311, label: 'Replica Lag > 10s',      start: '2024-03-13T13:00:00', end: '2024-03-13T15:00:00', category: 'incident', grouping: 'Database' },
+        { id: 312, label: 'Write Timeout Errors',   start: '2024-03-13T13:30:00', end: '2024-03-13T14:30:00', category: 'incident', grouping: 'Database' },
+        { id: 313, label: 'Replica Lag Alert',      start: '2024-03-13T13:05:00', category: 'alert', grouping: 'Database' },
+        { id: 314, label: 'Failover Initiated',     start: '2024-03-13T14:30:00', category: 'alert', grouping: 'Database' },
+        { id: 315, label: 'DB Backup',              start: '2024-03-13T20:00:00', end: '2024-03-13T22:00:00', category: 'task',     grouping: 'Database' },
+        { id: 316, label: 'Replica Resync',         start: '2024-03-13T20:30:00', end: '2024-03-13T23:00:00', category: 'task',     grouping: 'Database' },
+        { id: 317, label: 'Log Rotation',           start: '2024-03-13T22:00:00', end: '2024-03-13T23:00:00', category: 'task',     grouping: 'API' },
+
+        // ── March 14 (Thu) — DEFAULT VISIBLE RANGE — major outage, very dense ──
+        // Morning: deploy + parallel prep tasks
+        { id: 1,   label: 'v2.4.0 → Staging',       start: '2024-03-14T06:30:00', end: '2024-03-14T08:00:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 2,   label: 'Migration v2.4.0',        start: '2024-03-14T06:30:00', end: '2024-03-14T08:00:00', category: 'task',     grouping: 'Database' },
+        { id: 3,   label: 'Staging E2E Tests',       start: '2024-03-14T07:00:00', end: '2024-03-14T08:30:00', category: 'task',     grouping: 'Releases' },
+        { id: 4,   label: 'SSL Cert Rotation',       start: '2024-03-14T07:00:00', end: '2024-03-14T09:00:00', category: 'task',     grouping: 'API' },
+        { id: 5,   label: 'DNS Propagation',         start: '2024-03-14T07:30:00', end: '2024-03-14T09:00:00', category: 'task',     grouping: 'API' },
+        { id: 6,   label: 'Config Sync',             start: '2024-03-14T08:00:00', end: '2024-03-14T09:30:00', category: 'task',     grouping: 'API' },
+        { id: 7,   label: 'Schema Validation',       start: '2024-03-14T07:30:00', end: '2024-03-14T08:30:00', category: 'task',     grouping: 'Database' },
+        { id: 8,   label: 'Staging Passed',          start: '2024-03-14T08:30:00', category: 'alert', grouping: 'Releases' },
+
+        // Mid-morning: production deploy + canary
+        { id: 10,  label: 'v2.4.0 → Production',    start: '2024-03-14T09:00:00', end: '2024-03-14T10:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 11,  label: 'Canary Analysis',         start: '2024-03-14T09:30:00', end: '2024-03-14T10:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 12,  label: 'Feature Flag: Payments',  start: '2024-03-14T09:30:00', end: '2024-03-14T10:00:00', category: 'deploy',   grouping: 'Releases' },
+
+        // 10:00–12:30: cascading outage — lots of overlapping incidents + alerts
+        { id: 20,  label: 'API Latency Spike',       start: '2024-03-14T10:00:00', end: '2024-03-14T12:30:00', category: 'incident', grouping: 'API' },
+        { id: 21,  label: 'Payment Timeouts',        start: '2024-03-14T10:10:00', end: '2024-03-14T11:30:00', category: 'incident', grouping: 'API' },
+        { id: 22,  label: 'Search Degraded',         start: '2024-03-14T10:20:00', end: '2024-03-14T12:00:00', category: 'incident', grouping: 'API' },
+        { id: 23,  label: 'Auth Failures',           start: '2024-03-14T10:30:00', end: '2024-03-14T11:45:00', category: 'incident', grouping: 'API' },
+        { id: 24,  label: 'Webhook Backlog',         start: '2024-03-14T10:45:00', end: '2024-03-14T12:00:00', category: 'incident', grouping: 'API' },
+        { id: 30,  label: 'CPU > 90%',               start: '2024-03-14T10:05:00', category: 'alert', grouping: 'API' },
+        { id: 31,  label: 'Error Rate > 5%',         start: '2024-03-14T10:15:00', category: 'alert', grouping: 'API' },
+        { id: 32,  label: 'P1 Page Sent',            start: '2024-03-14T10:20:00', category: 'alert', grouping: 'API' },
+        { id: 33,  label: 'Latency P99 > 3s',        start: '2024-03-14T10:35:00', category: 'alert', grouping: 'API' },
+        { id: 34,  label: 'Memory > 85%',            start: '2024-03-14T10:50:00', category: 'alert', grouping: 'API' },
+        { id: 35,  label: 'Queue Depth > 10k',       start: '2024-03-14T11:00:00', category: 'alert', grouping: 'API' },
+        { id: 36,  label: 'Rollback v2.4.0',         start: '2024-03-14T12:20:00', category: 'alert', grouping: 'Releases' },
+
+        // 12:30–15:00: DB cascade from the outage
+        { id: 40,  label: 'DB Connection Pool',      start: '2024-03-14T12:30:00', end: '2024-03-14T15:00:00', category: 'incident', grouping: 'Database' },
+        { id: 41,  label: 'Lock Contention',         start: '2024-03-14T12:45:00', end: '2024-03-14T14:00:00', category: 'incident', grouping: 'Database' },
+        { id: 42,  label: 'Replication Delay',       start: '2024-03-14T13:00:00', end: '2024-03-14T14:30:00', category: 'incident', grouping: 'Database' },
+        { id: 43,  label: 'Query Timeout Surge',     start: '2024-03-14T13:15:00', end: '2024-03-14T14:15:00', category: 'incident', grouping: 'Database' },
+        { id: 44,  label: 'Pool Exhausted',          start: '2024-03-14T12:35:00', category: 'alert', grouping: 'Database' },
+        { id: 45,  label: 'Max Connections Hit',     start: '2024-03-14T12:50:00', category: 'alert', grouping: 'Database' },
+        { id: 46,  label: 'Replica Lag > 30s',       start: '2024-03-14T13:05:00', category: 'alert', grouping: 'Database' },
+        { id: 47,  label: 'Deadlock Detected',       start: '2024-03-14T13:30:00', category: 'alert', grouping: 'Database' },
+        { id: 48,  label: 'DB Failover',             start: '2024-03-14T14:50:00', category: 'alert', grouping: 'Database' },
+
+        // Afternoon: hotfix + recovery
+        { id: 50,  label: 'v2.4.1 Hotfix',          start: '2024-03-14T14:00:00', end: '2024-03-14T15:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 51,  label: 'Hotfix Canary',           start: '2024-03-14T14:30:00', end: '2024-03-14T15:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 52,  label: 'Hotfix Verified',         start: '2024-03-14T15:35:00', category: 'alert', grouping: 'Releases' },
+        { id: 53,  label: 'Cache Flush',             start: '2024-03-14T15:00:00', category: 'alert', grouping: 'API' },
+        { id: 54,  label: 'Pool Resize',             start: '2024-03-14T15:00:00', end: '2024-03-14T16:00:00', category: 'task',     grouping: 'Database' },
+        { id: 55,  label: 'Connection Drain',        start: '2024-03-14T15:00:00', end: '2024-03-14T15:45:00', category: 'task',     grouping: 'API' },
+        { id: 56,  label: 'Queue Replay',            start: '2024-03-14T15:30:00', end: '2024-03-14T16:30:00', category: 'task',     grouping: 'API' },
+        { id: 57,  label: 'Webhook Retry',           start: '2024-03-14T15:30:00', end: '2024-03-14T17:00:00', category: 'task',     grouping: 'API' },
+        { id: 58,  label: 'DB Vacuum & Reindex',     start: '2024-03-14T16:00:00', end: '2024-03-14T17:30:00', category: 'task',     grouping: 'Database' },
+        { id: 59,  label: 'Slow Log Analysis',       start: '2024-03-14T16:00:00', end: '2024-03-14T17:00:00', category: 'task',     grouping: 'Database' },
+        { id: 60,  label: 'Stats Refresh',           start: '2024-03-14T16:30:00', end: '2024-03-14T17:30:00', category: 'task',     grouping: 'Database' },
+
+        // Evening: final deploy + overnight tasks
+        { id: 70,  label: 'v2.4.2 → Production',    start: '2024-03-14T19:00:00', end: '2024-03-14T20:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 71,  label: 'Post-Deploy Canary',      start: '2024-03-14T19:30:00', end: '2024-03-14T20:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 72,  label: 'Health Check OK',         start: '2024-03-14T20:35:00', category: 'alert', grouping: 'API' },
+        { id: 73,  label: 'Disk Usage > 80%',        start: '2024-03-14T21:00:00', category: 'alert', grouping: 'Database' },
+        { id: 74,  label: 'Storage Cleanup',         start: '2024-03-14T21:00:00', end: '2024-03-14T22:30:00', category: 'task',     grouping: 'Database' },
+        { id: 75,  label: 'Archive Old Logs',        start: '2024-03-14T21:00:00', end: '2024-03-14T23:00:00', category: 'task',     grouping: 'API' },
+        { id: 76,  label: 'Incident Postmortem',     start: '2024-03-14T21:30:00', end: '2024-03-14T22:30:00', category: 'task',     grouping: 'API' },
+
+        // ── March 15 (Fri) — release day, overlapping deploys + another incident ──
+        { id: 400, label: 'v2.5.0-rc1 → Staging',   start: '2024-03-15T07:00:00', end: '2024-03-15T08:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 401, label: 'DB Migration v2.5',       start: '2024-03-15T07:00:00', end: '2024-03-15T08:30:00', category: 'task',     grouping: 'Database' },
+        { id: 402, label: 'E2E Test Suite',          start: '2024-03-15T07:30:00', end: '2024-03-15T09:00:00', category: 'task',     grouping: 'Releases' },
+        { id: 403, label: 'Staging Tests Failed',    start: '2024-03-15T08:35:00', category: 'alert', grouping: 'Releases' },
+        { id: 404, label: 'Migration Rollback',      start: '2024-03-15T08:40:00', category: 'alert', grouping: 'Database' },
+        { id: 405, label: 'v2.5.0-rc2 → Staging',   start: '2024-03-15T10:00:00', end: '2024-03-15T11:00:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 406, label: 'Regression Tests',        start: '2024-03-15T10:00:00', end: '2024-03-15T11:30:00', category: 'task',     grouping: 'Releases' },
+        { id: 407, label: 'Perf Benchmark',          start: '2024-03-15T10:30:00', end: '2024-03-15T12:00:00', category: 'task',     grouping: 'Releases' },
+        { id: 408, label: 'Rate Limiter Outage',     start: '2024-03-15T11:30:00', end: '2024-03-15T13:30:00', category: 'incident', grouping: 'API' },
+        { id: 409, label: 'Auth Token Failures',     start: '2024-03-15T11:45:00', end: '2024-03-15T13:00:00', category: 'incident', grouping: 'API' },
+        { id: 410, label: 'Session Store Overflow',  start: '2024-03-15T12:00:00', end: '2024-03-15T13:00:00', category: 'incident', grouping: 'API' },
+        { id: 411, label: '429 Spike',               start: '2024-03-15T11:35:00', category: 'alert', grouping: 'API' },
+        { id: 412, label: 'Token Refresh Errors',    start: '2024-03-15T11:50:00', category: 'alert', grouping: 'API' },
+        { id: 413, label: 'User Reports Flooding',   start: '2024-03-15T12:10:00', category: 'alert', grouping: 'API' },
+        { id: 414, label: 'Redis Cluster Restart',   start: '2024-03-15T13:00:00', end: '2024-03-15T13:30:00', category: 'task',     grouping: 'Database' },
+        { id: 415, label: 'Redis Sentinel Failover', start: '2024-03-15T13:00:00', end: '2024-03-15T13:20:00', category: 'task',     grouping: 'Database' },
+        { id: 416, label: 'v2.5.0 → Production',    start: '2024-03-15T14:00:00', end: '2024-03-15T15:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 417, label: 'Canary Monitoring',       start: '2024-03-15T14:30:00', end: '2024-03-15T15:30:00', category: 'deploy',   grouping: 'Releases' },
+        { id: 418, label: 'All Green',               start: '2024-03-15T15:35:00', category: 'alert', grouping: 'API' },
+        { id: 419, label: 'CDN Warm-up',             start: '2024-03-15T15:30:00', end: '2024-03-15T16:30:00', category: 'task',     grouping: 'API' },
+        { id: 420, label: 'Cache Preload',           start: '2024-03-15T16:00:00', end: '2024-03-15T17:00:00', category: 'task',     grouping: 'API' },
+        { id: 421, label: 'Weekend DB Backup',       start: '2024-03-15T22:00:00', end: '2024-03-16T00:30:00', category: 'task',     grouping: 'Database' },
+        { id: 422, label: 'Replica Snapshot',        start: '2024-03-15T22:30:00', end: '2024-03-16T01:00:00', category: 'task',     grouping: 'Database' },
+        { id: 423, label: 'Log Archive',             start: '2024-03-15T23:00:00', end: '2024-03-16T00:00:00', category: 'task',     grouping: 'API' },
+
+        // ── March 16 (Sat) — weekend maintenance window ──
+        { id: 500, label: 'Cert Expiry Warning',     start: '2024-03-16T03:00:00', category: 'alert', grouping: 'API' },
+        { id: 501, label: 'Auto-Scaling Event',      start: '2024-03-16T09:00:00', end: '2024-03-16T10:00:00', category: 'task',     grouping: 'API' },
+        { id: 502, label: 'Node Drain',              start: '2024-03-16T09:00:00', end: '2024-03-16T09:30:00', category: 'task',     grouping: 'API' },
+        { id: 503, label: 'Disk IOPS Spike',         start: '2024-03-16T10:00:00', end: '2024-03-16T12:00:00', category: 'incident', grouping: 'Database' },
+        { id: 504, label: 'Checkpoint Stall',        start: '2024-03-16T10:30:00', end: '2024-03-16T11:30:00', category: 'incident', grouping: 'Database' },
+        { id: 505, label: 'IOPS Alert',              start: '2024-03-16T10:05:00', category: 'alert', grouping: 'Database' },
+        { id: 506, label: 'WAL Backlog Alert',       start: '2024-03-16T10:35:00', category: 'alert', grouping: 'Database' },
+        { id: 507, label: 'Snapshot Restore Test',   start: '2024-03-16T14:00:00', end: '2024-03-16T16:00:00', category: 'task',     grouping: 'Database' },
+        { id: 508, label: 'Schema Validation',       start: '2024-03-16T14:30:00', end: '2024-03-16T15:30:00', category: 'task',     grouping: 'Database' },
+        { id: 509, label: 'Kernel Patch',            start: '2024-03-16T16:00:00', end: '2024-03-16T17:00:00', category: 'task',     grouping: 'API' },
+        { id: 510, label: 'Node Rolling Restart',    start: '2024-03-16T16:00:00', end: '2024-03-16T18:00:00', category: 'task',     grouping: 'API' },
+        { id: 511, label: 'Firewall Rule Audit',     start: '2024-03-16T16:30:00', end: '2024-03-16T17:30:00', category: 'task',     grouping: 'API' }
+      ]
+    });
+  </script>
+
+  <!-- ─── Showcase rows ─── -->
+  <section class="showcase">
+
+    <div class="showcase-row">
+      <div class="showcase-text">
+        <h2>Built for large datasets</h2>
+        <p>Canvas rendering with virtual scrolling means only visible items are drawn. Load thousands of items and pan through them smoothly.</p>
+      </div>
+      <div class="showcase-demo">
+        <canvas id="demo-perf"></canvas>
+      </div>
+    </div>
+
+    <div class="showcase-row showcase-row-reverse">
+      <div class="showcase-text">
+        <h2>Animated focus</h2>
+        <p>Smoothly navigate to any item, date, or range with configurable easing and duration. Click the buttons to see it in action.</p>
+        <div class="showcase-actions">
+          <button class="btn btn-outline btn-sm" onclick="">Script</button>
+          <button class="btn btn-outline btn-sm" onclick="">Principal</button>
+          <button class="btn btn-outline btn-sm" onclick="">Editing</button>
+          <button class="btn btn-outline btn-sm" onclick="">Premiere</button>
+        </div>
+      </div>
+      <div class="showcase-demo">
+        <canvas id="demo-focus"></canvas>
+      </div>
+    </div>
+
+    <div class="showcase-row">
+      <div class="showcase-text">
+        <h2>Pluggable date adapters</h2>
+        <p>Use the built-in native Date adapter, or bring your own. Luxon, Day.js, date-fns — whatever your stack uses. Full control over formatting and timezone handling.</p>
+      </div>
+      <div class="showcase-demo">
+        <canvas id="demo-adapter"></canvas>
+      </div>
+    </div>
+
+    <div class="showcase-row showcase-row-reverse">
+      <div class="showcase-text">
+        <h2>Fully responsive</h2>
+        <p>The timeline redraws seamlessly as its container resizes. Resize a sidebar, collapse a panel, go fullscreen — it just works.</p>
+      </div>
+      <div class="showcase-demo showcase-demo-responsive" id="responsive-outer">
+        <div class="resize-arrow resize-arrow-top">
+          <svg viewBox="0 0 24 40" fill="none"><path d="M12 0L6 8h12L12 0z" fill="currentColor"/><line x1="12" y1="8" x2="12" y2="32" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3"/><path d="M12 40l6-8H6l6 8z" fill="currentColor"/></svg>
+        </div>
+        <div class="resize-arrow resize-arrow-left">
+          <svg viewBox="0 0 40 24" fill="none"><path d="M0 12L8 6v12L0 12z" fill="currentColor"/><line x1="8" y1="12" x2="32" y2="12" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3"/><path d="M40 12l-8-6v12l8-6z" fill="currentColor"/></svg>
+        </div>
+        <div class="responsive-wrapper" id="responsive-wrapper">
+          <canvas id="demo-responsive"></canvas>
+        </div>
+        <div class="resize-arrow resize-arrow-right">
+          <svg viewBox="0 0 40 24" fill="none"><path d="M0 12L8 6v12L0 12z" fill="currentColor"/><line x1="8" y1="12" x2="32" y2="12" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3"/><path d="M40 12l-8-6v12l8-6z" fill="currentColor"/></svg>
+        </div>
+        <div class="resize-arrow resize-arrow-bottom">
+          <svg viewBox="0 0 24 40" fill="none"><path d="M12 0L6 8h12L12 0z" fill="currentColor"/><line x1="12" y1="8" x2="12" y2="32" stroke="currentColor" stroke-width="2" stroke-dasharray="3 3"/><path d="M12 40l6-8H6l6 8z" fill="currentColor"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="showcase-row">
+      <div class="showcase-text">
+        <h2>Perfect for live data</h2>
+        <p>Stream events in real time and the timeline keeps up. New data appears instantly with smooth animated transitions — no flicker, no jank.</p>
+      </div>
+      <div class="showcase-demo">
+        <canvas id="demo-realtime"></canvas>
+      </div>
+    </div>
+
+    <div class="showcase-row showcase-row-reverse">
+      <div class="showcase-text">
+        <h2>Show item dependencies</h2>
+        <p>Define source/target item relationships and the timeline renders connector arrows automatically.</p>
+      </div>
+      <div class="showcase-demo">
+        <canvas id="demo-deps"></canvas>
+      </div>
+    </div>
+
+    <div class="showcase-row">
+      <div class="showcase-text">
+        <h2>Export to image</h2>
+        <p>One call and you've got a PNG, JPEG, or WebP. Control DPR for crisp retina output.</p>
+        <div class="showcase-actions">
+          <button class="btn btn-outline btn-sm" id="export-btn">Download PNG</button>
+        </div>
+      </div>
+      <div class="showcase-demo">
+        <canvas id="demo-export"></canvas>
+      </div>
+    </div>
+
+  </section>
+
+  <script>
+    // ── Performance demo: 5000 generated items ──
+    (function() {
+      const cats = [
+        { name: 'compute', label: 'Compute', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+        { name: 'network', label: 'Network', style: { backgroundColor: '#ff0071', fontColor: '#fff' } },
+        { name: 'storage', label: 'Storage', style: { backgroundColor: '#10b981', fontColor: '#fff' } }
+      ];
+      const catNames = cats.map(c => c.name);
+      const labels = ['Lambda','EC2','S3 Sync','RDS','ELB','SNS','SQS','DynamoDB','ECS','Fargate','Redshift','Kinesis','API Call','Batch','CloudFront'];
+      const items = [];
+      const base = new Date('2024-01-01T00:00:00').getTime();
+      const span = 365 * 24 * 60 * 60 * 1000;
+      for (let i = 0; i < 5000; i++) {
+        const s = base + Math.random() * span;
+        const dur = (2 + Math.random() * 72) * 3600000;
+        items.push({
+          id: i,
+          label: labels[i % labels.length],
+          start: new Date(s).toISOString(),
+          end: new Date(s + dur).toISOString(),
+          category: catNames[i % catNames.length]
+        });
+      }
+      new TempisTimeline('#demo-perf', {
+        responsive: true,
+        verticalFill: 'fill-canvas',
+        style: { item: { borderRadius: 3, fontColor: '#fff' } },
+        categories: cats,
+        legend: { position: 'bottom' },
+        range: { start: '2024-06-10T00:00:00', end: '2024-06-12T00:00:00', position: 'bottom' },
+        items: items
+      });
+    })();
+
+    // ── Focus demo ──
+    var focusDemo = new TempisTimeline('#demo-focus', {
+      responsive: true,
+      verticalFill: 'fill-canvas',
+      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      grouping: { collapsible: true },
+      categories: [
+        { name: 'prep',     label: 'Preparation', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+        { name: 'filming',  label: 'Filming',     style: { backgroundColor: '#ff0071', fontColor: '#fff' } },
+        { name: 'post',     label: 'Post',        style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+        { name: 'key',      label: 'Key Dates',   style: { backgroundColor: '#f59e0b', fontColor: '#111' } }
+      ],
+      legend: { position: 'bottom' },
+      range: { start: '2024-01-01', end: '2024-12-31', position: 'bottom' },
+      items: [
+        { id: 'script',    label: 'Script',       start: '2024-01-08', end: '2024-02-28', category: 'prep',    grouping: 'Pre-Production' },
+        { id: 'casting',   label: 'Casting',      start: '2024-02-01', end: '2024-03-15', category: 'prep',    grouping: 'Pre-Production' },
+        { id: 'locations',  label: 'Locations',    start: '2024-02-15', end: '2024-03-31', category: 'prep',    grouping: 'Pre-Production' },
+        { id: 'storyboard', label: 'Storyboard',  start: '2024-03-01', end: '2024-04-10', category: 'prep',    grouping: 'Pre-Production' },
+        { id: 'greenlight', label: 'Greenlight',   start: '2024-04-12',                   category: 'key',     grouping: 'Pre-Production' },
+
+        { id: 'principal', label: 'Principal',     start: '2024-04-20', end: '2024-07-15', category: 'filming', grouping: 'Production' },
+        { id: 'stunts',    label: 'Stunts',        start: '2024-05-10', end: '2024-06-20', category: 'filming', grouping: 'Production' },
+        { id: 'reshoots',  label: 'Reshoots',      start: '2024-07-20', end: '2024-08-10', category: 'filming', grouping: 'Production' },
+        { id: 'wrap',      label: 'Wrap',           start: '2024-08-12',                   category: 'key',     grouping: 'Production' },
+
+        { id: 'editing',   label: 'Editing',       start: '2024-08-15', end: '2024-10-15', category: 'post',   grouping: 'Post-Production' },
+        { id: 'vfx',       label: 'VFX',           start: '2024-09-01', end: '2024-11-01', category: 'post',   grouping: 'Post-Production' },
+        { id: 'sound',     label: 'Sound',         start: '2024-10-01', end: '2024-11-10', category: 'post',   grouping: 'Post-Production' },
+        { id: 'colour',    label: 'Colour',        start: '2024-10-20', end: '2024-11-15', category: 'post',   grouping: 'Post-Production' },
+        { id: 'premiere',  label: 'Premiere',       start: '2024-12-06',                   category: 'key',     grouping: 'Post-Production' }
+      ]
+    });
+
+    // Auto-cycle focus targets
+    (function() {
+      var targets = [
+        { id: 'script',    animate: true, duration: 800 },
+        { id: 'principal', animate: true, duration: 800 },
+        { id: 'editing',   animate: true, duration: 800 },
+        { id: 'premiere',  animate: true, duration: 800 }
+      ];
+      var idx = 0;
+      var btns = document.querySelectorAll('.showcase-actions .btn');
+
+      function cycle() {
+        // Update active button state
+        btns.forEach(function(b, i) { b.classList.toggle('btn-active', i === idx); });
+        var target = targets[idx];
+        focusDemo.focus(target);
+        focusDemo.setSelection(target.id ? [target.id] : []);
+        idx = (idx + 1) % targets.length;
+      }
+
+      cycle();
+      var timer = setInterval(cycle, 3500);
+
+      // Pause on manual click, resume after a delay
+      btns.forEach(function(btn, i) {
+        btn.addEventListener('click', function() {
+          clearInterval(timer);
+          idx = i;
+          cycle();
+          idx = (i + 1) % targets.length;
+          timer = setInterval(cycle, 3500);
+        });
+      });
+    })();
+
+    // ── Adapter demo: timezone-style display ──
+    new TempisTimeline('#demo-adapter', {
+      responsive: true,
+      verticalFill: 'fill-canvas',
+      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      grouping: { collapsible: true },
+      categories: [
+        { name: 'flight', label: 'Flights', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+        { name: 'layover', label: 'Layovers', style: { backgroundColor: '#f59e0b', fontColor: '#111' } },
+        { name: 'arrival', label: 'Arrivals', style: { backgroundColor: '#10b981', fontColor: '#fff' } }
+      ],
+      legend: { position: 'bottom' },
+      range: { start: '2024-07-20T00:00:00', end: '2024-07-21T03:00:00', position: 'bottom' },
+      items: [
+        { id: 1, label: 'LHR → JFK',     start: '2024-07-20T06:00:00', end: '2024-07-20T14:30:00', category: 'flight', grouping: 'London → New York' },
+        { id: 2, label: 'JFK Layover',    start: '2024-07-20T14:30:00', end: '2024-07-20T17:00:00', category: 'layover', grouping: 'London → New York' },
+        { id: 3, label: 'JFK → LAX',      start: '2024-07-20T17:00:00', end: '2024-07-20T23:30:00', category: 'flight', grouping: 'London → New York' },
+        { id: 4, label: 'Arrive LAX',     start: '2024-07-20T23:30:00', category: 'arrival', grouping: 'London → New York' },
+        { id: 5, label: 'NRT → SIN',      start: '2024-07-20T08:00:00', end: '2024-07-20T15:00:00', category: 'flight', grouping: 'Tokyo → Singapore' },
+        { id: 6, label: 'Arrive SIN',     start: '2024-07-20T15:00:00', category: 'arrival', grouping: 'Tokyo → Singapore' },
+        { id: 7, label: 'CDG → DXB',      start: '2024-07-20T10:00:00', end: '2024-07-20T18:30:00', category: 'flight', grouping: 'Paris → Dubai' },
+        { id: 8, label: 'DXB Layover',    start: '2024-07-20T18:30:00', end: '2024-07-20T22:00:00', category: 'layover', grouping: 'Paris → Dubai' },
+        { id: 9, label: 'DXB → BOM',      start: '2024-07-20T22:00:00', end: '2024-07-21T03:30:00', category: 'flight', grouping: 'Paris → Dubai' },
+        { id: 10, label: 'Arrive BOM',    start: '2024-07-21T03:30:00', category: 'arrival', grouping: 'Paris → Dubai' }
+      ]
+    });
+
+    // ── Responsive demo ──
+    new TempisTimeline('#demo-responsive', {
+      responsive: true,
+      verticalFill: 'fill-canvas',
+      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      grouping: { collapsible: true },
+      categories: [
+        { name: 'session',  label: 'Sessions',  style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+        { name: 'social',   label: 'Social',     style: { backgroundColor: '#ff0071', fontColor: '#fff' } },
+        { name: 'food',     label: 'Food & Drink', style: { backgroundColor: '#10b981', fontColor: '#fff' } }
+      ],
+      legend: { position: 'bottom' },
+      range: { start: '2024-08-10T14:00:00', end: '2024-08-10T23:00:00', position: 'bottom' },
+      items: [
+        { id: 1,  label: 'Rock Set',      start: '2024-08-10T13:30:00', end: '2024-08-10T14:45:00', category: 'session', grouping: 'Stage' },
+        { id: 2,  label: 'Acoustic',      start: '2024-08-10T15:00:00', end: '2024-08-10T16:30:00', category: 'session', grouping: 'Stage' },
+        { id: 3,  label: 'Indie Set',     start: '2024-08-10T17:00:00', end: '2024-08-10T18:30:00', category: 'session', grouping: 'Stage' },
+        { id: 4,  label: 'Headliner',     start: '2024-08-10T20:00:00', end: '2024-08-10T22:00:00', category: 'session', grouping: 'Stage' },
+        { id: 5,  label: 'Encore',        start: '2024-08-10T22:00:00', end: '2024-08-10T22:30:00', category: 'session', grouping: 'Stage' },
+        { id: 6,  label: 'Fireworks',     start: '2024-08-10T22:15:00',                             category: 'social',  grouping: 'Stage' },
+        { id: 7,  label: 'Food Trucks',   start: '2024-08-10T14:00:00', end: '2024-08-10T22:00:00', category: 'food',    grouping: 'Village' },
+        { id: 8,  label: 'Craft Beer',    start: '2024-08-10T14:00:00', end: '2024-08-10T23:00:00', category: 'food',    grouping: 'Village' },
+        { id: 9,  label: 'Meet & Greet',  start: '2024-08-10T15:00:00', end: '2024-08-10T16:00:00', category: 'social',  grouping: 'Village' },
+        { id: 10, label: 'Silent Disco',  start: '2024-08-10T22:30:00', end: '2024-08-11T00:30:00', category: 'social',  grouping: 'Village' }
+      ]
+    });
+
+    // Animate the container width and height
+    (function() {
+      var wrapper = document.getElementById('responsive-wrapper');
+      var outer = document.getElementById('responsive-outer');
+      var aTop = outer.querySelector('.resize-arrow-top');
+      var aBot = outer.querySelector('.resize-arrow-bottom');
+      var aLeft = outer.querySelector('.resize-arrow-left');
+      var aRight = outer.querySelector('.resize-arrow-right');
+      var arrows = [aTop, aBot, aLeft, aRight];
+      var wide = true;
+      var pad = 4; // padding from outer edge
+      var innerPad = 4; // padding from inner wrapper edge
+      var tip = 8; // arrowhead size
+      var minGap = 24; // hide arrows below this gap
+
+      function vSvg(h) {
+        var mid = 14, r = 6;
+        return '<svg viewBox="0 0 28 ' + h + '" fill="none" xmlns="http://www.w3.org/2000/svg">'
+          + '<path d="M14 1 C11 1, ' + (mid-r) + ' ' + tip + ', ' + (mid-r) + ' ' + tip + ' L' + (mid+r) + ' ' + tip + ' C' + (mid+r) + ' ' + tip + ', 17 1, 14 1z" fill="currentColor"/>'
+          + '<line x1="14" y1="' + (tip+2) + '" x2="14" y2="' + (h-tip-2) + '" stroke="currentColor" stroke-width="2.5" stroke-dasharray="1.5 5" stroke-linecap="round"/>'
+          + '<path d="M14 ' + (h-1) + ' C11 ' + (h-1) + ', ' + (mid-r) + ' ' + (h-tip) + ', ' + (mid-r) + ' ' + (h-tip) + ' L' + (mid+r) + ' ' + (h-tip) + ' C' + (mid+r) + ' ' + (h-tip) + ', 17 ' + (h-1) + ', 14 ' + (h-1) + 'z" fill="currentColor"/>'
+          + '</svg>';
+      }
+
+      function hSvg(w) {
+        var mid = 14, r = 6;
+        return '<svg viewBox="0 0 ' + w + ' 28" fill="none" xmlns="http://www.w3.org/2000/svg">'
+          + '<path d="M1 14 C1 11, ' + tip + ' ' + (mid-r) + ', ' + tip + ' ' + (mid-r) + ' L' + tip + ' ' + (mid+r) + ' C' + tip + ' ' + (mid+r) + ', 1 17, 1 14z" fill="currentColor"/>'
+          + '<line x1="' + (tip+2) + '" y1="14" x2="' + (w-tip-2) + '" y2="14" stroke="currentColor" stroke-width="2.5" stroke-dasharray="1.5 5" stroke-linecap="round"/>'
+          + '<path d="M' + (w-1) + ' 14 C' + (w-1) + ' 11, ' + (w-tip) + ' ' + (mid-r) + ', ' + (w-tip) + ' ' + (mid-r) + ' L' + (w-tip) + ' ' + (mid+r) + ' C' + (w-tip) + ' ' + (mid+r) + ', ' + (w-1) + ' 17, ' + (w-1) + ' 14z" fill="currentColor"/>'
+          + '</svg>';
+      }
+
+      function tick() {
+        var oW = outer.clientWidth, oH = outer.clientHeight;
+        var wW = wrapper.offsetWidth, wH = wrapper.offsetHeight;
+        var gapX = (oW - wW) / 2;
+        var gapY = (oH - wH) / 2;
+        var arrowH = Math.max(0, gapY - pad - innerPad);
+        var arrowW = Math.max(0, gapX - pad - innerPad);
+        var showV = arrowH > minGap;
+        var showH = arrowW > minGap;
+
+        aTop.style.top = pad + 'px';
+        aTop.style.height = arrowH + 'px';
+        aTop.style.opacity = showV ? 0.45 : 0;
+        if (showV) aTop.innerHTML = vSvg(Math.max(12, arrowH));
+
+        aBot.style.bottom = pad + 'px';
+        aBot.style.height = arrowH + 'px';
+        aBot.style.opacity = showV ? 0.45 : 0;
+        if (showV) aBot.innerHTML = vSvg(Math.max(12, arrowH));
+
+        aLeft.style.left = pad + 'px';
+        aLeft.style.width = arrowW + 'px';
+        aLeft.style.opacity = showH ? 0.45 : 0;
+        if (showH) aLeft.innerHTML = hSvg(Math.max(12, arrowW));
+
+        aRight.style.right = pad + 'px';
+        aRight.style.width = arrowW + 'px';
+        aRight.style.opacity = showH ? 0.45 : 0;
+        if (showH) aRight.innerHTML = hSvg(Math.max(12, arrowW));
+
+        requestAnimationFrame(tick);
+      }
+
+      requestAnimationFrame(tick);
+
+      setInterval(function() {
+        wide = !wide;
+        wrapper.style.width = wide ? '100%' : '55%';
+        wrapper.style.height = wide ? '100%' : '60%';
+      }, 3000);
+    })();
+
+    // ── Real-time demo ──
+    (function() {
+      var stocks = [
+        { symbol: 'ACME', price: 142.50, last: null },
+        { symbol: 'GLOBEX', price: 87.20, last: null }
+      ];
+      var items = [];
+      var nextId = 1;
+      var now = Date.now();
+
+      function tick(stock, time) {
+        var prev = stock.price;
+        var change = (Math.random() - 0.48) * 1.2;
+        stock.price = Math.max(1, stock.price + change);
+        var pct = ((stock.price - prev) / prev) * 100;
+        var isUp = pct > 0.05;
+        var isDown = pct < -0.05;
+        var label, style;
+        if (stock.last === null) {
+          label = '$' + stock.price.toFixed(2);
+          style = { backgroundColor: '#2196F3', fontColor: '#fff' };
+        } else if (isUp) {
+          label = '$' + stock.price.toFixed(2) + ' ↗ ' + Math.abs(pct).toFixed(2) + '%';
+          style = { backgroundColor: '#10b981', fontColor: '#fff' };
+        } else {
+          label = '$' + stock.price.toFixed(2) + ' ↘ ' + Math.abs(pct).toFixed(2) + '%';
+          style = { backgroundColor: '#ef4444', fontColor: '#fff' };
+        }
+        stock.last = stock.price;
+        return {
+          id: nextId++,
+          label: label,
+          start: new Date(time).toISOString(),
+          grouping: stock.symbol,
+          style: style
+        };
+      }
+
+      // Seed with initial prices then a few ticks
+      var t0 = now - 15000;
+      items.push(tick(stocks[0], t0));
+      items.push(tick(stocks[1], t0 + 300));
+      for (var i = 0; i < 8; i++) {
+        var t = t0 + 2000 + i * 1500 + Math.random() * 500;
+        items.push(tick(stocks[i % 2], t));
+      }
+
+      var rtTimeline = new TempisTimeline('#demo-realtime', {
+        responsive: true,
+        verticalFill: 'fill-canvas',
+        style: { item: { borderRadius: 4 } },
+        grouping: { collapsible: true, sort: function(a, b) { return a === 'ACME' ? -1 : 1; } },
+        range: {
+          start: new Date(now - 10000).toISOString(),
+          end: new Date(now + 5000).toISOString(),
+          position: 'bottom'
+        },
+        items: items
+      });
+
+      var rtCanvas = document.getElementById('demo-realtime');
+      var rtHovering = false;
+      rtCanvas.addEventListener('mouseenter', function() { rtHovering = true; });
+      rtCanvas.addEventListener('mouseleave', function() { rtHovering = false; });
+
+      function scheduleNext() {
+        var delay = 1000 + Math.random() * 2000;
+        setTimeout(function() {
+          var stock = stocks[Math.random() < 0.5 ? 0 : 1];
+          var newItem = tick(stock, Date.now());
+          items.push(newItem);
+          if (items.length > 60) items = items.slice(-60);
+          rtTimeline.setItems(items);
+          if (!rtHovering) {
+            setTimeout(function() {
+              rtTimeline.focus({ id: newItem.id, animate: true, duration: 600, zoom: false });
+            }, 50);
+          }
+          scheduleNext();
+        }, delay);
+      }
+      scheduleNext();
+    })();
+
+    // ── Dependencies demo ──
+    new TempisTimeline('#demo-deps', {
+      responsive: true,
+      verticalFill: 'fill-canvas',
+      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      grouping: { collapsible: true },
+      categories: [
+        { name: 'design', label: 'Design',  style: { backgroundColor: '#ec4899', fontColor: '#fff' } },
+        { name: 'dev',    label: 'Dev',      style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+        { name: 'qa',     label: 'QA',       style: { backgroundColor: '#f59e0b', fontColor: '#111' } },
+      ],
+      legend: { position: 'bottom' },
+      items: [
+        { id: 1, label: 'Wireframes',    start: '2026-02-01', end: '2026-02-10', category: 'design', grouping: 'Design' },
+        { id: 2, label: 'Visual Design', start: '2026-02-11', end: '2026-02-20', category: 'design', grouping: 'Design' },
+        { id: 3, label: 'Asset Export',  start: '2026-02-21', end: '2026-02-25', category: 'design', grouping: 'Design' },
+        { id: 4, label: 'API Layer',     start: '2026-02-11', end: '2026-02-25', category: 'dev',    grouping: 'Engineering' },
+        { id: 5, label: 'UI Build',      start: '2026-02-26', end: '2026-03-10', category: 'dev',    grouping: 'Engineering' },
+        { id: 6, label: 'Integration',   start: '2026-03-11', end: '2026-03-18', category: 'dev',    grouping: 'Engineering' },
+        { id: 7, label: 'Test Plan',     start: '2026-02-15', end: '2026-02-25', category: 'qa',     grouping: 'QA' },
+        { id: 8, label: 'Testing',       start: '2026-03-19', end: '2026-03-28', category: 'qa',     grouping: 'QA' },
+      ],
+      dependencies: [
+        { source: 1, target: 2 },
+        { source: 2, target: 3 },
+        { source: 1, target: 4 },
+        { source: 3, target: 5 },
+        { source: 4, target: 5 },
+        { source: 5, target: 6 },
+        { source: 6, target: 8 },
+        { source: 7, target: 8 },
+      ],
+      range: { start: '2026-01-28', end: '2026-04-01', position: 'bottom' }
+    });
+
+    // ── Export demo ──
+    var exportTimeline = new TempisTimeline('#demo-export', {
+      responsive: true,
+      verticalFill: 'fill-canvas',
+      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      grouping: { collapsible: true },
+      categories: [
+        { name: 'stage',    label: 'Stages',    style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+        { name: 'headline', label: 'Headliners', style: { backgroundColor: '#ff0071', fontColor: '#fff' } },
+        { name: 'food',     label: 'Food & Drink', style: { backgroundColor: '#10b981', fontColor: '#fff' } }
+      ],
+      legend: { position: 'bottom' },
+      range: { start: '2024-07-06T10:00:00', end: '2024-07-06T23:00:00', position: 'bottom' },
+      items: [
+        { id: 1,  label: 'Doors Open',   start: '2024-07-06T11:00:00', end: '2024-07-06T11:30:00', category: 'stage',    grouping: 'Main' },
+        { id: 2,  label: 'Indie Folk',   start: '2024-07-06T11:30:00', end: '2024-07-06T13:00:00', category: 'stage',    grouping: 'Main' },
+        { id: 3,  label: 'Jazz Trio',    start: '2024-07-06T13:30:00', end: '2024-07-06T15:00:00', category: 'stage',    grouping: 'Main' },
+        { id: 4,  label: 'Synth Pop',    start: '2024-07-06T15:30:00', end: '2024-07-06T17:00:00', category: 'stage',    grouping: 'Main' },
+        { id: 5,  label: 'Headliner',    start: '2024-07-06T19:00:00', end: '2024-07-06T21:00:00', category: 'headline', grouping: 'Main' },
+        { id: 6,  label: 'DJ Set',       start: '2024-07-06T12:00:00', end: '2024-07-06T14:00:00', category: 'stage',    grouping: 'Tent' },
+        { id: 7,  label: 'Drum & Bass',  start: '2024-07-06T15:00:00', end: '2024-07-06T17:30:00', category: 'stage',    grouping: 'Tent' },
+        { id: 8,  label: 'Closing Set',  start: '2024-07-06T21:00:00', end: '2024-07-06T22:30:00', category: 'headline', grouping: 'Tent' },
+        { id: 9,  label: 'Street Food',  start: '2024-07-06T11:00:00', end: '2024-07-06T21:00:00', category: 'food',     grouping: 'Village' },
+        { id: 10, label: 'Craft Bar',    start: '2024-07-06T12:00:00', end: '2024-07-06T22:00:00', category: 'food',     grouping: 'Village' }
+      ]
+    });
+
+    document.getElementById('export-btn').addEventListener('click', function() {
+      exportTimeline.toImage({ type: 'image/png', dpr: 4, backgroundColor: '#111111' }).then(function(blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'tempis-timeline.png';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    });
+  </script>
+
+  <!-- ─── Stats bar ─── -->
+  <section class="stats-bar">
+    <div class="stat">
+      <span class="stat-value">1,000s</span>
+      <span class="stat-label">Of items with virtual rendering</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">0</span>
+      <span class="stat-label">Runtime dependencies</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">&lt;18kb</span>
+      <span class="stat-label">Minified + gzipped</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">100%</span>
+      <span class="stat-label">TypeScript</span>
+    </div>
+  </section>
+
+  <!-- ─── Feature list ─── -->
+  <section class="feature-list">
+    <h2>Everything else you'd expect</h2>
+    <div class="feature-list-grid">
+      <div class="feature-list-item">
+        <span class="feature-list-icon">📱</span>
+        <div>
+          <h3>Touch &amp; gesture support</h3>
+          <p>Pinch-to-zoom, smooth panning, and responsive layouts on every device.</p>
+        </div>
+      </div>
+      <div class="feature-list-item">
+        <span class="feature-list-icon">🏷️</span>
+        <div>
+          <h3>Categories &amp; legend</h3>
+          <p>Color-coded categories with an interactive legend. Filter on click, highlight on hover.</p>
+        </div>
+      </div>
+      <div class="feature-list-item">
+        <span class="feature-list-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="#61dafb"><path d="M12 10.11c1.03 0 1.87.84 1.87 1.89 0 1-.84 1.85-1.87 1.85S10.13 13 10.13 12c0-1.05.84-1.89 1.87-1.89M7.37 20c.63.38 2.01-.2 3.6-1.7-.52-.59-1.03-1.23-1.51-1.9a22.7 22.7 0 01-2.4-.36c-.51 2.14-.32 3.61.31 3.96m.71-5.74l-.29-.51c-.11.29-.22.58-.29.86.27.06.57.11.88.16l-.3-.51m6.54-.76l.81-1.5-.81-1.5c-.3-.53-.62-1-.91-1.47C13.17 9 12.6 9 12 9s-1.17 0-1.71.03c-.29.47-.61.94-.91 1.47L8.57 12l.81 1.5c.3.53.62 1 .91 1.47.54.03 1.11.03 1.71.03s1.17 0 1.71-.03c.29-.47.61-.94.91-1.47M12 6.78c-.19.22-.39.45-.59.72h1.18c-.2-.27-.4-.5-.59-.72m0 10.44c.19-.22.39-.45.59-.72h-1.18c.2.27.4.5.59.72M16.62 4c-.62-.38-2 .2-3.59 1.7.52.59 1.03 1.23 1.51 1.9.82.08 1.63.2 2.4.36.51-2.14.32-3.61-.32-3.96m-.7 5.74l.29.51c.11-.29.22-.58.29-.86-.27-.06-.57-.11-.88-.16l.3.51m1.45-7.05c1.47.84 1.63 3.05 1.01 5.63 2.54.75 4.37 1.99 4.37 3.68s-1.83 2.93-4.37 3.68c.62 2.58.46 4.79-1.01 5.63-1.46.84-3.45-.12-5.37-1.95-1.92 1.83-3.91 2.79-5.38 1.95-1.46-.84-1.62-3.05-1-5.63-2.54-.75-4.37-1.99-4.37-3.68s1.83-2.93 4.37-3.68c-.62-2.58-.46-4.79 1-5.63 1.47-.84 3.46.12 5.38 1.95 1.92-1.83 3.91-2.79 5.37-1.95M17.08 12c.34.75.64 1.5.89 2.26 2.1-.63 3.28-1.53 3.28-2.26s-1.18-1.63-3.28-2.26c-.25.76-.55 1.51-.89 2.26M6.92 12c-.34-.75-.64-1.5-.89-2.26-2.1.63-3.28 1.53-3.28 2.26s1.18 1.63 3.28 2.26c.25-.76.55-1.51.89-2.26m9 2.26l-.3.51c.31-.05.61-.1.88-.16-.07-.28-.18-.57-.29-.86l-.29.51m-2.89 4.04c1.59 1.5 2.97 2.08 3.59 1.7.64-.35.83-1.82.32-3.96-.77.16-1.58.28-2.4.36-.48.67-.99 1.31-1.51 1.9M8.08 9.74l.3-.51c-.31.05-.61.1-.88.16.07.28.18.57.29.86l.29-.51m2.89-4.04C9.38 4.2 8 3.62 7.37 4c-.63.35-.82 1.82-.31 3.96a22.7 22.7 0 012.4-.36c.48-.67.99-1.31 1.51-1.9z"/></svg></span>
+        <div>
+          <h3>React support</h3>
+          <p>Drop-in React component with reactive data, callbacks, and a full imperative ref API.</p>
+        </div>
+      </div>
+      <div class="feature-list-item">
+        <span class="feature-list-icon">🔀</span>
+        <div>
+          <h3>RTL support</h3>
+          <p>Full right-to-left layout for Arabic, Hebrew, and other RTL languages.</p>
+        </div>
+      </div>
+      <div class="feature-list-item">
+        <span class="feature-list-icon">💬</span>
+        <div>
+          <h3>Custom tooltips</h3>
+          <p>Rich tooltip templates with delay, overflow handling, and per-item control.</p>
+        </div>
+      </div>
+      <div class="feature-list-item">
+        <span class="feature-list-icon">📊</span>
+        <div>
+          <h3>Timeline bands</h3>
+          <p>Highlight time periods with vertical bands, maintenance windows, shifts, deadlines.</p>
+        </div>
+      </div>
+      <div class="feature-list-item">
+        <span class="feature-list-icon">♿</span>
+        <div>
+          <h3>Accessibility</h3>
+          <p>Keyboard navigation, ARIA attributes, and automatic reduced motion support.</p>
+        </div>
+      </div>
+      <div class="feature-list-item">
+        <span class="feature-list-icon"><svg width="24" height="24" viewBox="0 0 256 256" fill="none"><rect width="256" height="256" rx="20" fill="#3178C6"/><path d="M150.5 200.5v27.3c4.4 2.3 9.7 4 15.8 5.1 6.1 1.1 12.5 1.7 19.2 1.7 6.5 0 12.7-.6 18.5-1.9 5.8-1.3 10.9-3.4 15.3-6.4 4.4-3 7.8-6.9 10.4-11.7 2.5-4.8 3.8-10.7 3.8-17.6 0-5-.8-9.4-2.3-13.2-1.5-3.8-3.7-7.2-6.5-10.2-2.8-3-6.1-5.7-10-8.1-3.9-2.4-8.2-4.7-12.9-6.7-3.4-1.5-6.5-2.9-9.3-4.3-2.8-1.4-5.2-2.8-7.2-4.3-2-1.5-3.6-3.1-4.6-4.9-1.1-1.8-1.6-3.8-1.6-6.2 0-2.2.5-4.1 1.4-5.8.9-1.7 2.2-3.1 3.9-4.3 1.7-1.2 3.7-2.1 6-2.7 2.4-.6 5-.9 7.9-.9 2.1 0 4.3.2 6.7.5 2.4.4 4.7.9 7.1 1.7 2.4.8 4.6 1.7 6.8 2.9 2.1 1.2 4 2.5 5.6 4.1v-25.1c-4.2-1.7-8.8-2.9-13.7-3.7-4.9-.8-10.5-1.2-16.7-1.2-6.5 0-12.6.7-18.3 2.1-5.7 1.4-10.7 3.5-14.9 6.4-4.2 2.9-7.6 6.6-10 11.1-2.4 4.5-3.7 9.8-3.7 16 0 8.3 2.5 15.3 7.4 21.1 4.9 5.8 12.2 10.5 21.8 14.3 3.5 1.4 6.8 2.8 9.8 4.2 3 1.4 5.6 2.9 7.8 4.4 2.2 1.5 3.9 3.2 5.1 5 1.2 1.8 1.8 3.9 1.8 6.3 0 2.1-.5 3.9-1.3 5.5-.9 1.6-2.2 3-3.9 4.1-1.7 1.1-3.8 2-6.3 2.6-2.5.6-5.3.9-8.5.9-5.6 0-11.1-1-16.6-3.1-5.5-2.1-10.4-5.2-14.9-9.4zM106.1 118.1h30.3v-22.8H50v22.8h30.2V230h25.9V118.1z" fill="#fff"/></svg></span>
+        <div>
+          <h3>TypeScript-first</h3>
+          <p>Full type definitions, IntelliSense, and typed callbacks out of the box.</p>
+        </div>
+      </div>
+      <div class="feature-list-item">
+        <span class="feature-list-icon">📐</span>
+        <div>
+          <h3>Smart stacking</h3>
+          <p>Compact and stable stack modes for overlapping items. No clipping, no manual row management.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Install ─── -->
+  <section class="install-section">
+    <h2>Get started in seconds</h2>
+    <div class="install-row">
+      <div>
+        <p style="margin: 0 0 8px; font-size: 0.95em; font-weight: 600; opacity: 0.7;">Core canvas library — works with any framework</p>
+        <div class="install-box">
+          <span class="prompt">$</span> npm install <span style="color: #ff0071; font-weight: 600;">@tempis/timeline</span>
+        </div>
+      </div>
+      <div>
+        <p style="margin: 0 0 8px; font-size: 0.95em; font-weight: 600; opacity: 0.7;">React wrapper — drop-in component for React apps</p>
+        <div class="install-box">
+          <span class="prompt">$</span> npm install <span style="color: #61dafb; font-weight: 600;">@tempis/react</span> <span style="color: #ff0071; font-weight: 600;">@tempis/timeline</span>
+        </div>
+      </div>
+    </div>
+    <p class="install-sub">Or grab the <a href="get-started.html">CDN script tag</a> and drop it straight into your HTML.</p>
+  </section>
+
+  <footer>
+    <p>Tempis Timeline is source-available. Free for non-commercial use. <a href="pricing.html">Commercial licence</a> required for business use.</p>
+  </footer>
+</body>
+</html>

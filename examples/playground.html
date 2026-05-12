@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="../images/logo.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Timeline Playground</title>
+  <script>
+    // Cache buster - always load fresh JS
+    const timestamp = new Date().getTime();
+    document.write('<script src="../lib/tempis_timeline.js?' + timestamp + '"><\/script>');
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>
+    eruda.init({
+      position: { x: window.innerWidth - 60, y: window.innerHeight / 2 }
+    });
+  </script>
+</head>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  
+  html {
+    background-color: #f5f5f5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    gap: 20px;
+    height: 100vh;
+  }
+  
+  .menu-toggle {
+    display: none;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1001;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    width: 42px;
+    height: 42px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    font-size: 24px;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .menu-toggle:hover {
+    background: #0056b3;
+  }
+  
+  @media (max-width: 768px) {
+    body {
+      padding: 0;
+      gap: 0;
+    }
+    
+    .menu-toggle {
+      display: flex;
+    }
+    
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -100%;
+      height: 100vh;
+      width: 85%;
+      max-width: 100vw;
+      z-index: 1000;
+      border-radius: 0;
+      transition: left 0.3s ease, visibility 0s 0.3s;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.2);
+      visibility: hidden;
+      pointer-events: none;
+    }
+    
+    .sidebar.open {
+      left: 0;
+      visibility: visible;
+      pointer-events: auto;
+      transition: left 0.3s ease, visibility 0s 0s;
+    }
+    
+    .main-content {
+      width: 100%;
+      height: 100dvh;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .canvas-container {
+      flex: 1;
+      margin: 65px 10px 10px 10px;
+      border-radius: 4px;
+      min-height: 0;
+      overflow: hidden;
+    }
+  }
+  
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+  
+  .sidebar-overlay.active {
+    display: block;
+  }
+  
+  .sidebar {
+    width: 320px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 20px;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  
+  /* Passive scrollbar - only visible on hover */
+  .sidebar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .sidebar::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 4px;
+  }
+  
+  .sidebar:hover::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+  }
+  
+  .sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Firefox scrollbar styling */
+  .sidebar {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  
+  .sidebar:hover {
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+  
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+  }
+  
+  .canvas-container {
+    height: 100%;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    resize: both;
+    min-width: 250px;
+    min-height: 250px;
+    max-width: 100%;
+    max-height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .canvas-container canvas {
+    display: block;
+    box-sizing: border-box;
+  }
+  
+  h2 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    color: #333;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+  }
+  
+  h3 {
+    margin: 20px 0 10px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .control-group {
+    margin-bottom: 16px;
+  }
+  
+  .control-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #444;
+  }
+  
+  .control-group input[type="number"],
+  .control-group input[type="text"],
+  .control-group select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  
+  .control-group input[type="range"] {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #e0e0e0;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  
+  .control-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #007bff;
+    cursor: pointer;
+  }
+  
+  .control-group input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #007bff;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .control-group label span {
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .control-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+  
+  .checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .checkbox-wrapper label {
+    margin: 0;
+    cursor: pointer;
+  }
+  
+  .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .radio-option input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+  
+  .radio-option label {
+    margin: 0;
+    font-weight: normal;
+    cursor: pointer;
+  }
+  
+  button {
+    width: 100%;
+    padding: 10px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  button:hover {
+    background: #1976D2;
+  }
+  
+  button:active {
+    background: #0D47A1;
+  }
+  
+  .info-box {
+    background: #e3f2fd;
+    padding: 12px;
+    border-radius: 4px;
+    border-left: 4px solid #2196F3;
+    font-size: 12px;
+    color: #555;
+    margin-top: 20px;
+  }
+  
+  .divider {
+    height: 1px;
+    background: #e0e0e0;
+    margin: 20px 0;
+  }
+  
+  .dialog-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .dialog-overlay.active {
+    display: flex;
+  }
+  
+  .dialog {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    padding: 24px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .dialog h2 {
+    margin: 0 0 16px 0;
+    font-size: 20px;
+    color: #333;
+  }
+  
+  .dialog textarea {
+    width: 100%;
+    min-height: 300px;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    resize: vertical;
+    margin-bottom: 16px;
+  }
+  
+  .dialog-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+  
+  .dialog-buttons button {
+    width: auto;
+    min-width: 100px;
+  }
+  
+  .dialog-buttons button.secondary {
+    background: #757575;
+  }
+  
+  .dialog-buttons button.secondary:hover {
+    background: #616161;
+  }
+  
+  .error-message {
+    color: #f44336;
+    font-size: 13px;
+    margin-bottom: 12px;
+    display: none;
+  }
+  
+  .error-message.active {
+    display: block;
+  }
+</style>
+<body>
+  <button class="menu-toggle" id="menuToggle">☰</button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="sidebar" id="sidebar">
+    <h3 style="margin-top:0px;">Data</h3>
+    <div class="control-group">
+      <label>Number of Items</label>
+      <input type="number" id="itemCount" value="100" min="1" max="1000">
+    </div>
+    
+    <div class="control-group">
+      <label>Number of Groups</label>
+      <input type="number" id="groupCount" value="5" min="1" max="10">
+    </div>
+    
+    <div class="control-group">
+      <label>Number of Categories</label>
+      <input type="number" id="categoryCount" value="5" min="0" max="20">
+    </div>
+    
+    <div class="control-group">
+      <label>PIT Item Ratio (%)</label>
+      <input type="number" id="pitRatio" value="30" min="0" max="100">
+    </div>
+    
+    <div class="control-group">
+      <button id="setItemsBtn">Set Items (JSON)</button>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <h3>Layout</h3>
+    <div class="control-group">
+      <label>Stack Mode</label>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input type="radio" id="stackCompact" name="stackMode" value="compact">
+          <label for="stackCompact">Compact</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" id="stackStable" name="stackMode" value="stable" checked>
+          <label for="stackStable">Stable</label>
+        </div>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <label>Vertical Fill</label>
+      <select id="verticalFill">
+        <option value="content">Content</option>
+        <option value="fill-canvas">Fill Canvas</option>
+        <option value="grow-canvas">Grow Canvas</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="responsive" checked>
+        <label for="responsive">Responsive</label>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="rtl">
+        <label for="rtl">Right-to-Left</label>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="collapsible">
+        <label for="collapsible">Collapsible Groups</label>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <label>Scrollbar Visibility</label>
+      <select id="scrollbarVisibility">
+        <option value="always">Always</option>
+        <option value="hover" selected>Hover</option>
+        <option value="panning">Panning</option>
+        <option value="never">Never</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Scrollbar Color</label>
+      <input type="color" id="scrollbarColor" value="#000000" style="width:100%;height:32px;padding:0;border:1px solid #ddd;border-radius:4px;cursor:pointer;">
+    </div>
+
+    <div class="divider"></div>
+
+    <h3>Minimap</h3>
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="minimapEnabled">
+        <label for="minimapEnabled">Enabled</label>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Height (px)</label>
+      <input type="number" id="minimapHeight" value="40" min="20" max="100" step="5" style="width:100%;padding:6px 8px;border:1px solid #ddd;border-radius:4px;">
+    </div>
+    
+    <div class="divider"></div>
+    
+    <h3>Range</h3>
+    <div class="control-group">
+      <label>Position</label>
+      <select id="rangePosition">
+        <option value="top">Top</option>
+        <option value="bottom" selected>Bottom</option>
+        <option value="both">Both</option>
+        <option value="none">None</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="rangeFixed">
+        <label for="rangeFixed">Fixed Range</label>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="zoomEnabled" checked>
+        <label for="zoomEnabled">Zoom Enabled</label>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <label>Wheel Sensitivity: <span id="wheelSensitivityValue">1.0</span></label>
+      <input type="range" id="wheelSensitivity" min="0.1" max="8" value="1.0" step="0.1">
+    </div>
+    
+    <div class="control-group">
+      <label>Pinch Sensitivity: <span id="pinchSensitivityValue">1.0</span></label>
+      <input type="range" id="pinchSensitivity" min="0.1" max="8" value="1.0" step="0.1">
+    </div>
+    
+    <div class="divider"></div>
+    
+    <h3>Legend</h3>
+    <div class="control-group">
+      <label>Position</label>
+      <select id="legendPosition">
+        <option value="top">Top</option>
+        <option value="bottom" selected>Bottom</option>
+        <option value="none">None</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Alignment</label>
+      <select id="legendAlignment">
+        <option value="start">Start</option>
+        <option value="center" selected>Center</option>
+        <option value="end">End</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Category Marker Style</label>
+      <select id="legendMarkerStyle">
+        <option value="square">Square</option>
+        <option value="square-rounded" selected>Square Rounded</option>
+        <option value="circle">Circle</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Category Gap: <span id="legendGapValue">6</span>px</label>
+      <input type="range" id="legendGap" min="0" max="20" value="6" step="1">
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="legendHighlightOnHover" checked>
+        <label for="legendHighlightOnHover">Highlight on Category Hover</label>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="legendFilterOnClick" checked>
+        <label for="legendFilterOnClick">Filter on Category Click</label>
+      </div>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <h3>Selection</h3>
+    <div class="control-group">
+      <label>Mode</label>
+      <select id="selectionMode">
+        <option value="none" selected>None</option>
+        <option value="single">Single</option>
+        <option value="multi">Multi</option>
+      </select>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <h3>Style</h3>
+    <div class="control-group">
+      <label>Font Size: <span id="fontSizeValue">14</span>px</label>
+      <input type="range" id="fontSize" min="8" max="28" value="14" step="1">
+    </div>
+    
+    <div class="control-group">
+      <label>Item Padding: <span id="itemPaddingValue">10</span>px</label>
+      <input type="range" id="itemPadding" min="5" max="25" value="10" step="1">
+    </div>
+    
+    <div class="control-group">
+      <label>Border Radius: <span id="borderRadiusValue">5</span>px</label>
+      <input type="range" id="borderRadius" min="0" max="30" value="5" step="1">
+    </div>
+    
+    <div class="control-group">
+      <label>Border Thickness: <span id="borderThicknessValue">0</span>px</label>
+      <input type="range" id="borderThickness" min="0" max="5" value="0" step="1">
+    </div>
+    
+    <div class="divider"></div>
+    
+    <h3>Tooltip</h3>
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="tooltipEnabled" checked>
+        <label for="tooltipEnabled">Enabled</label>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <label>Overflow Behavior</label>
+      <select id="tooltipOverflow">
+        <option value="none">None</option>
+        <option value="canvas" selected>Canvas</option>
+        <option value="viewport">Viewport</option>
+      </select>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <h3>Focus</h3>
+    <div class="control-group">
+      <label>Select Item</label>
+      <select id="focusItemSelect">
+        <option value="">-- Select Item --</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="focusAnimate" checked>
+        <label for="focusAnimate">Animate Focus</label>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <label>Animation Duration (ms)</label>
+      <input type="number" id="focusDuration" value="800" min="100" max="3000" step="100">
+    </div>
+    
+    <div class="control-group">
+      <label>Easing Function</label>
+      <select id="focusEasing">
+        <option value="linear">Linear</option>
+        <option value="easeIn">Ease In</option>
+        <option value="easeOut">Ease Out</option>
+        <option value="easeInOut" selected>Ease In Out</option>
+        <option value="easeInCubic">Ease In Cubic</option>
+        <option value="easeOutCubic">Ease Out Cubic</option>
+        <option value="easeInOutCubic">Ease In Out Cubic</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <label>Zoom Behavior</label>
+      <select id="focusZoom">
+        <option value="auto" selected>Auto (Smart)</option>
+        <option value="true">Always Zoom</option>
+        <option value="false">Never Zoom</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <button id="focusBtn">Focus on Selected Item</button>
+    </div>
+    
+    <div class="control-group">
+      <button id="focusAllBtn">Focus on All Items</button>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <h3>Export</h3>
+    <div class="control-group">
+      <label>Format</label>
+      <select id="exportFormat">
+        <option value="image/png">PNG</option>
+        <option value="image/jpeg">JPEG</option>
+        <option value="image/webp">WebP</option>
+      </select>
+    </div>
+    
+    <div class="control-group" id="exportQualityGroup">
+      <label>Quality: <span id="exportQualityValue">0.9</span></label>
+      <input type="range" id="exportQuality" min="0" max="1" step="0.1" value="0.9">
+    </div>
+    
+    <div class="control-group">
+      <label>DPR</label>
+      <select id="exportDpr">
+        <option value="1">1×</option>
+        <option value="2" selected>2×</option>
+        <option value="3">3×</option>
+      </select>
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="exportBgEnabled">
+        <label for="exportBgEnabled">Background Color</label>
+      </div>
+    </div>
+    
+    <div class="control-group" id="exportBgColorGroup" style="display:none;">
+      <input type="color" id="exportBgColor" value="#ffffff" style="width:100%;height:32px;padding:0;border:1px solid #ddd;border-radius:4px;cursor:pointer;">
+    </div>
+    
+    <div class="control-group">
+      <button id="exportBtn">Save as Image</button>
+    </div>
+    
+    <div id="exportStatus" style="font-size:12px;color:#666;min-height:1.2em;margin-top:4px;"></div>
+  </div>
+  
+  <div class="main-content">
+    <div class="canvas-container">
+      <canvas id="canvas"></canvas>
+    </div>
+  </div>
+  
+  <!-- Set Items Dialog -->
+  <div class="dialog-overlay" id="setItemsDialog">
+    <div class="dialog">
+      <h2>Set Items (JSON)</h2>
+      <div class="error-message" id="jsonError"></div>
+      <textarea id="itemsJson" placeholder='[
+  {
+    "id": 1,
+    "label": "Item 1",
+    "start": "2024-01-15T10:00:00",
+    "end": "2024-01-20T15:00:00",
+    "category": "Category-1",
+    "grouping": "Group-1"
+  }
+]'></textarea>
+      <div class="dialog-buttons">
+        <button class="secondary" id="cancelSetItems">Cancel</button>
+        <button id="applySetItems">Apply</button>
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+  function getRandomItem(array) {
+    return array[Math.floor(Math.random() * array.length)];
+  }
+
+  function getRandomDatePeriod(startDate, endDate) {
+    const start = startDate.getTime();
+    const end = endDate.getTime();
+    const t1 = start + Math.random() * (end - start);
+    const t2 = start + Math.random() * (end - start);
+    return {
+      start: new Date(Math.min(t1, t2)),
+      end: new Date(Math.max(t1, t2))
+    };
+  }
+
+  function generateCategories(categoryCount) {
+    const colors = [
+      "#4CAF50", "#2196F3", "#FF9800", "#E91E63", "#9C27B0",
+      "#00BCD4", "#FFEB3B", "#795548", "#607D8B", "#F44336"
+    ];
+    
+    return Array.from({ length: categoryCount }, (_, i) => ({
+      name: `Category-${i + 1}`,
+      label: `Category ${i + 1}`,
+      style: { backgroundColor: colors[i % colors.length] }
+    }));
+  }
+
+  function generateItems(itemCount, groupCount, categoryCount, pitRatio) {
+    const minDate = new Date("2024-01-01T00:00:00");
+    const maxDate = new Date("2024-03-01T00:00:00");
+    const categories = Array.from({ length: categoryCount }, (_, i) => `Category-${i + 1}`);
+    const groups = Array.from({ length: groupCount }, (_, i) => `Group-${i + 1}`);
+    const items = [];
+
+    for (let i = 0; i < itemCount; i++) {
+      const randomDatePeriod = getRandomDatePeriod(minDate, maxDate);
+      const isPit = Math.random() * 100 < pitRatio;
+
+      items.push({
+        id: i,
+        label: `Item ${i}`,
+        start: randomDatePeriod.start,
+        end: isPit ? undefined : randomDatePeriod.end,
+        category: getRandomItem(categories),
+        grouping: getRandomItem(groups),
+      });
+    }
+
+    return items;
+  }
+
+  let timeline = null;
+  let currentItems = [];
+  let lastDataConfig = { itemCount: 0, groupCount: 0, categoryCount: 0, pitRatio: 0 };
+
+  function getTimelineOptions() {
+    const itemCount = parseInt(document.getElementById('itemCount').value);
+    const groupCount = parseInt(document.getElementById('groupCount').value);
+    const categoryCount = parseInt(document.getElementById('categoryCount').value);
+    const pitRatio = parseInt(document.getElementById('pitRatio').value);
+    
+    // Only regenerate items if data configuration changed
+    if (currentItems.length === 0 ||
+        lastDataConfig.itemCount !== itemCount ||
+        lastDataConfig.groupCount !== groupCount ||
+        lastDataConfig.categoryCount !== categoryCount ||
+        lastDataConfig.pitRatio !== pitRatio) {
+      currentItems = generateItems(itemCount, groupCount, categoryCount, pitRatio);
+      lastDataConfig = { itemCount, groupCount, categoryCount, pitRatio };
+    }
+    
+    const items = currentItems;
+
+    return {
+      responsive: document.getElementById('responsive').checked,
+      rtl: document.getElementById('rtl').checked,
+      stackMode: document.querySelector('input[name="stackMode"]:checked').value,
+      verticalFill: document.getElementById('verticalFill').value,
+      selection: document.getElementById('selectionMode').value,
+      style: {
+        font: {
+          size: parseInt(document.getElementById('fontSize').value)
+        },
+        item: {
+          padding: parseInt(document.getElementById('itemPadding').value),
+          borderRadius: parseInt(document.getElementById('borderRadius').value),
+          borderThickness: parseInt(document.getElementById('borderThickness').value) || undefined,
+          borderColor: parseInt(document.getElementById('borderThickness').value) > 0 ? '#333333' : undefined
+        }
+      },
+      scrollbar: {
+        visibility: document.getElementById('scrollbarVisibility').value,
+        color: document.getElementById('scrollbarColor').value + '4D'
+      },
+      minimap: document.getElementById('minimapEnabled').checked
+        ? { height: parseInt(document.getElementById('minimapHeight').value) || 40 }
+        : undefined,
+      range: {
+        position: document.getElementById('rangePosition').value,
+        fixed: document.getElementById('rangeFixed').checked,
+        zoom: {
+          enabled: document.getElementById('zoomEnabled').checked,
+          wheelSensitivity: parseFloat(document.getElementById('wheelSensitivity').value),
+          pinchSensitivity: parseFloat(document.getElementById('pinchSensitivity').value)
+        }
+      },
+      legend: {
+        position: document.getElementById('legendPosition').value,
+        alignment: document.getElementById('legendAlignment').value,
+        markerStyle: document.getElementById('legendMarkerStyle').value,
+        gap: parseInt(document.getElementById('legendGap').value),
+        isHighlightOnHover: document.getElementById('legendHighlightOnHover').checked,
+        isFilterOnClick: document.getElementById('legendFilterOnClick').checked
+      },
+      tooltip: {
+        enabled: document.getElementById('tooltipEnabled').checked,
+        overflowBehavior: document.getElementById('tooltipOverflow').value
+      },
+      categories: generateCategories(categoryCount),
+      items,
+      grouping: {
+        collapsible: document.getElementById('collapsible').checked,
+        sort: (a, b) => a.localeCompare(b)
+      },
+    };
+  }
+
+  function regenerateTimeline() {
+    // Destroy existing timeline
+    if (timeline) {
+      timeline.destroy();
+    }
+
+    // Create new timeline with current settings
+    const options = getTimelineOptions();
+    timeline = new tempis_timeline.TempisTimeline("#canvas", options);
+    window["timeline"] = timeline;
+    
+    // Update canvas container overflow based on vertical fill mode
+    const canvasContainer = document.querySelector('.canvas-container');
+    if (options.verticalFill === 'grow-canvas') {
+      canvasContainer.style.overflowY = 'auto';
+    } else {
+      canvasContainer.style.overflowY = 'hidden';
+    }
+    
+    // Populate the focus item dropdown
+    populateItemDropdown(options.items);
+  }
+
+  // Initialize timeline on load
+  regenerateTimeline();
+
+  // Add event listeners to all controls (except focus controls)
+  document.querySelectorAll('input, select').forEach(control => {
+    // Skip focus and export controls - they shouldn't regenerate the timeline
+    if (control.id.startsWith('focus') || control.id.startsWith('export')) {
+      return;
+    }
+    control.addEventListener('change', regenerateTimeline);
+  });
+
+  // Add input event listeners for range sliders to update value displays in real-time
+  document.getElementById('fontSize').addEventListener('input', (e) => {
+    document.getElementById('fontSizeValue').textContent = e.target.value;
+  });
+  
+  document.getElementById('itemPadding').addEventListener('input', (e) => {
+    document.getElementById('itemPaddingValue').textContent = e.target.value;
+  });
+  
+  document.getElementById('borderRadius').addEventListener('input', (e) => {
+    document.getElementById('borderRadiusValue').textContent = e.target.value;
+  });
+  
+  document.getElementById('borderThickness').addEventListener('input', (e) => {
+    document.getElementById('borderThicknessValue').textContent = e.target.value;
+  });
+  
+  document.getElementById('legendGap').addEventListener('input', (e) => {
+    document.getElementById('legendGapValue').textContent = e.target.value;
+  });
+  
+  document.getElementById('wheelSensitivity').addEventListener('input', (e) => {
+    document.getElementById('wheelSensitivityValue').textContent = parseFloat(e.target.value).toFixed(1);
+  });
+  
+  document.getElementById('pinchSensitivity').addEventListener('input', (e) => {
+    document.getElementById('pinchSensitivityValue').textContent = parseFloat(e.target.value).toFixed(1);
+  });
+
+  // Focus controls event listeners
+  document.getElementById('focusBtn').addEventListener('click', () => {
+    const selectedItemId = document.getElementById('focusItemSelect').value;
+    console.log('Selected item ID:', selectedItemId);
+    
+    if (!selectedItemId) {
+      alert('Please select an item to focus on');
+      return;
+    }
+
+    // Get animation options
+    const animate = document.getElementById('focusAnimate').checked;
+    const duration = parseInt(document.getElementById('focusDuration').value);
+    const easing = document.getElementById('focusEasing').value;
+    const zoomValue = document.getElementById('focusZoom').value;
+    const zoom = zoomValue === 'auto' ? 'auto' : zoomValue === 'true';
+
+    // Convert string ID back to number since items are generated with numeric IDs
+    const numericId = parseInt(selectedItemId);
+    console.log('Focusing on item:', numericId, { animate, duration, easing, zoom });
+    
+    timeline.focus({ 
+      id: numericId,
+      animate,
+      duration,
+      easing,
+      zoom
+    });
+  });
+
+  document.getElementById('focusAllBtn').addEventListener('click', () => {
+    // Get animation options
+    const animate = document.getElementById('focusAnimate').checked;
+    const duration = parseInt(document.getElementById('focusDuration').value);
+    const easing = document.getElementById('focusEasing').value;
+    
+    console.log('Focusing on all items', { animate, duration, easing });
+    
+    timeline.focus({
+      animate,
+      duration,
+      easing
+    });
+  });
+
+  // Function to populate item dropdown
+  function populateItemDropdown(items) {
+    const select = document.getElementById('focusItemSelect');
+    select.innerHTML = '<option value="">Select Item</option>';
+    
+    items.forEach(item => {
+      const option = document.createElement('option');
+      option.value = item.id;
+      option.textContent = `${item.label || 'Untitled'}`;
+      select.appendChild(option);
+    });
+  }
+
+  // Set Items Dialog handlers
+  const setItemsDialog = document.getElementById('setItemsDialog');
+  const setItemsBtn = document.getElementById('setItemsBtn');
+  const cancelSetItems = document.getElementById('cancelSetItems');
+  const applySetItems = document.getElementById('applySetItems');
+  const itemsJsonTextarea = document.getElementById('itemsJson');
+  const jsonError = document.getElementById('jsonError');
+
+  setItemsBtn.addEventListener('click', () => {
+    setItemsDialog.classList.add('active');
+    jsonError.classList.remove('active');
+    jsonError.textContent = '';
+  });
+
+  cancelSetItems.addEventListener('click', () => {
+    setItemsDialog.classList.remove('active');
+  });
+
+  // Close dialog when clicking outside
+  setItemsDialog.addEventListener('click', (e) => {
+    if (e.target === setItemsDialog) {
+      setItemsDialog.classList.remove('active');
+    }
+  });
+
+  applySetItems.addEventListener('click', () => {
+    try {
+      const itemsJson = itemsJsonTextarea.value.trim();
+      
+      if (!itemsJson) {
+        throw new Error('Please enter JSON data');
+      }
+
+      const items = JSON.parse(itemsJson);
+
+      if (!Array.isArray(items)) {
+        throw new Error('JSON must be an array of items');
+      }
+
+      // Validate items have required fields
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (!item.id && item.id !== 0) {
+          throw new Error(`Item at index ${i} is missing required field: id`);
+        }
+        if (!item.start) {
+          throw new Error(`Item at index ${i} is missing required field: start`);
+        }
+      }
+
+      // Extract unique categories from the items
+      const uniqueCategories = new Set();
+      items.forEach(item => {
+        if (item.category) {
+          uniqueCategories.add(item.category);
+        }
+      });
+
+      // Generate category definitions ONLY for categories found in the JSON items
+      const colors = [
+        "#4CAF50", "#2196F3", "#FF9800", "#E91E63", "#9C27B0",
+        "#00BCD4", "#FFEB3B", "#795548", "#607D8B", "#F44336"
+      ];
+      
+      const categories = Array.from(uniqueCategories).map((catName, i) => ({
+        name: catName,
+        label: catName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        style: { backgroundColor: colors[i % colors.length] }
+      }));
+
+      // Destroy the existing timeline
+      if (timeline) {
+        timeline.destroy();
+      }
+
+      // Get current options (for non-data settings like layout, style, etc.)
+      const options = getTimelineOptions();
+      
+      // Override with custom items and categories from JSON
+      // If no categories in JSON, use empty array (no categories)
+      options.items = items;
+      options.categories = categories;
+      
+      // Create new timeline with custom items
+      timeline = new tempis_timeline.TempisTimeline("#canvas", options);
+      window["timeline"] = timeline;
+      
+      // Update currentItems to prevent regeneration
+      currentItems = items;
+      
+      // Close the dialog
+      setItemsDialog.classList.remove('active');
+      jsonError.classList.remove('active');
+    } catch (error) {
+      jsonError.textContent = error.message;
+      jsonError.classList.add('active');
+      console.error('Error setting items:', error);
+    }
+  });
+
+  // Export controls
+  const exportFormat   = document.getElementById('exportFormat');
+  const exportQuality  = document.getElementById('exportQuality');
+  const exportQualityGroup = document.getElementById('exportQualityGroup');
+  const exportDpr      = document.getElementById('exportDpr');
+  const exportBgEnabled = document.getElementById('exportBgEnabled');
+  const exportBgColorGroup = document.getElementById('exportBgColorGroup');
+  const exportBgColor  = document.getElementById('exportBgColor');
+  const exportBtn      = document.getElementById('exportBtn');
+  const exportStatus   = document.getElementById('exportStatus');
+
+  function updateExportQualityVisibility() {
+    exportQualityGroup.style.display = exportFormat.value !== 'image/png' ? '' : 'none';
+  }
+  exportFormat.addEventListener('change', updateExportQualityVisibility);
+  updateExportQualityVisibility();
+
+  exportQuality.addEventListener('input', (e) => {
+    document.getElementById('exportQualityValue').textContent = e.target.value;
+  });
+
+  exportBgEnabled.addEventListener('change', () => {
+    exportBgColorGroup.style.display = exportBgEnabled.checked ? '' : 'none';
+  });
+
+  exportBtn.addEventListener('click', async () => {
+    exportBtn.disabled = true;
+    exportStatus.textContent = 'Exporting…';
+
+    try {
+      const type    = exportFormat.value;
+      const quality = parseFloat(exportQuality.value);
+      const dpr     = parseInt(exportDpr.value, 10);
+      const backgroundColor = exportBgEnabled.checked ? exportBgColor.value : undefined;
+
+      const blob = await timeline.toImage({ type, quality, dpr, backgroundColor });
+
+      const ext = type.split('/')[1];
+      const qualitySuffix = type !== 'image/png' ? '_q' + exportQuality.value : '';
+      const url = URL.createObjectURL(blob);
+      const a   = document.createElement('a');
+      a.href     = url;
+      a.download = 'timeline_' + dpr + 'x' + qualitySuffix + '.' + ext;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      const kb = (blob.size / 1024).toFixed(1);
+      exportStatus.textContent = 'Saved ' + ext.toUpperCase() + ' (' + kb + ' KB) at ' + dpr + '×';
+    } catch (err) {
+      exportStatus.textContent = 'Export failed: ' + err.message;
+    } finally {
+      exportBtn.disabled = false;
+    }
+  });
+
+  // Mobile menu toggle
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    sidebarOverlay.classList.add('active');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    sidebarOverlay.classList.remove('active');
+  }
+
+  menuToggle.addEventListener('click', () => {
+    if (sidebar.classList.contains('open')) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
+  });
+
+  sidebarOverlay.addEventListener('click', closeSidebar);
+
+  // Close sidebar when clicking on controls (mobile only)
+  if (window.innerWidth <= 768) {
+    document.querySelectorAll('.sidebar input, .sidebar select, .sidebar button').forEach(control => {
+      control.addEventListener('change', () => {
+        // Small delay to allow the change to process
+        setTimeout(closeSidebar, 100);
+      });
+    });
+  }
+</script>
+</html>

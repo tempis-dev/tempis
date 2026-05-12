@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="../images/logo.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stress Test</title>
+  <script src="../lib/tempis_timeline.js"></script>
+</head>
+<style>
+  html {
+    background-color: #ebebeb;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+  body {
+    margin: 20px;
+  }
+  .controls {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .control-group {
+    margin-bottom: 15px;
+  }
+  .control-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+  }
+  .control-group p {
+    margin: 5px 0 10px 0;
+    font-size: 14px;
+    color: #666;
+  }
+  .radio-group {
+    display: flex;
+    gap: 20px;
+  }
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .radio-option input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+  .radio-option label {
+    margin: 0;
+    font-weight: normal;
+    cursor: pointer;
+  }
+  .canvas-container {
+    width: 100%;
+    height: 600px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+  .mode-description {
+    background: #fff3cd;
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-top: 10px;
+    border-left: 4px solid #ffc107;
+    font-size: 14px;
+  }
+</style>
+<body>
+  <div class="controls">
+    <div class="control-group">
+      <label>Stack Mode</label>
+      <p>Choose how items are vertically arranged:</p>
+      <div class="radio-group">
+        <div class="radio-option">
+          <input type="radio" id="compact" name="stackMode" value="compact">
+          <label for="compact">Compact (dynamic layout)</label>
+        </div>
+        <div class="radio-option">
+          <input type="radio" id="stable" name="stackMode" value="stable" checked>
+          <label for="stable">Stable (fixed layout)</label>
+        </div>
+      </div>
+      <div class="mode-description" id="modeDescription">
+        <strong>Stable Mode:</strong> ALL items included in layout. PIT labels always centered on timestamp. Layout only updates on zoom/data changes.
+      </div>
+    </div>
+  </div>
+
+  <div class="canvas-container">
+    <canvas id="canvas"></canvas>
+  </div>
+</body>
+<script>
+  function getRandomItem(array) {
+    if (!Array.isArray(array) || array.length === 0) {
+      throw new Error("Input must be a non-empty array");
+    }
+
+    const randomIndex = Math.floor(Math.random() * array.length);
+    return array[randomIndex];
+  }
+
+  function getRandomDatePeriod(startDate, endDate) {
+    const start = startDate.getTime();
+    const end = endDate.getTime();
+
+    if (start >= end) {
+      throw new Error("startDate must be before endDate");
+    }
+
+    // Generate two random timestamps between start and end
+    const t1 = start + Math.random() * (end - start);
+    const t2 = start + Math.random() * (end - start);
+
+    // Order them so the earlier one comes first
+    const randomStart = new Date(Math.min(t1, t2));
+    const randomEnd = new Date(Math.max(t1, t2));
+
+    return { start: randomStart, end: randomEnd };
+  }
+
+  const minDate = new Date("Jan 23 2025 00:00:00 GMT+0000");
+  const maxDate = new Date("Jan 26 2025 00:00:00 GMT+0000");
+  const categories = ["Category-1", "Category-2", "Category-3", "Category-4", "Category-5"];
+  const groups = ["Group-1", "Group-2", "Group-3", "Group-4", "Group-5"];
+  const items = [];
+
+  const itemCount = prompt("Number of items?", 100);
+
+  for (let itemIndex = 0; itemIndex < parseInt(itemCount); itemIndex++) {
+    const randomDatePeriod = getRandomDatePeriod(minDate, maxDate);
+
+    items.push({ 
+      id: itemIndex,
+      label: `Item ${itemIndex}`,
+      start: randomDatePeriod.start,
+      end: getRandomItem([randomDatePeriod.end, undefined]),
+      category: getRandomItem(categories),
+      grouping: getRandomItem(groups),
+    });
+  }
+
+  // Track current mode
+  let currentMode = 'stable';
+
+  // Create our timeline options.
+  const timelineOptions = {
+    responsive: true,
+    stackMode: currentMode,
+    range: {
+      position: "bottom"
+    },
+    font: {
+      size: 14
+    },
+    categories: [
+      {
+        name: "Category-1",
+        label: "Category 1",
+      },
+      {
+        name: "Category-2",
+        label: "Category 2",
+      },
+      {
+        name: "Category-3",
+        label: "Category 3",
+      },
+      {
+        name: "Category-4",
+        label: "Category 4",
+      },
+      {
+        name: "Category-5",
+        label: "Category 5",
+      }
+    ],
+    items
+  };
+
+  // Create our timeline and stick a reference to it on the window for easy access.
+  let timeline = new tempis_timeline.TempisTimeline("#canvas", timelineOptions);
+  window["timeline"] = timeline;
+
+  // Update mode description
+  function updateModeDescription(mode) {
+    const description = document.getElementById('modeDescription');
+    if (mode === 'compact') {
+      description.innerHTML = '<strong>Compact Mode:</strong> Only visible items are included in layout. PIT labels adjust to fit canvas. Layout updates when panning.';
+    } else {
+      description.innerHTML = '<strong>Stable Mode:</strong> ALL items included in layout. PIT labels always centered on timestamp. Layout only updates on zoom/data changes.';
+    }
+  }
+
+  // Handle mode changes
+  document.querySelectorAll('input[name="stackMode"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      currentMode = e.target.value;
+      
+      // Destroy the old timeline to clean up event listeners
+      if (timeline) {
+        timeline.destroy();
+      }
+      
+      // Recreate timeline with new stack mode
+      timelineOptions.stackMode = currentMode;
+      timeline = new tempis_timeline.TempisTimeline("#canvas", timelineOptions);
+      window["timeline"] = timeline;
+      
+      updateModeDescription(currentMode);
+      console.log(`Switched to ${currentMode} stack mode with ${items.length} items`);
+    });
+  });
+</script>
+</html>

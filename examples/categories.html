@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="../images/logo.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categories</title>
+  <script src="../lib/tempis_timeline.js"></script>
+</head>
+<style>
+  html {
+    background-color: #ebebeb;
+  }
+  .canvas-container {
+    width: 100%;
+    height: 600px;
+    resize: both;
+    overflow: hidden;
+  }
+</style>
+<body>
+  <div class="canvas-container">
+    <canvas id="canvas">
+  </div>
+</body>
+<script>
+  // Create our timeline options.
+  const timelineOptions = {
+    responsive: true,
+    range: {
+      position: "both",
+      minimum: null,
+      maximum: null,
+    },
+    legend: {
+      position: "bottom",
+      alignment: "center",
+      item: {
+        markerStyle: "square-rounded",
+        isHighlightOnHover: true,
+        isFilterOnClick: true,
+        padding: 4
+      }
+    },
+    zoom: {
+      enabled: true
+    },
+    style: {
+      font: {
+        size: 14
+      }
+    },
+    categories: [
+      {
+        name: "work",
+        label: "Work",
+      },
+      {
+        name: "play",
+        label: "Play",
+      },
+      {
+        name: "accident",
+        label: "Accident",
+        style: {
+          backgroundColor: "#d90b2a"
+        }
+      }
+    ],
+    items: [
+      { 
+        id: 0,
+        label: "Sleeping",
+        start: new Date("Thu Jan 23 2025 00:00:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 08:30:00 GMT+0000"),
+        category: "play"
+      },
+      { 
+        id: 1,
+        label: "Working",
+        start: new Date("Thu Jan 23 2025 09:00:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 17:00:00 GMT+0000"),
+        category: "work"
+      },
+      { 
+        id: 2,
+        label: "Eating",
+        start: new Date("Thu Jan 23 2025 17:15:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 18:00:00 GMT+0000"),
+        category: "work"
+      },
+      { 
+        id: 3,
+        label: "Playing",
+        start: new Date("Thu Jan 23 2025 18:30:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 21:00:00 GMT+0000"),
+        category: "play"
+      },
+      { 
+        id: 4,
+        label: "Sleeping",
+        start: new Date("Thu Jan 23 2025 21:10:00 GMT+0000"),
+        end: new Date("Thu Jan 24 2025 00:00:00 GMT+0000"),
+        category: "play"
+      },
+      { 
+        id: 5,
+        label: "Snoring",
+        start: new Date("Thu Jan 23 2025 02:30:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 07:30:00 GMT+0000"),
+        category: "play"
+      },
+      { 
+        id: 6,
+        label: "Stubbed Toe, like, really bad",
+        start: new Date("Thu Jan 23 2025 11:32:30 GMT+0000"),
+        category: "accident"
+      },
+      { 
+        id: 7,
+        label: "Sleeping",
+        start: new Date("Thu Jan 23 2025 00:00:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 11:30:00 GMT+0000"),
+        category: "play"
+      },
+      { 
+        id: 8,
+        label: "Sniffing",
+        start: new Date("Thu Jan 23 2025 11:35:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 13:45:00 GMT+0000"),
+        category: "play"
+      },
+      { 
+        id: 9,
+        label: "Eating",
+        start: new Date("Thu Jan 23 2025 13:05:00 GMT+0000"),
+        end: new Date("Thu Jan 23 2025 13:45:00 GMT+0000"),
+        category: "play"
+      },
+      { 
+        id: 10,
+        label: "Sleeping",
+        start: new Date("Thu Jan 23 2025 14:00:00 GMT+0000"),
+        end: new Date("Thu Jan 24 2025 00:00:00 GMT+0000"),
+        category: "play"
+      },
+    ]
+  };
+
+  // Create our timeline and stick a reference to it on the window for easy access.
+  window["timeline"] = new tempis_timeline.TempisTimeline("#canvas", timelineOptions);
+</script>
+</html>

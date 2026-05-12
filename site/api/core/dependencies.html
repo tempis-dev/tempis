@@ -1,0 +1,75 @@
+<h1>Dependencies</h1>
+<p class="subtitle">Render connector arrows between items to show relationships.</p>
+
+<div class="api-demo"><canvas id="demo-deps"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-deps', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    items: [
+      { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-12', grouping: 'Group 1' },
+      { id: 2, label: 'Item 2', start: '2026-01-14', end: '2026-01-22', grouping: 'Group 1' },
+      { id: 3, label: 'Item 3', start: '2026-01-13', end: '2026-01-25', grouping: 'Group 2' },
+      { id: 4, label: 'Item 4', start: '2026-01-31', end: '2026-02-05', grouping: 'Group 2' },
+    ],
+    dependencies: [
+      { source: 1, target: 2, style: { color: '#ef4444', lineWidth: 2 } },
+      { source: 1, target: 3, style: { color: '#f59e0b', lineStyle: 'dashed' } },
+      { source: 2, target: 4 },
+      { source: 3, target: 4, style: { color: '#10b981', lineStyle: 'dotted' } },
+    ],
+    range: { start: '2026-01-01', end: '2026-02-10', position: 'bottom' }
+  });
+</script>
+
+<div class="note">Connectors are only drawn when both the source and target items are visible in the current view. Panning one item off-screen will hide the connector.</div>
+
+<h2>TempisTimelineDependency</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>source</code></td><td><code>string | number</code></td><td>The ID of the source item (arrow starts here).</td></tr>
+    <tr><td><code>target</code></td><td><code>string | number</code></td><td>The ID of the target item (arrow points here).</td></tr>
+    <tr><td><code>style</code></td><td><code>TempisTimelineDependencyStyle</code></td><td>Optional style overrides for this connector arrow.</td></tr>
+  </tbody>
+</table>
+
+<h2>TempisTimelineDependencyStyle</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>color</code></td><td><code>string</code></td><td>grid colour</td><td>Colour of the connector line and arrowhead.</td></tr>
+    <tr><td><code>lineWidth</code></td><td><code>number</code></td><td><code>1.5</code></td><td>Line thickness in pixels.</td></tr>
+    <tr><td><code>lineStyle</code></td><td><code>TempisTimelineLineStyle</code></td><td><code>"solid"</code></td><td>Line style: <code>solid</code>, <code>dashed</code>, <code>dotted</code>, <code>dash-dot</code>, or <code>long-dash</code>.</td></tr>
+  </tbody>
+</table>
+
+<h2>Usage</h2>
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  items: [
+    { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-12', grouping: 'Group 1' },
+    { id: 2, label: 'Item 2', start: '2026-01-14', end: '2026-01-22', grouping: 'Group 1' },
+    { id: 3, label: 'Item 3', start: '2026-01-13', end: '2026-01-25', grouping: 'Group 2' },
+    { id: 4, label: 'Item 4', start: '2026-01-31', end: '2026-02-05', grouping: 'Group 2' },
+  ],
+  dependencies: [
+    { source: 1, target: 2, style: { color: '#ef4444', lineWidth: 2 } },
+    { source: 1, target: 3, style: { color: '#f59e0b', lineStyle: 'dashed' } },
+    { source: 2, target: 4 },
+    { source: 3, target: 4, style: { color: '#10b981', lineStyle: 'dotted' } },
+  ],
+  range: { start: '2026-01-01', end: '2026-02-10', position: 'bottom' }
+});</code></pre>
+
+<h2>Methods</h2>
+
+<h3>setDependencies(dependencies)</h3>
+<p>Replaces all dependencies and redraws. Does not affect item layout — only the connector arrows are updated.</p>
+<pre><code class="language-typescript">timeline.setDependencies([
+  { source: 1, target: 2 },
+  { source: 2, target: 3 },
+]);</code></pre>

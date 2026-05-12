@@ -1,0 +1,86 @@
+<h1>Accessibility</h1>
+<p class="subtitle">Built-in keyboard navigation, ARIA attributes, and motion preferences.</p>
+
+<h2>Overview</h2>
+<p>Tempis Timeline includes accessibility support out of the box. The canvas element is made focusable and keyboard-navigable by default, with ARIA attributes for screen reader identification and automatic respect for the user's reduced motion preference.</p>
+
+<h2>Options</h2>
+<p>Accessibility options are grouped under the <code>accessibility</code> key in the timeline options.</p>
+
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+const timeline = new TempisTimeline('#canvas', {
+  accessibility: {
+    ariaLabel: 'Project Schedule — Q1 2026',
+    keyboard: true,
+    keyboardPanStep: 0.1,
+    keyboardZoomStep: 0.5
+  },
+  items: [
+    { id: 1, label: 'Item 1', start: '2026-03-01', end: '2026-03-10' },
+    { id: 2, label: 'Item 2', start: '2026-03-08', end: '2026-03-18' },
+  ],
+  range: { start: '2026-02-25', end: '2026-04-01', position: 'bottom' }
+});</code></pre>
+
+<table>
+  <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>ariaLabel</code></td><td><code>string</code></td><td>—</td><td>Sets the <code>aria-label</code> attribute on the canvas. Provides a meaningful description for screen readers.</td></tr>
+    <tr><td><code>keyboard</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Enables keyboard navigation. When <code>false</code>, no <code>tabindex</code> or key handlers are added.</td></tr>
+    <tr><td><code>keyboardPanStep</code></td><td><code>number</code></td><td><code>0.1</code></td><td>Fraction of the visible range to pan per arrow key press. <code>0.1</code> pans 10% of the visible range.</td></tr>
+    <tr><td><code>keyboardZoomStep</code></td><td><code>number</code></td><td><code>0.5</code></td><td>Zoom intensity per <code>+</code>/<code>-</code> key press. Higher values zoom faster.</td></tr>
+  </tbody>
+</table>
+
+<h2>Keyboard Controls</h2>
+<p>When the canvas is focused (via Tab or click), the following keys are available:</p>
+
+<table>
+  <thead><tr><th>Key</th><th>Action</th></tr></thead>
+  <tbody>
+    <tr><td><code>←</code> Arrow Left</td><td>Pan the timeline backward in time</td></tr>
+    <tr><td><code>→</code> Arrow Right</td><td>Pan the timeline forward in time</td></tr>
+    <tr><td><code>↑</code> Arrow Up</td><td>Scroll the data view up (when content overflows)</td></tr>
+    <tr><td><code>↓</code> Arrow Down</td><td>Scroll the data view down (when content overflows)</td></tr>
+    <tr><td><code>+</code> or <code>=</code></td><td>Zoom in (centered on the viewport)</td></tr>
+    <tr><td><code>-</code> or <code>_</code></td><td>Zoom out (centered on the viewport)</td></tr>
+  </tbody>
+</table>
+
+<div class="note">Modifier key combinations (Ctrl, Meta, Alt) are not intercepted, so browser shortcuts continue to work normally.</div>
+
+<p>Pan direction is automatically reversed when the timeline is in <a href="#core/rtl">RTL mode</a>.</p>
+
+<h2>ARIA Attributes</h2>
+<p>The timeline automatically applies the following attributes to the canvas element unless they are already set in your markup:</p>
+
+<table>
+  <thead><tr><th>Attribute</th><th>Value</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>role</code></td><td><code>"img"</code></td><td>Identifies the canvas as a graphical element for screen readers.</td></tr>
+    <tr><td><code>tabindex</code></td><td><code>"0"</code></td><td>Makes the canvas focusable via Tab. Only set when <code>keyboard</code> is enabled.</td></tr>
+    <tr><td><code>aria-label</code></td><td>User-provided</td><td>Gives the canvas a descriptive name. Only set when <code>ariaLabel</code> is provided in options.</td></tr>
+  </tbody>
+</table>
+
+<div class="note">If you set <code>role</code>, <code>tabindex</code>, or <code>aria-label</code> directly on the canvas element in your HTML, the timeline will not overwrite them.</div>
+
+<h2>Reduced Motion</h2>
+<p>The timeline respects the <code>prefers-reduced-motion: reduce</code> media query. When the user has requested reduced motion in their operating system or browser settings, all animated transitions (such as <code>focus({ animate: true })</code>) are applied instantly without animation.</p>
+<p>This behaviour is always active and cannot be disabled.</p>
+
+<h2>Disabling Keyboard Navigation</h2>
+<p>If your application handles its own keyboard shortcuts and the timeline's key handlers conflict, you can disable them:</p>
+
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  accessibility: {
+    keyboard: false
+  },
+  items: [
+    { id: 1, label: 'Item 1', start: '2026-03-01', end: '2026-03-10' },
+  ],
+  range: { start: '2026-02-25', end: '2026-04-01', position: 'bottom' }
+});</code></pre>
+
+<p>When <code>keyboard</code> is <code>false</code>, no <code>tabindex</code> attribute or key event handlers are added to the canvas. The <code>role</code> and <code>aria-label</code> attributes are still applied.</p>

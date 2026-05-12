@@ -1,0 +1,63 @@
+<h1>Getting Started</h1>
+<p class="subtitle">Install the core library and render your first timeline.</p>
+
+<h2>Install</h2>
+<div class="install-box">
+  <span class="prompt">$</span> npm install <span style="color: #ff0071; font-weight: 600;">@tempis/timeline</span>
+</div>
+
+<h2>CDN</h2>
+<pre><code class="language-html">&lt;script src="https://unpkg.com/@tempis/timeline/dist/tempis_timeline.min.js"&gt;&lt;/script&gt;</code></pre>
+
+<div class="note">The CDN build exposes a global <code>tempis_timeline</code> object. Access the constructor via <code>tempis_timeline.TempisTimeline</code>.</div>
+
+<h2>Minimal Example</h2>
+<div class="api-demo"><canvas id="demo-getting-started"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-getting-started', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    items: [
+      { id: 1, label: 'Item 1',  start: '2026-01-05', end: '2026-01-15', grouping: 'Group 1' },
+      { id: 2, label: 'Item 2',   start: '2026-01-12', end: '2026-01-28', grouping: 'Group 1' },
+      { id: 3, label: 'Event 1',  start: '2026-01-30', grouping: 'Group 1' },
+      { id: 4, label: 'Item 3',     start: '2026-01-08', end: '2026-01-25', grouping: 'Group 2' },
+    ],
+    range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+  });
+</script>
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  items: [
+    { id: 1, label: 'Item 1',  start: '2026-01-05', end: '2026-01-15', grouping: 'Group 1' },
+    { id: 2, label: 'Item 2',   start: '2026-01-12', end: '2026-01-28', grouping: 'Group 1' },
+    { id: 3, label: 'Event 1',  start: '2026-01-30', grouping: 'Group 1' },
+    { id: 4, label: 'Item 3',     start: '2026-01-08', end: '2026-01-25', grouping: 'Group 2' },
+  ],
+  range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+});</code></pre>
+
+<div class="note">When using <code>responsive: true</code>, the canvas must be inside a container with explicit dimensions. The timeline resizes to fill its parent — if the parent has no width or height, the canvas will collapse to zero.</div>
+
+<h2>Script Tag Usage</h2>
+<pre><code class="language-html">&lt;canvas id="my-timeline"&gt;&lt;/canvas&gt;
+&lt;script src="https://unpkg.com/@tempis/timeline/dist/tempis_timeline.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  new tempis_timeline.TempisTimeline('#my-timeline', {
+    responsive: true,
+    items: [
+      { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-15' }
+    ],
+    range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+  });
+&lt;/script&gt;</code></pre>
+
+<h2>What's Next</h2>
+<p>Now that you have a basic timeline rendering, explore these pages to build on it:</p>
+<ul>
+  <li><a href="#core/items">Items</a> — range events, point-in-time markers, and per-item styling.</li>
+  <li><a href="#core/categories">Categories</a> — colour-code items and add a legend.</li>
+  <li><a href="#core/selection">Selection</a> — let users select items interactively.</li>
+</ul>

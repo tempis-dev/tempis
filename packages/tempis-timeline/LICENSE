@@ -1,0 +1,58 @@
+Tempis Timeline — Source Available License
+
+Copyright (c) 2025-present Nikolas Howard (tempis-dev)
+
+This license governs use of the Tempis Timeline software and associated
+documentation ("Software").
+
+─────────────────────────────────────────────────────────────────────────────
+
+1. NON-COMMERCIAL USE (FREE)
+
+   You may use, copy, modify, and distribute the Software free of charge for:
+
+   • Personal projects
+   • Academic research and education
+   • Open-source projects that generate no revenue
+   • Evaluation and prototyping (including within a commercial organisation,
+     provided the Software is not shipped to production or end users)
+
+2. COMMERCIAL USE (LICENCE REQUIRED)
+
+   A paid commercial licence is required when the Software is used in any
+   context where revenue is generated, directly or indirectly. This includes
+   but is not limited to:
+
+   • SaaS applications and hosted products
+   • Paid software products (desktop, mobile, or web)
+   • Client projects and agency work delivered for payment
+   • Internal business tools within a revenue-generating organisation
+   • Any product or service distributed to paying customers
+
+   A single commercial licence covers one organisation — unlimited developers,
+   unlimited projects, no seat limits.
+
+   For pricing and purchase: https://tempis.dev/pricing
+
+3. REDISTRIBUTION
+
+   Redistribution of the Software, with or without modification, is permitted
+   provided that:
+
+   • This licence notice is included in all copies or substantial portions
+   • The Software is not sold or sublicensed as a standalone product
+   • Modified versions are clearly marked as such
+
+4. NO WARRANTY
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+   DEALINGS IN THE SOFTWARE.
+
+─────────────────────────────────────────────────────────────────────────────
+
+For commercial licensing inquiries: info@tempis.dev

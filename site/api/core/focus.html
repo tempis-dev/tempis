@@ -1,0 +1,58 @@
+<h1>Focus</h1>
+<p class="subtitle">Pan and zoom the timeline to a specific item, date, or range.</p>
+
+<div class="api-demo"><canvas id="demo-focus"></canvas></div>
+<div class="btn-group" style="display: flex; gap: 8px; margin: -16px 0 24px;">
+  <button class="btn btn-outline btn-sm" onclick="window._focusDemo.focus({ id: 1, animate: true, duration: 600 })">Focus Item 1</button>
+  <button class="btn btn-outline btn-sm" onclick="window._focusDemo.focus({ id: 3, animate: true, duration: 600 })">Focus Event 1</button>
+  <button class="btn btn-outline btn-sm" onclick="window._focusDemo.focus({ animate: true, duration: 800 })">Show All</button>
+</div>
+<script>
+  window._focusDemo = new tempis_timeline.TempisTimeline('#demo-focus', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    items: [
+      { id: 1, label: 'Item 1',    start: '2026-01-05', end: '2026-01-19', grouping: 'Group 1' },
+      { id: 2, label: 'Item 2',    start: '2026-01-20', end: '2026-02-02', grouping: 'Group 1' },
+      { id: 3, label: 'Event 1',   start: '2026-02-05', grouping: 'Group 1' },
+      { id: 4, label: 'Item 3',    start: '2026-01-08', end: '2026-01-22', grouping: 'Group 2' },
+      { id: 5, label: 'Item 4',    start: '2026-01-15', end: '2026-02-01', grouping: 'Group 2' },
+    ],
+    range: { start: '2026-01-01', end: '2026-02-10', position: 'bottom' }
+  });
+</script>
+
+<div class="note">If the user has enabled <code>prefers-reduced-motion</code> in their OS settings, animations are automatically skipped — the timeline jumps to the target position instantly.</div>
+
+<h2>FocusOptions</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>id</code></td><td><code>string | number</code></td><td>—</td><td>Item identifier to focus on.</td></tr>
+    <tr><td><code>date</code></td><td><code>string | number | Date</code></td><td>—</td><td>Date to centre the timeline on.</td></tr>
+    <tr><td><code>range</code></td><td><code>[DateInput, DateInput]</code></td><td>—</td><td>Two-element tuple defining the range to display.</td></tr>
+    <tr><td><code>animate</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Animate the transition.</td></tr>
+    <tr><td><code>duration</code></td><td><code>number</code></td><td><code>500</code></td><td>Animation duration in milliseconds.</td></tr>
+    <tr><td><code>easing</code></td><td><code>EasingFunction</code></td><td><code>"easeInOut"</code></td><td>Easing curve for the animation.</td></tr>
+    <tr><td><code>zoom</code></td><td><code>boolean | "auto"</code></td><td><code>"auto"</code></td><td>Whether to zoom to fit the target item. <code>"auto"</code> zooms only when the item is large relative to the current view.</td></tr>
+  </tbody>
+</table>
+
+<p>Calling <code>focus()</code> with no arguments centres the timeline on the full range of all items.</p>
+<p>Note: calling <code>focus()</code> clears any active tooltip.</p>
+
+<p>When <code>zoom</code> is set to <code>"auto"</code>, the timeline only zooms if the target item occupies more than 80% of the current visible range. Otherwise it keeps the current zoom level and centres on the item.</p>
+
+<h2>Focus by Item</h2>
+<pre><code class="language-typescript">timeline.focus({ id: 42, animate: true, duration: 800 });</code></pre>
+
+<h2>Focus by Date</h2>
+<pre><code class="language-typescript">timeline.focus({ date: '2026-06-15', animate: true });</code></pre>
+
+<h2>Focus by Range</h2>
+<pre><code class="language-typescript">timeline.focus({
+  range: ['2026-01-01', '2026-03-31'],
+  animate: true,
+  duration: 600
+});</code></pre>

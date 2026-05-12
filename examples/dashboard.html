@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="../images/logo.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fleet Dashboard — Tempis Timeline</title>
+  <script src="../lib/tempis_timeline.js"></script>
+  <style>
+    :root {
+      --bg: #f5f6fa;
+      --card: #ffffff;
+      --border: #e8eaf0;
+      --text: #1a1a2e;
+      --text-secondary: #6b7280;
+      --primary: #4f46e5;
+      --primary-light: #eef2ff;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius: 12px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; overflow: hidden; height: 100vh; }
+
+    /* Top bar */
+    .topbar { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
+    .topbar h1 { font-size: 1.1em; font-weight: 700; }
+    .topbar .spacer { flex: 1; }
+    .topbar select, .topbar input { padding: 6px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; background: var(--bg); }
+
+    /* Grid layout */
+    .dashboard { display: grid; grid-template-columns: 1fr 320px; grid-template-rows: auto 1fr; gap: 16px; padding: 16px 24px; height: calc(100vh - 53px); overflow: hidden; }
+
+    /* KPI row */
+    .kpi-row { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .kpi { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; }
+    .kpi .label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+    .kpi .value { font-size: 1.8em; font-weight: 800; line-height: 1; }
+    .kpi .change { font-size: 12px; margin-top: 6px; }
+    .kpi .change.up { color: var(--success); }
+    .kpi .change.down { color: var(--danger); }
+    .kpi .mini-chart { display: flex; align-items: flex-end; gap: 3px; height: 32px; margin-top: 10px; }
+    .kpi .mini-chart .bar { width: 100%; border-radius: 3px 3px 0 0; background: var(--primary); opacity: 0.2; }
+    .kpi .mini-chart .bar.active { opacity: 1; }
+
+    /* Timeline card */
+    .timeline-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+    .timeline-card .card-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+    .timeline-card .card-header h2 { font-size: 0.95em; font-weight: 700; }
+    .timeline-card .card-header .spacer { flex: 1; }
+    .timeline-card .card-header button { background: var(--primary-light); color: var(--primary); border: none; padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: 600; }
+    .timeline-card .card-header button:hover { background: var(--primary); color: #fff; }
+    .timeline-body { flex: 1; min-height: 0; }
+    .timeline-body canvas { display: block; width: 100%; height: 100%; }
+
+    /* Sidebar */
+    .sidebar { display: flex; flex-direction: column; gap: 16px; overflow-y: auto; min-height: 0; }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.2); border-radius: 2px; }
+    .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.4); }
+
+    /* Detail card */
+    .detail-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+    .detail-card h3 { font-size: 0.9em; font-weight: 700; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); }
+    .detail-card .empty { color: var(--text-secondary); font-size: 13px; text-align: center; padding: 20px 0; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 11px; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.03em; margin-bottom: 3px; }
+    .field .val { font-size: 14px; font-weight: 500; }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+    .field select, .field input { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; margin-top: 4px; }
+    .save-btn { width: 100%; padding: 8px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+    .save-btn:hover { background: #4338ca; }
+
+    /* Activity list */
+    .activity-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+    .activity-text { font-size: 13px; line-height: 1.4; }
+    .activity-text .time { color: var(--text-secondary); font-size: 11px; }
+
+    /* Donut chart */
+    .donut-wrap { display: flex; align-items: center; gap: 16px; }
+    .donut { position: relative; width: 80px; height: 80px; }
+    .donut svg { transform: rotate(-90deg); }
+    .donut .center-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; }
+    .donut-legend { font-size: 12px; }
+    .donut-legend div { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .donut-legend .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    @media (max-width: 900px) {
+      .dashboard { grid-template-columns: 1fr; height: auto; }
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .timeline-body { min-height: 350px; }
+    }
+
+    /* Context menu */
+    .ctx { position: fixed; z-index: 9999; background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 8px 28px rgba(0,0,0,0.12); padding: 6px 0; min-width: 180px; display: none; }
+    .ctx.open { display: block; }
+    .ctx-item { padding: 8px 16px; font-size: 13px; cursor: pointer; }
+    .ctx-item:hover { background: #f5f6fa; }
+    .ctx-sep { height: 1px; background: #eee; margin: 4px 0; }
+
+    /* Reschedule dialog */
+    .reschedule-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 10000; display: none; align-items: center; justify-content: center; }
+    .reschedule-overlay.open { display: flex; }
+    .reschedule-dialog { background: #fff; border-radius: 12px; padding: 24px; width: 340px; box-shadow: 0 16px 48px rgba(0,0,0,0.2); }
+    .reschedule-dialog h3 { font-size: 1em; margin-bottom: 16px; }
+    .reschedule-dialog .field { margin-bottom: 12px; }
+    .reschedule-dialog label { display: block; font-size: 11px; text-transform: uppercase; color: #888; margin-bottom: 4px; }
+    .reschedule-dialog input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; }
+    .reschedule-dialog .btn-row { display: flex; gap: 8px; margin-top: 16px; }
+    .reschedule-dialog .btn-row button { flex: 1; padding: 8px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .reschedule-dialog .btn-cancel { background: #f5f6fa; border: 1px solid var(--border); color: var(--text); }
+    .reschedule-dialog .btn-save { background: var(--primary); border: none; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h1>🚛 Fleet Maintenance</h1>
+    <div class="spacer"></div>
+    <label style="font-size:12px;color:var(--text-secondary);">Region</label>
+    <select id="region" onchange="filterRegion()">
+      <option value="all">All Regions</option>
+      <option value="north">North</option>
+      <option value="south">South</option>
+      <option value="east">East</option>
+    </select>
+    <label style="font-size:12px;color:var(--text-secondary);">Range</label>
+    <button onclick="tl.focus({ range: ['2026-01-01','2026-04-01'], animate: true })" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--border);padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;">Q1</button>
+    <button onclick="tl.focus({ range: ['2026-04-01','2026-07-01'], animate: true })" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--border);padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;">Q2</button>
+    <button onclick="tl.focus({ range: ['2026-07-01','2026-10-01'], animate: true })" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--border);padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;">Q3</button>
+    <button onclick="tl.focus({ range: ['2026-10-01','2027-01-01'], animate: true })" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--border);padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;">Q4</button>
+    <button onclick="tl.focus({ animate: true })" style="background:var(--primary-light);color:var(--primary);border:1px solid var(--border);padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;">All</button>
+  </div>
+
+  <div class="dashboard">
+    <!-- KPI Row -->
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="label">Active Vehicles</div>
+        <div class="value">47</div>
+        <div class="change up">↑ 3 from last month</div>
+        <div class="mini-chart" id="chart-vehicles"></div>
+      </div>
+      <div class="kpi">
+        <div class="label">Scheduled Services</div>
+        <div class="value">23</div>
+        <div class="change down">↓ 2 overdue</div>
+        <div class="mini-chart" id="chart-services"></div>
+      </div>
+      <div class="kpi">
+        <div class="label">Avg. Downtime</div>
+        <div class="value">1.8d</div>
+        <div class="change up">↑ 12% improvement</div>
+        <div class="mini-chart" id="chart-downtime"></div>
+      </div>
+      <div class="kpi">
+        <div class="label">Compliance Rate</div>
+        <div class="value">94%</div>
+        <div class="change up">↑ 2% from last quarter</div>
+        <div class="mini-chart" id="chart-compliance"></div>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline-card">
+      <div class="card-header">
+        <h2>Maintenance Schedule</h2>
+        <div class="spacer"></div>
+        <button onclick="tl.clearSelection(); selectedItem=null; updateDetail();">Clear</button>
+      </div>
+      <div class="timeline-body">
+        <canvas id="timeline"></canvas>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Detail panel -->
+      <div class="detail-card" id="detail-panel">
+        <h3>Task Details</h3>
+        <div class="empty" id="detail-empty">Select a task on the timeline</div>
+        <div id="detail-form" style="display:none;">
+          <div class="field"><label>Vehicle</label><div class="val" id="d-vehicle"></div></div>
+          <div class="field"><label>Service</label><div class="val" id="d-service"></div></div>
+          <div class="field"><label>Scheduled</label><div class="val" id="d-dates"></div></div>
+          <div class="field"><label>Status</label>
+            <select id="d-status" onchange="updateStatus()">
+              <option value="scheduled">Scheduled</option>
+              <option value="in-progress">In Progress</option>
+              <option value="complete">Complete</option>
+              <option value="overdue">Overdue</option>
+            </select>
+          </div>
+          <div class="field"><label>Assigned To</label>
+            <select id="d-assignee">
+              <option>Mike R.</option>
+              <option>Sarah K.</option>
+              <option>James T.</option>
+              <option>Unassigned</option>
+            </select>
+          </div>
+          <div class="field"><label>Notes</label>
+            <input type="text" id="d-notes" placeholder="Add a note...">
+          </div>
+          <button class="save-btn" onclick="saveItem()">Save Changes</button>
+        </div>
+      </div>
+
+      <!-- Fleet status donut -->
+      <div class="detail-card">
+        <h3>Fleet Status</h3>
+        <div class="donut-wrap">
+          <div class="donut">
+            <svg width="80" height="80" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e8eaf0" stroke-width="3"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#10b981" stroke-width="3" stroke-dasharray="65 35" stroke-linecap="round"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f59e0b" stroke-width="3" stroke-dasharray="20 80" stroke-dashoffset="-65" stroke-linecap="round"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="9 91" stroke-dashoffset="-85" stroke-linecap="round"/>
+            </svg>
+            <div class="center-label">47</div>
+          </div>
+          <div class="donut-legend">
+            <div><span class="dot" style="background:#10b981"></span> Operational (31)</div>
+            <div><span class="dot" style="background:#f59e0b"></span> In Service (12)</div>
+            <div><span class="dot" style="background:#ef4444"></span> Out of Service (4)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent activity -->
+      <div class="detail-card">
+        <h3>Recent Activity</h3>
+        <div class="activity-item">
+          <div class="activity-icon" style="background:#eef2ff;color:#4f46e5;">🔧</div>
+          <div class="activity-text">Truck #12 brake service completed<br><span class="time">2 hours ago</span></div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon" style="background:#fef3c7;color:#f59e0b;">⚠️</div>
+          <div class="activity-text">Van #08 oil change overdue by 3 days<br><span class="time">5 hours ago</span></div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon" style="background:#d1fae5;color:#10b981;">✅</div>
+          <div class="activity-text">Truck #03 annual inspection passed<br><span class="time">Yesterday</span></div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon" style="background:#fee2e2;color:#ef4444;">🚨</div>
+          <div class="activity-text">Van #15 engine warning — service scheduled<br><span class="time">Yesterday</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Context menu -->
+  <div class="ctx" id="ctx">
+    <div class="ctx-item" onclick="ctxFocus()">🔍 Focus</div>
+    <div class="ctx-item" onclick="ctxReschedule()">📅 Reschedule</div>
+    <div class="ctx-sep"></div>
+    <div class="ctx-item" style="color:#d32f2f;" onclick="ctxRemove()">🗑 Remove</div>
+  </div>
+
+  <!-- Reschedule dialog -->
+  <div class="reschedule-overlay" id="resched-overlay" onclick="closeResched()">
+    <div class="reschedule-dialog" onclick="event.stopPropagation()">
+      <h3 id="resched-title">Reschedule Task</h3>
+      <div class="field">
+        <label>Start Date</label>
+        <input type="date" id="resched-start">
+      </div>
+      <div class="field">
+        <label>End Date</label>
+        <input type="date" id="resched-end">
+      </div>
+      <div class="btn-row">
+        <button class="btn-cancel" onclick="closeResched()">Cancel</button>
+        <button class="btn-save" onclick="applyResched()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var TT = tempis_timeline.TempisTimeline;
+    var selectedItem = null;
+    var itemNotes = {};     // id → note string
+    var itemAssignees = {}; // id → assignee name
+
+    // Mini bar charts
+    function miniChart(id, data, activeIdx) {
+      var el = document.getElementById(id);
+      var max = Math.max.apply(null, data);
+      data.forEach(function(v, i) {
+        var bar = document.createElement('div');
+        bar.className = 'bar' + (i === activeIdx ? ' active' : '');
+        bar.style.height = Math.round((v / max) * 100) + '%';
+        el.appendChild(bar);
+      });
+    }
+    miniChart('chart-vehicles', [38,40,42,41,44,45,47], 6);
+    miniChart('chart-services', [18,22,19,25,20,21,23], 6);
+    miniChart('chart-downtime', [3.2,2.8,2.5,2.1,2.0,1.9,1.8], 6);
+    miniChart('chart-compliance', [88,89,90,91,92,93,94], 6);
+
+    var allItems = [
+      // ── Trucks ──────────────────────────────────────────
+      // Q1 — overlapping routine + inspection
+      { id: 1,  label: 'Truck #01 — Oil Change',          start: '2026-01-05', end: '2026-01-14', category: 'routine',    grouping: 'Trucks', region: 'north' },
+      { id: 2,  label: 'Truck #03 — Annual Inspection',    start: '2026-01-12', end: '2026-02-06', category: 'inspection', grouping: 'Trucks', region: 'north' },
+      { id: 3,  label: 'Truck #05 — Brake Overhaul',       start: '2026-02-09', end: '2026-03-06', category: 'repair',    grouping: 'Trucks', region: 'north', style: { borderColor: '#d32f2f', borderThickness: 3, borderStyle: 'dashed' } },
+      { id: 4,  label: 'Truck #12 — Tyre Rotation',        start: '2026-02-23', end: '2026-03-06', category: 'routine',   grouping: 'Trucks', region: 'north' },
+      // Q2 — overlapping repair + routine
+      { id: 5,  label: 'Truck #01 — Transmission Service', start: '2026-04-06', end: '2026-04-24', category: 'repair',    grouping: 'Trucks', region: 'north' },
+      { id: 6,  label: 'Truck #07 — Oil Change',           start: '2026-04-14', end: '2026-04-24', category: 'routine',   grouping: 'Trucks', region: 'north' },
+      { id: 7,  label: 'Truck #09 — Coolant Flush',        start: '2026-05-18', end: '2026-06-05', category: 'routine',   grouping: 'Trucks', region: 'north' },
+      { id: 8,  label: 'Truck #03 — Exhaust Repair',       start: '2026-05-25', end: '2026-06-12', category: 'repair',    grouping: 'Trucks', region: 'north' },
+      // Q3
+      { id: 9,  label: 'Truck #03 — 6-Month Check',        start: '2026-07-13', end: '2026-08-07', category: 'inspection', grouping: 'Trucks', region: 'north' },
+      { id: 10, label: 'Truck #12 — Brake Pads',            start: '2026-08-03', end: '2026-08-14', category: 'repair',    grouping: 'Trucks', region: 'north' },
+      // Q4
+      { id: 11, label: 'Truck #01 — Annual Inspection',     start: '2026-10-12', end: '2026-11-06', category: 'inspection', grouping: 'Trucks', region: 'north' },
+      { id: 12, label: 'Truck #05 — Oil Change',            start: '2026-10-26', end: '2026-11-06', category: 'routine',   grouping: 'Trucks', region: 'north' },
+
+      // ── Vans ────────────────────────────────────────────
+      // Q1 — overlapping
+      { id: 20, label: 'Van #02 — Oil Change',              start: '2026-01-12', end: '2026-01-23', category: 'routine',   grouping: 'Vans', region: 'south' },
+      { id: 21, label: 'Van #04 — MOT',                     start: '2026-01-19', end: '2026-02-13', category: 'inspection', grouping: 'Vans', region: 'south' },
+      { id: 22, label: 'Van #08 — Suspension Repair',       start: '2026-02-16', end: '2026-03-13', category: 'repair',    grouping: 'Vans', region: 'south' },
+      { id: 23, label: 'Van #10 — Brake Service',           start: '2026-03-02', end: '2026-03-13', category: 'repair',    grouping: 'Vans', region: 'south' },
+      // Q2 — overlapping
+      { id: 24, label: 'Van #02 — Tyre Rotation',           start: '2026-04-06', end: '2026-04-17', category: 'routine',   grouping: 'Vans', region: 'south' },
+      { id: 25, label: 'Van #15 — Engine Diagnostic',       start: '2026-04-13', end: '2026-05-08', category: 'repair',    grouping: 'Vans', region: 'south', style: { borderColor: '#7b1fa2', borderThickness: 3, borderStyle: 'dashed' } },
+      { id: 26, label: 'Van #06 — Oil Change',              start: '2026-05-18', end: '2026-05-29', category: 'routine',   grouping: 'Vans', region: 'south' },
+      // Q3
+      { id: 27, label: 'Van #02 — Annual Inspection',       start: '2026-07-06', end: '2026-07-24', category: 'inspection', grouping: 'Vans', region: 'south' },
+      { id: 28, label: 'Van #06 — Brake Service',           start: '2026-07-20', end: '2026-08-01', category: 'repair',    grouping: 'Vans', region: 'south' },
+      { id: 29, label: 'Van #08 — Coolant Flush',           start: '2026-08-17', end: '2026-08-28', category: 'routine',   grouping: 'Vans', region: 'south' },
+      // Q4
+      { id: 30, label: 'Van #04 — Tyre Rotation',           start: '2026-10-19', end: '2026-10-30', category: 'routine',   grouping: 'Vans', region: 'south' },
+      { id: 31, label: 'Van #15 — Follow-up Diagnostic',    start: '2026-10-26', end: '2026-11-13', category: 'inspection', grouping: 'Vans', region: 'south' },
+
+      // ── Equipment ───────────────────────────────────────
+      // Q1 — overlapping
+      { id: 40, label: 'Forklift #A — Hydraulic Service',   start: '2026-01-19', end: '2026-02-06', category: 'routine',   grouping: 'Equipment', region: 'east' },
+      { id: 41, label: 'Crane #B — Annual Certification',   start: '2026-01-26', end: '2026-02-20', category: 'inspection', grouping: 'Equipment', region: 'east' },
+      { id: 42, label: 'Forklift #C — Chain Replacement',   start: '2026-02-23', end: '2026-03-13', category: 'repair',    grouping: 'Equipment', region: 'east' },
+      // Q2
+      { id: 43, label: 'Forklift #A — Battery Replace',     start: '2026-04-20', end: '2026-05-01', category: 'repair',    grouping: 'Equipment', region: 'east' },
+      { id: 44, label: 'Crane #B — Load Test',              start: '2026-05-11', end: '2026-05-29', category: 'inspection', grouping: 'Equipment', region: 'east' },
+      { id: 45, label: 'Forklift #C — Tyre Replace',        start: '2026-05-18', end: '2026-05-29', category: 'repair',    grouping: 'Equipment', region: 'east' },
+      // Q3
+      { id: 46, label: 'Crane #B — Cable Inspection',       start: '2026-08-10', end: '2026-08-28', category: 'inspection', grouping: 'Equipment', region: 'east' },
+      { id: 47, label: 'Forklift #A — Oil Change',          start: '2026-08-17', end: '2026-08-28', category: 'routine',   grouping: 'Equipment', region: 'east' },
+      // Q4
+      { id: 48, label: 'Forklift #A — Annual Cert',         start: '2026-11-02', end: '2026-11-20', category: 'inspection', grouping: 'Equipment', region: 'east' },
+      { id: 49, label: 'Crane #B — Hydraulic Overhaul',     start: '2026-11-09', end: '2026-11-27', category: 'repair',    grouping: 'Equipment', region: 'east' },
+    ];
+
+    var dependencies = [
+      // Truck #01: oil change done before transmission (same row, sequential)
+      { source: 1, target: 5, style: { color: '#4f46e5', lineStyle: 'solid' } },
+      // Truck #03: annual inspection before 6-month check
+      { source: 2, target: 9, style: { color: '#4f46e5', lineStyle: 'solid' } },
+      // Van #02: oil change before annual inspection
+      { source: 20, target: 27, style: { lineStyle: 'solid' } },
+      // Van #15: engine diagnostic before follow-up
+      { source: 25, target: 31, style: { color: '#7b1fa2', lineStyle: 'solid' } },
+      // Forklift #A: hydraulic service before battery replace
+      { source: 40, target: 43, style: { lineStyle: 'solid' } },
+      // Crane #B: annual cert before load test
+      { source: 41, target: 44, style: { lineStyle: 'solid' } },
+    ];
+
+    var ctxItemId = null;
+    var currentItems = allItems.slice();
+
+    var tl = new TT('#timeline', {
+      responsive: true,
+      verticalFill: 'fill-canvas',
+      selection: 'single',
+      style: { item: { borderRadius: 6, fontColor: '#fff', padding: 10 }, font: { family: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" } },
+      categories: [
+        { name: 'routine',    label: 'Routine',    style: { backgroundColor: '#4f46e5', fontColor: '#fff' } },
+        { name: 'inspection', label: 'Inspection',  style: { backgroundColor: '#0ea5e9', fontColor: '#fff' } },
+        { name: 'repair',     label: 'Repair',      style: { backgroundColor: '#f59e0b', fontColor: '#fff' } },
+      ],
+      legend: { position: 'bottom', markerStyle: 'circle' },
+      grouping: { collapsible: true },
+      items: currentItems,
+      dependencies: dependencies,
+      bands: [
+        { start: '2026-03-30', style: { color: '#388e3c', borderColor: '#388e3c', borderThickness: 1 } },
+        { start: '2026-06-30', style: { color: '#388e3c', borderColor: '#388e3c', borderThickness: 1 } },
+        { start: '2026-09-30', style: { color: '#388e3c', borderColor: '#388e3c', borderThickness: 1 } },
+      ],
+      range: { start: '2026-01-01', end: '2026-07-01', position: 'bottom' },
+      tooltip: {
+        overflowBehavior: 'viewport',
+        template: function(id) {
+          var item = currentItems.find(function(i) { return i.id === id; });
+          if (!item) return null;
+          var parts = item.label.split('—');
+          var vehicle = parts[0] ? parts[0].trim() : '';
+          var service = parts[1] ? parts[1].trim() : item.label;
+          var days = item.end ? Math.round((new Date(item.end) - new Date(item.start)) / 86400000) : 0;
+          var isOverdue = item.style && item.style.borderColor === '#d32f2f';
+          var isInProgress = item.style && item.style.borderColor === '#7b1fa2';
+          var isComplete = item.style && item.style.borderColor === '#388e3c';
+          var status = isOverdue ? 'Overdue' : isInProgress ? 'In Progress' : isComplete ? 'Complete' : 'Scheduled';
+          var statusColor = isOverdue ? '#d32f2f' : isInProgress ? '#7b1fa2' : isComplete ? '#388e3c' : '#4f46e5';
+          var catColors = { routine: '#4f46e5', inspection: '#0ea5e9', repair: '#f59e0b' };
+          var catColor = catColors[item.category] || '#888';
+          var note = itemNotes[item.id];
+          var assignee = itemAssignees[item.id];
+          var extras = '';
+          if (note) extras += '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #eee;color:#666;font-size:12px;font-style:italic;">📝 ' + note + '</div>';
+          if (assignee) extras += '<div style="margin-top:4px;color:#666;font-size:12px;">👤 ' + assignee + '</div>';
+          return '<div style="padding:12px 16px;font-family:Inter,sans-serif;font-size:13px;min-width:200px;background:#fff;color:#1a1a2e;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);">' +
+            '<div style="font-weight:700;font-size:14px;margin-bottom:4px;">' + vehicle + '</div>' +
+            '<div style="margin-bottom:10px;color:#666;">' + service + '</div>' +
+            '<div style="display:flex;gap:20px;margin-bottom:8px;">' +
+              '<div><span style="font-size:10px;color:#999;text-transform:uppercase;">Duration</span><br><strong>' + (days > 0 ? days + ' days' : 'Milestone') + '</strong></div>' +
+              '<div><span style="font-size:10px;color:#999;text-transform:uppercase;">Region</span><br><strong style="text-transform:capitalize;">' + (item.region || '—') + '</strong></div>' +
+            '</div>' +
+            '<div style="display:flex;align-items:center;gap:8px;padding-top:8px;border-top:1px solid #eee;">' +
+              '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + statusColor + ';"></span>' +
+              '<span style="font-weight:600;">' + status + '</span>' +
+              '<span style="margin-left:auto;background:' + catColor + ';color:#fff;padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600;">' + item.category + '</span>' +
+            '</div>' + extras + '</div>';
+        }
+      },
+      onItemContextClick: function(id, pos) {
+        ctxItemId = id;
+        var ctx = document.getElementById('ctx');
+        ctx.style.left = pos.x + 'px';
+        ctx.style.top = pos.y + 'px';
+        ctx.classList.add('open');
+      },
+      onSelectionChange: function(changes) {
+        var sel = changes.find(function(c) { return c.selected; });
+        if (sel) {
+          selectedItem = currentItems.find(function(i) { return i.id === sel.id; });
+          tl.setSelection([sel.id]);
+        } else {
+          selectedItem = null;
+          tl.setSelection([]);
+        }
+        updateDetail();
+      }
+    });
+
+    // Close context menu on click
+    document.addEventListener('click', function() { document.getElementById('ctx').classList.remove('open'); });
+
+    function ctxFocus() {
+      document.getElementById('ctx').classList.remove('open');
+      tl.focus({ id: ctxItemId, animate: true, duration: 500 });
+      tl.setSelection([ctxItemId]);
+      selectedItem = currentItems.find(function(i) { return i.id === ctxItemId; });
+      updateDetail();
+    }
+
+    function ctxRemove() {
+      document.getElementById('ctx').classList.remove('open');
+      currentItems = currentItems.filter(function(i) { return i.id !== ctxItemId; });
+      tl.setItems(currentItems);
+      // Remove related dependencies
+      var newDeps = dependencies.filter(function(d) { return d.source !== ctxItemId && d.target !== ctxItemId; });
+      dependencies = newDeps;
+      tl.setDependencies(dependencies);
+      if (selectedItem && selectedItem.id === ctxItemId) { selectedItem = null; updateDetail(); }
+    }
+
+    function ctxReschedule() {
+      document.getElementById('ctx').classList.remove('open');
+      var item = currentItems.find(function(i) { return i.id === ctxItemId; });
+      if (!item) return;
+      document.getElementById('resched-title').textContent = 'Reschedule: ' + item.label;
+      document.getElementById('resched-start').value = item.start;
+      document.getElementById('resched-end').value = item.end || '';
+      document.getElementById('resched-overlay').classList.add('open');
+    }
+
+    function closeResched() { document.getElementById('resched-overlay').classList.remove('open'); }
+
+    function applyResched() {
+      var item = currentItems.find(function(i) { return i.id === ctxItemId; });
+      if (!item) return;
+      var newStart = document.getElementById('resched-start').value;
+      var newEnd = document.getElementById('resched-end').value;
+      if (newStart) item.start = newStart;
+      if (newEnd) item.end = newEnd;
+      tl.setItems(currentItems);
+      if (selectedItem && selectedItem.id === ctxItemId) updateDetail();
+      closeResched();
+    }
+
+    function updateDetail() {
+      var empty = document.getElementById('detail-empty');
+      var form = document.getElementById('detail-form');
+      if (!selectedItem) { empty.style.display = ''; form.style.display = 'none'; return; }
+      empty.style.display = 'none'; form.style.display = '';
+      document.getElementById('d-vehicle').textContent = selectedItem.grouping + ' — ' + selectedItem.label.split('—')[0].trim();
+      document.getElementById('d-service').textContent = selectedItem.label.split('—')[1] ? selectedItem.label.split('—')[1].trim() : selectedItem.label;
+      document.getElementById('d-dates').textContent = selectedItem.start + (selectedItem.end ? ' → ' + selectedItem.end : '');
+      var isOverdue = selectedItem.style && selectedItem.style.borderColor === '#d32f2f';
+      var isInProgress = selectedItem.style && selectedItem.style.borderColor === '#7b1fa2';
+      var isComplete = selectedItem.style && selectedItem.style.borderColor === '#388e3c';
+      document.getElementById('d-status').value = isOverdue ? 'overdue' : isInProgress ? 'in-progress' : isComplete ? 'complete' : 'scheduled';
+      document.getElementById('d-notes').value = itemNotes[selectedItem.id] || '';
+      document.getElementById('d-assignee').value = itemAssignees[selectedItem.id] || 'Unassigned';
+    }
+
+    function saveItem() {
+      if (!selectedItem) return;
+      var note = document.getElementById('d-notes').value.trim();
+      if (note) itemNotes[selectedItem.id] = note;
+      else delete itemNotes[selectedItem.id];
+      var assignee = document.getElementById('d-assignee').value;
+      if (assignee && assignee !== 'Unassigned') itemAssignees[selectedItem.id] = assignee;
+      else delete itemAssignees[selectedItem.id];
+      updateStatus();
+    }
+
+    function updateStatus() {
+      if (!selectedItem) return;
+      var val = document.getElementById('d-status').value;
+      if (val === 'overdue') selectedItem.style = { borderColor: '#d32f2f', borderThickness: 3, borderStyle: 'dashed' };
+      else if (val === 'in-progress') selectedItem.style = { borderColor: '#7b1fa2', borderThickness: 3, borderStyle: 'dashed' };
+      else if (val === 'complete') selectedItem.style = { borderColor: '#388e3c', borderThickness: 3, borderStyle: 'dashed' };
+      else delete selectedItem.style;
+      tl.setItems(currentItems);
+      tl.setSelection([selectedItem.id]);
+    }
+
+    function filterRegion() {
+      var region = document.getElementById('region').value;
+      currentItems = region === 'all' ? allItems.slice() : allItems.filter(function(i) { return i.region === region; });
+      tl.setItems(currentItems);
+      selectedItem = null;
+      updateDetail();
+    }
+  </script>
+</body>
+</html>

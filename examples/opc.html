@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="../images/logo.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OPC</title>
+  <script src="../lib/tempis_timeline.js"></script>
+</head>
+<style>
+  html {
+    background-color: #ebebeb;
+  }
+  .canvas-container {
+    width: 100%;
+    height: 600px;
+    resize: both;
+    overflow: hidden;
+  }
+</style>
+<body>
+  <div class="canvas-container">
+    <canvas id="canvas">
+  </div>
+</body>
+<script>
+  // Create our timeline options.
+  const timelineOptions = {
+    responsive: true,
+    range: {
+      position: "bottom",
+      start: new Date("Nov 01 2025 23:52:00 GMT+0000"),
+    },
+    font: {
+      size: 14
+    },
+    categories: [
+      { name: "temperature", label: "Temperature", style: { backgroundColor: "#ff6b6b" } },
+      { name: "pressure", label: "Pressure", style: { backgroundColor: "#4dabf7" } },
+      { name: "flow", label: "Flow", style: { backgroundColor: "#51cf66" } }
+    ],
+    items: [
+      // Device 1 readings
+      { id: 0, label: "72°C", start: new Date("Sun Nov 02 2025 00:05:00 GMT+0000"), category: "temperature", grouping: "Device 1" },
+      { id: 1, label: "101 kPa", start: new Date("Sun Nov 02 2025 00:10:00 GMT+0000"), category: "pressure", grouping: "Device 1" },
+      { id: 2, label: "15 L/s", start: new Date("Sun Nov 02 2025 00:15:00 GMT+0000"), category: "flow", grouping: "Device 1" },
+      { id: 3, label: "73°C", start: new Date("Sun Nov 02 2025 01:00:00 GMT+0000"), category: "temperature", grouping:"Device 1" },
+      { id: 4, label: "100 kPa", start: new Date("Sun Nov 02 2025 01:05:00 GMT+0000"), category: "pressure", grouping:"Device 1" },
+      { id: 5, label: "14 L/s", start: new Date("Sun Nov 02 2025 01:10:00 GMT+0000"), category: "flow", grouping:"Device 1" },
+
+      // Device 2 readings
+      { id: 6, label: "68°C", start: new Date("Sun Nov 02 2025 00:07:00 GMT+0000"), category: "temperature", grouping:"Device 2" },
+      { id: 7, label: "98 kPa", start: new Date("Sun Nov 02 2025 00:12:00 GMT+0000"), category: "pressure", grouping:"Device 2" },
+      { id: 8, label: "12 L/s", start: new Date("Sun Nov 02 2025 00:17:00 GMT+0000"), category: "flow", grouping:"Device 2" },
+      { id: 9, label: "69°C", start: new Date("Sun Nov 02 2025 01:02:00 GMT+0000"), category: "temperature", grouping:"Device 2" },
+      { id: 10, label: "99 kPa", start: new Date("Sun Nov 02 2025 01:07:00 GMT+0000"), category: "pressure", grouping:"Device 2" },
+      { id: 11, label: "13 L/s", start: new Date("Sun Nov 02 2025 01:12:00 GMT+0000"), category: "flow", grouping:"Device 2" },
+
+      // Device 3 readings
+      { id: 12, label: "75°C", start: new Date("Sun Nov 02 2025 00:03:00 GMT+0000"), category: "temperature", grouping:"Device 3" },
+      { id: 13, label: "105 kPa", start: new Date("Sun Nov 02 2025 00:08:00 GMT+0000"), category: "pressure", grouping:"Device 3" },
+      { id: 14, label: "18 L/s", start: new Date("Sun Nov 02 2025 00:13:00 GMT+0000"), category: "flow", grouping:"Device 3" },
+      { id: 15, label: "76°C", start: new Date("Sun Nov 02 2025 01:01:00 GMT+0000"), category: "temperature", grouping:"Device 3" },
+      { id: 16, label: "106 kPa", start: new Date("Sun Nov 02 2025 01:06:00 GMT+0000"), category: "pressure", grouping:"Device 3" },
+      { id: 17, label: "19 L/s", start: new Date("Sun Nov 02 2025 01:11:00 GMT+0000"), category: "flow", grouping:"Device 3" },
+
+      // More random readings for the day
+      { id: 18, label: "74°C", start: new Date("Sun Nov 02 2025 02:00:00 GMT+0000"), category: "temperature", grouping:"Device 1" },
+      { id: 19, label: "102 kPa", start: new Date("Sun Nov 02 2025 02:05:00 GMT+0000"), category: "pressure", grouping:"Device 1" },
+      { id: 20, label: "16 L/s", start: new Date("Sun Nov 02 2025 02:10:00 GMT+0000"), category: "flow", grouping:"Device 1" },
+      { id: 21, label: "70°C", start: new Date("Sun Nov 02 2025 02:03:00 GMT+0000"), category: "temperature", grouping:"Device 2" },
+      { id: 22, label: "97 kPa", start: new Date("Sun Nov 02 2025 02:08:00 GMT+0000"), category: "pressure", grouping:"Device 2" },
+      { id: 23, label: "13 L/s", start: new Date("Sun Nov 02 2025 02:13:00 GMT+0000"), category: "flow", grouping:"Device 2" },
+      { id: 24, label: "77°C", start: new Date("Sun Nov 02 2025 02:01:00 GMT+0000"), category: "temperature", grouping:"Device 3" },
+      { id: 25, label: "107 kPa", start: new Date("Sun Nov 02 2025 02:06:00 GMT+0000"), category: "pressure", grouping:"Device 3" },
+      { id: 26, label: "20 L/s", start: new Date("Sun Nov 02 2025 02:11:00 GMT+0000"), category: "flow", grouping:"Device 3" },
+
+      // You can continue this pattern every hour or every few minutes...
+    ]
+  };
+
+  // Create our timeline and stick a reference to it on the window for easy access.
+  window["timeline"] = new tempis_timeline.TempisTimeline("#canvas", timelineOptions);
+</script>
+</html>

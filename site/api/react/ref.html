@@ -1,0 +1,73 @@
+<h1>Ref API</h1>
+<p class="subtitle">Access imperative methods on the timeline instance via a React ref.</p>
+
+<h2>TempisTimelineRef</h2>
+<table>
+  <thead><tr><th>Method</th><th>Signature</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>focus</code></td><td><code>(options?: FocusOptions) =&gt; void</code></td><td>Focus on an item, date, or range.</td></tr>
+    <tr><td><code>getRange</code></td><td><code>() =&gt; { start: Date; end: Date }</code></td><td>Get the current visible range.</td></tr>
+    <tr><td><code>setItems</code></td><td><code>(items) =&gt; void</code></td><td>Replace all items.</td></tr>
+    <tr><td><code>getItems</code></td><td><code>() =&gt; TempisTimelineItem[]</code></td><td>Get current items.</td></tr>
+    <tr><td><code>setCategories</code></td><td><code>(categories) =&gt; void</code></td><td>Replace all categories.</td></tr>
+    <tr><td><code>getCategories</code></td><td><code>() =&gt; TempisTimelineCategory[]</code></td><td>Get current categories.</td></tr>
+    <tr><td><code>setBands</code></td><td><code>(bands) =&gt; void</code></td><td>Replace all bands.</td></tr>
+    <tr><td><code>setDependencies</code></td><td><code>(deps) =&gt; void</code></td><td>Replace all dependencies.</td></tr>
+    <tr><td><code>setSelection</code></td><td><code>(ids) =&gt; void</code></td><td>Set selected item IDs.</td></tr>
+    <tr><td><code>getSelection</code></td><td><code>() =&gt; (string | number)[]</code></td><td>Get selected item IDs.</td></tr>
+    <tr><td><code>clearSelection</code></td><td><code>() =&gt; void</code></td><td>Clear all selections.</td></tr>
+    <tr><td><code>setGroupCollapsed</code></td><td><code>(group: string, collapsed?: boolean) =&gt; void</code></td><td>Set or toggle a group's collapsed state.</td></tr>
+    <tr><td><code>isGroupCollapsed</code></td><td><code>(group: string) =&gt; boolean</code></td><td>Check if a group is collapsed.</td></tr>
+    <tr><td><code>toImage</code></td><td><code>(options?) =&gt; Promise&lt;Blob&gt;</code></td><td>Export as image.</td></tr>
+    <tr><td><code>redraw</code></td><td><code>() =&gt; void</code></td><td>Force a redraw.</td></tr>
+    <tr><td><code>getInstance</code></td><td><code>() =&gt; CoreTimeline | null</code></td><td>Access the underlying core instance.</td></tr>
+    <tr><td><code>getCanvas</code></td><td><code>() =&gt; HTMLCanvasElement | null</code></td><td>Access the canvas element.</td></tr>
+  </tbody>
+</table>
+
+<h2>Usage Pattern</h2>
+<p>The component uses <code>forwardRef</code> and <code>useImperativeHandle</code> to expose the ref methods. Create a ref with <code>useRef</code> and pass it to the component.</p>
+
+<div class="note">The ref is <code>null</code> until the component mounts and the timeline instance is created. Always use optional chaining (<code>ref.current?.focus(...)</code>) when calling ref methods.</div>
+
+<h2>Example — Focus Buttons</h2>
+<pre><code class="language-tsx">import { useRef } from 'react';
+import { TempisTimeline, type TempisTimelineRef } from '@tempis/react';
+
+function App() {
+  const timelineRef = useRef&lt;TempisTimelineRef&gt;(null);
+
+  const items = [
+    { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-19' },
+    { id: 2, label: 'Item 2', start: '2026-01-20', end: '2026-02-02' },
+    { id: 3, label: 'Item 3', start: '2026-02-05' },
+  ];
+
+  return (
+    &lt;div&gt;
+      &lt;div style={{ marginBottom: 8 }}&gt;
+        &lt;button onClick={() =&gt; timelineRef.current?.focus({ id: 1, animate: true })}&gt;
+          Focus Item 1
+        &lt;/button&gt;
+        &lt;button onClick={() =&gt; timelineRef.current?.focus({ id: 3, animate: true })}&gt;
+          Focus Item 3
+        &lt;/button&gt;
+        &lt;button onClick={() =&gt; timelineRef.current?.focus({ animate: true })}&gt;
+          Fit All
+        &lt;/button&gt;
+      &lt;/div&gt;
+      &lt;TempisTimeline
+        ref={timelineRef}
+        items={items}
+        options={{
+          responsive: true,
+          range: { start: '2026-01-01', end: '2026-02-15', position: 'bottom' }
+        }}
+        height={300}
+      /&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<h2>Escape Hatches</h2>
+<p><code>getInstance()</code> returns the underlying <code>TempisTimeline</code> core instance (or <code>null</code> before mount). <code>getCanvas()</code> returns the raw <code>&lt;canvas&gt;</code> element. Use these when you need functionality not exposed by the ref API.</p>

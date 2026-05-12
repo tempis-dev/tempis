@@ -1,0 +1,153 @@
+<h1>Items</h1>
+<p class="subtitle">Timeline items are the core data — range events and point-in-time markers.</p>
+
+<h2>TempisTimelineItem</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>id</code></td><td><code>string | number</code></td><td>Unique identifier (required).</td></tr>
+    <tr><td><code>start</code></td><td><code>string | number | Date</code></td><td>Start date (required). ISO string, timestamp, or Date.</td></tr>
+    <tr><td><code>end</code></td><td><code>string | number | Date</code></td><td>End date. Omit for point-in-time items.</td></tr>
+    <tr><td><code>label</code></td><td><code>string</code></td><td>Display label.</td></tr>
+    <tr><td><code>grouping</code></td><td><code>string</code></td><td>Group name for row organisation.</td></tr>
+    <tr><td><code>category</code></td><td><code>string</code></td><td>Category name (must match a defined category).</td></tr>
+    <tr><td><code>selected</code></td><td><code>boolean</code></td><td>Whether the item is initially selected.</td></tr>
+    <tr><td><code>progress</code></td><td><code>number</code></td><td>Completion progress (0–1). Renders as a fill bar inside range items. Ignored for point-in-time items.</td></tr>
+    <tr><td><code>style</code></td><td><code>TempisTimelineItemStyle</code></td><td>Per-item style overrides.</td></tr>
+  </tbody>
+</table>
+
+<div class="note">Item IDs must be unique across the entire timeline. Duplicate IDs will cause unexpected behaviour with selection, focus, and dependency rendering.</div>
+
+<div class="note">Dates can be ISO strings (<code>'2026-01-15'</code>), Unix timestamps in milliseconds, or <code>Date</code> objects.</div>
+
+<h2>Range Items vs Point-in-Time</h2>
+<p>Items with both <code>start</code> and <code>end</code> render as horizontal bars. Items with only <code>start</code> render as point-in-time markers with a downward triangle.</p>
+
+<div class="api-demo"><canvas id="demo-items-types"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-items-types', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    items: [
+      { id: 1, label: 'Item 1',    start: '2026-01-05', end: '2026-01-19', grouping: 'Range Items' },
+      { id: 2, label: 'Item 2',    start: '2026-01-20', end: '2026-02-02', grouping: 'Range Items' },
+      { id: 3, label: 'Item 3',    start: '2026-01-08', end: '2026-01-16', grouping: 'Range Items' },
+      { id: 4, label: 'Event 1',   start: '2026-01-05', grouping: 'Point-in-Time' },
+      { id: 5, label: 'Event 2',   start: '2026-01-19', grouping: 'Point-in-Time' },
+      { id: 6, label: 'Event 3',   start: '2026-02-02', grouping: 'Point-in-Time' },
+      { id: 7, label: 'Event 4',   start: '2026-02-10', grouping: 'Point-in-Time' },
+    ],
+    range: { start: '2026-01-01', end: '2026-02-15', position: 'bottom' }
+  });
+</script>
+
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  items: [
+    { id: 1, label: 'Item 1',  start: '2026-01-05', end: '2026-01-19', grouping: 'Range Items' },
+    { id: 2, label: 'Item 2',  start: '2026-01-20', end: '2026-02-02', grouping: 'Range Items' },
+    { id: 3, label: 'Item 3',  start: '2026-01-08', end: '2026-01-16', grouping: 'Range Items' },
+    { id: 4, label: 'Event 1', start: '2026-01-05', grouping: 'Point-in-Time' },
+    { id: 5, label: 'Event 2', start: '2026-01-19', grouping: 'Point-in-Time' },
+    { id: 6, label: 'Event 3', start: '2026-02-02', grouping: 'Point-in-Time' },
+    { id: 7, label: 'Event 4', start: '2026-02-10', grouping: 'Point-in-Time' },
+  ],
+  range: { start: '2026-01-01', end: '2026-02-15', position: 'bottom' }
+});</code></pre>
+
+<h2>Methods</h2>
+
+<h3>setItems(items)</h3>
+<p>Replaces all items and redraws the timeline.</p>
+<pre><code class="language-typescript">timeline.setItems([
+  { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-10' }
+]);</code></pre>
+
+<h3>getItems()</h3>
+<p>Returns the current item definitions.</p>
+<pre><code class="language-typescript">const items = timeline.getItems();</code></pre>
+
+<h2>Per-Item Styles</h2>
+<p>Override the default appearance on individual items.</p>
+
+<div class="api-demo"><canvas id="demo-items-styles"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-items-styles', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    items: [
+      { id: 1, label: 'Item 1 (Default)', start: '2026-01-05', end: '2026-01-15' },
+      { id: 2, label: 'Item 2 (Dashed)', start: '2026-01-10', end: '2026-01-22',
+        style: { backgroundColor: '#6366f1', borderColor: '#818cf8', borderThickness: 2, borderStyle: 'dashed' } },
+      { id: 3, label: 'Item 3 (Rounded)', start: '2026-01-18', end: '2026-01-28',
+        style: { backgroundColor: '#7c3aed', fontColor: '#fff', borderRadius: 12 } },
+      { id: 4, label: 'Item 4 (Dotted)', start: '2026-01-08', end: '2026-01-20',
+        style: { backgroundColor: '#059669', borderColor: '#34d399', borderThickness: 2, borderStyle: 'dotted' } },
+      { id: 5, label: 'Item 5 (Styled)', start: '2026-01-14', end: '2026-01-19',
+        style: { backgroundColor: '#e11d48', borderColor: '#9f1239', borderThickness: 2, borderStyle: 'dashed', borderRadius: 8 } },
+      { id: 6, label: 'Item 6 (Long Dash)', start: '2026-01-22', end: '2026-01-30',
+        style: { backgroundColor: '#0ea5e9', borderColor: '#38bdf8', borderThickness: 2, borderStyle: 'long-dash' } },
+    ],
+    range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+  });
+</script>
+
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+
+const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  items: [
+    { id: 1, label: 'Item 1 (Default)', start: '2026-01-05', end: '2026-01-15' },
+    { id: 2, label: 'Item 2 (Dashed)', start: '2026-01-10', end: '2026-01-22',
+      style: { backgroundColor: '#6366f1', borderColor: '#818cf8', borderThickness: 2, borderStyle: 'dashed' } },
+    { id: 3, label: 'Item 3 (Rounded)', start: '2026-01-18', end: '2026-01-28',
+      style: { backgroundColor: '#7c3aed', fontColor: '#fff', borderRadius: 12 } },
+    { id: 4, label: 'Item 4 (Dotted)', start: '2026-01-08', end: '2026-01-20',
+      style: { backgroundColor: '#059669', borderColor: '#34d399', borderThickness: 2, borderStyle: 'dotted' } },
+    { id: 5, label: 'Item 5 (Styled)', start: '2026-01-14', end: '2026-01-19',
+      style: { backgroundColor: '#e11d48', borderColor: '#9f1239', borderThickness: 2, borderStyle: 'dashed', borderRadius: 8 } },
+    { id: 6, label: 'Item 6 (Long Dash)', start: '2026-01-22', end: '2026-01-30',
+      style: { backgroundColor: '#0ea5e9', borderColor: '#38bdf8', borderThickness: 2, borderStyle: 'long-dash' } },
+  ],
+  range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+});</code></pre>
+
+<h2>Progress Indicator</h2>
+<p>Range items can display a progress fill bar by setting the <code>progress</code> property to a value between 0 and 1. The fill renders as a lighter overlay from the left edge, clipped to the item's border radius. The <code>progress</code> property is ignored for point-in-time items. Values are clamped to the 0–1 range.</p>
+
+<div class="api-demo"><canvas id="demo-progress"></canvas></div>
+<script>
+  new tempis_timeline.TempisTimeline('#demo-progress', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 6, fontColor: '#fff', padding: 8 } },
+    grouping: { collapsible: true },
+    items: [
+      { id: 1, label: 'Item 1 (100%)',  start: '2026-02-01', end: '2026-02-14', progress: 1.0 },
+      { id: 2, label: 'Item 2 (70%)',   start: '2026-02-05', end: '2026-02-20', progress: 0.7 },
+      { id: 3, label: 'Item 3 (40%)',   start: '2026-02-10', end: '2026-02-25', progress: 0.4 },
+      { id: 4, label: 'Item 4 (0%)',    start: '2026-02-15', end: '2026-02-28', progress: 0 },
+      { id: 5, label: 'Event 1',        start: '2026-02-12' },
+    ],
+    range: { start: '2026-01-28', end: '2026-03-05', position: 'bottom' }
+  });
+</script>
+
+<pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  items: [
+    { id: 1, label: 'Item 1 (100%)', start: '2026-02-01', end: '2026-02-14', progress: 1.0 },
+    { id: 2, label: 'Item 2 (70%)',  start: '2026-02-05', end: '2026-02-20', progress: 0.7 },
+    { id: 3, label: 'Item 3 (40%)',  start: '2026-02-10', end: '2026-02-25', progress: 0.4 },
+    { id: 4, label: 'Item 4 (0%)',   start: '2026-02-15', end: '2026-02-28', progress: 0 },
+    { id: 5, label: 'Event 1',       start: '2026-02-12' },
+  ],
+  range: { start: '2026-01-28', end: '2026-03-05', position: 'bottom' }
+});</code></pre>
+
+<div class="note">Progress is rendered as a semi-transparent white overlay (<code>rgba(255, 255, 255, 0.2)</code>) so it works with any background colour. In RTL mode, the fill starts from the right edge.</div>

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="../images/logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Price Stream - Tempis Timeline</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin-top: 0;
+            color: #333;
+        }
+        .controls {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+            font-weight: 500;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            background: #fff3e0;
+            color: #f57c00;
+            border: 1px solid #ff9800;
+        }
+        .canvas-container {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            height: 600px;
+            overflow: hidden;
+        }
+        .info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Crypto Price Stream</h1>
+        
+        <div class="controls">
+            <button id="startBtn">Start Streaming</button>
+            <button id="stopBtn" disabled>Stop Streaming</button>
+            <button id="clearBtn">Clear Timeline</button>
+            <div id="status" class="status">Ready to start</div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="timeline-canvas"></canvas>
+        </div>
+
+        <div class="info">
+            <strong>Live Cryptocurrency Price Stream</strong><br>
+            This demo connects to Binance's public WebSocket API for real-time cryptocurrency prices and demonstrates streaming by adding price events to the timeline with <code>setItems()</code>. 
+            Each significant price movement creates a new timeline event with smooth animations.
+        </div>
+    </div>
+
+    <script src="../lib/tempis_timeline.js"></script>
+    <script>
+        console.log('Script starting...');
+        
+        // Check if tempis_timeline is loaded
+        if (typeof tempis_timeline === 'undefined') {
+            console.error('tempis_timeline is not loaded!');
+            document.getElementById('status').textContent = 'Error: Timeline library not loaded';
+            document.getElementById('status').style.background = '#ffebee';
+            document.getElementById('status').style.color = '#c62828';
+        } else {
+            console.log('tempis_timeline loaded successfully');
+        }
+        
+        const canvas = document.getElementById('timeline-canvas');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const status = document.getElementById('status');
+        
+        let timeline = null;
+        let websocket = null;
+        let allEvents = [];
+        let isStreaming = false;
+        let lastPrices = {}; // Track previous prices for change detection
+        let eventIdCounter = 1; // Simple counter for unique IDs
+        
+        // Cryptocurrency data (matching Binance symbols)
+        const cryptoCoins = [
+            { id: 'btcusdt', name: 'Bitcoin', symbol: 'BTC', color: '#f7931a' },
+            { id: 'ethusdt', name: 'Ethereum', symbol: 'ETH', color: '#627eea' },
+            { id: 'solusdt', name: 'Solana', symbol: 'SOL', color: '#9945ff' },
+            { id: 'dogeusdt', name: 'Dogecoin', symbol: 'DOGE', color: '#c2a633' },
+            { id: 'adausdt', name: 'Cardano', symbol: 'ADA', color: '#0033ad' },
+            { id: 'dotusdt', name: 'Polkadot', symbol: 'DOT', color: '#e6007a' },
+            { id: 'avaxusdt', name: 'Avalanche', symbol: 'AVAX', color: '#e84142' },
+            { id: 'linkusdt', name: 'Chainlink', symbol: 'LINK', color: '#2a5ada' },
+            { id: 'maticusdt', name: 'Polygon', symbol: 'MATIC', color: '#8247e5' },
+            { id: 'ltcusdt', name: 'Litecoin', symbol: 'LTC', color: '#345d9d' }
+        ];
+        
+        function initializeTimeline() {
+            try {
+                console.log('Initializing timeline...');
+                
+                if (timeline) {
+                    timeline.destroy();
+                }
+                
+                // Set initial range to show recent price events (last 1 minute)
+                const now = new Date();
+                const startTime = new Date(now.getTime() - 1 * 60 * 1000); // 1 minute ago
+                const endTime = now; // Now
+                
+                timeline = new tempis_timeline.TempisTimeline('#timeline-canvas', {
+                    responsive: true,
+                    verticalFill: 'fill-canvas',
+                    items: [],
+                    // No categories - using groups instead
+                    range: {
+                        position: 'bottom',
+                        start: startTime,
+                        end: endTime,
+                        zoom: {
+                            enabled: true
+                        }
+                    },
+                    selection: 'single'
+                });
+                
+                console.log('Timeline initialized successfully');
+                status.textContent = 'Timeline ready';
+                
+            } catch (error) {
+                console.error('Error initializing timeline:', error);
+                status.textContent = `Error: ${error.message}`;
+                status.style.background = '#ffebee';
+                status.style.color = '#c62828';
+            }
+        }
+        
+        function connectWebSocket() {
+            try {
+                console.log('Connecting to Binance WebSocket...');
+                
+                // Use Binance's public WebSocket API - no authentication required
+                // Subscribe to multiple crypto pairs
+                const streams = [
+                    'btcusdt@trade',
+                    'ethusdt@trade',
+                    'solusdt@trade',
+                    'dogeusdt@trade',
+                    'adausdt@trade',
+                    'dotusdt@trade',
+                    'avaxusdt@trade',
+                    'linkusdt@trade',
+                    'maticusdt@trade',
+                    'ltcusdt@trade'
+                ].join('/');
+                
+                websocket = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
+                
+                websocket.onopen = function(event) {
+                    console.log('WebSocket connected successfully');
+                    status.textContent = 'Connected - waiting for price updates...';
+                    status.style.background = '#e8f5e8';
+                    status.style.color = '#2e7d32';
+                };
+                
+                websocket.onmessage = function(event) {
+                    try {
+                        const message = JSON.parse(event.data);
+                        if (message.data) {
+                            processBinanceUpdate(message.data);
+                        }
+                    } catch (error) {
+                        console.error('Error parsing WebSocket message:', error);
+                    }
+                };
+                
+                websocket.onerror = function(error) {
+                    console.error('WebSocket error:', error);
+                    status.textContent = 'WebSocket connection error';
+                    status.style.background = '#ffebee';
+                    status.style.color = '#c62828';
+                };
+                
+                websocket.onclose = function(event) {
+                    console.log('WebSocket connection closed:', event.code, event.reason);
+                    if (isStreaming) {
+                        status.textContent = 'Connection lost - attempting to reconnect...';
+                        status.style.background = '#fff3e0';
+                        status.style.color = '#f57c00';
+                        
+                        // Attempt to reconnect after 3 seconds
+                        setTimeout(() => {
+                            if (isStreaming) {
+                                connectWebSocket();
+                            }
+                        }, 3000);
+                    }
+                };
+                
+            } catch (error) {
+                console.error('Failed to connect WebSocket:', error);
+                status.textContent = `Connection error: ${error.message}`;
+                status.style.background = '#ffebee';
+                status.style.color = '#c62828';
+            }
+        }
+        
+        function processBinanceUpdate(trade) {
+            // Binance sends individual trade messages
+            // trade.s = symbol (e.g., "BTCUSDT")
+            // trade.p = price
+            const symbol = trade.s.toLowerCase();
+            const coinInfo = cryptoCoins.find(c => c.id === symbol);
+            if (!coinInfo) return;
+            
+            const currentPrice = parseFloat(trade.p);
+            const lastPrice = lastPrices[symbol];
+            const now = new Date();
+            
+            // Create event for significant price changes or first time seeing this coin
+            let shouldCreateEvent = false;
+            let eventType = 'price_update';
+            let changePercent = 0;
+            
+            if (lastPrice === undefined) {
+                // First time seeing this coin
+                shouldCreateEvent = true;
+                eventType = 'initial_price';
+            } else {
+                // Calculate price change since last update
+                changePercent = ((currentPrice - lastPrice) / lastPrice) * 100;
+                
+                // Create event for changes > 0.1% (more sensitive for real-time data)
+                if (Math.abs(changePercent) > 0.1) {
+                    shouldCreateEvent = true;
+                    eventType = changePercent > 0 ? 'price_increase' : 'price_decrease';
+                }
+            }
+            
+            if (shouldCreateEvent) {
+                let label = '';
+                let itemStyle = {};
+                
+                if (eventType === 'initial_price') {
+                    label = `$${currentPrice.toFixed(2)}`;
+                    itemStyle = {
+                        backgroundColor: '#2196F3',
+                        fontColor: '#ffffff'
+                    };
+                } else {
+                    const direction = changePercent > 0 ? '↗' : '↘';
+                    label = `$${currentPrice.toFixed(2)} ${direction} ${Math.abs(changePercent).toFixed(2)}%`;
+                    itemStyle = {
+                        backgroundColor: changePercent > 0 ? '#4CAF50' : '#F44336',
+                        fontColor: '#ffffff'
+                    };
+                }
+                
+                const newEvent = {
+                    id: eventIdCounter++,
+                    label: label,
+                    start: now,
+                    grouping: coinInfo.name,
+                    style: itemStyle
+                };
+                
+                allEvents.push(newEvent);
+                
+                // Keep only the last 100 events
+                if (allEvents.length > 100) {
+                    allEvents = allEvents.slice(-100);
+                }
+                
+                // Update timeline items
+                timeline.setItems([...allEvents]);
+                
+                // Focus on the newest event with animation
+                setTimeout(() => {
+                    timeline.focus({
+                        id: newEvent.id,
+                        animate: true,
+                        duration: 800,
+                        easing: 'easeInOutCubic',
+                        zoom: false
+                    });
+                }, 100);
+                
+                status.textContent = `Streaming (${allEvents.length} events)`;
+                status.style.background = '#e8f5e8';
+                status.style.color = '#2e7d32';
+            }
+            
+            // Update last price
+            lastPrices[symbol] = currentPrice;
+        }
+        
+        function processPriceUpdate(priceData) {
+            const newEvents = [];
+            const now = new Date();
+            
+            for (const [coinId, priceString] of Object.entries(priceData)) {
+                const coinInfo = cryptoCoins.find(c => c.id === coinId);
+                if (!coinInfo) continue;
+                
+                const currentPrice = parseFloat(priceString);
+                const lastPrice = lastPrices[coinId];
+                
+                // Create event for significant price changes or first time seeing this coin
+                let shouldCreateEvent = false;
+                let eventType = 'price_update';
+                let changePercent = 0;
+                
+                if (lastPrice === undefined) {
+                    // First time seeing this coin
+                    shouldCreateEvent = true;
+                    eventType = 'initial_price';
+                } else {
+                    // Calculate price change since last update
+                    changePercent = ((currentPrice - lastPrice) / lastPrice) * 100;
+                    
+                    // Create event for changes > 0.1% (more sensitive for real-time data)
+                    if (Math.abs(changePercent) > 0.1) {
+                        shouldCreateEvent = true;
+                        eventType = changePercent > 0 ? 'price_increase' : 'price_decrease';
+                    }
+                }
+                
+                if (shouldCreateEvent) {
+                    let label = '';
+                    let itemStyle = {};
+                    
+                    if (eventType === 'initial_price') {
+                        label = `$${currentPrice.toFixed(2)}`;
+                        itemStyle = {
+                            backgroundColor: '#2196F3', // Blue for initial price
+                            fontColor: '#ffffff'
+                        };
+                    } else {
+                        const direction = changePercent > 0 ? '↗' : '↘';
+                        label = `$${currentPrice.toFixed(2)} ${direction} ${Math.abs(changePercent).toFixed(2)}%`;
+                        itemStyle = {
+                            backgroundColor: changePercent > 0 ? '#4CAF50' : '#F44336', // Green for increase, red for decrease
+                            fontColor: '#ffffff'
+                        };
+                    }
+                    
+                    newEvents.push({
+                        id: eventIdCounter++,
+                        label: label,
+                        start: now,
+                        grouping: coinInfo.name, // Use crypto name as group
+                        style: itemStyle
+                    });
+                }
+                
+                // Update last price
+                lastPrices[coinId] = currentPrice;
+            }
+            
+            if (newEvents.length > 0) {
+                // Add new events to our collection
+                allEvents = [...allEvents, ...newEvents];
+                
+                // Keep only the last 100 events to prevent memory issues
+                if (allEvents.length > 100) {
+                    allEvents = allEvents.slice(-100);
+                }
+                
+                // Update timeline items
+                console.log("setItems", allEvents.length, "new events:", newEvents.length);
+                timeline.setItems(allEvents);
+                
+                // Focus on the newest event with animation
+                const newestEvent = newEvents[newEvents.length - 1];
+                setTimeout(() => {
+                    timeline.focus({
+                        id: newestEvent.id,
+                        animate: true,
+                        duration: 800,
+                        easing: 'easeInOutCubic',
+                        zoom: false
+                    });
+                }, 100);
+                
+                status.textContent = `Streaming (+${newEvents.length} events, ${allEvents.length} total)`;
+                status.style.background = '#e8f5e8';
+                status.style.color = '#2e7d32';
+            }
+        }
+        
+        function startStreaming() {
+            if (isStreaming) return;
+            
+            isStreaming = true;
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            
+            status.textContent = 'Connecting to live stream...';
+            status.style.background = '#e8f5e8';
+            status.style.color = '#2e7d32';
+            
+            // Connect to WebSocket
+            connectWebSocket();
+        }
+        
+        function stopStreaming() {
+            if (!isStreaming) return;
+            
+            isStreaming = false;
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            if (websocket) {
+                websocket.close();
+                websocket = null;
+            }
+            
+            status.textContent = 'Streaming stopped';
+            status.style.background = '#fff3e0';
+            status.style.color = '#f57c00';
+        }
+        
+        // Event listeners
+        startBtn.addEventListener('click', () => {
+            console.log('Start button clicked');
+            startStreaming();
+        });
+        
+        stopBtn.addEventListener('click', () => {
+            console.log('Stop button clicked');
+            stopStreaming();
+        });
+        
+        clearBtn.addEventListener('click', () => {
+            console.log('Clear button clicked');
+            if (timeline) {
+                timeline.setItems([]);
+            }
+            allEvents = [];
+            lastPrices = {};
+            eventIdCounter = 1;
+            status.textContent = 'Timeline cleared';
+            status.style.background = '#fff3e0';
+            status.style.color = '#f57c00';
+        });
+        
+        // Initialize
+        console.log('Setting up timeline...');
+        initializeTimeline();
+        
+        // Start streaming automatically on page load
+        setTimeout(() => {
+            startStreaming();
+        }, 1000); // Small delay to ensure timeline is fully initialized
+        
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            stopStreaming();
+            if (timeline) {
+                timeline.destroy();
+            }
+        });
+        
+        console.log('Script loaded successfully');
+    </script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<h1>Component Props</h1>
+<p class="subtitle">All props accepted by the <code>&lt;TempisTimeline&gt;</code> component.</p>
+
+<h2>TempisTimelineProps</h2>
+<table>
+  <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>items</code></td><td><code>TempisTimelineItem[]</code></td><td>required</td><td>Timeline items to display.</td></tr>
+    <tr><td><code>categories</code></td><td><code>TempisTimelineCategory[]</code></td><td>—</td><td>Item categories.</td></tr>
+    <tr><td><code>bands</code></td><td><code>TempisTimelineBand[]</code></td><td>—</td><td>Timeline bands.</td></tr>
+    <tr><td><code>dependencies</code></td><td><code>TempisTimelineDependency[]</code></td><td>—</td><td>Item dependencies rendered as connector arrows.</td></tr>
+    <tr><td><code>options</code></td><td><code>TempisTimelineConfig</code></td><td><code>{}</code></td><td>Configuration options (see <a href="#react/options">Options</a>).</td></tr>
+    <tr><td><code>onItemClick</code></td><td><code>(id: string | number) =&gt; void</code></td><td>—</td><td>Item click handler.</td></tr>
+    <tr><td><code>onItemDoubleClick</code></td><td><code>(id: string | number) =&gt; void</code></td><td>—</td><td>Item double-click handler.</td></tr>
+    <tr><td><code>onItemContextClick</code></td><td><code>(id: string | number, position: { x: number; y: number }) =&gt; void</code></td><td>—</td><td>Item right-click (context menu) handler. Receives viewport coordinates for positioning a custom menu.</td></tr>
+    <tr><td><code>onItemHover</code></td><td><code>(id: string | number | null) =&gt; void</code></td><td>—</td><td>Item hover handler.</td></tr>
+    <tr><td><code>onSelectionChange</code></td><td><code>(changes: SelectionChangeEvent[]) =&gt; void</code></td><td>—</td><td>Selection change handler.</td></tr>
+    <tr><td><code>onRangeChange</code></td><td><code>(start: Date, end: Date) =&gt; void</code></td><td>—</td><td>Range change handler.</td></tr>
+    <tr><td><code>onGroupToggle</code></td><td><code>(group: string, collapsed: boolean) =&gt; void</code></td><td>—</td><td>Group collapse/expand handler. Fires when a group header is clicked.</td></tr>
+    <tr><td><code>className</code></td><td><code>string</code></td><td>—</td><td>CSS class for the wrapper <code>&lt;div&gt;</code>.</td></tr>
+    <tr><td><code>wrapperStyle</code></td><td><code>CSSProperties</code></td><td>—</td><td>Inline styles for the wrapper <code>&lt;div&gt;</code>.</td></tr>
+    <tr><td><code>width</code></td><td><code>string | number</code></td><td><code>"100%"</code></td><td>Canvas width.</td></tr>
+    <tr><td><code>height</code></td><td><code>string | number</code></td><td><code>300</code></td><td>Canvas height.</td></tr>
+  </tbody>
+</table>
+
+<h2>Reactive vs Structural</h2>
+<p><code>items</code>, <code>categories</code>, and <code>bands</code> are reactive — changes are synced to the existing instance via <code>useEffect</code> without recreating it. The <code>options</code> prop is structural — when its serialised value changes, the entire timeline instance is destroyed and recreated.</p>
+<p>The <code>dependencies</code> prop is also reactive, just like <code>items</code>, <code>categories</code>, and <code>bands</code> — changes are synced to the existing instance without a recreate.</p>
+<p>Callbacks are stored in a ref and never trigger a recreate, so you can safely pass inline arrow functions.</p>
+
+<div class="note">Avoid putting callbacks inside the <code>options</code> object — use the dedicated callback props instead. Callbacks in <code>options</code> would trigger unnecessary recreates.</div>
+
+<h2>Example</h2>
+<pre><code class="language-tsx">import { TempisTimeline } from '@tempis/react';
+
+function ProjectTimeline() {
+  return (
+    &lt;TempisTimeline
+      items={[
+        { id: 1, label: 'Item 1', start: '2026-03-01', end: '2026-03-15', category: 'cat-a' },
+        { id: 2, label: 'Item 2',  start: '2026-03-10', end: '2026-03-25', category: 'cat-b' },
+      ]}
+      categories={[
+        { name: 'cat-a', label: 'Category A', style: { backgroundColor: '#6366f1' } },
+        { name: 'cat-b', label: 'Category B', style: { backgroundColor: '#10b981' } },
+      ]}
+      options={{
+        responsive: true,
+        selection: 'single',
+        legend: { position: 'top' },
+        range: { start: '2026-02-25', end: '2026-04-01', position: 'bottom' }
+      }}
+      onItemClick={(id) =&gt; console.log('Clicked', id)}
+      height={350}
+    /&gt;
+  );
+}</code></pre>
+
+<h2>Reactive Data</h2>
+<p>The <code>items</code>, <code>categories</code>, <code>bands</code>, and <code>dependencies</code> props are synced to the core instance via <code>useEffect</code>. When a prop changes, the component calls the corresponding setter on the existing instance — no destroy/recreate needed.</p>
+
+<h3>Dynamic Add / Remove</h3>
+<pre><code class="language-tsx">import { useState } from 'react';
+import { TempisTimeline } from '@tempis/react';
+
+function App() {
+  const [items, setItems] = useState([
+    { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-10' },
+  ]);
+
+  function addItem() {
+    setItems(prev =&gt; [
+      ...prev,
+      { id: prev.length + 1, label: `Item ${prev.length + 1}`, start: '2026-02-12', end: '2026-02-20' }
+    ]);
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={addItem}&gt;Add Item&lt;/button&gt;
+      &lt;TempisTimeline
+        items={items}
+        options={{ responsive: true, range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' } }}
+        height={300}
+      /&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<h3>Toggle Categories</h3>
+<pre><code class="language-tsx">import { useState } from 'react';
+import { TempisTimeline } from '@tempis/react';
+
+function App() {
+  const allCategories = [
+    { name: 'cat-a', label: 'Category A', style: { backgroundColor: '#6366f1' } },
+    { name: 'cat-b', label: 'Category B', style: { backgroundColor: '#f43f5e' } },
+  ];
+  const [categories, setCategories] = useState(allCategories);
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={() =&gt; setCategories(prev =&gt;
+        prev.length === 2 ? prev.slice(0, 1) : allCategories
+      )}&gt;Toggle Category B&lt;/button&gt;
+      &lt;TempisTimeline
+        items={[
+          { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-14', category: 'cat-a' },
+          { id: 2, label: 'Item 2', start: '2026-02-05', end: '2026-02-12', category: 'cat-b' },
+        ]}
+        categories={categories}
+        options={{ responsive: true, legend: { position: 'top' }, range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' } }}
+        height={300}
+      /&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
