@@ -3,6 +3,18 @@
   "private": true,
   "version": "0.0.0",
   "description": "Canvas-based timeline visualisation library, wrappers and utilities",
+  "keywords": [
+    "timeline",
+    "canvas",
+    "chart",
+    "gantt",
+    "schedule",
+    "visualization",
+    "interactive",
+    "touch",
+    "responsive",
+    "typescript"
+  ],
   "workspaces": [
     "packages/*"
   ],
