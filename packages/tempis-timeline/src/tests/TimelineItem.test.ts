@@ -145,3 +145,45 @@ describe("TimelineItem — border styles", () => {
         expect(item.style.borderRadius).toBe(10);
     });
 });
+
+describe("TimelineItem — progress", () => {
+    const baseStyle = { ...DEFAULT_ITEM_STYLE };
+
+    it("returns null when progress is not defined", () => {
+        const item = new TimelineItem({ id: 1, start: "2026-01-01", end: "2026-01-10" }, baseStyle);
+        expect(item.progress).toBeNull();
+    });
+
+    it("returns the progress value when set", () => {
+        const item = new TimelineItem({ id: 1, start: "2026-01-01", end: "2026-01-10", progress: 0.5 }, baseStyle);
+        expect(item.progress).toBe(0.5);
+    });
+
+    it("clamps progress to 0 when negative", () => {
+        const item = new TimelineItem({ id: 1, start: "2026-01-01", end: "2026-01-10", progress: -0.5 }, baseStyle);
+        expect(item.progress).toBe(0);
+    });
+
+    it("clamps progress to 1 when greater than 1", () => {
+        const item = new TimelineItem({ id: 1, start: "2026-01-01", end: "2026-01-10", progress: 1.5 }, baseStyle);
+        expect(item.progress).toBe(1);
+    });
+
+    it("returns 0 for progress of 0", () => {
+        const item = new TimelineItem({ id: 1, start: "2026-01-01", end: "2026-01-10", progress: 0 }, baseStyle);
+        expect(item.progress).toBe(0);
+    });
+
+    it("returns 1 for progress of 1", () => {
+        const item = new TimelineItem({ id: 1, start: "2026-01-01", end: "2026-01-10", progress: 1 }, baseStyle);
+        expect(item.progress).toBe(1);
+    });
+
+    it("returns null when progress is undefined", () => {
+        const item = new TimelineItem(
+            { id: 1, start: "2026-01-01", end: "2026-01-10", progress: undefined },
+            baseStyle
+        );
+        expect(item.progress).toBeNull();
+    });
+});
