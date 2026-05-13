@@ -56,3 +56,53 @@
   animate: true,
   duration: 600
 });</code></pre>
+
+<h2>Easing Functions</h2>
+<p>The <code>easing</code> option accepts one of the following values:</p>
+
+<div class="api-demo"><canvas id="demo-easing"></canvas></div>
+<div class="btn-group" style="display: flex; gap: 8px; margin: 0 0 16px; flex-wrap: wrap;">
+  <button class="btn btn-outline btn-sm" onclick="window._easingNext('linear')">linear</button>
+  <button class="btn btn-outline btn-sm" onclick="window._easingNext('easeIn')">easeIn</button>
+  <button class="btn btn-outline btn-sm" onclick="window._easingNext('easeOut')">easeOut</button>
+  <button class="btn btn-outline btn-sm" onclick="window._easingNext('easeInOut')">easeInOut</button>
+  <button class="btn btn-outline btn-sm" onclick="window._easingNext('easeInCubic')">easeInCubic</button>
+  <button class="btn btn-outline btn-sm" onclick="window._easingNext('easeOutCubic')">easeOutCubic</button>
+  <button class="btn btn-outline btn-sm" onclick="window._easingNext('easeInOutCubic')">easeInOutCubic</button>
+</div>
+<script>
+  (function() {
+    var items = [
+      { id: 1, label: 'Item 1', start: '2026-03-01T08:00:00', end: '2026-03-01T10:00:00', grouping: 'Group 1' },
+      { id: 2, label: 'Item 2', start: '2026-03-01T11:00:00', end: '2026-03-01T13:00:00', grouping: 'Group 1' },
+      { id: 3, label: 'Item 3', start: '2026-03-01T14:00:00', end: '2026-03-01T16:00:00', grouping: 'Group 2' },
+      { id: 4, label: 'Item 4', start: '2026-03-01T17:00:00', end: '2026-03-01T19:00:00', grouping: 'Group 2' },
+      { id: 5, label: 'Item 5', start: '2026-03-01T20:00:00', end: '2026-03-01T22:00:00', grouping: 'Group 3' },
+    ];
+    var currentIndex = 0;
+    window._easingDemo = new tempis_timeline.TempisTimeline('#demo-easing', {
+      responsive: true,
+      verticalFill: 'fill-canvas',
+      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      items: items,
+      range: { start: '2026-03-01T06:00:00', end: '2026-03-01T12:00:00', position: 'bottom' }
+    });
+    window._easingNext = function(easing) {
+      currentIndex = (currentIndex + 1) % items.length;
+      window._easingDemo.focus({ id: items[currentIndex].id, animate: true, duration: 1000, easing: easing });
+    };
+  })();
+</script>
+
+<table>
+  <thead><tr><th>Value</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>"linear"</code></td><td>Constant speed, no acceleration.</td></tr>
+    <tr><td><code>"easeIn"</code></td><td>Starts slow, accelerates.</td></tr>
+    <tr><td><code>"easeOut"</code></td><td>Starts fast, decelerates.</td></tr>
+    <tr><td><code>"easeInOut"</code></td><td>Slow start and end, fast middle. This is the default.</td></tr>
+    <tr><td><code>"easeInCubic"</code></td><td>Stronger ease-in curve.</td></tr>
+    <tr><td><code>"easeOutCubic"</code></td><td>Stronger ease-out curve.</td></tr>
+    <tr><td><code>"easeInOutCubic"</code></td><td>Stronger ease-in-out curve.</td></tr>
+  </tbody>
+</table>

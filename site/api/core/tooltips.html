@@ -8,6 +8,7 @@
     responsive: true,
     verticalFill: 'fill-canvas',
     style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    grouping: { collapsible: true },
     items: [
       { id: 1, label: 'Item 1', start: '2026-04-01', end: '2026-04-10', grouping: 'Group 1' },
       { id: 2, label: 'Item 2', start: '2026-04-08', end: '2026-04-18', grouping: 'Group 1' },
@@ -19,63 +20,258 @@
       overflowBehavior: 'viewport',
       template: function(id) {
         var item = window._tooltipsDemo.getItems().find(function(i) { return i.id === id; });
-        return '<div style="padding: 8px; font-family: sans-serif;">' +
-          '<strong>' + (item ? item.label : '') + '</strong>' +
-          '<p style="margin: 4px 0 0;">Custom tooltip for item ' + id + '</p>' +
+        return '<div style="padding: 12px 16px; font-family: sans-serif; min-width: 160px;">' +
+          '<div style="font-weight: 700; margin-bottom: 4px;">' + (item ? item.label : '') + '</div>' +
+          '<div style="font-size: 12px; color: #666;">Custom tooltip for item ' + id + '</div>' +
           '</div>';
       }
     }
   });
 </script>
 
-<div class="note">The default tooltip shows the item label and date range. Provide a <code>template</code> function to fully customise the content.</div>
+<h2>Overview</h2>
+<p>Tooltips appear when the user hovers over a timeline item. By default, they show the item label and date range. You can fully customise the content using a template function, control when they appear, adjust their positioning, and add a delay.</p>
 
 <h2>TempisTimelineTooltipOptions</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
   <tbody>
-    <tr><td><code>enabled</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Enable or disable tooltips globally.</td></tr>
-    <tr><td><code>delay</code></td><td><code>number</code></td><td><code>0</code></td><td>Delay in milliseconds before the tooltip appears.</td></tr>
-    <tr><td><code>dateFormat</code></td><td><code>string</code></td><td><code>"D MMMM HH:mm:ss"</code></td><td>Date format pattern for the default tooltip.</td></tr>
-    <tr><td><code>overflowBehavior</code></td><td><code>"none" | "canvas" | "viewport"</code></td><td><code>"none"</code></td><td>How the tooltip repositions near edges.</td></tr>
-    <tr><td><code>template</code></td><td><code>(id) =&gt; HTMLElement | string | null</code></td><td>—</td><td>Custom template function. Return an HTML string or element.</td></tr>
-    <tr><td><code>shouldShow</code></td><td><code>(id) =&gt; boolean</code></td><td>—</td><td>Predicate controlling whether a tooltip appears for a given item.</td></tr>
+    <tr><td><code>enabled</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Enable or disable tooltips globally. Set to <code>false</code> to suppress all tooltips.</td></tr>
+    <tr><td><code>delay</code></td><td><code>number</code></td><td><code>0</code></td><td>Delay in milliseconds before the tooltip appears after hovering an item. Useful to avoid flickering when the user moves quickly across items.</td></tr>
+    <tr><td><code>dateFormat</code></td><td><code>string</code></td><td><code>"D MMMM HH:mm:ss"</code></td><td>The date format pattern used in the default tooltip. Uses the same tokens as the date adapter (see <a href="#core/date-adapters">Date Adapters</a>).</td></tr>
+    <tr><td><code>overflowBehavior</code></td><td><code>"none" | "canvas" | "viewport"</code></td><td><code>"none"</code></td><td>Controls how the tooltip repositions when it would overflow an edge.</td></tr>
+    <tr><td><code>template</code></td><td><code>(id: string | number) =&gt; HTMLElement | string | null</code></td><td>—</td><td>Custom template function for full control over tooltip content.</td></tr>
+    <tr><td><code>shouldShow</code></td><td><code>(id: string | number) =&gt; boolean</code></td><td>—</td><td>Predicate that controls whether a tooltip appears for a specific item.</td></tr>
   </tbody>
 </table>
 
-<p>The <code>overflowBehavior</code> options are:</p>
+<h2>Default Tooltip</h2>
+<p>When no <code>template</code> is provided, the timeline renders a default tooltip showing:</p>
 <ul>
-  <li><code>"none"</code> — no repositioning; the tooltip may be clipped.</li>
-  <li><code>"canvas"</code> — the tooltip flips to stay within the canvas bounds.</li>
-  <li><code>"viewport"</code> — the tooltip flips to stay within the browser viewport.</li>
+  <li>The item label</li>
+  <li>The start date (formatted using <code>dateFormat</code>)</li>
+  <li>The end date (for range items)</li>
+</ul>
+<p>You can customise the date format without writing a full template:</p>
+<pre><code class="language-typescript">tooltip: {
+  dateFormat: 'D MMM YYYY'  // Shows "5 Jan 2026" instead of "5 January 14:00:00"
+}</code></pre>
+
+<h2>Overflow Behaviour</h2>
+<p>Tooltip positioning is relative to the cursor. When a tooltip would extend beyond an edge, the <code>overflowBehavior</code> setting controls what happens:</p>
+<ul>
+  <li><code>"none"</code> — the tooltip renders at the cursor position and may be clipped by the canvas or viewport. Use this when you want full control over positioning via CSS.</li>
+  <li><code>"canvas"</code> — the tooltip flips horizontally or vertically to stay within the canvas element bounds. Good for timelines embedded in scrollable containers.</li>
+  <li><code>"viewport"</code> — the tooltip flips to stay within the browser viewport. Best for most use cases — ensures the tooltip is always fully visible.</li>
 </ul>
 
+<pre><code class="language-typescript">tooltip: {
+  overflowBehavior: 'viewport'
+}</code></pre>
+
 <h2>Custom Template</h2>
-<p>The <code>template</code> function receives the item ID and should return an HTML string or <code>HTMLElement</code>. Return <code>null</code> to fall back to the default tooltip.</p>
+<p>The <code>template</code> function gives you full control over tooltip content. It receives the item ID and should return one of:</p>
+<ul>
+  <li>An <strong>HTML string</strong> — injected as <code>innerHTML</code> into the tooltip container.</li>
+  <li>An <strong>HTMLElement</strong> — appended directly as the tooltip content.</li>
+  <li><strong><code>null</code></strong> — falls back to the default tooltip for that item.</li>
+</ul>
+
+<h3>Returning a HTML String</h3>
+
+<div class="api-demo"><canvas id="demo-tooltip-string"></canvas></div>
+<p style="margin: 0 0 16px; color: #64748b; font-size: 14px;">Hover to see the HTML string tooltip with duration.</p>
+<script>
+  window._tooltipStringDemo = new tempis_timeline.TempisTimeline('#demo-tooltip-string', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 6, fontColor: '#fff', padding: 8 } },
+    items: [
+      { id: 1, label: 'Design Sprint', start: '2026-04-01', end: '2026-04-14', grouping: 'Product' },
+      { id: 2, label: 'Development', start: '2026-04-10', end: '2026-05-01', grouping: 'Engineering' },
+    ],
+    range: { start: '2026-03-25', end: '2026-05-10', position: 'bottom' },
+    tooltip: {
+      overflowBehavior: 'viewport',
+      template: function(id) {
+        var item = window._tooltipStringDemo.getItems().find(function(i) { return i.id === id; });
+        if (!item) return null;
+        var days = item.end ? Math.round((new Date(item.end).getTime() - new Date(item.start).getTime()) / 86400000) : 0;
+        return '<div style="padding: 12px 16px; font-family: sans-serif; min-width: 180px; background: #fff; color: #1a1a2e; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">' +
+          '<div style="font-weight: 700; margin-bottom: 6px;">' + item.label + '</div>' +
+          '<div style="font-size: 12px; color: #666;">' + (days > 0 ? days + ' days' : 'Milestone') + '</div>' +
+          '</div>';
+      }
+    }
+  });
+</script>
+
 <pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {
   items: [
-    { id: 1, label: 'Item 1', start: '2026-04-10', end: '2026-04-12' },
+    { id: 1, label: 'Design Sprint', start: '2026-04-01', end: '2026-04-14' },
+    { id: 2, label: 'Development', start: '2026-04-10', end: '2026-05-01' },
   ],
-  range: { start: '2026-04-01', end: '2026-04-30', position: 'bottom' },
+  range: { start: '2026-03-25', end: '2026-05-10', position: 'bottom' },
   tooltip: {
     overflowBehavior: 'viewport',
     template(id) {
-      const item = timeline.getItems().find(i => i.id === id);
+      const item = timeline.getItems().find(i =&gt; i.id === id);
+      if (!item) return null;
+
+      const days = item.end
+        ? Math.round((new Date(item.end).getTime() - new Date(item.start).getTime()) / 86400000)
+        : 0;
+
       return `
-        &lt;div style="padding: 8px; font-family: sans-serif;"&gt;
-          &lt;strong&gt;${item?.label}&lt;/strong&gt;
-          &lt;p style="margin: 4px 0 0;"&gt;Custom tooltip content&lt;/p&gt;
+        &lt;div style="padding: 12px 16px; font-family: sans-serif; min-width: 180px;"&gt;
+          &lt;div style="font-weight: 700; margin-bottom: 6px;"&gt;${item.label}&lt;/div&gt;
+          &lt;div style="font-size: 12px; color: #666;"&gt;
+            ${days &gt; 0 ? days + ' days' : 'Milestone'}
+          &lt;/div&gt;
         &lt;/div&gt;
       `;
     }
   }
 });</code></pre>
 
+<h3>Returning a HTMLElement</h3>
+<p>For complex tooltips or when you want to attach event listeners, return a DOM element:</p>
+
+<div class="api-demo"><canvas id="demo-tooltip-element"></canvas></div>
+<p style="margin: 0 0 16px; color: #64748b; font-size: 14px;">Hover to see the HTMLElement tooltip.</p>
+<script>
+  window._tooltipElementDemo = new tempis_timeline.TempisTimeline('#demo-tooltip-element', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 6, fontColor: '#fff', padding: 8 } },
+    items: [
+      { id: 1, label: 'Research', start: '2026-03-01', end: '2026-03-12', grouping: 'Phase 1' },
+      { id: 2, label: 'Prototype', start: '2026-03-10', end: '2026-03-22', grouping: 'Phase 1' },
+      { id: 3, label: 'Build', start: '2026-03-18', end: '2026-04-05', grouping: 'Phase 2' },
+    ],
+    range: { start: '2026-02-25', end: '2026-04-10', position: 'bottom' },
+    tooltip: {
+      overflowBehavior: 'viewport',
+      template: function(id) {
+        var item = window._tooltipElementDemo.getItems().find(function(i) { return i.id === id; });
+        if (!item) return null;
+        var el = document.createElement('div');
+        el.style.cssText = 'padding: 12px 16px; font-family: sans-serif; background: #fff; color: #1a1a2e; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); min-width: 160px;';
+        var title = document.createElement('strong');
+        title.textContent = item.label;
+        el.appendChild(title);
+        var desc = document.createElement('p');
+        desc.style.cssText = 'margin: 4px 0 0; font-size: 12px; color: #666;';
+        desc.textContent = 'ID: ' + item.id;
+        el.appendChild(desc);
+        return el;
+      }
+    }
+  });
+</script>
+
+<pre><code class="language-typescript">tooltip: {
+  template(id) {
+    const item = timeline.getItems().find(i =&gt; i.id === id);
+    if (!item) return null;
+
+    const el = document.createElement('div');
+    el.style.padding = '12px 16px';
+    el.style.fontFamily = 'sans-serif';
+
+    const title = document.createElement('strong');
+    title.textContent = item.label;
+    el.appendChild(title);
+
+    const desc = document.createElement('p');
+    desc.style.margin = '4px 0 0';
+    desc.style.fontSize = '12px';
+    desc.style.color = '#666';
+    desc.textContent = `ID: ${item.id}`;
+    el.appendChild(desc);
+
+    return el;
+  }
+}</code></pre>
+
+<h3>Conditional Fallback</h3>
+<p>Return <code>null</code> from the template to use the default tooltip for specific items:</p>
+<pre><code class="language-typescript">tooltip: {
+  template(id) {
+    // Only customise tooltips for items with a specific category
+    const item = timeline.getItems().find(i =&gt; i.id === id);
+    if (item?.category === 'milestone') {
+      return '&lt;div style="padding: 8px;"&gt;🎯 Milestone reached&lt;/div&gt;';
+    }
+    return null; // Default tooltip for everything else
+  }
+}</code></pre>
+
 <h2>shouldShow Predicate</h2>
-<p>Use <code>shouldShow</code> to conditionally suppress tooltips for specific items.</p>
+<p>Use <code>shouldShow</code> to conditionally suppress tooltips for specific items without disabling them globally. The function receives the item ID and should return <code>true</code> to show the tooltip or <code>false</code> to suppress it.</p>
+
 <pre><code class="language-typescript">tooltip: {
   shouldShow(id) {
-    // Only show tooltips for items with id > 10
-    return typeof id === 'number' && id > 10;
+    // Only show tooltips for range items (not milestones)
+    const item = timeline.getItems().find(i =&gt; i.id === id);
+    return !!item?.end;
+  }
+}</code></pre>
+
+<div class="note">When <code>shouldShow</code> returns <code>false</code>, no tooltip is rendered at all — the <code>template</code> function is not called.</div>
+
+<h2>Styling</h2>
+<p>The tooltip container is a plain <code>&lt;div&gt;</code> positioned absolutely near the cursor. It has no default styling beyond positioning — your template controls the appearance entirely. For rich card-style tooltips, include padding, background, border-radius, and box-shadow in your template HTML.</p>
+
+<div class="api-demo"><canvas id="demo-tooltip-styled"></canvas></div>
+<p style="margin: 0 0 16px; color: #64748b; font-size: 14px;">Hover over items to see the styled card tooltip.</p>
+<script>
+  window._styledTooltipDemo = new tempis_timeline.TempisTimeline('#demo-tooltip-styled', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 6, fontColor: '#fff', padding: 8 } },
+    categories: [
+      { name: 'feature', label: 'Feature', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+      { name: 'bug', label: 'Bug Fix', style: { backgroundColor: '#ef4444', fontColor: '#fff' } },
+    ],
+    legend: { position: 'top', markerStyle: 'circle' },
+    items: [
+      { id: 1, label: 'Auth Redesign', start: '2026-03-01', end: '2026-03-14', category: 'feature', grouping: 'Sprint 1' },
+      { id: 2, label: 'Fix Login Bug', start: '2026-03-05', end: '2026-03-10', category: 'bug', grouping: 'Sprint 1' },
+      { id: 3, label: 'Dashboard v2', start: '2026-03-10', end: '2026-03-25', category: 'feature', grouping: 'Sprint 2' },
+      { id: 4, label: 'Fix Timeout', start: '2026-03-18', end: '2026-03-22', category: 'bug', grouping: 'Sprint 2' },
+    ],
+    range: { start: '2026-02-25', end: '2026-04-01', position: 'bottom' },
+    tooltip: {
+      overflowBehavior: 'viewport',
+      template: function(id) {
+        var item = window._styledTooltipDemo.getItems().find(function(i) { return i.id === id; });
+        if (!item) return null;
+        var days = item.end ? Math.round((new Date(item.end).getTime() - new Date(item.start).getTime()) / 86400000) : 0;
+        return '<div style="padding: 12px 16px; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-family: sans-serif; font-size: 13px; min-width: 160px; color: #1a1a2e;">' +
+          '<div style="font-weight: 700; margin-bottom: 4px;">' + item.label + '</div>' +
+          '<div style="color: #666; font-size: 12px;">' + (days > 0 ? days + ' days' : 'Milestone') + '</div>' +
+          '</div>';
+      }
+    }
+  });
+</script>
+
+<pre><code class="language-typescript">tooltip: {
+  overflowBehavior: 'viewport',
+  template(id) {
+    const item = timeline.getItems().find(i =&gt; i.id === id);
+    return `
+      &lt;div style="
+        padding: 12px 16px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        font-family: sans-serif;
+        font-size: 13px;
+      "&gt;
+        &lt;strong&gt;${item?.label}&lt;/strong&gt;
+      &lt;/div&gt;
+    `;
   }
 }</code></pre>

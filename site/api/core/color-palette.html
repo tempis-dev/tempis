@@ -18,6 +18,37 @@
 <p>Setting a new palette affects all timelines created after the call. Existing instances are not automatically updated — call <code>redraw()</code> or recreate the instance to apply the new palette.</p>
 
 <h2>Example</h2>
+<div class="api-demo"><canvas id="demo-palette"></canvas></div>
+<div class="btn-group" style="display: flex; gap: 8px; margin: 0 0 16px;">
+  <button class="btn btn-outline btn-sm" onclick="tempis_timeline.TempisTimeline.setGlobalPalette(['#6366f1','#ec4899','#14b8a6','#f59e0b','#ef4444']); document.getElementById('demo-palette').getContext('2d').clearRect(0,0,9999,9999); window._paletteDemo.destroy(); window._paletteDemo = new tempis_timeline.TempisTimeline('#demo-palette', window._paletteOpts);">Vibrant</button>
+  <button class="btn btn-outline btn-sm" onclick="tempis_timeline.TempisTimeline.setGlobalPalette(['#264653','#2a9d8f','#e9c46a','#f4a261','#e76f51']); window._paletteDemo.destroy(); window._paletteDemo = new tempis_timeline.TempisTimeline('#demo-palette', window._paletteOpts);">Earth</button>
+  <button class="btn btn-outline btn-sm" onclick="tempis_timeline.TempisTimeline.setGlobalPalette(['#1d4ed8','#7c3aed','#db2777','#ea580c','#65a30d']); window._paletteDemo.destroy(); window._paletteDemo = new tempis_timeline.TempisTimeline('#demo-palette', window._paletteOpts);">Bold</button>
+</div>
+<script>
+  window._paletteOpts = {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    categories: [
+      { name: 'cat-a', label: 'Category A' },
+      { name: 'cat-b', label: 'Category B' },
+      { name: 'cat-c', label: 'Category C' },
+      { name: 'cat-d', label: 'Category D' },
+      { name: 'cat-e', label: 'Category E' },
+    ],
+    legend: { position: 'top', markerStyle: 'circle' },
+    items: [
+      { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-10', category: 'cat-a' },
+      { id: 2, label: 'Item 2', start: '2026-02-05', end: '2026-02-18', category: 'cat-b' },
+      { id: 3, label: 'Item 3', start: '2026-02-12', end: '2026-02-22', category: 'cat-c' },
+      { id: 4, label: 'Item 4', start: '2026-02-08', end: '2026-02-15', category: 'cat-d' },
+      { id: 5, label: 'Item 5', start: '2026-02-16', end: '2026-02-26', category: 'cat-e' },
+    ],
+    range: { start: '2026-01-25', end: '2026-03-01', position: 'bottom' }
+  };
+  tempis_timeline.TempisTimeline.setGlobalPalette(['#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#ef4444']);
+  window._paletteDemo = new tempis_timeline.TempisTimeline('#demo-palette', window._paletteOpts);
+</script>
 <pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
 
 // Set a custom palette before creating the timeline

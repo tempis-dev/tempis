@@ -24,6 +24,29 @@
 <div class="note">The minimap and scrollbar are automatically hidden during export. The exported image contains only the timeline content.</div>
 
 <h2>Example — Download as PNG</h2>
+<div class="api-demo"><canvas id="demo-export"></canvas></div>
+<div class="btn-group" style="display: flex; gap: 8px; margin: 0 0 16px;">
+  <button class="btn btn-outline btn-sm" onclick="window._exportDemo.toImage({ type: 'image/png', dpr: 2, backgroundColor: '#ffffff' }).then(function(b) { var u = window.URL.createObjectURL(b); var a = document.createElement('a'); a.href = u; a.download = 'timeline.png'; a.click(); window.URL.revokeObjectURL(u); })">Download PNG (2x)</button>
+  <button class="btn btn-outline btn-sm" onclick="window._exportDemo.toImage({ type: 'image/jpeg', quality: 0.9, dpr: 1, backgroundColor: '#ffffff' }).then(function(b) { var u = window.URL.createObjectURL(b); var a = document.createElement('a'); a.href = u; a.download = 'timeline.jpg'; a.click(); window.URL.revokeObjectURL(u); })">Download JPEG</button>
+</div>
+<script>
+  window._exportDemo = new tempis_timeline.TempisTimeline('#demo-export', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    style: { item: { borderRadius: 4, fontColor: '#fff' } },
+    categories: [
+      { name: 'cat-a', label: 'Category A', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+      { name: 'cat-b', label: 'Category B', style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+    ],
+    legend: { position: 'top' },
+    items: [
+      { id: 1, label: 'Item 1', start: '2026-02-01', end: '2026-02-14', category: 'cat-a' },
+      { id: 2, label: 'Item 2', start: '2026-02-10', end: '2026-02-25', category: 'cat-b' },
+      { id: 3, label: 'Item 3', start: '2026-02-18', end: '2026-03-05', category: 'cat-a' },
+    ],
+    range: { start: '2026-01-25', end: '2026-03-10', position: 'bottom' }
+  });
+</script>
 <pre><code class="language-typescript">async function downloadTimeline() {
   const blob = await timeline.toImage({
     type: 'image/png',

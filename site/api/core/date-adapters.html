@@ -1,55 +1,140 @@
 <h1>Date Adapters</h1>
 <p class="subtitle">Plug in custom date libraries for timezone and locale support.</p>
 
-<h2>TempisTimelineDateAdapter</h2>
-<p>A date adapter must implement four methods:</p>
+<h2>Overview</h2>
+<p>The timeline uses a date adapter for all date operations: parsing input dates, calculating tick positions, snapping to time boundaries, and formatting labels. By default, a built-in adapter using the browser's native <code>Date</code> object handles everything. If you need timezone-aware rendering or custom locale formatting, you can register a custom adapter that wraps a library like Luxon or Day.js.</p>
+
+<h2>Built-in Native Adapter</h2>
+<p>The default adapter works out of the box with no configuration. It uses the browser's local timezone and supports the following format tokens for axis labels and tooltips:</p>
+
 <table>
-  <thead><tr><th>Method</th><th>Signature</th><th>Description</th></tr></thead>
+  <thead><tr><th>Token</th><th>Output</th><th>Example</th></tr></thead>
   <tbody>
-    <tr><td><code>parse</code></td><td><code>(input: DateInput) =&gt; number | null</code></td><td>Parse a Date, ISO string, or timestamp into epoch milliseconds.</td></tr>
-    <tr><td><code>startOf</code></td><td><code>(instant: number, unit: Unit) =&gt; number</code></td><td>Snap a timestamp to the start of the given unit.</td></tr>
-    <tr><td><code>add</code></td><td><code>(instant: number, unit: Unit, amount: number) =&gt; number</code></td><td>Add calendar units to a timestamp.</td></tr>
-    <tr><td><code>format</code></td><td><code>(instant: number, pattern: string) =&gt; string</code></td><td>Format a timestamp using a pattern string.</td></tr>
+    <tr><td><code>YYYY</code></td><td>Full year</td><td>2026</td></tr>
+    <tr><td><code>MMMM</code></td><td>Full month name</td><td>January</td></tr>
+    <tr><td><code>MMM</code></td><td>Short month name</td><td>Jan</td></tr>
+    <tr><td><code>MM</code></td><td>Zero-padded month</td><td>01</td></tr>
+    <tr><td><code>D</code></td><td>Day of month</td><td>5</td></tr>
+    <tr><td><code>ddd</code></td><td>Short weekday</td><td>Mon</td></tr>
+    <tr><td><code>HH</code></td><td>24-hour hours</td><td>14</td></tr>
+    <tr><td><code>hh</code></td><td>12-hour hours</td><td>02</td></tr>
+    <tr><td><code>mm</code></td><td>Minutes</td><td>05</td></tr>
+    <tr><td><code>ss</code></td><td>Seconds</td><td>03</td></tr>
+    <tr><td><code>SSS</code></td><td>Milliseconds</td><td>007</td></tr>
+    <tr><td><code>A</code></td><td>Uppercase AM/PM</td><td>PM</td></tr>
+    <tr><td><code>a</code></td><td>Lowercase am/pm</td><td>pm</td></tr>
   </tbody>
 </table>
 
+<p>Tokens can be combined freely: <code>"ddd D MMMM HH:mm"</code> produces <code>"Mon 5 January 14:05"</code>.</p>
+
+<div class="note">The built-in adapter uses the browser's local timezone. All dates are displayed relative to the user's system clock. If you need to display events in a specific timezone (e.g. UTC, or a fixed office timezone), you'll need a custom adapter.</div>
+
+<h2>TempisTimelineDateAdapter Interface</h2>
+<p>A custom adapter must implement four methods. All operate on epoch milliseconds internally.</p>
+
+<table>
+  <thead><tr><th>Method</th><th>Signature</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>parse</code></td><td><code>(input: string | number | Date) =&gt; number | null</code></td><td>Convert a date input (ISO string, timestamp, or Date object) into epoch milliseconds. Return <code>null</code> if the input is invalid.</td></tr>
+    <tr><td><code>startOf</code></td><td><code>(instant: number, unit: string) =&gt; number</code></td><td>Snap a timestamp to the start of the given unit (e.g. <code>"day"</code>, <code>"month"</code>, <code>"year"</code>). Used to calculate tick positions on the time axis.</td></tr>
+    <tr><td><code>add</code></td><td><code>(instant: number, unit: string, amount: number) =&gt; number</code></td><td>Add a number of calendar units to a timestamp. Supports negative amounts for subtraction. Used to step through ticks on the axis.</td></tr>
+    <tr><td><code>format</code></td><td><code>(instant: number, pattern: string) =&gt; string</code></td><td>Format a timestamp into a display string using the pattern tokens. Used for axis labels and default tooltips.</td></tr>
+  </tbody>
+</table>
+
+<h3>Supported Units</h3>
+<p>The <code>startOf</code> and <code>add</code> methods receive one of these unit strings:</p>
+<p><code>year</code>, <code>month</code>, <code>week</code>, <code>day</code>, <code>hour</code>, <code>minute</code>, <code>second</code>, <code>millisecond</code></p>
+
 <h2>Registering an Adapter</h2>
-<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
+<pre><code class="language-typescript">import { AdapterRegistry } from '@tempis/timeline';
 
-TempisTimeline.registerDateAdapter(myAdapter);</code></pre>
-<p>Internally this calls <code>AdapterRegistry.register()</code>. If no adapter is registered, a built-in <code>NativeDateAdapter</code> using the browser's <code>Date</code> and <code>Intl</code> APIs is used automatically.</p>
+AdapterRegistry.register(myAdapter);</code></pre>
 
-<div class="note">A registered adapter applies globally to all timeline instances. Register it once before creating any timelines.</div>
+<div class="note">A registered adapter applies globally to all timeline instances. Register it once at application startup, before creating any timelines. There is no way to use different adapters for different instances.</div>
 
-<h2>Built-in Native Adapter</h2>
-<p>The default adapter works with the local timezone and supports standard format tokens. No installation required — it is used out of the box.</p>
+<h2>When to Use a Custom Adapter</h2>
+<ul>
+  <li><strong>Fixed timezone display</strong> — show all events in UTC or a specific timezone regardless of the user's local clock.</li>
+  <li><strong>Non-Gregorian calendars</strong> — render dates in Hijri, Hebrew, or other calendar systems.</li>
+  <li><strong>Custom locale formatting</strong> — use locale-specific month/day names beyond what the browser provides.</li>
+  <li><strong>DST-aware calculations</strong> — ensure "add 1 day" always means 24 hours, even across daylight saving transitions.</li>
+</ul>
 
-<div class="note">The built-in adapter uses the browser's local timezone. If you need timezone-aware rendering (e.g. showing events in UTC or a specific timezone), register a custom adapter using a library like Luxon or Day.js.</div>
-
-<h2>Example — Luxon Adapter Skeleton</h2>
+<h2>Example — Luxon Adapter</h2>
+<p>This adapter renders all dates in the <code>America/New_York</code> timezone using Luxon:</p>
 <pre><code class="language-typescript">import { DateTime } from 'luxon';
-import { TempisTimeline } from '@tempis/timeline';
+import { AdapterRegistry } from '@tempis/timeline';
 import type { TempisTimelineDateAdapter } from '@tempis/timeline';
 
 const luxonAdapter: TempisTimelineDateAdapter = {
   parse(input) {
     if (input instanceof Date) return input.getTime();
-    if (typeof input === 'number') return input;
+    if (typeof input === 'number') return isNaN(input) ? null : input;
     const dt = DateTime.fromISO(input, { zone: 'America/New_York' });
     return dt.isValid ? dt.toMillis() : null;
   },
+
   startOf(instant, unit) {
     return DateTime.fromMillis(instant, { zone: 'America/New_York' })
-      .startOf(unit).toMillis();
+      .startOf(unit as any)
+      .toMillis();
   },
+
   add(instant, unit, amount) {
     return DateTime.fromMillis(instant, { zone: 'America/New_York' })
-      .plus({ [unit + 's']: amount }).toMillis();
+      .plus({ [unit + 's']: amount })
+      .toMillis();
   },
+
   format(instant, pattern) {
+    // Luxon uses different tokens — map common ones.
+    const luxonPattern = pattern
+      .replace('YYYY', 'yyyy')
+      .replace('D', 'd')
+      .replace('ddd', 'EEE');
     return DateTime.fromMillis(instant, { zone: 'America/New_York' })
-      .toFormat(pattern);
+      .toFormat(luxonPattern);
   }
 };
 
-TempisTimeline.registerDateAdapter(luxonAdapter);</code></pre>
+// Register once at app startup.
+AdapterRegistry.register(luxonAdapter);</code></pre>
+
+<div class="note">Luxon and the native adapter use different format tokens. Your <code>format</code> method should either map the Tempis tokens to your library's tokens, or configure the timeline's <code>range.minorUnit.formats</code> and <code>range.majorUnit.formats</code> to use your library's native token syntax.</div>
+
+<h2>Example — Day.js Adapter</h2>
+<pre><code class="language-typescript">import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import { AdapterRegistry } from '@tempis/timeline';
+import type { TempisTimelineDateAdapter } from '@tempis/timeline';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const TZ = 'Europe/London';
+
+const dayjsAdapter: TempisTimelineDateAdapter = {
+  parse(input) {
+    if (input instanceof Date) return input.getTime();
+    if (typeof input === 'number') return isNaN(input) ? null : input;
+    const d = dayjs.tz(input, TZ);
+    return d.isValid() ? d.valueOf() : null;
+  },
+
+  startOf(instant, unit) {
+    return dayjs(instant).tz(TZ).startOf(unit as any).valueOf();
+  },
+
+  add(instant, unit, amount) {
+    return dayjs(instant).tz(TZ).add(amount, unit as any).valueOf();
+  },
+
+  format(instant, pattern) {
+    return dayjs(instant).tz(TZ).format(pattern);
+  }
+};
+
+AdapterRegistry.register(dayjsAdapter);</code></pre>
