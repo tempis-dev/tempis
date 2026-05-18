@@ -74,7 +74,7 @@
       legend: { position: 'bottom' },
       grouping: { collapsible: true },
       minimap: {},
-      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      style: { font: { family: "'Inter', sans-serif" }, item: { borderRadius: 4, fontColor: '#fff' } },
       categories: [
         { name: 'deploy',   label: 'Deployments', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
         { name: 'incident', label: 'Incidents',    style: { backgroundColor: '#ff0071', fontColor: '#fff' } },
@@ -349,7 +349,7 @@
       new TempisTimeline('#demo-perf', {
         responsive: true,
         verticalFill: 'fill-canvas',
-        style: { item: { borderRadius: 3, fontColor: '#fff' } },
+        style: { font: { family: "'Inter', sans-serif" }, item: { borderRadius: 3, fontColor: '#fff' } },
         categories: cats,
         legend: { position: 'bottom' },
         range: { start: '2024-06-10T00:00:00', end: '2024-06-12T00:00:00', position: 'bottom' },
@@ -361,7 +361,7 @@
     var focusDemo = new TempisTimeline('#demo-focus', {
       responsive: true,
       verticalFill: 'fill-canvas',
-      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      style: { font: { family: "'Inter', sans-serif" }, item: { borderRadius: 4, fontColor: '#fff' } },
       grouping: { collapsible: true },
       categories: [
         { name: 'prep',     label: 'Preparation', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
@@ -430,7 +430,7 @@
     new TempisTimeline('#demo-adapter', {
       responsive: true,
       verticalFill: 'fill-canvas',
-      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      style: { font: { family: "'Inter', sans-serif" }, item: { borderRadius: 4, fontColor: '#fff' } },
       grouping: { collapsible: true },
       categories: [
         { name: 'flight', label: 'Flights', style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
@@ -457,7 +457,7 @@
     new TempisTimeline('#demo-responsive', {
       responsive: true,
       verticalFill: 'fill-canvas',
-      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      style: { font: { family: "'Inter', sans-serif" }, item: { borderRadius: 4, fontColor: '#fff' } },
       grouping: { collapsible: true },
       categories: [
         { name: 'session',  label: 'Sessions',  style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
@@ -605,7 +605,7 @@
       var rtTimeline = new TempisTimeline('#demo-realtime', {
         responsive: true,
         verticalFill: 'fill-canvas',
-        style: { item: { borderRadius: 4 } },
+        style: { font: { family: "'Inter', sans-serif" }, item: { borderRadius: 4 } },
         grouping: { collapsible: true, sort: function(a, b) { return a === 'ACME' ? -1 : 1; } },
         range: {
           start: new Date(now - 10000).toISOString(),
@@ -643,7 +643,7 @@
     new TempisTimeline('#demo-deps', {
       responsive: true,
       verticalFill: 'fill-canvas',
-      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      style: { font: { family: "'Inter', sans-serif" }, item: { borderRadius: 4, fontColor: '#fff' } },
       grouping: { collapsible: true },
       categories: [
         { name: 'design', label: 'Design',  style: { backgroundColor: '#ec4899', fontColor: '#fff' } },
@@ -678,7 +678,7 @@
     var exportTimeline = new TempisTimeline('#demo-export', {
       responsive: true,
       verticalFill: 'fill-canvas',
-      style: { item: { borderRadius: 4, fontColor: '#fff' } },
+      style: { font: { family: "'Inter', sans-serif" }, item: { borderRadius: 4, fontColor: '#fff' } },
       grouping: { collapsible: true },
       categories: [
         { name: 'stage',    label: 'Stages',    style: { backgroundColor: '#6366f1', fontColor: '#fff' } },

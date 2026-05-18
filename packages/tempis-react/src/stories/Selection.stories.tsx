@@ -15,8 +15,7 @@ const meta: Meta<typeof TempisTimeline> = {
     component: TempisTimeline,
     parameters: { layout: "padded" },
     args: {
-        onItemClick: fn(),
-        onSelectionChange: fn()
+        onItemClick: fn()
     }
 };
 export default meta;

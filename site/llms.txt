@@ -1,0 +1,416 @@
+# Tempis Timeline
+
+> A fast, zero-dependency, canvas-rendered timeline library for the web.
+
+- Website: https://tempis.dev
+- GitHub: https://github.com/tempis-dev/tempis
+- Licence: Source-available (free non-commercial, paid commercial)
+
+## Install
+
+```bash
+npm install @tempis/timeline
+```
+
+React wrapper:
+```bash
+npm install @tempis/react @tempis/timeline
+```
+
+CDN:
+```html
+<script src="https://unpkg.com/@tempis/timeline/dist/tempis_timeline.min.js"></script>
+```
+
+## Constructor
+
+```typescript
+new TempisTimeline(context: string | HTMLCanvasElement, options: TempisTimelineOptions)
+```
+
+## TempisTimelineOptions
+
+```typescript
+interface TempisTimelineOptions {
+  items: TempisTimelineItem[];                    // Required. The items to display.
+  responsive?: boolean;                           // Resize canvas to match parent. Default: false.
+  verticalFill?: "content" | "fill-canvas" | "grow-canvas"; // Default: "content".
+  rtl?: boolean;                                  // Right-to-left layout. Default: false.
+  stackMode?: "compact" | "stable";              // Item stacking. Default: "stable".
+  selection?: "none" | "single" | "multi";       // Selection mode. Default: "none".
+  categories?: TempisTimelineCategory[];
+  bands?: TempisTimelineBand[];
+  dependencies?: TempisTimelineDependency[];
+  range?: TempisTimelineRangeOptions;
+  legend?: TempisTimelineLegendOptions;
+  tooltip?: TempisTimelineTooltipOptions;
+  style?: TempisTimelineStyleOptions;
+  scrollbar?: TempisTimelineScrollbarOptions;
+  grouping?: TempisTimelineGroupingOptions;
+  accessibility?: TempisTimelineAccessibilityOptions;
+  minimap?: TempisTimelineMinimapOptions;
+
+  // Callbacks
+  onItemClick?(id: string | number): void;
+  onItemDoubleClick?(id: string | number): void;
+  onItemContextClick?(id: string | number, position: { x: number; y: number }): void;
+  onItemHover?(id: string | number | null): void;
+  onSelectionChange?(changes: SelectionChangeEvent[]): void;
+  onRangeChange?(start: Date, end: Date): void;
+  onGroupToggle?(group: string, collapsed: boolean): void;
+}
+```
+
+## TempisTimelineItem
+
+```typescript
+interface TempisTimelineItem {
+  id: string | number;              // Required. Unique identifier.
+  start: string | number | Date;    // Required. ISO string, timestamp, or Date.
+  end?: string | number | Date;     // Omit for point-in-time items.
+  label?: string;                   // Display label.
+  grouping?: string;                // Group name for row organisation.
+  category?: string;                // Category name (must match a defined category).
+  style?: TempisTimelineItemStyle;  // Per-item style overrides.
+  selected?: boolean;               // Whether initially selected.
+  progress?: number;                // Completion progress (0–1). Renders as fill bar.
+}
+```
+
+## TempisTimelineItemStyle
+
+```typescript
+interface TempisTimelineItemStyle {
+  backgroundColor?: string;
+  fontColor?: string;
+  padding?: number;
+  borderColor?: string;
+  borderThickness?: number;
+  borderStyle?: "solid" | "dashed" | "dotted" | "dash-dot" | "long-dash";
+  borderRadius?: number;
+}
+```
+
+## TempisTimelineCategory
+
+```typescript
+interface TempisTimelineCategory {
+  name: string;                     // Unique identifier referenced by items.
+  label: string;                    // Display label in the legend.
+  style?: TempisTimelineItemStyle;  // Style applied to all items in this category.
+}
+```
+
+## TempisTimelineBand
+
+```typescript
+interface TempisTimelineBand {
+  start: string | number | Date;    // Required.
+  end?: string | number | Date;     // Omit for point-in-time band (vertical line).
+  style?: {
+    color?: string;
+    borderColor?: string;
+    borderThickness?: number;
+    opacity?: number;
+  };
+}
+```
+
+## TempisTimelineDependency
+
+```typescript
+interface TempisTimelineDependency {
+  source: string | number;          // Source item ID (arrow starts here).
+  target: string | number;          // Target item ID (arrow points here).
+  style?: {
+    color?: string;
+    lineWidth?: number;
+    lineStyle?: "solid" | "dashed" | "dotted" | "dash-dot" | "long-dash";
+  };
+}
+```
+
+## TempisTimelineRangeOptions
+
+```typescript
+interface TempisTimelineRangeOptions {
+  fixed?: boolean;                  // Lock range (no pan/zoom). Default: false.
+  position?: "top" | "bottom" | "both" | "none"; // Axis position. Default: "bottom".
+  start?: string | number | Date;   // Initial visible start.
+  end?: string | number | Date;     // Initial visible end.
+  min?: string | number | Date;     // Earliest navigable date.
+  max?: string | number | Date;     // Latest navigable date.
+  minorUnit?: { font?: TempisTimelineFont; formats?: object };
+  majorUnit?: { font?: TempisTimelineFont; formats?: object };
+  zoom?: {
+    enabled?: boolean;              // Default: true.
+    min?: number;                   // Minimum range in ms.
+    max?: number;                   // Maximum range in ms.
+    wheelSensitivity?: number;      // Default: 1.0.
+    pinchSensitivity?: number;      // Default: 1.0.
+  };
+}
+```
+
+## TempisTimelineLegendOptions
+
+```typescript
+interface TempisTimelineLegendOptions {
+  position?: "top" | "bottom" | "none";           // Default: "none".
+  alignment?: "start" | "center" | "end";         // Default: "start".
+  markerStyle?: "square" | "square-rounded" | "circle"; // Default: "square-rounded".
+  isHighlightOnHover?: boolean;                   // Default: true.
+  isFilterOnClick?: boolean;                      // Default: true.
+  gap?: number;
+}
+```
+
+## TempisTimelineTooltipOptions
+
+```typescript
+interface TempisTimelineTooltipOptions {
+  enabled?: boolean;                // Default: true.
+  delay?: number;                   // Delay in ms. Default: 0.
+  dateFormat?: string;              // Default: "D MMMM HH:mm:ss".
+  overflowBehavior?: "none" | "canvas" | "viewport"; // Default: "none".
+  template?: (id: string | number) => HTMLElement | string | null;
+  shouldShow?: (id: string | number) => boolean;
+}
+```
+
+## TempisTimelineStyleOptions
+
+```typescript
+interface TempisTimelineStyleOptions {
+  font?: TempisTimelineFont;
+  item?: TempisTimelineItemStyle;
+  gridColor?: string;               // Colour for grid lines, labels, separators. Default: "#808080".
+}
+```
+
+## TempisTimelineFont
+
+```typescript
+interface TempisTimelineFont {
+  family?: string;                  // Default: "Helvetica, Arial, sans-serif".
+  size?: number;                    // Default: 14.
+  weight?: string | number;         // Default: "normal".
+  style?: string;                   // Default: "normal".
+  lineHeight?: string;
+}
+```
+
+## TempisTimelineScrollbarOptions
+
+```typescript
+interface TempisTimelineScrollbarOptions {
+  visibility?: "always" | "hover" | "panning" | "never"; // Default: "hover".
+  color?: string;                   // Thumb/track colour.
+}
+```
+
+## TempisTimelineGroupingOptions
+
+```typescript
+interface TempisTimelineGroupingOptions {
+  sort?: (a: string, b: string) => number;
+  collapsible?: boolean;            // Default: false.
+}
+```
+
+## TempisTimelineAccessibilityOptions
+
+```typescript
+interface TempisTimelineAccessibilityOptions {
+  ariaLabel?: string;               // Sets aria-label on the canvas.
+  keyboard?: boolean;               // Enable keyboard nav. Default: true.
+  keyboardPanStep?: number;         // Fraction of range per arrow key. Default: 0.1.
+  keyboardZoomStep?: number;        // Zoom intensity per +/- key. Default: 0.5.
+}
+```
+
+## TempisTimelineMinimapOptions
+
+```typescript
+interface TempisTimelineMinimapOptions {
+  height?: number;                  // Default: 40.
+  backgroundColor?: string;
+  viewportColor?: string;
+}
+```
+
+## Instance Methods
+
+```typescript
+// Items
+setItems(items: TempisTimelineItem[]): void
+getItems(): TempisTimelineItem[]
+
+// Categories
+setCategories(categories: TempisTimelineCategory[]): void
+getCategories(): TempisTimelineCategory[]
+
+// Bands
+setBands(bands: TempisTimelineBand[]): void
+
+// Dependencies
+setDependencies(dependencies: TempisTimelineDependency[]): void
+
+// Selection
+setSelection(ids: (string | number)[]): void
+getSelection(): (string | number)[]
+clearSelection(): void
+
+// Groups
+setGroupCollapsed(group: string, collapsed?: boolean): void  // Omit collapsed to toggle.
+isGroupCollapsed(group: string): boolean
+
+// Navigation
+focus(options?: FocusOptions): void
+getRange(): { start: Date; end: Date }
+
+// Export
+toImage(options?: ImageGenerationOptions): Promise<Blob>
+
+// Lifecycle
+redraw(): void
+destroy(): void
+```
+
+## FocusOptions
+
+```typescript
+interface FocusOptions {
+  id?: string | number;             // Item to focus on.
+  date?: string | number | Date;    // Date to centre on.
+  range?: [DateInput, DateInput];   // Range to display.
+  animate?: boolean;                // Default: false.
+  duration?: number;                // Animation ms. Default: 500.
+  easing?: "linear" | "easeIn" | "easeOut" | "easeInOut" | "easeInCubic" | "easeOutCubic" | "easeInOutCubic";
+  zoom?: boolean | "auto";          // Default: "auto".
+}
+```
+
+## ImageGenerationOptions
+
+```typescript
+interface ImageGenerationOptions {
+  type?: string;                    // "image/png" | "image/jpeg" | "image/webp". Default: "image/png".
+  quality?: number;                 // 0–1 for lossy formats.
+  dpr?: number;                     // Device pixel ratio. Default: 1.
+  backgroundColor?: string;         // Default: transparent.
+}
+```
+
+## SelectionChangeEvent
+
+```typescript
+interface SelectionChangeEvent {
+  id: string | number;
+  selected: boolean;
+}
+```
+
+## Static Methods
+
+```typescript
+TempisTimeline.setGlobalPalette(colors: string[]): void
+TempisTimeline.getGlobalPalette(): string[]
+TempisTimeline.registerDateAdapter(adapter: TempisTimelineDateAdapter): void
+```
+
+## Date Adapter Interface
+
+```typescript
+interface TempisTimelineDateAdapter {
+  parse(input: string | number | Date): number | null;
+  startOf(instant: number, unit: string): number;
+  add(instant: number, unit: string, amount: number): number;
+  format(instant: number, pattern: string): string;
+}
+```
+
+Units: year, month, week, day, hour, minute, second, millisecond
+
+Format tokens: YYYY, MMMM, MMM, MM, D, ddd, HH, hh, mm, ss, SSS, A, a
+
+## React Component
+
+```tsx
+import { TempisTimeline } from '@tempis/react';
+
+<TempisTimeline
+  items={items}
+  categories={categories}
+  bands={bands}
+  dependencies={dependencies}
+  options={{ responsive: true, range: { ... } }}
+  onItemClick={(id) => {}}
+  onSelectionChange={(changes) => {}}
+  onGroupToggle={(group, collapsed) => {}}
+  ref={timelineRef}
+  height={400}
+/>
+```
+
+Reactive props (synced without recreate): items, categories, bands, dependencies
+Structural props (trigger recreate on change): options
+
+## Ref API (React)
+
+```typescript
+interface TempisTimelineRef {
+  focus(options?: FocusOptions): void;
+  getRange(): { start: Date; end: Date };
+  setItems(items: TempisTimelineItem[]): void;
+  getItems(): TempisTimelineItem[];
+  setCategories(categories: TempisTimelineCategory[]): void;
+  getCategories(): TempisTimelineCategory[];
+  setBands(bands: TempisTimelineBand[]): void;
+  setDependencies(deps: TempisTimelineDependency[]): void;
+  setSelection(ids: (string | number)[]): void;
+  getSelection(): (string | number)[];
+  clearSelection(): void;
+  setGroupCollapsed(group: string, collapsed?: boolean): void;
+  isGroupCollapsed(group: string): boolean;
+  toImage(options?: ImageGenerationOptions): Promise<Blob>;
+  redraw(): void;
+  getInstance(): CoreTimeline | null;
+  getCanvas(): HTMLCanvasElement | null;
+}
+```
+
+## Quick Example
+
+```typescript
+import { TempisTimeline } from '@tempis/timeline';
+
+const timeline = new TempisTimeline('#canvas', {
+  responsive: true,
+  verticalFill: 'fill-canvas',
+  grouping: { collapsible: true },
+  minimap: { height: 40 },
+  style: {
+    gridColor: '#64748b',
+    font: { family: "'Inter', sans-serif", size: 13 },
+    item: { borderRadius: 6, fontColor: '#fff', padding: 8 }
+  },
+  categories: [
+    { name: 'feature', label: 'Feature', style: { backgroundColor: '#6366f1' } },
+    { name: 'bug', label: 'Bug Fix', style: { backgroundColor: '#ef4444' } },
+  ],
+  legend: { position: 'top', markerStyle: 'circle' },
+  items: [
+    { id: 1, label: 'Auth Redesign', start: '2026-01-05', end: '2026-01-20', category: 'feature', grouping: 'Sprint 1', progress: 0.8 },
+    { id: 2, label: 'Fix Login', start: '2026-01-10', end: '2026-01-15', category: 'bug', grouping: 'Sprint 1', progress: 1.0 },
+    { id: 3, label: 'Dashboard', start: '2026-01-18', end: '2026-02-05', category: 'feature', grouping: 'Sprint 2', progress: 0.3 },
+  ],
+  dependencies: [
+    { source: 1, target: 3, style: { lineStyle: 'dashed' } }
+  ],
+  range: { start: '2026-01-01', end: '2026-02-10', position: 'bottom' },
+  selection: 'single',
+  onItemClick(id) { console.log('clicked', id); },
+  onSelectionChange(changes) { console.log('selection', changes); }
+});
+```

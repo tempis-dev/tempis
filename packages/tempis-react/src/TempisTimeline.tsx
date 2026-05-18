@@ -252,6 +252,7 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
     const instanceRef = useRef<CoreTimeline | null>(null);
 
     // Store latest callbacks in a ref so we don't recreate the instance when they change.
+    // This includes tooltip functions (template, shouldShow) which live inside the options object but are functions that shouldn't trigger a recreate.
     const callbacksRef = useRef({
         onItemClick,
         onItemDoubleClick,
@@ -259,7 +260,9 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
         onItemHover,
         onSelectionChange,
         onRangeChange,
-        onGroupToggle
+        onGroupToggle,
+        tooltipTemplate: options.tooltip?.template,
+        tooltipShouldShow: options.tooltip?.shouldShow
     });
     callbacksRef.current = {
         onItemClick,
@@ -268,12 +271,19 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
         onItemHover,
         onSelectionChange,
         onRangeChange,
-        onGroupToggle
+        onGroupToggle,
+        tooltipTemplate: options.tooltip?.template,
+        tooltipShouldShow: options.tooltip?.shouldShow
     };
 
-    // Serialise the options object to detect actual value changes,
-    // avoiding unnecessary instance recreates from new object references on every render.
+    // Serialise the options object to detect actual value changes.
+    // Functions are stripped by JSON.stringify, which is intentional — they're stored
+    // in callbacksRef above and passed to the core instance via stable wrappers.
     const optionsKey = JSON.stringify(options);
+
+    // Track whether onSelectionChange is provided to switch between controlled/uncontrolled mode.
+    // The core library uses the presence of this callback to determine selection behavior.
+    const isSelectionControlled = !!onSelectionChange;
 
     // Create / destroy the core instance.
     useEffect(() => {
@@ -287,6 +297,15 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
 
         const timeline = new CoreTimeline(canvasRef.current, {
             ...options,
+            tooltip: {
+                ...options.tooltip,
+                template: options.tooltip?.template
+                    ? (id) => callbacksRef.current.tooltipTemplate?.(id) ?? null
+                    : undefined,
+                shouldShow: options.tooltip?.shouldShow
+                    ? (id) => callbacksRef.current.tooltipShouldShow?.(id) ?? true
+                    : undefined
+            },
             items,
             categories,
             bands,
@@ -295,7 +314,9 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
             onItemDoubleClick: (id) => callbacksRef.current.onItemDoubleClick?.(id),
             onItemContextClick: (id, pos) => callbacksRef.current.onItemContextClick?.(id, pos),
             onItemHover: (id) => callbacksRef.current.onItemHover?.(id),
-            onSelectionChange: (changes) => callbacksRef.current.onSelectionChange?.(changes),
+            onSelectionChange: onSelectionChange
+                ? (changes) => callbacksRef.current.onSelectionChange?.(changes)
+                : undefined,
             onRangeChange: (start, end) => callbacksRef.current.onRangeChange?.(start, end),
             onGroupToggle: (group, collapsed) => callbacksRef.current.onGroupToggle?.(group, collapsed)
         });
@@ -306,7 +327,7 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
             timeline.destroy();
             instanceRef.current = null;
         };
-    }, [optionsKey]);
+    }, [optionsKey, isSelectionControlled]);
 
     // Sync items.
     useEffect(() => {
