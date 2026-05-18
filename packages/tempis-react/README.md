@@ -24,19 +24,21 @@ npm install @tempis/react @tempis/timeline
 ## Quick Start
 
 ```tsx
-import { TempisReactTimeline } from '@tempis/react';
+import { TempisTimeline } from '@tempis/react';
 
 function App() {
   return (
-    <TempisReactTimeline
-      responsive
+    <TempisTimeline
       items={[
         { id: 1, label: 'Design',  start: '2026-01-05', end: '2026-01-15', grouping: 'Frontend' },
         { id: 2, label: 'Build',   start: '2026-01-12', end: '2026-01-28', grouping: 'Frontend' },
         { id: 3, label: 'Launch',  start: '2026-01-30', grouping: 'Frontend' },
         { id: 4, label: 'API',     start: '2026-01-08', end: '2026-01-25', grouping: 'Backend' },
       ]}
-      range={{ start: '2026-01-01', end: '2026-02-01', position: 'bottom' }}
+      options={{
+        responsive: true,
+        range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
+      }}
       onItemClick={(id) => console.log('clicked', id)}
       height={400}
     />
@@ -46,7 +48,7 @@ function App() {
 
 ## Props
 
-All [`TempisTimelineOptions`](../tempis-timeline/README.md#api) are accepted as props, plus:
+The component accepts `items`, `categories`, `bands`, and `dependencies` as reactive props, plus an `options` object for configuration:
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -67,7 +69,7 @@ Access imperative methods via `useRef`:
 
 ```tsx
 import { useRef } from 'react';
-import { TempisReactTimeline, type TempisTimelineRef } from '@tempis/react';
+import { TempisTimeline, type TempisTimelineRef } from '@tempis/react';
 
 function App() {
   const ref = useRef<TempisTimelineRef>(null);
@@ -77,7 +79,7 @@ function App() {
       <button onClick={() => ref.current?.focus({ id: 1, animate: true })}>
         Focus Item 1
       </button>
-      <TempisReactTimeline ref={ref} items={items} />
+      <TempisTimeline ref={ref} items={items} options={{ responsive: true }} />
     </>
   );
 }

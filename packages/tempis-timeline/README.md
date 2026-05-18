@@ -16,19 +16,19 @@
 ## Install
 
 ```bash
-npm install tempis-timeline
+npm install @tempis/timeline
 ```
 
 Or via CDN:
 
 ```html
-<script src="https://unpkg.com/tempis-timeline/dist/tempis_timeline.min.js"></script>
+<script src="https://unpkg.com/@tempis/timeline/dist/tempis_timeline.min.js"></script>
 ```
 
 ## Quick Start
 
 ```typescript
-import { TempisTimeline } from 'tempis-timeline';
+import { TempisTimeline } from '@tempis/timeline';
 
 const timeline = new TempisTimeline('#canvas', {
   responsive: true,
@@ -131,7 +131,7 @@ const blob = await timeline.toImage({
 ### Date Adapters
 
 ```typescript
-import { AdapterRegistry } from 'tempis-timeline';
+import { AdapterRegistry } from '@tempis/timeline';
 
 AdapterRegistry.register(myLuxonAdapter);
 ```
