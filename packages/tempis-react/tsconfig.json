@@ -11,12 +11,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "paths": {
-      "@tempis/timeline": ["../tempis-timeline/src/index.ts"]
-    },
-    "baseUrl": "."
+    "resolveJsonModule": true
   },
-  "include": ["src"],
+  "include": ["src/index.ts", "src/TempisTimeline.tsx"],
   "exclude": ["node_modules", "dist"]
 }
