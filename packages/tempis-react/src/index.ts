@@ -19,6 +19,10 @@ export type {
     TempisTimelineScrollbarOptions,
     TempisTimelineAccessibilityOptions,
     TempisTimelineMinimapOptions,
+    TempisTimelineVerticalFillMode,
+    TempisTimelineStackMode,
+    TempisTimelineItemSelectionMode,
+    TempisTimelineDateAdapter,
     ImageGenerationOptions,
     SelectionChangeEvent,
     FocusOptions

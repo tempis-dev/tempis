@@ -1,7 +1,6 @@
 import { useRef, useEffect, useImperativeHandle, forwardRef, type CSSProperties } from "react";
 import {
     TempisTimeline as CoreTimeline,
-    type TempisTimelineOptions,
     type TempisTimelineItem,
     type TempisTimelineCategory,
     type TempisTimelineBand,
@@ -14,6 +13,9 @@ import {
     type TempisTimelineScrollbarOptions,
     type TempisTimelineAccessibilityOptions,
     type TempisTimelineMinimapOptions,
+    type TempisTimelineVerticalFillMode,
+    type TempisTimelineStackMode,
+    type TempisTimelineItemSelectionMode,
     type ImageGenerationOptions,
     type FocusOptions,
     type SelectionChangeEvent
@@ -135,16 +137,16 @@ export interface TempisTimelineConfig {
     responsive?: boolean;
 
     /** The vertical fill mode. */
-    verticalFill?: TempisTimelineOptions["verticalFill"];
+    verticalFill?: TempisTimelineVerticalFillMode;
 
     /** Whether the timeline should be rendered right-to-left. */
     rtl?: boolean;
 
     /** The stack mode controlling how items are vertically arranged. */
-    stackMode?: TempisTimelineOptions["stackMode"];
+    stackMode?: TempisTimelineStackMode;
 
     /** The item selection mode. */
-    selection?: TempisTimelineOptions["selection"];
+    selection?: TempisTimelineItemSelectionMode;
 
     /** The timeline range options. */
     range?: TempisTimelineRangeOptions;
