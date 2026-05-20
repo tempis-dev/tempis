@@ -395,11 +395,13 @@ export class TimelineRangeView {
                 context.lineWidth = 1;
                 context.strokeStyle = this._gridColor;
                 context.setLineDash([3, 3]); /* dashes are 5px and spaces are 3px */
+                context.globalAlpha = 0.5;
                 context.beginPath();
                 const x = Math.round(xPosition) + 0.5;
                 context.moveTo(x, minorTicksYPosition);
                 context.lineTo(x, minorTicksYPosition + rangeContainerHeight / 2);
                 context.stroke();
+                context.globalAlpha = 1.0;
             }
 
             // Create the formatted date label for this minor tick.

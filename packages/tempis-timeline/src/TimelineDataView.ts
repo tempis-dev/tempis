@@ -454,6 +454,7 @@ export class TimelineDataView {
         context.lineWidth = 1;
         context.strokeStyle = this._gridColor;
         context.setLineDash([3, 3]); /* dashes are 5px and spaces are 3px */
+        context.globalAlpha = 0.5;
         context.beginPath();
 
         for (const { xPosition } of rangeMinorTicks) {
@@ -469,6 +470,7 @@ export class TimelineDataView {
         // Reset the line dash to be solid.
         context.stroke();
         context.setLineDash([]);
+        context.globalAlpha = 1.0;
     }
 
     /**

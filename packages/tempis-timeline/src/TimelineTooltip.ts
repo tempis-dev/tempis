@@ -131,6 +131,7 @@ export class TimelineTooltip {
             position: "fixed",
             pointerEvents: "none",
             zIndex: "9999",
+            width: "max-content",
             font: this._font.font
         });
 
