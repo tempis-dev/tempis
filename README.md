@@ -109,6 +109,8 @@ npm test             # Lint + unit tests
 
 The [`examples/`](examples/) directory has interactive demos covering basic usage, dashboards, dependencies, progress indicators, real-time streaming, custom tooltips, RTL, image export, and more. Run `npm run dev` and browse them at `http://localhost:8080/examples/`.
 
+You can also view them online at [tempis.dev/examples](https://tempis.dev/examples.html).
+
 ## Licence
 
 Free for personal projects, education, and evaluation. A paid licence is required for commercial use where revenue is generated. See [LICENSE](LICENSE) for full terms.

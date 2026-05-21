@@ -113,6 +113,10 @@ All core types are re-exported for convenience — no need to install `@tempis/t
 import type { TempisTimelineItem, FocusOptions } from '@tempis/react';
 ```
 
+## Documentation
+
+Full API documentation and guides are available at [tempis.dev/api/react/getting-started](https://tempis.dev/api/react/getting-started.html).
+
 ## Licence
 
 Free for personal projects, education, and evaluation. A paid licence is required for commercial use where revenue is generated. See [LICENSE](LICENSE) for full terms.

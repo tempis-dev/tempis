@@ -117,28 +117,15 @@ new TempisTimeline(context: string | HTMLCanvasElement, options: TempisTimelineO
 | `onRangeChange` | `(start: Date, end: Date) => void` |
 | `onGroupToggle` | `(group: string, collapsed: boolean) => void` |
 
-### Image Export
-
-```typescript
-const blob = await timeline.toImage({
-  type: 'image/png',       // 'image/jpeg', 'image/webp'
-  quality: 0.9,            // lossy formats
-  dpr: 2,                  // resolution multiplier
-  backgroundColor: '#fff'  // transparent by default
-});
-```
-
-### Date Adapters
-
-```typescript
-import { AdapterRegistry } from '@tempis/timeline';
-
-AdapterRegistry.register(myLuxonAdapter);
-```
-
 ## Browser Support
 
 Chrome, Edge, Firefox, Safari, Opera (latest versions).
+
+## Documentation
+
+Full API documentation and guides are available at [tempis.dev/api/core/getting-started](https://tempis.dev/api/core/getting-started.html).
+
+Browse interactive examples at [tempis.dev/examples](https://tempis.dev/examples.html).
 
 ## Licence
 
