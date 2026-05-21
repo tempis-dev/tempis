@@ -8,7 +8,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/react-%3E%3D18-blue" alt="React 18+">
   <img src="https://img.shields.io/badge/language-TypeScript-blue" alt="TypeScript">
-  <img src="https://img.shields.io/badge/license-dual-orange" alt="dual license">
+  <img src="https://img.shields.io/badge/license-source--available-orange" alt="source-available licence">
 </p>
 
 ---
@@ -103,6 +103,7 @@ function App() {
 | `toImage(options?)` | Export as image blob |
 | `redraw()` | Force a redraw |
 | `getInstance()` | Access the underlying core instance |
+| `getCanvas()` | Access the underlying canvas element |
 
 ## Re-exports
 

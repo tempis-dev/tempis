@@ -1,14 +1,14 @@
 <h1 align="center">@tempis/timeline</h1>
 
 <p align="center">
-  Core canvas-rendered timeline library.<br>
-  Zero dependencies. Smooth at 5,000+ items. Under 15 KB minified.
+  The core typescript-based canvas-rendered timeline library.<br>
+  Zero dependencies. Smooth at 5,000+ items. Under 18 KB gzipped.
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/dependencies-0-brightgreen" alt="zero dependencies">
   <img src="https://img.shields.io/badge/language-TypeScript-blue" alt="TypeScript">
-  <img src="https://img.shields.io/badge/license-dual-orange" alt="dual license">
+  <img src="https://img.shields.io/badge/license-source--available-orange" alt="source-available licence">
 </p>
 
 ---

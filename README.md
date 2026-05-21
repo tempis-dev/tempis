@@ -11,6 +11,7 @@
 
 <p align="center">
   <img src="https://github.com/tempis-dev/tempis/actions/workflows/ci.yml/badge.svg" alt="CI">
+  <img src="https://img.shields.io/npm/v/@tempis/timeline" alt="npm version">
   <img src="https://img.shields.io/badge/language-TypeScript-blue" alt="TypeScript">
   <img src="https://img.shields.io/badge/license-source--available-orange" alt="source-available licence">
 </p>
@@ -91,8 +92,8 @@ tempis/
 ├── examples/              Interactive HTML demos
 ├── site/                  Documentation site
 ├── scripts/               Build tooling
-├── lib/                   Dev build output (gitignored)
-└── dist/                  Distribution output (gitignored)
+├── lib/                   Dev build output
+└── dist/                  Distribution output
 ```
 
 ## Development
@@ -101,13 +102,12 @@ tempis/
 npm install
 npm run dev          # Watch + dev server on :8080
 npm run build        # Build all packages
-npm run build:site   # Build the documentation site
 npm test             # Lint + unit tests
 ```
 
 ## Examples
 
-The [`examples/`](examples/) directory has 35+ interactive demos covering basic usage, dashboards, dependencies, progress indicators, real-time streaming, custom tooltips, RTL, image export, and more. Run `npm run dev` and browse them at `http://localhost:8080/examples/`.
+The [`examples/`](examples/) directory has interactive demos covering basic usage, dashboards, dependencies, progress indicators, real-time streaming, custom tooltips, RTL, image export, and more. Run `npm run dev` and browse them at `http://localhost:8080/examples/`.
 
 ## Licence
 
@@ -115,4 +115,4 @@ Free for personal projects, education, and evaluation. A paid licence is require
 
 ## Need Help?
 
-Do you have a question or have you found a bug? Open an issue or start a discussion on the [Tempis GitHub repository](https://github.com/nicktempis/tempis-timeline).
+Do you have a question or have you found a bug? Open an issue or start a discussion on the [Tempis GitHub repository](https://github.com/tempis-dev/tempis).
