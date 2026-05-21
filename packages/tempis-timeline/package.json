@@ -1,6 +1,6 @@
 {
   "name": "@tempis/timeline",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A fast, zero-dependency, canvas-rendered timeline library with smooth interactions, touch support, and TypeScript types.",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
