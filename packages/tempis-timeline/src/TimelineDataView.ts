@@ -282,7 +282,7 @@ export class TimelineDataView {
         this._lastDrawHeight = fillVertically ? maxHeight : Math.min(this._drawPlan.height, maxHeight);
 
         // Clear the data view area.
-        context.clearRect(0, yPosition, context.canvas.width, this._lastDrawHeight);
+        context.clearRect(0, yPosition, context.canvas.clientWidth, this._lastDrawHeight);
 
         // Draw any configured timeline bands first.
         this._drawBands(context, bands, fromDt, toDt, yPosition, this._lastDrawHeight);
@@ -459,7 +459,7 @@ export class TimelineDataView {
 
         for (const { xPosition } of rangeMinorTicks) {
             // We should only render a unit bar if its not right at the edge of the canvas as it looks a little weird.
-            if (xPosition > 0 && xPosition < context.canvas.width) {
+            if (xPosition > 0 && xPosition < context.canvas.clientWidth) {
                 // Render the unit bar at a half-pixel unit so we dont get blur.
                 const x = Math.round(xPosition) + 0.5;
                 context.moveTo(x, yPosition);
@@ -869,12 +869,17 @@ export class TimelineDataView {
         // Draw the item range rectangle.
         // When a border is configured, inset the fill so it doesn't bleed outside the stroke.
         const fillInset = itemBorderThickness && itemBorderColor ? itemBorderThickness / 2 : 0;
+
+        // Clamp the draw coordinates to a safe range to prevent canvas rasterizer artifacts when items extend far off-screen (e.g. a year-long item viewed at second-level zoom).
+        const drawXStart = Math.max(-100, itemDrawPlan.xPositionStart);
+        const drawXEnd = Math.min(effectiveCanvasWidth + 100, itemDrawPlan.xPositionEnd);
+
         context.fillStyle = itemBackgroundColor;
         context.beginPath();
         context.roundRect(
-            itemDrawPlan.xPositionStart + fillInset,
+            drawXStart + fillInset,
             scrolledYPosition + itemDrawPlan.yPositionStart + fillInset,
-            itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - fillInset * 2,
+            drawXEnd - drawXStart - fillInset * 2,
             itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - fillInset * 2,
             Math.max(0, itemBorderRadius - fillInset)
         );
@@ -890,9 +895,9 @@ export class TimelineDataView {
                 // Clip to the item shape so the progress fill respects border radius.
                 context.beginPath();
                 context.roundRect(
-                    itemDrawPlan.xPositionStart + fillInset,
+                    drawXStart + fillInset,
                     scrolledYPosition + itemDrawPlan.yPositionStart + fillInset,
-                    itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - fillInset * 2,
+                    drawXEnd - drawXStart - fillInset * 2,
                     itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - fillInset * 2,
                     Math.max(0, itemBorderRadius - fillInset)
                 );
@@ -904,7 +909,7 @@ export class TimelineDataView {
                     ? itemDrawPlan.xPositionEnd - fillInset - progressWidth
                     : itemDrawPlan.xPositionStart + fillInset;
                 context.fillRect(
-                    progressX,
+                    Math.max(-100, progressX),
                     scrolledYPosition + itemDrawPlan.yPositionStart + fillInset,
                     progressWidth,
                     itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - fillInset * 2
@@ -924,9 +929,9 @@ export class TimelineDataView {
 
             context.beginPath();
             context.roundRect(
-                itemDrawPlan.xPositionStart + context.lineWidth / 2,
+                drawXStart + context.lineWidth / 2,
                 scrolledYPosition + itemDrawPlan.yPositionStart + context.lineWidth / 2,
-                itemDrawPlan.xPositionEnd - itemDrawPlan.xPositionStart - context.lineWidth,
+                drawXEnd - drawXStart - context.lineWidth,
                 itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - +context.lineWidth,
                 itemBorderRadius
             );

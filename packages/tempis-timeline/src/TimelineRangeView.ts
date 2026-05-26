@@ -37,6 +37,12 @@ const DEFAULT_MAJOR_UNIT_LABEL_FORMATS: TempisTimelineRangeUnitLabelFormats = {
 /** The default amount of padding to use for unit labels. */
 const DEFAULT_UNIT_LABEL_PADDING: number = 4;
 
+/** The hard minimum zoom range in milliseconds. */
+const ZOOM_HARD_MIN_MS: number = 100;
+
+/** The hard maximum zoom range in milliseconds (~10,000 years). */
+const ZOOM_HARD_MAX_MS: number = 315360000000000;
+
 export class TimelineRangeView {
     /** The timeline canvas. */
     private readonly _canvas: HTMLCanvasElement;
@@ -85,6 +91,9 @@ export class TimelineRangeView {
 
     /** Animation frame ID for range animations. */
     private _animationFrameId: number | null = null;
+
+    /** Accumulated fractional milliseconds from panning the range (to prevent drift from integer truncation). */
+    private _moveRangeAccumulator: number = 0;
 
     /**
      * Creates a new instance of the TimelineRangeView class.
@@ -152,7 +161,6 @@ export class TimelineRangeView {
 
         // If our from and to date are the same then we cannot represent this single point in time on the timeline.
         // To get around this we should pad the time out by some arbitrary amount either side of the date.
-        // TODO For now we can just add a minute either side, but we should probably make this configurable.
         if (this._fromDt.getTime() === this._toDt.getTime()) {
             this._setFromTime(this._fromDt.getTime() - 60 * 1000);
             this._setToTime(this._toDt.getTime() + 60 * 1000);
@@ -196,9 +204,21 @@ export class TimelineRangeView {
         // Get the range milli value of one unit of canvas client width.
         const rangeXMillisValue = currentRangeLength / this._canvas.clientWidth;
 
-        // Calculate the new from and to times based on the current range and the movement value.
-        const targetFrom = this._fromDt.getTime() + rangeXMillisValue * movementX;
-        const targetTo = this._toDt.getTime() + rangeXMillisValue * movementX;
+        // Accumulate fractional milliseconds across frames. At close zoom levels, a single pixel of
+        // movement can represent less than 1ms. Since Date stores whole milliseconds, applying these
+        // sub-millisecond shifts directly would truncate the remainder each frame, causing the range
+        // to drift away from the cursor. Instead, we should bank the fractional part and only apply whole
+        // millisecond shifts once enough has accumulated.
+        this._moveRangeAccumulator += rangeXMillisValue * movementX;
+        const shift = Math.trunc(this._moveRangeAccumulator);
+        if (shift === 0) {
+            return;
+        }
+        this._moveRangeAccumulator -= shift;
+
+        // Calculate the new from and to times based on the integer shift.
+        const targetFrom = this._fromDt.getTime() + shift;
+        const targetTo = this._toDt.getTime() + shift;
 
         // Get the millis range between the min and max range values.
         const minMaxRange = this._maxDate.getTime() - this._minDate.getTime();
@@ -239,6 +259,9 @@ export class TimelineRangeView {
             return;
         }
 
+        // Reset the pan accumulator since the ms-per-pixel ratio is changing.
+        this._moveRangeAccumulator = 0;
+
         // Work out the target position in milliseconds. This is the position on the canvas that we want to zoom around.
         // If we are rendering right-to-left then we should flip the x position so that it would map to the correct millisecond value.
         const targetPositionMillis = this._isRTL
@@ -259,8 +282,10 @@ export class TimelineRangeView {
         // Get the new millis range based on the new from and to times.
         let targetRange = targetTo - targetFrom;
 
-        // Clamp the new zoom range to the zoom min and max if they are defined.
-        const clampedRange = clamp(targetRange, this._options.zoom?.min, this._options.zoom?.max);
+        // Clamp the new zoom range to the zoom min and max if they are defined, or fall back to the hard min/max for the range.
+        const effectiveMin = Math.max(ZOOM_HARD_MIN_MS, this._options.zoom?.min ?? ZOOM_HARD_MIN_MS);
+        const effectiveMax = Math.min(ZOOM_HARD_MAX_MS, this._options.zoom?.max ?? ZOOM_HARD_MAX_MS);
+        const clampedRange = clamp(targetRange, effectiveMin, effectiveMax);
 
         // If the clamped range is different to the calculated one (the range is outside the zoom min/max bounds) then we need to calculate the new clamped from/to dates.
         if (targetRange != clampedRange) {
