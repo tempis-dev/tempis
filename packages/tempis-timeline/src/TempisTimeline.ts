@@ -652,6 +652,9 @@ export class TempisTimeline {
         // Track the last hovered item ID to avoid firing duplicate hover callbacks.
         let lastHoveredItemId: string | number | null = null;
 
+        // Track scrollbar dragging state.
+        let isDraggingScrollbar = false;
+
         // A function that gets the position on the canvas for the mouse event or pointer event.
         const getMouseOrPointerPosition = (event: PointerEvent | MouseEvent) => {
             const rect = this._canvas.getBoundingClientRect();
@@ -699,6 +702,16 @@ export class TempisTimeline {
                 // Check if the click is on the minimap first.
                 const pos = getMouseOrPointerPosition(event);
                 if (this._minimapView.handlePointer(pos.x, pos.y, "down", this._canvas.clientWidth)) {
+                    this._canvas.setPointerCapture(event.pointerId);
+                    this._draw();
+                    return;
+                }
+
+                // Check if the click is on the scrollbar.
+                const scrollbarInfo = this._dataView.getScrollbarAtPoint(pos, this._canvas.clientWidth);
+                if (scrollbarInfo) {
+                    isDraggingScrollbar = true;
+                    this._dataView.scrollToTrackPosition(pos.y);
                     this._canvas.setPointerCapture(event.pointerId);
                     this._draw();
                     return;
@@ -759,6 +772,14 @@ export class TempisTimeline {
             }
 
             // Single pointer panning.
+            // Handle scrollbar dragging if active.
+            if (isDraggingScrollbar) {
+                const pos = getMouseOrPointerPosition(event);
+                this._dataView.scrollToTrackPosition(pos.y);
+                this._draw();
+                return;
+            }
+
             // Handle minimap dragging if active.
             if (this._minimapView.isDragging) {
                 const pos = getMouseOrPointerPosition(event);
@@ -802,6 +823,13 @@ export class TempisTimeline {
         this._eventHandlers.pointerup = (event) => {
             // Remove this pointer from tracking.
             activePointers.delete(event.pointerId);
+
+            // Handle scrollbar drag end.
+            if (isDraggingScrollbar) {
+                isDraggingScrollbar = false;
+                this._canvas.releasePointerCapture(event.pointerId);
+                return;
+            }
 
             // Handle minimap drag end.
             if (this._minimapView.isDragging) {
@@ -900,6 +928,7 @@ export class TempisTimeline {
             }
 
             isPointerDown = false;
+            isDraggingScrollbar = false;
         };
         this._canvas.addEventListener("pointercancel", this._eventHandlers.pointercancel);
 

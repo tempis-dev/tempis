@@ -68,6 +68,21 @@ const DEFAULT_GROUP_MARGIN: number = 8;
 /** The minimum amount of available horizontal space required to render a label. */
 const MINIMUM_RENDERED_LABEL_WIDTH: number = 5;
 
+/** The scrollbar thumb width in pixels. */
+const SCROLLBAR_WIDTH: number = 8;
+
+/** The scrollbar horizontal padding from the canvas edge. */
+const SCROLLBAR_PADDING: number = 4;
+
+/** The scrollbar vertical margin from the top and bottom of the data view. */
+const SCROLLBAR_MARGIN: number = 6;
+
+/** The extra hit area padding around the scrollbar for easier targeting. */
+const SCROLLBAR_HIT_PADDING: number = 6;
+
+/** The minimum scrollbar thumb height in pixels. */
+const SCROLLBAR_MIN_THUMB_HEIGHT: number = 30;
+
 export class TimelineDataView {
     /** The underlying dataset model. */
     private readonly _dataSet: TimelineDataSet;
@@ -160,6 +175,71 @@ export class TimelineDataView {
      */
     public scrollByYMovement(movementY: number): void {
         this._scrollYOffset += movementY;
+    }
+
+    /**
+     * Tests if a point is on the scrollbar thumb and returns the scrollbar geometry if so.
+     * @param point The point to test.
+     * @param canvasWidth The canvas width.
+     * @returns The scrollbar info if the point is on the scrollbar, or null otherwise.
+     */
+    public getScrollbarAtPoint(
+        point: { x: number; y: number },
+        canvasWidth: number
+    ): { thumbY: number; thumbHeight: number; trackY: number; trackHeight: number } | null {
+        if (!this._drawPlan || this._drawPlan.height <= this._lastDrawHeight) {
+            return null;
+        }
+
+        const scrollbarX = this._isRTL ? SCROLLBAR_PADDING : canvasWidth - SCROLLBAR_WIDTH - SCROLLBAR_PADDING;
+
+        // Check if the point is within the scrollbar horizontal bounds (with some extra hit area).
+        if (
+            point.x < scrollbarX - SCROLLBAR_HIT_PADDING ||
+            point.x > scrollbarX + SCROLLBAR_WIDTH + SCROLLBAR_HIT_PADDING
+        ) {
+            return null;
+        }
+
+        // Check if the point is within the data view vertical bounds.
+        if (point.y < this._lastDrawYPosition || point.y > this._lastDrawYPosition + this._lastDrawHeight) {
+            return null;
+        }
+
+        const availableHeight = this._lastDrawHeight - SCROLLBAR_MARGIN * 2;
+        const visibleRatio = this._lastDrawHeight / this._drawPlan.height;
+        const thumbHeight = Math.max(SCROLLBAR_MIN_THUMB_HEIGHT, availableHeight * visibleRatio);
+        const scrollableHeight = availableHeight - thumbHeight;
+        const scrollRatio = Math.abs(this._scrollYOffset) / (this._drawPlan.height - this._lastDrawHeight);
+        const thumbY = this._lastDrawYPosition + SCROLLBAR_MARGIN + scrollRatio * scrollableHeight;
+        const trackY = this._lastDrawYPosition + SCROLLBAR_MARGIN;
+        const trackHeight = availableHeight;
+
+        return { thumbY, thumbHeight, trackY, trackHeight };
+    }
+
+    /**
+     * Scrolls the view to a position based on a Y coordinate within the scrollbar track.
+     * @param trackPositionY The Y position within the scrollbar track area.
+     */
+    public scrollToTrackPosition(trackPositionY: number): void {
+        if (!this._drawPlan || this._drawPlan.height <= this._lastDrawHeight) {
+            return;
+        }
+
+        const availableHeight = this._lastDrawHeight - SCROLLBAR_MARGIN * 2;
+        const visibleRatio = this._lastDrawHeight / this._drawPlan.height;
+        const thumbHeight = Math.max(SCROLLBAR_MIN_THUMB_HEIGHT, availableHeight * visibleRatio);
+        const scrollableHeight = availableHeight - thumbHeight;
+
+        // Calculate the ratio from the track position (clamped to valid range).
+        const trackTop = this._lastDrawYPosition + SCROLLBAR_MARGIN;
+        const relativeY = trackPositionY - trackTop - thumbHeight / 2;
+        const ratio = Math.max(0, Math.min(1, relativeY / scrollableHeight));
+
+        // Convert ratio to scroll offset.
+        const maxScroll = this._drawPlan.height - this._lastDrawHeight;
+        this._scrollYOffset = -ratio * maxScroll;
     }
 
     /**
@@ -506,20 +586,17 @@ export class TimelineDataView {
             return;
         }
 
-        const scrollbarWidth = 8;
-        const scrollbarPadding = 4;
-        const scrollbarMargin = 6; // Margin from top and bottom
         const scrollbarX = this._isRTL
-            ? scrollbarPadding
-            : context.canvas.clientWidth - scrollbarWidth - scrollbarPadding;
+            ? SCROLLBAR_PADDING
+            : context.canvas.clientWidth - SCROLLBAR_WIDTH - SCROLLBAR_PADDING;
 
         // Calculate scrollbar thumb size and position with margins
-        const availableHeight = height - scrollbarMargin * 2;
+        const availableHeight = height - SCROLLBAR_MARGIN * 2;
         const visibleRatio = height / this._drawPlan.height;
-        const thumbHeight = Math.max(30, availableHeight * visibleRatio); // Minimum 30px thumb
+        const thumbHeight = Math.max(SCROLLBAR_MIN_THUMB_HEIGHT, availableHeight * visibleRatio);
         const scrollableHeight = availableHeight - thumbHeight;
         const scrollRatio = Math.abs(this._scrollYOffset) / (this._drawPlan.height - height);
-        const thumbY = yPosition + scrollbarMargin + scrollRatio * scrollableHeight;
+        const thumbY = yPosition + SCROLLBAR_MARGIN + scrollRatio * scrollableHeight;
 
         const scrollbarColor = this._scrollbarOptions.color ?? this._gridColor;
 
@@ -528,7 +605,13 @@ export class TimelineDataView {
         context.globalAlpha = 0.15;
         context.fillStyle = scrollbarColor;
         context.beginPath();
-        context.roundRect(scrollbarX, yPosition + scrollbarMargin, scrollbarWidth, availableHeight, scrollbarWidth / 2);
+        context.roundRect(
+            scrollbarX,
+            yPosition + SCROLLBAR_MARGIN,
+            SCROLLBAR_WIDTH,
+            availableHeight,
+            SCROLLBAR_WIDTH / 2
+        );
         context.fill();
         context.restore();
 
@@ -537,7 +620,7 @@ export class TimelineDataView {
         context.globalAlpha = 0.5;
         context.fillStyle = scrollbarColor;
         context.beginPath();
-        context.roundRect(scrollbarX, thumbY, scrollbarWidth, thumbHeight, scrollbarWidth / 2);
+        context.roundRect(scrollbarX, thumbY, SCROLLBAR_WIDTH, thumbHeight, SCROLLBAR_WIDTH / 2);
         context.fill();
         context.restore();
     }
