@@ -12,6 +12,7 @@ export type {
     TempisTimelineDependencyStyle,
     TempisTimelineOptions,
     TempisTimelineRangeOptions,
+    TempisTimelineRangeZoomOptions,
     TempisTimelineLegendOptions,
     TempisTimelineTooltipOptions,
     TempisTimelineStyleOptions,
