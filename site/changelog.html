@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Changelog — Tempis Timeline</title>
+  <meta name="description" content="Release history for Tempis Timeline. See what's new in each version.">
+  <link rel="canonical" href="https://tempis.dev/changelog.html">
+  <meta property="og:title" content="Changelog — Tempis Timeline">
+  <meta property="og:description" content="Release history for Tempis Timeline. See what's new in each version.">
+  <meta property="og:url" content="https://tempis.dev/changelog.html">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" type="image/png" href="images/logo.png">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .changelog-entry { margin-bottom: 48px; }
+    .changelog-entry h2 { margin-bottom: 4px; }
+    .changelog-entry .meta { font-size: 0.85em; color: var(--text-muted); margin-bottom: 16px; }
+    .changelog-entry .meta a { color: var(--accent); text-decoration: none; }
+    .changelog-entry .meta a:hover { text-decoration: underline; }
+    .changelog-entry .body { line-height: 1.7; }
+    .changelog-entry .body h2 { font-size: 1.1em; margin-top: 20px; margin-bottom: 8px; }
+    .changelog-entry .body h3 { font-size: 1em; margin-top: 16px; margin-bottom: 6px; }
+    .changelog-entry .body ul { padding-left: 20px; margin: 8px 0; }
+    .changelog-entry .body li { margin-bottom: 4px; }
+    .changelog-entry .body code { background: var(--code-bg); padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+    .changelog-entry .body table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9em; }
+    .changelog-entry .body table th, .changelog-entry .body table td { padding: 6px 10px; border: 1px solid var(--border); text-align: left; }
+    .changelog-entry .body table th { background: var(--code-bg); }
+    .changelog-loading { text-align: center; padding: 60px 0; color: var(--text-muted); }
+    .changelog-error { text-align: center; padding: 60px 0; color: var(--text-muted); }
+    .changelog-error a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="Tempis">
+        Tempis
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="get-started.html">Get Started</a></li>
+        <li><a href="examples.html">Examples</a></li>
+        <li><a href="api.html">API</a></li>
+        <li><a href="pricing.html">Pricing</a></li>
+      </ul>
+      <a href="https://github.com/tempis-dev/tempis" class="nav-github" aria-label="GitHub">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+      </a>
+      <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.mobile-menu').classList.add('open');document.querySelector('.mobile-menu-overlay').classList.add('active');">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </nav>
+  <div class="mobile-menu-overlay" onclick="document.querySelector('.mobile-menu').classList.remove('open');this.classList.remove('active');"></div>
+  <div class="mobile-menu">
+    <button class="mobile-menu-close" aria-label="Close menu" onclick="this.parentElement.classList.remove('open');document.querySelector('.mobile-menu-overlay').classList.remove('active');">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <a href="index.html">Home</a>
+    <a href="get-started.html">Get Started</a>
+    <a href="examples.html">Examples</a>
+    <a href="api.html">API</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="https://github.com/tempis-dev/tempis" class="mobile-menu-github" aria-label="GitHub"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
+  </div>
+
+  <div class="page-wrapper">
+    <h1>Changelog</h1>
+    <p>Release history pulled from <a href="https://github.com/tempis-dev/tempis/releases" target="_blank" rel="noopener">GitHub Releases</a>.</p>
+
+    <div id="changelog-content">
+      <div class="changelog-loading">Loading releases...</div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Tempis Timeline is source-available. Free for non-commercial use. <a href="pricing.html">Commercial licence</a> required for business use.</p><p style="margin-top: 8px; font-size: 0.85em; opacity: 0.6;"><a href="terms.html">Terms</a> &middot; <a href="privacy.html">Privacy</a></p>
+  </footer>
+
+  <script>
+    async function loadChangelog() {
+      const container = document.getElementById('changelog-content');
+
+      try {
+        const response = await fetch('https://api.github.com/repos/tempis-dev/tempis/releases', {
+          headers: { 'Accept': 'application/vnd.github.v3+json' }
+        });
+
+        if (!response.ok) throw new Error(`GitHub API returned ${response.status}`);
+
+        const releases = await response.json();
+
+        if (releases.length === 0) {
+          container.innerHTML = '<div class="changelog-error">No releases found yet.</div>';
+          return;
+        }
+
+        container.innerHTML = releases.map(release => {
+          const date = new Date(release.published_at).toLocaleDateString('en-GB', {
+            day: 'numeric', month: 'long', year: 'numeric'
+          });
+          const body = markdownToHtml(release.body || '');
+          const name = release.name || release.tag_name;
+
+          return `
+            <div class="changelog-entry">
+              <h2>${escapeHtml(name)}</h2>
+              <div class="meta">${date} &middot; <a href="${release.html_url}" target="_blank" rel="noopener">View on GitHub</a></div>
+              <div class="body">${body}</div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        container.innerHTML = `
+          <div class="changelog-error">
+            <p>Could not load releases. View them directly on <a href="https://github.com/tempis-dev/tempis/releases" target="_blank" rel="noopener">GitHub</a>.</p>
+          </div>
+        `;
+      }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function markdownToHtml(md) {
+      if (!md) return '';
+      let html = escapeHtml(md);
+
+      // Headers
+      html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+      html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+      // Bold
+      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      // Inline code
+      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+      // Links
+      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+      // Tables — must be processed before paragraphs
+      html = html.replace(/((?:^\|.+\|\s*$\n?){2,})/gm, (tableBlock) => {
+        const rows = tableBlock.trim().split('\n').filter(r => r.trim());
+        if (rows.length < 2) return tableBlock;
+        let tableHtml = '<table>';
+        rows.forEach((row, i) => {
+          const cells = row.split('|').filter(c => c.trim() !== '');
+          // Skip separator row (e.g. |---|---|)
+          if (cells.every(c => /^\s*[-:]+\s*$/.test(c))) return;
+          const tag = i === 0 ? 'th' : 'td';
+          tableHtml += '<tr>' + cells.map(c => `<${tag}>${c.trim()}</${tag}>`).join('') + '</tr>';
+        });
+        tableHtml += '</table>';
+        return tableHtml;
+      });
+
+      // Unordered list items
+      html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+      html = html.replace(/((<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>');
+
+      // Paragraphs — split on double newlines, wrap remaining text blocks
+      html = html.split('\n\n').map(block => {
+        block = block.trim();
+        if (!block) return '';
+        if (block.startsWith('<h') || block.startsWith('<ul') || block.startsWith('<table')) return block;
+        return '<p>' + block.replace(/\n/g, '<br>') + '</p>';
+      }).join('');
+
+      return html;
+    }
+
+    loadChangelog();
+  </script>
+</body>
+</html>
