@@ -376,6 +376,9 @@ export interface TempisTimelineRangeZoomOptions {
 
     /** The touch pinch zoom sensitivity multiplier. Higher values = faster zoom. Defaults to 1.0. */
     pinchSensitivity?: number;
+
+    /** Whether a modifier key (Ctrl or Cmd) must be held to zoom with the mouse wheel. Defaults to `false`. */
+    requireModifier?: boolean;
 }
 
 export type TempisTimelineLegendPosition = "top" | "bottom" | "none";

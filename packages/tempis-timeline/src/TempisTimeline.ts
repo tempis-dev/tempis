@@ -937,13 +937,25 @@ export class TempisTimeline {
             // Prevent default scrolling behavior, we want the timeline to handle it instead.
             event.preventDefault();
 
-            // Get wheel sensitivity from options (default 1.0).
-            const wheelSensitivity = this._options.range?.zoom?.wheelSensitivity ?? 1.0;
+            // Determine whether this scroll event should zoom or vertically scroll.
+            // When requireModifier is true, plain scroll = vertical scroll, Ctrl/Cmd + scroll = zoom.
+            // When requireModifier is false (default), plain scroll = zoom, Ctrl/Cmd + scroll = vertical scroll.
+            const hasModifier = event.ctrlKey || event.metaKey;
+            const requireModifier = this._options.range?.zoom?.requireModifier ?? false;
+            const shouldZoom = requireModifier ? hasModifier : !hasModifier;
 
-            // Zoom the range view based on the wheel delta and the mouse position.
-            this._rangeView.zoomRange(event.deltaY, getMouseOrPointerPosition(event).x, wheelSensitivity);
+            // So are we zooming or scrolling vertically?
+            if (shouldZoom) {
+                // Get wheel sensitivity from options (default 1.0).
+                const wheelSensitivity = this._options.range?.zoom?.wheelSensitivity ?? 1.0;
 
-            // We will want to redraw the timeline after zooming.
+                // Zoom the range view based on the wheel delta and the mouse position.
+                this._rangeView.zoomRange(event.deltaY, getMouseOrPointerPosition(event).x, wheelSensitivity);
+            } else {
+                // Scroll the data view vertically.
+                this._dataView.scrollByYMovement(-event.deltaY);
+            }
+
             this._draw();
         };
         this._canvas.addEventListener("wheel", this._eventHandlers.wheel);

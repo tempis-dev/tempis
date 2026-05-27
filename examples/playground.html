@@ -548,9 +548,29 @@
     </div>
     
     <div class="control-group">
+      <label>Range Min Date</label>
+      <input type="date" id="rangeMin" value="" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px;font-family:inherit;">
+    </div>
+    
+    <div class="control-group">
+      <label>Range Max Date</label>
+      <input type="date" id="rangeMax" value="" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px;font-family:inherit;">
+    </div>
+    
+    <div class="divider"></div>
+    
+    <h3>Zoom</h3>
+    <div class="control-group">
       <div class="checkbox-wrapper">
         <input type="checkbox" id="zoomEnabled" checked>
-        <label for="zoomEnabled">Zoom Enabled</label>
+        <label for="zoomEnabled">Enabled</label>
+      </div>
+    </div>
+    
+    <div class="control-group">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" id="zoomRequireModifier">
+        <label for="zoomRequireModifier">Require Ctrl/Cmd</label>
       </div>
     </div>
     
@@ -565,7 +585,7 @@
     </div>
     
     <div class="control-group">
-      <label>Zoom Min</label>
+      <label>Min</label>
       <div style="display:flex;gap:6px;">
         <input type="number" id="zoomMinValue" value="" min="1" placeholder="—" style="flex:1;">
         <select id="zoomMinUnit" style="width:auto;">
@@ -578,7 +598,7 @@
     </div>
     
     <div class="control-group">
-      <label>Zoom Max</label>
+      <label>Max</label>
       <div style="display:flex;gap:6px;">
         <input type="number" id="zoomMaxValue" value="" min="1" placeholder="—" style="flex:1;">
         <select id="zoomMaxUnit" style="width:auto;">
@@ -588,16 +608,6 @@
           <option value="2592000000">Months</option>
         </select>
       </div>
-    </div>
-    
-    <div class="control-group">
-      <label>Range Min Date</label>
-      <input type="date" id="rangeMin" value="" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px;font-family:inherit;">
-    </div>
-    
-    <div class="control-group">
-      <label>Range Max Date</label>
-      <input type="date" id="rangeMax" value="" style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:4px;font-size:13px;font-family:inherit;">
     </div>
     
     <div class="divider"></div>
@@ -933,6 +943,7 @@
         max: document.getElementById('rangeMax').value || undefined,
         zoom: {
           enabled: document.getElementById('zoomEnabled').checked,
+          requireModifier: document.getElementById('zoomRequireModifier').checked,
           wheelSensitivity: parseFloat(document.getElementById('wheelSensitivity').value),
           pinchSensitivity: parseFloat(document.getElementById('pinchSensitivity').value),
           min: document.getElementById('zoomMinValue').value
