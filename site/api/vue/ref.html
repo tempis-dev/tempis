@@ -1,0 +1,49 @@
+<h1>Template Ref API</h1>
+<p class="subtitle">Access imperative methods on the timeline instance through a template ref.</p>
+
+<h2>Usage</h2>
+<pre><code class="language-typescript">&lt;script setup lang="ts"&gt;
+import { ref } from 'vue'
+import { TempisTimeline, type TempisTimelineExposed } from '@tempis/vue'
+
+const timelineRef = ref&lt;TempisTimelineExposed | null&gt;(null)
+
+function focusAll() {
+  timelineRef.value?.focus({ animate: true, duration: 400 })
+}
+
+function exportImage() {
+  timelineRef.value?.toImage({ format: 'png', dpr: 2 }).then(blob =&gt; {
+    const url = URL.createObjectURL(blob)
+    window.open(url)
+  })
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;TempisTimeline ref="timelineRef" :items="items" /&gt;
+  &lt;button @click="focusAll"&gt;Focus All&lt;/button&gt;
+  &lt;button @click="exportImage"&gt;Export&lt;/button&gt;
+&lt;/template&gt;</code></pre>
+
+<h2>Exposed Methods</h2>
+<table>
+  <thead><tr><th>Method</th><th>Signature</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>focus</code></td><td><code>(options?: FocusOptions) =&gt; void</code></td><td>Focus on a specific item, date, or the full range.</td></tr>
+    <tr><td><code>getRange</code></td><td><code>() =&gt; { start: Date, end: Date }</code></td><td>Get the current visible range.</td></tr>
+    <tr><td><code>setItems</code></td><td><code>(items: TempisTimelineItem[]) =&gt; void</code></td><td>Set items and redraw.</td></tr>
+    <tr><td><code>getItems</code></td><td><code>() =&gt; TempisTimelineItem[]</code></td><td>Get current items.</td></tr>
+    <tr><td><code>setCategories</code></td><td><code>(categories: TempisTimelineCategory[]) =&gt; void</code></td><td>Set categories and redraw.</td></tr>
+    <tr><td><code>getCategories</code></td><td><code>() =&gt; TempisTimelineCategory[]</code></td><td>Get current categories.</td></tr>
+    <tr><td><code>setBands</code></td><td><code>(bands: TempisTimelineBand[]) =&gt; void</code></td><td>Set bands and redraw.</td></tr>
+    <tr><td><code>setDependencies</code></td><td><code>(deps: TempisTimelineDependency[]) =&gt; void</code></td><td>Set dependencies and redraw.</td></tr>
+    <tr><td><code>setSelection</code></td><td><code>(ids: (string | number)[]) =&gt; void</code></td><td>Programmatically select items.</td></tr>
+    <tr><td><code>getSelection</code></td><td><code>() =&gt; (string | number)[]</code></td><td>Get selected item IDs.</td></tr>
+    <tr><td><code>clearSelection</code></td><td><code>() =&gt; void</code></td><td>Deselect all and redraw.</td></tr>
+    <tr><td><code>toImage</code></td><td><code>(options?: ImageGenerationOptions) =&gt; Promise&lt;Blob&gt;</code></td><td>Export timeline as an image.</td></tr>
+    <tr><td><code>redraw</code></td><td><code>() =&gt; void</code></td><td>Force a redraw.</td></tr>
+    <tr><td><code>getInstance</code></td><td><code>() =&gt; CoreTimeline | null</code></td><td>Access the underlying core instance.</td></tr>
+    <tr><td><code>getCanvas</code></td><td><code>() =&gt; HTMLCanvasElement | null</code></td><td>Access the canvas element.</td></tr>
+  </tbody>
+</table>

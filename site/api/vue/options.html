@@ -1,0 +1,42 @@
+<h1>Options</h1>
+<p class="subtitle">The <code>options</code> prop controls structural timeline configuration.</p>
+
+<h2>TempisTimelineConfig</h2>
+<p>Changes to the <code>options</code> prop trigger a full instance destroy and recreate. This ensures the timeline is always in sync with the configuration, but means frequent changes here are more expensive than updating reactive data props.</p>
+
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>responsive</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Resize canvas to match parent dimensions.</td></tr>
+    <tr><td><code>verticalFill</code></td><td><code>TempisTimelineVerticalFillMode</code></td><td><code>"scroll"</code></td><td>Vertical fill behaviour.</td></tr>
+    <tr><td><code>rtl</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Right-to-left layout.</td></tr>
+    <tr><td><code>stackMode</code></td><td><code>TempisTimelineStackMode</code></td><td><code>"compact"</code></td><td>Item stacking strategy.</td></tr>
+    <tr><td><code>selection</code></td><td><code>TempisTimelineItemSelectionMode</code></td><td><code>"none"</code></td><td>Selection mode.</td></tr>
+    <tr><td><code>range</code></td><td><code>TempisTimelineRangeOptions</code></td><td>—</td><td>Range configuration.</td></tr>
+    <tr><td><code>legend</code></td><td><code>TempisTimelineLegendOptions</code></td><td>—</td><td>Legend configuration.</td></tr>
+    <tr><td><code>tooltip</code></td><td><code>TempisTimelineTooltipOptions</code></td><td>—</td><td>Tooltip configuration.</td></tr>
+    <tr><td><code>style</code></td><td><code>TempisTimelineStyleOptions</code></td><td>—</td><td>Style overrides.</td></tr>
+    <tr><td><code>scrollbar</code></td><td><code>TempisTimelineScrollbarOptions</code></td><td>—</td><td>Scrollbar options.</td></tr>
+    <tr><td><code>grouping</code></td><td><code>TempisTimelineGroupingOptions</code></td><td>—</td><td>Grouping options.</td></tr>
+  </tbody>
+</table>
+
+<h2>Example</h2>
+<pre><code class="language-typescript">&lt;TempisTimeline
+  :items="items"
+  :options="{
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    selection: 'multi',
+    stackMode: 'compact',
+    range: {
+      start: '2026-01-01',
+      end: '2026-06-01',
+      position: 'bottom',
+      zoom: { enabled: true, min: 86400000, max: 31536000000 }
+    },
+    legend: { position: 'bottom', alignment: 'center' },
+    tooltip: { enabled: true, delay: 300 },
+    style: { item: { borderRadius: 6, fontColor: '#fff' } }
+  }"
+/&gt;</code></pre>

@@ -1,0 +1,40 @@
+<h1>Getting Started (Vue)</h1>
+<p class="subtitle">Install the Vue 3 wrapper and render your first timeline component.</p>
+
+<h2>Install</h2>
+<div class="install-box" style="margin-bottom: 12px;">
+  <span class="prompt">$</span> npm install <span style="color: #42b883; font-weight: 600;">@tempis/vue</span> <span style="color: #ff0071; font-weight: 600;">@tempis/timeline</span>
+</div>
+<p><code>@tempis/timeline</code> is a peer dependency of <code>@tempis/vue</code> and must be installed alongside it.</p>
+
+<h2>What's Included</h2>
+<p>The <code>@tempis/vue</code> package provides:</p>
+<ul>
+  <li>The <code>&lt;TempisTimeline&gt;</code> component — a Vue 3 wrapper around the core library.</li>
+  <li>The <code>TempisTimelineExposed</code> type — for accessing imperative methods via a template ref.</li>
+  <li>Re-exports of all core types (<code>TempisTimelineItem</code>, <code>TempisTimelineCategory</code>, etc.) so you don't need to import from <code>@tempis/timeline</code> directly.</li>
+</ul>
+
+<div class="note">The Vue component handles <code>destroy()</code> automatically on unmount — you don't need to manage cleanup.</div>
+
+<h2>Minimal Example</h2>
+<pre><code class="language-typescript">&lt;script setup lang="ts"&gt;
+import { TempisTimeline } from '@tempis/vue'
+
+const items = [
+  { id: 1, label: 'Item 1', start: '2026-01-05', end: '2026-01-15', grouping: 'Group 1' },
+  { id: 2, label: 'Item 2', start: '2026-01-12', end: '2026-01-28', grouping: 'Group 1' },
+  { id: 3, label: 'Event 1', start: '2026-01-30', grouping: 'Group 1' },
+  { id: 4, label: 'Item 3', start: '2026-01-08', end: '2026-01-25', grouping: 'Group 2' },
+]
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;TempisTimeline
+    :items="items"
+    :options="{ responsive: true, range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' } }"
+    :height="400"
+  /&gt;
+&lt;/template&gt;</code></pre>
+
+<div class="note">When using <code>responsive: true</code>, the component's wrapper must be inside a container with explicit dimensions. The timeline resizes to fill its parent — if the parent has no width or height, the canvas will collapse to zero.</div>

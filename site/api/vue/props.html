@@ -1,0 +1,100 @@
+<h1>Component Props</h1>
+<p class="subtitle">All props accepted by the <code>&lt;TempisTimeline&gt;</code> Vue component.</p>
+
+<h2>Props</h2>
+<table>
+  <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>items</code></td><td><code>TempisTimelineItem[]</code></td><td>required</td><td>Timeline items to display.</td></tr>
+    <tr><td><code>categories</code></td><td><code>TempisTimelineCategory[]</code></td><td>—</td><td>Item categories.</td></tr>
+    <tr><td><code>bands</code></td><td><code>TempisTimelineBand[]</code></td><td>—</td><td>Timeline bands.</td></tr>
+    <tr><td><code>dependencies</code></td><td><code>TempisTimelineDependency[]</code></td><td>—</td><td>Item dependency arrows.</td></tr>
+    <tr><td><code>selection</code></td><td><code>(string | number)[]</code></td><td>—</td><td>Selected item IDs (<code>v-model:selection</code>). Enables controlled selection when provided.</td></tr>
+    <tr><td><code>options</code></td><td><code>TempisTimelineConfig</code></td><td><code>{}</code></td><td>Configuration options (see <a href="#vue/options">Options</a>).</td></tr>
+    <tr><td><code>width</code></td><td><code>string | number</code></td><td><code>"100%"</code></td><td>Canvas width.</td></tr>
+    <tr><td><code>height</code></td><td><code>string | number</code></td><td><code>300</code></td><td>Canvas height.</td></tr>
+    <tr><td><code>wrapperClass</code></td><td><code>string</code></td><td>—</td><td>CSS class for the wrapper <code>&lt;div&gt;</code>.</td></tr>
+    <tr><td><code>wrapperStyle</code></td><td><code>CSSProperties</code></td><td>—</td><td>Inline styles for the wrapper <code>&lt;div&gt;</code>.</td></tr>
+  </tbody>
+</table>
+
+<h2>Events</h2>
+<table>
+  <thead><tr><th>Event</th><th>Payload</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>item-click</code></td><td><code>id: string | number</code></td><td>Item clicked.</td></tr>
+    <tr><td><code>item-double-click</code></td><td><code>id: string | number</code></td><td>Item double-clicked.</td></tr>
+    <tr><td><code>item-context-click</code></td><td><code>id: string | number, position: { x, y }</code></td><td>Item right-clicked (context menu).</td></tr>
+    <tr><td><code>item-hover</code></td><td><code>id: string | number | null</code></td><td>Pointer enters an item or leaves all items (<code>null</code>).</td></tr>
+    <tr><td><code>update:selection</code></td><td><code>(string | number)[]</code></td><td>Selection changed. Emitted only in controlled mode. Use with <code>v-model:selection</code>.</td></tr>
+    <tr><td><code>range-change</code></td><td><code>start: Date, end: Date</code></td><td>Visible range changed.</td></tr>
+    <tr><td><code>group-toggle</code></td><td><code>group: string, collapsed: boolean</code></td><td>A group header was clicked to collapse or expand.</td></tr>
+  </tbody>
+</table>
+
+<h2>Selection Modes</h2>
+<p>Selection behaviour depends on two things: the <code>selection</code> mode in options (<code>"none"</code>, <code>"single"</code>, or <code>"multi"</code>) and whether you bind <code>v-model:selection</code>.</p>
+
+<h3>Uncontrolled (default)</h3>
+<p>Don't pass the <code>selection</code> prop. The timeline manages selection state internally — items highlight immediately on click.</p>
+<pre><code class="language-typescript">&lt;TempisTimeline
+  :items="items"
+  :options="{ selection: 'multi' }"
+/&gt;</code></pre>
+
+<h3>Controlled (v-model)</h3>
+<p>Bind <code>v-model:selection</code> to own the selection state. The timeline will not update visually until you update the bound ref. This lets you validate, filter, or transform selection changes before applying them.</p>
+<pre><code class="language-typescript">&lt;script setup lang="ts"&gt;
+import { ref } from 'vue'
+import { TempisTimeline } from '@tempis/vue'
+
+const selectedIds = ref&lt;(string | number)[]&gt;([])
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;p&gt;Selected: {{ selectedIds }}&lt;/p&gt;
+  &lt;button @click="selectedIds = []"&gt;Clear&lt;/button&gt;
+  &lt;TempisTimeline
+    v-model:selection="selectedIds"
+    :items="items"
+    :options="{ selection: 'multi' }"
+  /&gt;
+&lt;/template&gt;</code></pre>
+
+<h2>Reactive vs Structural</h2>
+<p><code>items</code>, <code>categories</code>, <code>bands</code>, <code>dependencies</code>, and <code>selection</code> are reactive — changes are synced to the existing instance via <code>watch</code> without recreating it. The <code>options</code> prop is structural — when its serialised value changes, the entire timeline instance is destroyed and recreated.</p>
+
+<h2>Example</h2>
+<pre><code class="language-typescript">&lt;script setup lang="ts"&gt;
+import { ref } from 'vue'
+import { TempisTimeline, type TempisTimelineItem } from '@tempis/vue'
+
+const items = ref&lt;TempisTimelineItem[]&gt;([
+  { id: 1, label: 'Item 1', start: '2026-03-01', end: '2026-03-15', category: 'cat-a' },
+  { id: 2, label: 'Item 2', start: '2026-03-10', end: '2026-03-25', category: 'cat-b' },
+])
+
+const categories = [
+  { name: 'cat-a', label: 'Category A', style: { backgroundColor: '#6366f1' } },
+  { name: 'cat-b', label: 'Category B', style: { backgroundColor: '#10b981' } },
+]
+
+function onItemClick(id: string | number) {
+  console.log('Clicked:', id)
+}
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;TempisTimeline
+    :items="items"
+    :categories="categories"
+    :options="{
+      responsive: true,
+      selection: 'single',
+      legend: { position: 'top' },
+      range: { start: '2026-02-25', end: '2026-04-01', position: 'bottom' }
+    }"
+    :height="350"
+    @item-click="onItemClick"
+  /&gt;
+&lt;/template&gt;</code></pre>
