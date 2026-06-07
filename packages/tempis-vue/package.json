@@ -1,0 +1,65 @@
+{
+  "name": "@tempis/vue",
+  "version": "1.0.0",
+  "description": "Vue 3 wrapper for the Tempis Timeline canvas library",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "build:esm": "esbuild ./src/index.ts --bundle --sourcemap --format=esm --external:vue --external:@tempis/timeline --outfile=dist/index.esm.js",
+    "build:cjs": "esbuild ./src/index.ts --bundle --sourcemap --format=cjs --external:vue --external:@tempis/timeline --outfile=dist/index.js",
+    "build:all": "npm run build && npm run build:esm && npm run build:cjs",
+    "prepublishOnly": "npm run build:all",
+    "storybook": "storybook dev -p 6007",
+    "build-storybook": "storybook build"
+  },
+  "keywords": [
+    "tempis",
+    "timeline",
+    "vue",
+    "vue3",
+    "canvas",
+    "chart",
+    "gantt",
+    "visualization",
+    "typescript"
+  ],
+  "author": "Nikolas Howard",
+  "license": "SEE LICENSE IN LICENSE",
+  "homepage": "https://tempis.dev",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tempis-dev/tempis"
+  },
+  "bugs": {
+    "url": "https://github.com/tempis-dev/tempis/issues"
+  },
+  "sideEffects": false,
+  "peerDependencies": {
+    "@tempis/timeline": "^1.0.0",
+    "vue": ">=3.3.0"
+  },
+  "devDependencies": {
+    "@tempis/timeline": "*",
+    "@storybook/addon-essentials": "^8.6.18",
+    "@storybook/vue3": "^8.6.18",
+    "@storybook/vue3-vite": "^8.6.18",
+    "@storybook/test": "^8.6.18",
+    "esbuild": "^0.15.18",
+    "storybook": "^8.6.18",
+    "typescript": "^5.7.3",
+    "vue": "^3.5.0"
+  }
+}
