@@ -187,11 +187,28 @@ nav .nav-github:hover {
   position: relative;
 }
 
-.hero h1 span {
+.hero h1 span:not(.typewriter):not(.typewriter-cursor) {
   background: linear-gradient(135deg, var(--primary) 0%, #ff6b9d 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.typewriter {
+  background: none;
+  -webkit-text-fill-color: var(--text-primary);
+}
+
+.typewriter-cursor {
+  background: none;
+  -webkit-text-fill-color: var(--text-primary);
+  animation: blink 0.7s infinite;
+  font-weight: 300;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
 }
 
 .hero p {
@@ -208,6 +225,19 @@ nav .nav-github:hover {
   gap: 16px;
   justify-content: center;
   position: relative;
+}
+
+.hero-stars {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.star-count {
+  background: rgba(255,255,255,0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  margin-left: 4px;
 }
 
 .btn {
