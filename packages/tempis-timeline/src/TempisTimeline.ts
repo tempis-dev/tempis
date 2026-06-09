@@ -142,8 +142,10 @@ export class TempisTimeline {
         this._canvas = this._getCanvas(context);
         this._font = new TimelineFont(this._options.style?.font);
 
-        // Apply accessibility attributes to the canvas.
-        this._applyCanvasAccessibilityAttributes();
+        // Apply accessibility attributes to the canvas (skip in headless mode).
+        if (!this._options.headless) {
+            this._applyCanvasAccessibilityAttributes();
+        }
 
         this._dataSet = new TimelineDataSet(this._options);
         this._dataView = new TimelineDataView(
@@ -191,20 +193,20 @@ export class TempisTimeline {
         // Create the timeline bands.
         this._bands = (this._options.bands ?? []).map((definition) => new TimelineBand(definition));
 
-        // Do our initial canvas resize.
-        this._resizeCanvas();
+        if (!this._options.headless) {
+            // Do our initial canvas resize.
+            this._resizeCanvas();
 
-        // Is our timeline going to be responsive?
-        if (this._isResponsive) {
-            // We should set up a resize observer to keep our canvas dimensions inline with that of its parent element if the timeline is responsive.
-            this._createCanvasContainerResizeObserver();
-        } else {
-            // We still need to apply our DPR scaling to our canvas if we aren't rendering responsively.
-            this._applyCanvasDPRScaling();
+            // Is our timeline going to be responsive?
+            if (this._isResponsive) {
+                this._createCanvasContainerResizeObserver();
+            } else {
+                this._applyCanvasDPRScaling();
+            }
+
+            // Create the canvas event handlers.
+            this._createCanvasEventHandlers();
         }
-
-        // Create the canvas event handlers.
-        this._createCanvasEventHandlers();
 
         // We should register a callback to redraw the timeline every time our dataset is updated.
         this._dataSet.registerUpdateCallback(() => this._draw());
@@ -432,7 +434,9 @@ export class TempisTimeline {
      */
     public redraw(): void {
         // Our canvas size or window scaling may have changed, so we should reapply the canvas DPR scaling.
-        this._applyCanvasDPRScaling();
+        if (!this._options.headless) {
+            this._applyCanvasDPRScaling();
+        }
 
         // Our canvas size or window scaling may have changed, we will need to recalculate the ticks for our range.
         this._rangeView.calculateMinorAndMajorUnitTicks();
@@ -569,8 +573,6 @@ export class TempisTimeline {
     private _getCanvas(context: string | HTMLCanvasElement): HTMLCanvasElement {
         if (!context) {
             throw new Error(`no canvas defined`);
-        } else if (context instanceof HTMLCanvasElement) {
-            return context;
         } else if (typeof context === "string") {
             // The context value is a string, so we can assume that it is a selector for our canvas element.
             const targetElement = document.querySelector(context);
@@ -580,9 +582,17 @@ export class TempisTimeline {
             }
 
             return targetElement;
+        } else if (typeof context === "object") {
+            // In headless mode, accept any canvas-like object (e.g. @napi-rs/canvas).
+            // In normal mode, verify it's a real HTMLCanvasElement.
+            if (!this._options.headless && !(context instanceof HTMLCanvasElement)) {
+                throw new Error("expected an HTMLCanvasElement instance");
+            }
+
+            return context as HTMLCanvasElement;
         }
 
-        throw new Error("whatcha doing this isn't a valid value!");
+        throw new Error("invalid canvas context value");
     }
 
     /**
@@ -1147,7 +1157,7 @@ export class TempisTimeline {
 
         // In "grow-canvas" mode, we need to calculate the required height BEFORE drawing
         // to avoid drawing twice (once to measure, once after resizing).
-        if (this._verticalFillMode === "grow-canvas") {
+        if (!this._options.headless && this._verticalFillMode === "grow-canvas") {
             const requiredHeight = this._calculateRequiredCanvasHeight(context);
 
             // Only resize and reapply DPR scaling if the height actually changed.

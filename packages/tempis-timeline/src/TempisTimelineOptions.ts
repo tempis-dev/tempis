@@ -4,8 +4,18 @@ import { SelectionChangeEvent } from "./Event";
  * The options passed when creating an instance of TempisTimeline.
  */
 export interface TempisTimelineOptions {
-    /** Whether the canvas should resize to match the dimensions of its parent container. */
+    /** Whether the canvas should resize to match the dimensions of its parent container. Defaults to `false`. */
     responsive?: boolean;
+
+    /**
+     * Whether the timeline should run in headless mode. Defaults to `false`.
+     * When `true`, event listeners, resize observers, tooltips, and accessibility attributes are not created.
+     * Only the data model and draw pipeline are initialised. Used for server-side rendering or static image generation.
+     */
+    headless?: boolean;
+
+    /** Whether the timeline and any default tooltips should be rendered right-to-left. Defaults to `false`. */
+    rtl?: boolean;
 
     /** The timeline accessibility options. */
     accessibility?: TempisTimelineAccessibilityOptions;
@@ -17,9 +27,6 @@ export interface TempisTimelineOptions {
      * - `"grow-canvas"`– The timeline grows the canvas element itself to match the required content height.
      */
     verticalFill?: TempisTimelineVerticalFillMode;
-
-    /** Whether the timeline and any default tooltips should be rendered right-to-left. */
-    rtl?: boolean;
 
     /** The timeline range options. */
     range?: TempisTimelineRangeOptions;
