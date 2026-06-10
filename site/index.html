@@ -19,6 +19,48 @@
   <script src="lib/tempis_timeline.js"></script>
 </head>
 <body>
+  <div class="bg-bars" id="bgBars"></div>
+  <script>
+  (function() {
+    const container = document.getElementById('bgBars');
+    const colors = ['#6366f1', '#ff0071', '#f59e0b', '#10b981', '#ec4899', '#2196F3'];
+    const barCount = 25;
+    const bars = [];
+
+    for (let i = 0; i < barCount; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'bg-bar';
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const width = 250 + Math.random() * 400;
+      const top = (i / barCount) * 100 + (Math.random() * (100 / barCount) * 0.5);
+      const speed = 0.2 + Math.random() * 0.4;
+      const direction = Math.random() > 0.5 ? 1 : -1;
+      const startX = Math.random() * window.innerWidth;
+
+      bar.style.width = width + 'px';
+      bar.style.top = top + '%';
+      bar.style.left = '0px';
+      bar.style.background = color;
+      bar.style.transform = 'translateX(' + startX + 'px)';
+      bar.textContent = '*'.repeat(3 + Math.floor(Math.random() * 10));
+
+      container.appendChild(bar);
+      bars.push({ el: bar, x: startX, speed: speed, direction: direction, width: width });
+    }
+
+    function animate() {
+      const vw = window.innerWidth;
+      for (const b of bars) {
+        b.x += b.speed * b.direction;
+        if (b.direction === 1 && b.x > vw) b.x = -b.width;
+        if (b.direction === -1 && b.x < -b.width) b.x = vw;
+        b.el.style.transform = 'translateX(' + b.x + 'px)';
+      }
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+  })();
+  </script>
   <nav>
     <div class="nav-inner">
       <a href="index.html" class="logo">
