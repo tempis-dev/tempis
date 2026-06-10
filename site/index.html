@@ -24,21 +24,24 @@
   (function() {
     const container = document.getElementById('bgBars');
     const colors = ['#6366f1', '#ff0071', '#f59e0b', '#10b981', '#ec4899', '#2196F3'];
-    const barCount = 25;
+    const barHeight = 24;
+    const trackGap = 8;
+    const trackHeight = barHeight + trackGap;
+    const viewportHeight = window.innerHeight;
+    const trackCount = Math.floor(viewportHeight / trackHeight);
     const bars = [];
 
-    for (let i = 0; i < barCount; i++) {
+    for (let track = 0; track < trackCount; track++) {
       const bar = document.createElement('div');
       bar.className = 'bg-bar';
       const color = colors[Math.floor(Math.random() * colors.length)];
       const width = 250 + Math.random() * 400;
-      const top = (i / barCount) * 100 + (Math.random() * (100 / barCount) * 0.5);
       const speed = 0.2 + Math.random() * 0.4;
       const direction = Math.random() > 0.5 ? 1 : -1;
       const startX = Math.random() * window.innerWidth;
 
       bar.style.width = width + 'px';
-      bar.style.top = top + '%';
+      bar.style.top = (track * trackHeight) + 'px';
       bar.style.left = '0px';
       bar.style.background = color;
       bar.style.transform = 'translateX(' + startX + 'px)';
