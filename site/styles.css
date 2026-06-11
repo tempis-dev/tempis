@@ -68,6 +68,38 @@ body {
   overflow-x: hidden;
 }
 
+.bg-bars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  mask-image: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.3) 60%, black 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.3) 60%, black 80%);
+}
+
+.bg-bar {
+  position: absolute;
+  height: 24px;
+  border-radius: 6px;
+  opacity: 0.18;
+  will-change: transform;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 8px;
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.6);
+  overflow: hidden;
+  white-space: nowrap;
+  line-height: 24px;
+  padding-top: 3px;
+}
+
 *::-webkit-scrollbar { width: 6px; height: 6px; }
 *::-webkit-scrollbar-track { background: transparent; }
 *::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.3); border-radius: 3px; }
@@ -187,11 +219,28 @@ nav .nav-github:hover {
   position: relative;
 }
 
-.hero h1 span {
+.hero h1 span:not(.typewriter):not(.typewriter-cursor) {
   background: linear-gradient(135deg, var(--primary) 0%, #ff6b9d 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.typewriter {
+  background: none;
+  -webkit-text-fill-color: var(--text-primary);
+}
+
+.typewriter-cursor {
+  background: none;
+  -webkit-text-fill-color: var(--text-primary);
+  animation: blink 0.7s infinite;
+  font-weight: 300;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
 }
 
 .hero p {
@@ -208,6 +257,19 @@ nav .nav-github:hover {
   gap: 16px;
   justify-content: center;
   position: relative;
+}
+
+.hero-stars {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.star-count {
+  background: rgba(255,255,255,0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  margin-left: 4px;
 }
 
 .btn {
@@ -263,7 +325,10 @@ nav .nav-github:hover {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
-  box-shadow: 0 8px 32px var(--shadow-heavy);
+  box-shadow: 0 8px 32px var(--shadow-heavy), 0 0 40px 20px var(--bg);
+  background: var(--bg);
+  position: relative;
+  z-index: 1;
 }
 
 /* ─── Features grid ─── */
@@ -853,7 +918,10 @@ footer a:hover {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
-  box-shadow: 0 8px 32px var(--shadow-heavy);
+  box-shadow: 0 8px 32px var(--shadow-heavy), 0 0 40px 20px var(--bg);
+  background: var(--bg);
+  position: relative;
+  z-index: 1;
 }
 
 .showcase-demo canvas {
