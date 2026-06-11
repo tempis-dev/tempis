@@ -144,10 +144,11 @@ interface TempisTimelineRangeOptions {
   majorUnit?: { font?: TempisTimelineFont; formats?: object };
   zoom?: {
     enabled?: boolean;              // Default: true.
-    min?: number;                   // Minimum range in ms.
-    max?: number;                   // Maximum range in ms.
+    min?: number;                   // Minimum range in ms. Hard floor: 1000ms.
+    max?: number;                   // Maximum range in ms. Hard ceiling: ~10,000 years.
     wheelSensitivity?: number;      // Default: 1.0.
     pinchSensitivity?: number;      // Default: 1.0.
+    requireModifier?: boolean;      // When true, plain scroll = vertical scroll, Ctrl/Cmd + scroll = zoom. When false (default), plain scroll = zoom, Ctrl/Cmd + scroll = vertical scroll.
   };
 }
 ```
