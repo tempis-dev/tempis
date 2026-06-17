@@ -348,7 +348,7 @@ export const TempisTimeline = defineComponent({
                 "div",
                 {
                     class: props.wrapperClass,
-                    style: props.wrapperStyle,
+                    style: { width: "100%", height: "100%", ...props.wrapperStyle },
                 },
                 [
                     h("canvas", {
