@@ -434,6 +434,135 @@ nav .nav-github:hover {
   gap: 24px;
 }
 
+/* ─── Frameworks section ─── */
+.frameworks-section {
+  padding: 100px 32px;
+  text-align: center;
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.frameworks-section h2 {
+  font-size: 2.4em;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.frameworks-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1em;
+  margin-bottom: 48px;
+}
+
+.frameworks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  text-align: center;
+}
+
+.framework-card {
+  padding: 28px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 0.2s, transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.framework-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.framework-card.framework-core:hover {
+  border-color: #ff0071;
+}
+
+.framework-card.framework-core:hover h3 {
+  color: #ff0071;
+}
+
+.framework-card.framework-react:hover {
+  border-color: #61dafb;
+}
+
+.framework-card.framework-react:hover h3 {
+  color: #61dafb;
+}
+
+.framework-card.framework-vue:hover {
+  border-color: #42b883;
+}
+
+.framework-card.framework-vue:hover h3 {
+  color: #42b883;
+}
+
+.framework-card.coming-soon {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.framework-card.coming-soon:hover {
+  border-color: var(--border);
+  transform: none;
+}
+
+.framework-icon {
+  margin-bottom: 4px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-elevated);
+  border-radius: 8px;
+}
+
+.framework-icon img {
+  width: 24px;
+  height: 24px;
+}
+
+.framework-card h3 {
+  font-size: 1.1em;
+  font-weight: 700;
+  margin: 0;
+}
+
+.framework-card p {
+  font-size: 0.8em;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.framework-status {
+  font-size: 0.7em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  margin-top: 8px;
+}
+
+.framework-status.available {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.framework-status.soon {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
 /* ─── Content pages ─── */
 .page-wrapper {
   max-width: var(--max-width);
