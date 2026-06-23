@@ -514,6 +514,9 @@ export interface TempisTimelineDependencyStyle {
 
     /** The line style. Defaults to "solid". */
     lineStyle?: TempisTimelineLineStyle;
+
+    /** The opacity of the connector. Defaults to 1. */
+    opacity?: number;
 }
 
 /**
