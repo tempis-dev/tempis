@@ -26,7 +26,7 @@ export type {
     TempisTimelineDateAdapter,
     ImageGenerationOptions,
     SelectionChangeEvent,
-    FocusOptions,
+    FocusOptions
 } from "@tempis/timeline";
 
 export { AdapterRegistry } from "@tempis/timeline";

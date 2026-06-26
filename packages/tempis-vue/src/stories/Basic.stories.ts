@@ -11,8 +11,8 @@ const meta: Meta<typeof TempisTimeline> = {
         onItemDoubleClick: fn(),
         onItemContextClick: fn(),
         onItemHover: fn(),
-        onRangeChange: fn(),
-    },
+        onRangeChange: fn()
+    }
 };
 export default meta;
 
@@ -26,13 +26,13 @@ export const Default: Story = {
             { id: 2, label: "Build", start: "2026-01-12", end: "2026-01-28", grouping: "Frontend" },
             { id: 3, label: "Launch", start: "2026-01-30", grouping: "Frontend" },
             { id: 4, label: "API", start: "2026-01-08", end: "2026-01-25", grouping: "Backend" },
-            { id: 5, label: "Testing", start: "2026-01-20", end: "2026-01-29", grouping: "Backend" },
+            { id: 5, label: "Testing", start: "2026-01-20", end: "2026-01-29", grouping: "Backend" }
         ],
         options: {
             responsive: true,
-            range: { start: "2026-01-01", end: "2026-02-01", position: "bottom" },
-        },
-    },
+            range: { start: "2026-01-01", end: "2026-02-01", position: "bottom" }
+        }
+    }
 };
 
 export const SingleItem: Story = {
@@ -41,9 +41,9 @@ export const SingleItem: Story = {
         items: [{ id: 1, label: "Solo Task", start: "2026-03-10", end: "2026-03-20" }],
         options: {
             responsive: true,
-            range: { start: "2026-03-01", end: "2026-04-01", position: "bottom" },
-        },
-    },
+            range: { start: "2026-03-01", end: "2026-04-01", position: "bottom" }
+        }
+    }
 };
 
 export const PointInTimeItems: Story = {
@@ -56,13 +56,13 @@ export const PointInTimeItems: Story = {
             { id: 4, label: "GA Release", start: "2026-06-15", grouping: "Milestones" },
             { id: 5, label: "Sprint 1", start: "2026-02-01", end: "2026-03-15", grouping: "Work" },
             { id: 6, label: "Sprint 2", start: "2026-03-15", end: "2026-05-01", grouping: "Work" },
-            { id: 7, label: "Sprint 3", start: "2026-05-01", end: "2026-06-15", grouping: "Work" },
+            { id: 7, label: "Sprint 3", start: "2026-05-01", end: "2026-06-15", grouping: "Work" }
         ],
         options: {
             responsive: true,
-            range: { start: "2026-01-15", end: "2026-07-01", position: "bottom" },
-        },
-    },
+            range: { start: "2026-01-15", end: "2026-07-01", position: "bottom" }
+        }
+    }
 };
 
 export const ManyGroups: Story = {
@@ -76,12 +76,12 @@ export const ManyGroups: Story = {
             { id: 5, label: "Design", start: "2026-01-03", end: "2026-01-20", grouping: "Team Gamma" },
             { id: 6, label: "Research", start: "2026-01-12", end: "2026-02-01", grouping: "Team Gamma" },
             { id: 7, label: "QA", start: "2026-01-20", end: "2026-02-15", grouping: "Team Delta" },
-            { id: 8, label: "Docs", start: "2026-01-25", end: "2026-02-10", grouping: "Team Delta" },
+            { id: 8, label: "Docs", start: "2026-01-25", end: "2026-02-10", grouping: "Team Delta" }
         ],
         options: {
             responsive: true,
             verticalFill: "fill-canvas",
-            range: { start: "2026-01-01", end: "2026-02-20", position: "bottom" },
-        },
-    },
+            range: { start: "2026-01-01", end: "2026-02-20", position: "bottom" }
+        }
+    }
 };

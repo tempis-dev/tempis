@@ -638,7 +638,7 @@ pre code {
   background: rgba(128, 128, 128, 0.15);
   padding: 3px 8px;
   border-radius: 6px;
-  color: var(--primary);
+  color: var(--text);
   font-size: 0.9em;
 }
 

@@ -322,15 +322,13 @@
                 timeline.setItems([...allEvents]);
                 
                 // Focus on the newest event with animation
-                setTimeout(() => {
-                    timeline.focus({
-                        id: newEvent.id,
-                        animate: true,
-                        duration: 800,
-                        easing: 'easeInOutCubic',
-                        zoom: false
-                    });
-                }, 100);
+                timeline.focus({
+                    id: newEvent.id,
+                    animate: true,
+                    duration: 800,
+                    easing: 'easeOutCubic',
+                    zoom: false
+                });
                 
                 status.textContent = `Streaming (${allEvents.length} events)`;
                 status.style.background = '#e8f5e8';

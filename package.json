@@ -25,7 +25,8 @@
     "dev:site": "concurrently -n watch,serve -c blue,green \"node scripts/watch-site.js\" \"http-server dist/site -p 8081 -c-1\"",
     "serve:site": "http-server dist/site -p 8081 -c-1",
     "test": "npm run test --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present"
+    "lint": "npm run lint --workspaces --if-present",
+    "format": "npm run format --workspaces --if-present"
   },
   "devDependencies": {
     "chokidar": "^4.0.0",

@@ -992,7 +992,7 @@ export class TimelineDataView {
                     ? itemDrawPlan.xPositionEnd - fillInset - progressWidth
                     : itemDrawPlan.xPositionStart + fillInset;
                 context.fillRect(
-                    Math.max(-100, progressX),
+                    progressX,
                     scrolledYPosition + itemDrawPlan.yPositionStart + fillInset,
                     progressWidth,
                     itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - fillInset * 2

@@ -1,13 +1,4 @@
-import {
-    defineComponent,
-    ref,
-    h,
-    onMounted,
-    onUnmounted,
-    watch,
-    type PropType,
-    type CSSProperties,
-} from "vue";
+import { defineComponent, ref, h, onMounted, onUnmounted, watch, type PropType, type CSSProperties } from "vue";
 import {
     TempisTimeline as CoreTimeline,
     type TempisTimelineItem,
@@ -26,7 +17,7 @@ import {
     type TempisTimelineAccessibilityOptions,
     type TempisTimelineMinimapOptions,
     type ImageGenerationOptions,
-    type FocusOptions,
+    type FocusOptions
 } from "@tempis/timeline";
 
 /**
@@ -136,22 +127,22 @@ export const TempisTimeline = defineComponent({
         /** The timeline items. */
         items: {
             type: Array as PropType<TempisTimelineItem[]>,
-            required: true,
+            required: true
         },
         /** The timeline item categories. */
         categories: {
             type: Array as PropType<TempisTimelineCategory[]>,
-            default: undefined,
+            default: undefined
         },
         /** The timeline bands. */
         bands: {
             type: Array as PropType<TempisTimelineBand[]>,
-            default: undefined,
+            default: undefined
         },
         /** Item dependencies. */
         dependencies: {
             type: Array as PropType<TempisTimelineDependency[]>,
-            default: undefined,
+            default: undefined
         },
         /**
          * The selected item IDs (v-model:selection).
@@ -161,33 +152,33 @@ export const TempisTimeline = defineComponent({
          */
         selection: {
             type: Array as PropType<(string | number)[]>,
-            default: undefined,
+            default: undefined
         },
         /** Configuration options — changes trigger full instance recreate. */
         options: {
             type: Object as PropType<TempisTimelineConfig>,
-            default: () => ({}),
+            default: () => ({})
         },
         /** Width of the canvas. Defaults to "100%". */
         width: {
             type: [String, Number] as PropType<string | number>,
-            default: "100%",
+            default: "100%"
         },
         /** Height of the canvas. Defaults to 300. */
         height: {
             type: [String, Number] as PropType<string | number>,
-            default: 300,
+            default: 300
         },
         /** Optional CSS class for the wrapper div. */
         wrapperClass: {
             type: String,
-            default: undefined,
+            default: undefined
         },
         /** Optional inline styles for the wrapper div. */
         wrapperStyle: {
             type: Object as PropType<CSSProperties>,
-            default: undefined,
-        },
+            default: undefined
+        }
     },
 
     emits: [
@@ -204,7 +195,7 @@ export const TempisTimeline = defineComponent({
         /** Emitted when the visible range changes. */
         "rangeChange",
         /** Emitted when a group header is clicked to collapse or expand. */
-        "groupToggle",
+        "groupToggle"
     ],
 
     setup(props, { emit, expose }) {
@@ -231,7 +222,7 @@ export const TempisTimeline = defineComponent({
                         : undefined,
                     shouldShow: opts.tooltip?.shouldShow
                         ? (id) => props.options.tooltip?.shouldShow?.(id) ?? true
-                        : undefined,
+                        : undefined
                 },
                 items: props.items,
                 categories: props.categories,
@@ -243,17 +234,17 @@ export const TempisTimeline = defineComponent({
                 onItemHover: (id) => emit("itemHover", id),
                 onSelectionChange: isControlled()
                     ? (changes) => {
-                        // Compute the new selection array from the changes.
-                        const current = new Set(props.selection ?? []);
-                        changes.forEach((c) => {
-                            if (c.selected) current.add(c.id);
-                            else current.delete(c.id);
-                        });
-                        emit("update:selection", Array.from(current));
-                    }
+                          // Compute the new selection array from the changes.
+                          const current = new Set(props.selection ?? []);
+                          changes.forEach((c) => {
+                              if (c.selected) current.add(c.id);
+                              else current.delete(c.id);
+                          });
+                          emit("update:selection", Array.from(current));
+                      }
                     : undefined,
                 onRangeChange: (start, end) => emit("rangeChange", start, end),
-                onGroupToggle: (group, collapsed) => emit("groupToggle", group, collapsed),
+                onGroupToggle: (group, collapsed) => emit("groupToggle", group, collapsed)
             });
         }
 
@@ -323,7 +314,10 @@ export const TempisTimeline = defineComponent({
         // Expose imperative API via template ref.
         const exposed: TempisTimelineExposed = {
             focus: (opts) => instance?.focus(opts),
-            getRange: () => instance!.getRange(),
+            getRange: () => {
+                if (!instance) throw new Error("Timeline instance is not available.");
+                return instance.getRange();
+            },
             setItems: (i) => instance?.setItems(i),
             getItems: () => instance?.getItems() ?? [],
             setCategories: (c) => instance?.setCategories(c),
@@ -335,10 +329,13 @@ export const TempisTimeline = defineComponent({
             clearSelection: () => instance?.clearSelection(),
             setGroupCollapsed: (group, collapsed) => instance?.setGroupCollapsed(group, collapsed),
             isGroupCollapsed: (group) => instance?.isGroupCollapsed(group) ?? false,
-            toImage: (opts) => instance!.toImage(opts),
+            toImage: (opts) => {
+                if (!instance) return Promise.reject(new Error("Timeline instance is not available."));
+                return instance.toImage(opts);
+            },
             redraw: () => instance?.redraw(),
             getInstance: () => instance,
-            getCanvas: () => canvasRef.value,
+            getCanvas: () => canvasRef.value
         };
 
         expose(exposed);
@@ -348,7 +345,7 @@ export const TempisTimeline = defineComponent({
                 "div",
                 {
                     class: props.wrapperClass,
-                    style: { width: "100%", height: "100%", ...props.wrapperStyle },
+                    style: { width: "100%", height: "100%", ...props.wrapperStyle }
                 },
                 [
                     h("canvas", {
@@ -356,10 +353,10 @@ export const TempisTimeline = defineComponent({
                         style: {
                             width: typeof props.width === "number" ? `${props.width}px` : props.width,
                             height: typeof props.height === "number" ? `${props.height}px` : props.height,
-                            display: "block",
-                        },
-                    }),
+                            display: "block"
+                        }
+                    })
                 ]
             );
-    },
+    }
 });
