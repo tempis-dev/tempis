@@ -12,6 +12,6 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/index.ts", "src/TempisTimeline.ts"],
   "exclude": ["node_modules", "dist"]
 }
