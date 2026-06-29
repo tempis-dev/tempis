@@ -1,6 +1,6 @@
 {
   "name": "@tempis/react",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "React wrapper for the Tempis Timeline canvas library",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
