@@ -42,6 +42,7 @@
 🔷 **Image Export** – download as PNG, JPEG, or WebP with DPR and background colour control<br>
 🔷 **Date Adapters** – plug in Luxon, Day.js, or any library for timezone and locale support<br>
 🔷 **React Wrapper** – declarative props, reactive data, imperative ref API, automatic cleanup<br>
+🔷 **Vue Wrapper** – v-model selection, reactive props, template ref API, automatic cleanup<br>
 🔷 **Accessibility** – keyboard navigation, ARIA attributes, and automatic reduced motion support<br>
 🔷 **TypeScript-First** – full type definitions, IntelliSense, and typed callbacks out of the box
 
@@ -51,6 +52,7 @@
 |---------|-------------|
 | [`@tempis/timeline`](packages/tempis-timeline) | Core timeline library — canvas rendering, interactions, adapters |
 | [`@tempis/react`](packages/tempis-react) | React wrapper with declarative props, reactive data, and imperative ref API |
+| [`@tempis/vue`](packages/tempis-vue) | Vue 3 wrapper with v-model selection, reactive props, and template ref API |
 
 ## Quick Start
 
@@ -88,7 +90,8 @@ Or via CDN:
 tempis/
 ├── packages/
 │   ├── tempis-timeline/   Core library
-│   └── tempis-react/      React wrapper
+│   ├── tempis-react/      React wrapper
+│   └── tempis-vue/        Vue 3 wrapper
 ├── examples/              Interactive HTML demos
 ├── site/                  Documentation site
 ├── scripts/               Build tooling

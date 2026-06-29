@@ -125,6 +125,26 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://tempis.dev/api/vue/getting-started.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tempis.dev/api/vue/props.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tempis.dev/api/vue/ref.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tempis.dev/api/vue/options.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://tempis.dev/api/vue/reactive-data.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://tempis.dev/changelog.html</loc>
     <priority>0.5</priority>
   </url>
