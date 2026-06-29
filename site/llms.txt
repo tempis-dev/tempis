@@ -126,6 +126,7 @@ interface TempisTimelineDependency {
     color?: string;
     lineWidth?: number;
     lineStyle?: "solid" | "dashed" | "dotted" | "dash-dot" | "long-dash";
+    opacity?: number;                 // 0–1. Default: 1.
   };
 }
 ```

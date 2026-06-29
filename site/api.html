@@ -34,6 +34,7 @@
     }
     .api-sidebar .sidebar-heading.pink { color: #ff0071; opacity: 1; }
     .api-sidebar .sidebar-heading.blue { color: #61dafb; opacity: 1; }
+    .api-sidebar .sidebar-heading.vue { color: #42b883; opacity: 1; }
     .api-sidebar a {
       display: block; padding: 5px 12px; border-radius: 6px;
       text-decoration: none; color: var(--text-secondary);
@@ -42,6 +43,7 @@
     .api-sidebar a:hover { background: var(--hover-bg); color: var(--text); }
     .api-sidebar a.active { background: var(--primary); color: #fff; }
     .api-sidebar a.active-react { background: #61dafb; color: #fff; }
+    .api-sidebar a.active-vue { background: #42b883; color: #fff; }
     .api-content {
       flex: 1; overflow-y: auto; padding: 48px 56px 80px;
     }
@@ -105,6 +107,26 @@
     }
     .api-sheet a:hover { background: var(--hover-bg); color: var(--text); }
 
+    .api-prev-next {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    .api-prev-next-link {
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 0.9em;
+      transition: color 0.15s;
+    }
+    .api-prev-next-link:hover {
+      color: var(--text);
+    }
+    .api-prev-next-link.next {
+      margin-left: auto;
+    }
+
     @media (max-width: 768px) {
       .api-sidebar { display: none; }
       .api-content { padding: 32px 20px 80px; }
@@ -138,7 +160,7 @@
       <div class="sidebar-group">
         <div class="sidebar-heading pink"><span style="color:var(--text)">@tempis/</span>timeline</div>
         <a href="#core/getting-started">Getting Started</a>
-        <a href="#core/constructor">Constructor</a>
+        <a href="#core/constructor">Creating a Timeline</a>
         <a href="#core/items">Items</a>
         <a href="#core/categories">Categories</a>
         <a href="#core/bands">Bands</a>
@@ -166,6 +188,14 @@
         <a href="#react/props">Component Props</a>
         <a href="#react/options">Options</a>
         <a href="#react/ref">Ref API</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-heading vue"><span style="color:var(--text)">@tempis/</span>vue</div>
+        <a href="#vue/getting-started">Getting Started</a>
+        <a href="#vue/props">Props &amp; Events</a>
+        <a href="#vue/options">Options</a>
+        <a href="#vue/ref">Template Ref API</a>
+        <a href="#vue/reactive-data">Reactive Data</a>
       </div>
     </aside>
     <main class="api-content" id="api-content">
@@ -206,6 +236,12 @@
     <a href="#react/props" onclick="closeSheet()">Component Props</a>
     <a href="#react/options" onclick="closeSheet()">Options</a>
     <a href="#react/ref" onclick="closeSheet()">Ref API</a>
+    <div class="sidebar-heading vue"><span style="color:var(--text)">@tempis/</span>vue</div>
+    <a href="#vue/getting-started" onclick="closeSheet()">Getting Started</a>
+    <a href="#vue/props" onclick="closeSheet()">Props &amp; Events</a>
+    <a href="#vue/options" onclick="closeSheet()">Options</a>
+    <a href="#vue/ref" onclick="closeSheet()">Template Ref API</a>
+    <a href="#vue/reactive-data" onclick="closeSheet()">Reactive Data</a>
   </div>
   <script>
     function closeSheet() {
@@ -241,16 +277,34 @@
       });
     }
 
+    function buildPrevNext(hash) {
+      var order = Array.from(links).map(function(a) {
+        return { hash: a.getAttribute('href').slice(1), label: a.textContent.trim() };
+      });
+      var idx = order.findIndex(function(p) { return p.hash === hash; });
+      if (idx === -1) return '';
+      var prev = idx > 0 ? order[idx - 1] : null;
+      var next = idx < order.length - 1 ? order[idx + 1] : null;
+      var html = '<div class="api-prev-next">';
+      if (prev) html += '<a href="#' + prev.hash + '" class="api-prev-next-link prev">&lsaquo; ' + prev.label + '</a>';
+      else html += '<span></span>';
+      if (next) html += '<a href="#' + next.hash + '" class="api-prev-next-link next">' + next.label + ' &rsaquo;</a>';
+      else html += '<span></span>';
+      html += '</div>';
+      return html;
+    }
+
     function loadPage(hash) {
       hash = hash || 'core/getting-started';
       var isReact = hash.indexOf('react/') === 0;
+      var isVue = hash.indexOf('vue/') === 0;
       links.forEach(function(a) {
         var isMatch = a.getAttribute('href') === '#' + hash;
-        a.classList.remove('active', 'active-react');
-        if (isMatch) a.classList.add(isReact ? 'active-react' : 'active');
+        a.classList.remove('active', 'active-react', 'active-vue');
+        if (isMatch) a.classList.add(isVue ? 'active-vue' : isReact ? 'active-react' : 'active');
       });
       if (cache[hash]) {
-        contentEl.innerHTML = cache[hash];
+        contentEl.innerHTML = cache[hash] + buildPrevNext(hash);
         hljs.highlightAll();
         runScripts();
         document.querySelector('.api-content').scrollTop = 0;
@@ -260,7 +314,7 @@
         .then(function(r) { return r.ok ? r.text() : '<h1>Not found</h1><p>This page hasn\'t been written yet.</p>'; })
         .then(function(html) {
           cache[hash] = html;
-          contentEl.innerHTML = html;
+          contentEl.innerHTML = html + buildPrevNext(hash);
           hljs.highlightAll();
           runScripts();
           document.querySelector('.api-content').scrollTop = 0;

@@ -199,11 +199,36 @@ export class TimelineDataSet {
      * Updates the dataset.
      */
     public update(options: TempisTimelineOptions) {
+        // Make a note of which exsiting groups are currently collapsed.
+        const collapsedGroups = new Set(this._groupings.filter((g) => g.isCollapsed).map((g) => g.group));
+
+        // Preserve selection state for uncontrolled selection mode (when no onSelectionChange callback is provided).
+        // In controlled mode, the consumer maintains selection via the `selected` property on item definitions.
+        const selectedIds = !options.onSelectionChange ? new Set(this.getSelectedItems().map((item) => item.id)) : null;
+
         // We first need to create our categories.
         this._createCategories(options);
 
         // Then we need to create our actual groupings and item models.
         this._createGroupings(options);
+
+        // Reapply collapsed state to groups that still exist.
+        for (const grouping of this._groupings) {
+            if (collapsedGroups.has(grouping.group)) {
+                grouping.isCollapsed = true;
+            }
+        }
+
+        // Reapply selection state in uncontrolled mode.
+        if (selectedIds && selectedIds.size > 0) {
+            for (const grouping of this._groupings) {
+                for (const item of grouping.items) {
+                    if (selectedIds.has(item.id)) {
+                        item.isSelected = true;
+                    }
+                }
+            }
+        }
 
         // We have updated the dataset, so any registered update callbacks should be invoked.
         this._invokeUpdateCallbacks();

@@ -992,7 +992,7 @@ export class TimelineDataView {
                     ? itemDrawPlan.xPositionEnd - fillInset - progressWidth
                     : itemDrawPlan.xPositionStart + fillInset;
                 context.fillRect(
-                    Math.max(-100, progressX),
+                    progressX,
                     scrolledYPosition + itemDrawPlan.yPositionStart + fillInset,
                     progressWidth,
                     itemDrawPlan.yPositionEnd - itemDrawPlan.yPositionStart - fillInset * 2
@@ -1182,8 +1182,10 @@ export class TimelineDataView {
 
             // Apply per-dependency style or fall back to defaults.
             const depColor = dependency.style?.color ?? this._gridColor;
+            const depOpacity = dependency.style?.opacity ?? 1;
             context.strokeStyle = depColor;
             context.fillStyle = depColor;
+            context.globalAlpha = depOpacity;
             context.lineWidth = dependency.style?.lineWidth ?? 1.5;
             this._applyLineStyle(context, dependency.style?.lineStyle ?? "solid", dependency.style?.lineWidth ?? 1.5);
 
@@ -1275,6 +1277,9 @@ export class TimelineDataView {
             context.lineTo(tx - ARROW_SIZE * dir, ty + ARROW_SIZE / 2);
             context.closePath();
             context.fill();
+
+            // Reset opacity after each dependency.
+            context.globalAlpha = 1;
         }
     }
 

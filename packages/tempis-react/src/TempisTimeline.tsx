@@ -354,7 +354,10 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
     // We need to expose the imperative methods for the instance ref.
     useImperativeHandle(ref, () => ({
         focus: (opts) => instanceRef.current?.focus(opts),
-        getRange: () => instanceRef.current!.getRange(),
+        getRange: () => {
+            if (!instanceRef.current) throw new Error("Timeline instance is not available.");
+            return instanceRef.current.getRange();
+        },
         setItems: (i) => instanceRef.current?.setItems(i),
         getItems: () => instanceRef.current?.getItems() ?? [],
         setCategories: (c) => instanceRef.current?.setCategories(c),
@@ -366,14 +369,17 @@ export const TempisTimeline = forwardRef<TempisTimelineRef, TempisTimelineProps>
         clearSelection: () => instanceRef.current?.clearSelection(),
         setGroupCollapsed: (group, collapsed) => instanceRef.current?.setGroupCollapsed(group, collapsed),
         isGroupCollapsed: (group) => instanceRef.current?.isGroupCollapsed(group) ?? false,
-        toImage: (opts) => instanceRef.current!.toImage(opts),
+        toImage: (opts) => {
+            if (!instanceRef.current) return Promise.reject(new Error("Timeline instance is not available."));
+            return instanceRef.current.toImage(opts);
+        },
         redraw: () => instanceRef.current?.redraw(),
         getInstance: () => instanceRef.current,
         getCanvas: () => canvasRef.current
     }));
 
     return (
-        <div className={className} style={wrapperStyle}>
+        <div className={className} style={{ width: "100%", height: "100%", ...wrapperStyle }}>
             <canvas ref={canvasRef} style={{ width, height, display: "block" }} />
         </div>
     );

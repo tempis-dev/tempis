@@ -358,17 +358,17 @@
 
     var dependencies = [
       // Truck #01: oil change done before transmission (same row, sequential)
-      { source: 1, target: 5, style: { color: '#4f46e5', lineStyle: 'solid' } },
+      { source: 1, target: 5, style: { color: '#4f46e5', lineStyle: 'solid', opacity: 0.5 } },
       // Truck #03: annual inspection before 6-month check
-      { source: 2, target: 9, style: { color: '#4f46e5', lineStyle: 'solid' } },
+      { source: 2, target: 9, style: { color: '#4f46e5', lineStyle: 'solid', opacity: 0.5 } },
       // Van #02: oil change before annual inspection
-      { source: 20, target: 27, style: { lineStyle: 'solid' } },
+      { source: 20, target: 27, style: { lineStyle: 'solid', opacity: 0.5 } },
       // Van #15: engine diagnostic before follow-up
-      { source: 25, target: 31, style: { color: '#7b1fa2', lineStyle: 'solid' } },
+      { source: 25, target: 31, style: { color: '#7b1fa2', lineStyle: 'solid', opacity: 0.5 } },
       // Forklift #A: hydraulic service before battery replace
-      { source: 40, target: 43, style: { lineStyle: 'solid' } },
+      { source: 40, target: 43, style: { lineStyle: 'solid', opacity: 0.5 } },
       // Crane #B: annual cert before load test
-      { source: 41, target: 44, style: { lineStyle: 'solid' } },
+      { source: 41, target: 44, style: { lineStyle: 'solid', opacity: 0.5 } },
     ];
 
     var ctxItemId = null;

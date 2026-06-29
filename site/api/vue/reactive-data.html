@@ -1,0 +1,74 @@
+<h1>Reactive Data</h1>
+<p class="subtitle">Update timeline data without recreating the instance.</p>
+
+<h2>How It Works</h2>
+<p>The <code>items</code>, <code>categories</code>, <code>bands</code>, <code>dependencies</code>, and <code>selection</code> props are watched with Vue's <code>watch()</code>. When their values change, the component calls the corresponding <code>setItems()</code>, <code>setCategories()</code>, <code>setBands()</code>, <code>setDependencies()</code>, or <code>setSelection()</code> method on the existing core instance — no destroy/recreate cycle.</p>
+
+<p>This makes the following patterns efficient:</p>
+<ul>
+  <li>Streaming data — push new items into a reactive array.</li>
+  <li>Filtering — swap the items array based on user input.</li>
+  <li>Dynamic categories — toggle visibility by updating the categories list.</li>
+</ul>
+
+<h2>Example: Dynamic Filtering</h2>
+<pre><code class="language-typescript">&lt;script setup lang="ts"&gt;
+import { ref, computed } from 'vue'
+import { TempisTimeline, type TempisTimelineItem } from '@tempis/vue'
+
+const allItems: TempisTimelineItem[] = [
+  { id: 1, label: 'Research', start: '2026-03-01', end: '2026-03-10', grouping: 'Phase 1', category: 'planning' },
+  { id: 2, label: 'Design',   start: '2026-03-08', end: '2026-03-20', grouping: 'Phase 1', category: 'design' },
+  { id: 3, label: 'Build',    start: '2026-03-18', end: '2026-04-05', grouping: 'Phase 2', category: 'dev' },
+  { id: 4, label: 'Test',     start: '2026-04-01', end: '2026-04-12', grouping: 'Phase 2', category: 'qa' },
+]
+
+const activeCategory = ref&lt;string | null&gt;(null)
+
+const filteredItems = computed(() =&gt; {
+  if (!activeCategory.value) return allItems
+  return allItems.filter(i =&gt; i.category === activeCategory.value)
+})
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div&gt;
+    &lt;button @click="activeCategory = null"&gt;All&lt;/button&gt;
+    &lt;button @click="activeCategory = 'planning'"&gt;Planning&lt;/button&gt;
+    &lt;button @click="activeCategory = 'design'"&gt;Design&lt;/button&gt;
+    &lt;button @click="activeCategory = 'dev'"&gt;Dev&lt;/button&gt;
+    &lt;button @click="activeCategory = 'qa'"&gt;QA&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;TempisTimeline
+    :items="filteredItems"
+    :options="{ responsive: true, range: { position: 'bottom' } }"
+    :height="350"
+  /&gt;
+&lt;/template&gt;</code></pre>
+
+<h2>Example: Streaming Data</h2>
+<pre><code class="language-typescript">&lt;script setup lang="ts"&gt;
+import { ref, onMounted, onUnmounted } from 'vue'
+import { TempisTimeline, type TempisTimelineItem } from '@tempis/vue'
+
+const items = ref&lt;TempisTimelineItem[]&gt;([])
+let nextId = 0
+let interval: ReturnType&lt;typeof setInterval&gt;
+
+onMounted(() =&gt; {
+  interval = setInterval(() =&gt; {
+    const now = new Date()
+    const end = new Date(now.getTime() + 3600000) // +1 hour
+    items.value = [
+      ...items.value,
+      { id: nextId++, label: `Event ${nextId}`, start: now.toISOString(), end: end.toISOString() }
+    ]
+  }, 2000)
+})
+
+onUnmounted(() =&gt; clearInterval(interval))
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;TempisTimeline :items="items" :options="{ responsive: true }" :height="300" /&gt;
+&lt;/template&gt;</code></pre>

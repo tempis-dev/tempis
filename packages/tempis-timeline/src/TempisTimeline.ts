@@ -1096,8 +1096,9 @@ export class TempisTimeline {
         this._canvas.style.boxSizing = "border-box";
 
         // Set actual display size of the canvas (css pixels).
-        this._canvas.style.width = canvasContainerElement.clientWidth + "px";
-        this._canvas.style.height = canvasContainerElement.clientHeight + "px";
+        // Use floor to prevent subpixel values that could overflow the container.
+        this._canvas.style.width = Math.floor(canvasContainerElement.clientWidth) + "px";
+        this._canvas.style.height = Math.floor(canvasContainerElement.clientHeight) + "px";
 
         // Apply the window device pixel ratio scaling to the canvas.
         this._applyCanvasDPRScaling();
@@ -1122,8 +1123,10 @@ export class TempisTimeline {
         const dpr = window.devicePixelRatio || 1;
 
         // Set the "physical" size of the canvas, this is the number of pixels that the canvas has.
-        this._canvas.width = this._canvas.offsetWidth * dpr;
-        this._canvas.height = this._canvas.offsetHeight * dpr;
+        // Floor the values to avoid subpixel rounding that can cause the canvas to be fractionally
+        // larger than its container, triggering scrollbar feedback loops on high-DPI displays.
+        this._canvas.width = Math.floor(this._canvas.offsetWidth * dpr);
+        this._canvas.height = Math.floor(this._canvas.offsetHeight * dpr);
 
         // Scale the drawing context to account for the increased pixel density.
         canvasContext.scale(dpr, dpr);
