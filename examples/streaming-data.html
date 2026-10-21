@@ -447,7 +447,7 @@
                     Show moves ≥
                     <select id="thresholdSelect"></select>
                 </label>
-                <button id="allBtn" class="chip" style="display:none">← All pairs</button>
+                <button id="allBtn" class="chip" style="display:none; margin-left:12px;">← All pairs</button>
             </div>
             <div class="timeline-wrap">
                 <canvas id="timeline-canvas"></canvas>
@@ -528,11 +528,11 @@
 
         // How big a move (since the coin's last recorded point) counts as significant.
         // User-adjustable via the dropdown; defaults are set per view at runtime.
-        let thresholdPct = 0.05;
+        let thresholdPct = 0.075;
 
         // Master event log across ALL coins. Coin selection just filters the view.
         // Each entry: { id, coinId, kind, price, changePercent, time }
-        //   kind: 'initial' | 'up' | 'down'   (all point-in-time)
+        //   kind: 'up' | 'down'   (all point-in-time)
         let events = [];
         const MAX_EVENTS = 300;   // keep the log bounded
 
@@ -587,9 +587,9 @@
         // Threshold options & defaults differ per view. The per-coin view allows much
         // finer thresholds since a single pair's moves are small; the overview starts
         // coarser so the all-pairs feed stays readable.
-        const OVERVIEW_THRESHOLDS = ['0.02', '0.05', '0.1', '0.25', '0.5', '1'];
-        const FOCUS_THRESHOLDS = ['0.001', '0.005', '0.01', '0.02', '0.05', '0.1', '0.25', '0.5', '1'];
-        const OVERVIEW_DEFAULT = '0.05';
+        const OVERVIEW_THRESHOLDS = ['0.02', '0.05', '0.075', '0.1', '0.25', '0.5', '1'];
+        const FOCUS_THRESHOLDS = ['0.001', '0.005', '0.01', '0.02', '0.05', '0.075', '0.1', '0.25', '0.5', '1'];
+        const OVERVIEW_DEFAULT = '0.075';
         const FOCUS_DEFAULT = '0.02';
 
         const thresholdSelect = document.getElementById('thresholdSelect');
@@ -650,22 +650,16 @@
         }
 
         // Turn an event into a point-in-time timeline item.
-        //   initial  → blue, just the price
-        //   up       → green ▲ with the % rise
-        //   down     → red ▼ with the % fall
+        //   up    → green ▲ with the % rise
+        //   down  → red ▼ with the % fall
         function eventToItem(e) {
             const coin = coinById[e.coinId];
-            let bg, label;
-            if (e.kind === 'up') {
-                bg = '#15a46b';
-                label = `${coin.symbol} ▲ $${fmtPrice(e.price)} (+${e.changePercent.toFixed(2)}%)`;
-            } else if (e.kind === 'down') {
-                bg = '#e5484d';
-                label = `${coin.symbol} ▼ $${fmtPrice(e.price)} (${e.changePercent.toFixed(2)}%)`;
-            } else { // initial
-                bg = '#2196F3';
-                label = `${coin.symbol} $${fmtPrice(e.price)}`;
-            }
+            const isUp = e.kind === 'up';
+            const bg = isUp ? '#15a46b' : '#e5484d';
+            const arrow = isUp ? '▲' : '▼';
+            const sign = isUp ? '+' : '';
+            // 3dp so the smallest selectable threshold (0.001%) still shows a value.
+            const label = `${coin.symbol} ${arrow} $${fmtPrice(e.price)} (${sign}${e.changePercent.toFixed(3)}%)`;
             return {
                 id: e.id,
                 label: label,
@@ -866,16 +860,15 @@
         }
 
         // ───────────── Significant-change detection ─────────────
-        // The first time we see a coin we log its initial price. After that we only
-        // add an item when the price has moved at least `thresholdPct` from the last
-        // recorded point — an "up" (green ▲) or a "down" (red ▼).
+        // The first price we see for a coin just sets its baseline — no item. After
+        // that, every item represents a move of at least `thresholdPct` from the last
+        // recorded point: an "up" (green ▲) or a "down" (red ▼).
         function recordIfSignificant(coin, price, now) {
             const symbol = coin.id;
             const prev = lastRecorded[symbol];
 
             if (prev === undefined) {
-                lastRecorded[symbol] = price;
-                addEvent({ coinId: symbol, kind: 'initial', price: price, changePercent: 0, time: now });
+                lastRecorded[symbol] = price; // baseline only
                 return;
             }
 
@@ -894,7 +887,6 @@
 
         // ───────────── Event detail dialog ─────────────
         const EVENT_KIND_LABEL = {
-            'initial': 'Initial price',
             'up': 'Price up',
             'down': 'Price down'
         };
@@ -907,21 +899,16 @@
             document.getElementById('dlgDot').style.background = coin.color;
             document.getElementById('dlgCoin').innerHTML = `${coin.symbol} <small>${coin.name}</small>`;
 
-            const chgClass = d.changePercent > 0 ? 'up' : d.changePercent < 0 ? 'down' : '';
-            const chgText = `${d.changePercent >= 0 ? '+' : ''}${d.changePercent.toFixed(2)}%`;
+            const chgClass = d.changePercent >= 0 ? 'up' : 'down';
+            const chgText = `${d.changePercent >= 0 ? '+' : ''}${d.changePercent.toFixed(3)}%`;
 
-            let rows = `
+            document.getElementById('dlgBody').innerHTML = `
                 <div class="dialog-row"><span class="k">Event</span><span class="v">${EVENT_KIND_LABEL[d.kind]}</span></div>
-                <div class="dialog-row"><span class="k">Price</span><span class="v">$${fmtPrice(d.price)}</span></div>`;
-            if (d.kind !== 'initial') {
-                rows += `
-                <div class="dialog-row"><span class="k">Change</span><span class="v ${chgClass}">${chgText}</span></div>`;
-            }
-            rows += `
+                <div class="dialog-row"><span class="k">Price</span><span class="v">$${fmtPrice(d.price)}</span></div>
+                <div class="dialog-row"><span class="k">Change</span><span class="v ${chgClass}">${chgText}</span></div>
                 <div class="dialog-row"><span class="k">Pair</span><span class="v">${coin.symbol}USDT</span></div>
                 <div class="dialog-row"><span class="k">Time</span><span class="v">${d.time.toLocaleTimeString('en-US', { hour12: false })}</span></div>`;
 
-            document.getElementById('dlgBody').innerHTML = rows;
             eventOverlay.classList.add('open');
         }
         function closeEventDialog() { eventOverlay.classList.remove('open'); }
