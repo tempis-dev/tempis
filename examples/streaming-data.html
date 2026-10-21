@@ -175,6 +175,104 @@
             flex: 0 0 auto;
         }
         .panel-head .hint { color: var(--text-faint); letter-spacing: 0.3px; text-transform: none; font-size: 11px; }
+        .panel-head .head-spacer { flex: 1 1 auto; }
+        .chip {
+            font-family: Geist, sans-serif;
+            font-size: 11px;
+            text-transform: none;
+            letter-spacing: 0.2px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--panel-2);
+            color: var(--text-dim);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .chip:hover { color: var(--text); border-color: #cbd2dd; }
+
+        /* threshold dropdown */
+        .thresh {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: Geist, sans-serif;
+            font-size: 11px;
+            text-transform: none;
+            letter-spacing: 0.2px;
+            color: var(--text-dim);
+        }
+        .thresh select {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--text);
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 4px 8px;
+            cursor: pointer;
+            outline: none;
+        }
+        .thresh select:focus { border-color: var(--accent); }
+
+        /* selected watchlist row */
+        .ticker-row.selected {
+            background: var(--panel-2);
+            box-shadow: inset 3px 0 0 var(--accent);
+        }
+
+        /* ───────────── Event dialog ───────────── */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(17, 24, 39, 0.45);
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .overlay.open { display: flex; }
+        .dialog {
+            width: 340px;
+            max-width: calc(100vw - 32px);
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: 0 24px 60px rgba(17,24,39,0.25);
+            overflow: hidden;
+            animation: dialogIn 0.16s ease-out;
+        }
+        @keyframes dialogIn {
+            from { opacity: 0; transform: translateY(8px) scale(0.98); }
+            to   { opacity: 1; transform: none; }
+        }
+        .dialog-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--border-soft);
+        }
+        .dialog-head .coin-dot { width: 12px; height: 12px; border-radius: 3px; flex: 0 0 auto; }
+        .dialog-head .coin { font-weight: 600; font-size: 15px; }
+        .dialog-head .coin small { color: var(--text-faint); font-weight: 400; margin-left: 6px; }
+        .dialog-head .x {
+            margin-left: auto; cursor: pointer; color: var(--text-faint);
+            font-size: 18px; line-height: 1; border: none; background: none; padding: 2px 4px;
+        }
+        .dialog-head .x:hover { color: var(--text); }
+        .dialog-body { padding: 6px 18px 18px; }
+        .dialog-row {
+            display: flex; justify-content: space-between; align-items: baseline;
+            padding: 11px 0; border-bottom: 1px solid var(--border-soft);
+            font-size: 13px;
+        }
+        .dialog-row:last-child { border-bottom: none; }
+        .dialog-row .k { color: var(--text-dim); }
+        .dialog-row .v { font-family: var(--mono); color: var(--text); }
+        .dialog-row .v.up { color: var(--up); }
+        .dialog-row .v.down { color: var(--down); }
 
         .watchlist-body { overflow-y: auto; flex: 1 1 auto; }
 
@@ -282,6 +380,7 @@
         .stat .val { color: var(--text); font-size: 13px; }
         .stat .val.accent { color: var(--accent); }
         .stat .val.up { color: var(--up); }
+        .stat .val.down { color: var(--down); }
 
         /* scrollbars */
         ::-webkit-scrollbar { width: 9px; height: 9px; }
@@ -314,7 +413,7 @@
         <div class="brand">
             <span class="logo">T</span>
             <span>Tempis Markets</span>
-            <span class="sub">Live Tape · Binance Spot</span>
+            <span class="sub">Live Prices · Binance Spot</span>
         </div>
         <div class="spacer"></div>
         <div id="connPill" class="conn-pill">
@@ -342,8 +441,13 @@
         <!-- Main -->
         <main class="main">
             <div class="panel-head">
-                <span>Trade Tape — Price Movement Stream</span>
-                <span class="hint">moves &gt; 0.1%</span>
+                <span id="tapeTitle">Price Changes — All Pairs</span>
+                <span class="head-spacer"></span>
+                <label class="thresh">
+                    Show moves ≥
+                    <select id="thresholdSelect"></select>
+                </label>
+                <button id="allBtn" class="chip" style="display:none">← All pairs</button>
             </div>
             <div class="timeline-wrap">
                 <canvas id="timeline-canvas"></canvas>
@@ -351,19 +455,19 @@
             <!-- Stats strip -->
             <div class="stats">
                 <div class="stat">
-                    <span class="label">Events</span>
+                    <span class="label">Events logged</span>
                     <span id="statEvents" class="val accent">0</span>
                 </div>
                 <div class="stat">
-                    <span class="label">Msgs/sec</span>
-                    <span id="statRate" class="val">0</span>
+                    <span class="label">Top mover</span>
+                    <span id="statTopMover" class="val">—</span>
                 </div>
                 <div class="stat">
-                    <span class="label">Total Msgs</span>
-                    <span id="statMsgs" class="val">0</span>
+                    <span class="label">Feed</span>
+                    <span id="statRate" class="val">0 msg/s</span>
                 </div>
                 <div class="stat">
-                    <span class="label">Last Update</span>
+                    <span class="label">Last update</span>
                     <span id="statLast" class="val">—</span>
                 </div>
                 <div class="stat">
@@ -372,6 +476,18 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Event detail dialog -->
+    <div class="overlay" id="eventOverlay">
+        <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlgCoin">
+            <div class="dialog-head">
+                <span class="coin-dot" id="dlgDot"></span>
+                <span class="coin" id="dlgCoin"></span>
+                <button class="x" id="dlgClose" aria-label="Close">×</button>
+            </div>
+            <div class="dialog-body" id="dlgBody"></div>
+        </div>
     </div>
 
     <script src="../lib/tempis_timeline.js"></script>
@@ -387,20 +503,38 @@
         const watchlistBody = document.getElementById('watchlistBody');
         const statEvents = document.getElementById('statEvents');
         const statRate = document.getElementById('statRate');
-        const statMsgs = document.getElementById('statMsgs');
+        const statTopMover = document.getElementById('statTopMover');
         const statLast = document.getElementById('statLast');
         const statStatus = document.getElementById('statStatus');
+        const tapeTitle = document.getElementById('tapeTitle');
+        const allBtn = document.getElementById('allBtn');
+        const eventOverlay = document.getElementById('eventOverlay');
 
         // ───────────── State ─────────────
         let timeline = null;
         let websocket = null;
-        let allEvents = [];
         let isStreaming = false;
-        let lastPrices = {};      // Track previous prices for change detection (event logic)
-        let refPrices = {};       // First-seen price per coin (watchlist % change)
-        let eventIdCounter = 1;   // Simple counter for unique IDs
-        let totalMsgs = 0;        // All WebSocket trade messages
-        let msgsThisSecond = 0;   // Rolling counter for msgs/sec
+        let focusedCoin = null;   // Coin id when filtered to a single pair, else null
+        let eventIdCounter = 1;
+
+        // Per-coin live state
+        let lastPrices = {};      // Last trade price (watchlist flash direction)
+        let refPrices = {};       // First price seen per coin (watchlist session %)
+        let lastRecorded = {};    // Price at the last recorded timeline event, per coin
+
+        // Live message metrics
+        let totalMsgs = 0;
+        let msgsThisSecond = 0;
+
+        // How big a move (since the coin's last recorded point) counts as significant.
+        // User-adjustable via the dropdown; defaults are set per view at runtime.
+        let thresholdPct = 0.05;
+
+        // Master event log across ALL coins. Coin selection just filters the view.
+        // Each entry: { id, coinId, kind, price, changePercent, time }
+        //   kind: 'initial' | 'up' | 'down'   (all point-in-time)
+        let events = [];
+        const MAX_EVENTS = 300;   // keep the log bounded
 
         // Cryptocurrency data (matching Binance symbols)
         const cryptoCoins = [
@@ -416,7 +550,11 @@
             { id: 'ltcusdt', name: 'Litecoin', symbol: 'LTC', color: '#345d9d' }
         ];
 
-        // ───────────── Watchlist UI ─────────────
+        const coinById = {};
+        cryptoCoins.forEach(c => { coinById[c.id] = c; });
+
+        // ───────────── Price formatting ─────────────
+        // Overview/watchlist formatting (coarser).
         function fmtPrice(p) {
             if (p >= 1000) return p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             if (p >= 1) return p.toFixed(2);
@@ -429,14 +567,122 @@
                 const row = document.createElement('div');
                 row.className = 'ticker-row';
                 row.id = `row-${coin.id}`;
+                row.style.cursor = 'pointer';
+                row.title = `Click to drill into ${coin.name}`;
                 row.innerHTML = `
                     <div class="sym"><span class="swatch" style="background:${coin.color}"></span>${coin.symbol}</div>
                     <div class="price" id="price-${coin.id}">—</div>
                     <div class="name">${coin.name}</div>
                     <div class="chg" id="chg-${coin.id}">—</div>
                 `;
+                // Click a pair to drill into just that coin (toggle off to go back to all).
+                row.addEventListener('click', () => {
+                    if (focusedCoin === coin.id) setFocusedCoin(null);
+                    else setFocusedCoin(coin.id);
+                });
                 watchlistBody.appendChild(row);
             });
+        }
+
+        // Threshold options & defaults differ per view. The per-coin view allows much
+        // finer thresholds since a single pair's moves are small; the overview starts
+        // coarser so the all-pairs feed stays readable.
+        const OVERVIEW_THRESHOLDS = ['0.02', '0.05', '0.1', '0.25', '0.5', '1'];
+        const FOCUS_THRESHOLDS = ['0.001', '0.005', '0.01', '0.02', '0.05', '0.1', '0.25', '0.5', '1'];
+        const OVERVIEW_DEFAULT = '0.05';
+        const FOCUS_DEFAULT = '0.02';
+
+        const thresholdSelect = document.getElementById('thresholdSelect');
+
+        // Populate the dropdown for the current view and apply its default threshold.
+        function applyThresholdOptions(forFocus) {
+            const opts = forFocus ? FOCUS_THRESHOLDS : OVERVIEW_THRESHOLDS;
+            const def = forFocus ? FOCUS_DEFAULT : OVERVIEW_DEFAULT;
+            thresholdSelect.innerHTML = opts.map(v => `<option value="${v}">${v}%</option>`).join('');
+            thresholdSelect.value = def;
+            setThreshold(parseFloat(def));
+        }
+
+        // Set the active threshold and re-baseline each coin so new items use it from
+        // here on (without retroactively changing what's already logged).
+        function setThreshold(pct) {
+            thresholdPct = pct;
+            lastRecorded = {};
+            for (const id in lastPrices) lastRecorded[id] = lastPrices[id];
+        }
+
+        // ───────────── Coin focus / filter ─────────────
+        // Selecting a coin just filters the view — it never resets data.
+        function setFocusedCoin(coinId) {
+            focusedCoin = coinId;
+
+            document.querySelectorAll('.ticker-row.selected').forEach(r => r.classList.remove('selected'));
+            if (coinId) {
+                const row = document.getElementById(`row-${coinId}`);
+                if (row) row.classList.add('selected');
+                const coin = coinById[coinId];
+                tapeTitle.textContent = `Price Changes — ${coin.name} (${coin.symbol})`;
+                allBtn.style.display = '';
+            } else {
+                tapeTitle.textContent = 'Price Changes — All Pairs';
+                allBtn.style.display = 'none';
+            }
+
+            // Swap the threshold options/default to match the new view.
+            applyThresholdOptions(!!coinId);
+
+            renderTape(true);
+        }
+
+        // Build the visible timeline items from the event log for the current view.
+        function renderTape(focusLatest) {
+            const items = events
+                .filter(e => !focusedCoin || e.coinId === focusedCoin)
+                .map(e => eventToItem(e));
+
+            timeline.setItems(items);
+            statEvents.textContent = items.length.toLocaleString('en-US');
+
+            if (focusLatest && items.length) {
+                const lastId = items[items.length - 1].id;
+                timeline.focus({ id: lastId, animate: true, duration: 500, easing: 'easeOutCubic', zoom: false });
+            }
+        }
+
+        // Turn an event into a point-in-time timeline item.
+        //   initial  → blue, just the price
+        //   up       → green ▲ with the % rise
+        //   down     → red ▼ with the % fall
+        function eventToItem(e) {
+            const coin = coinById[e.coinId];
+            let bg, label;
+            if (e.kind === 'up') {
+                bg = '#15a46b';
+                label = `${coin.symbol} ▲ $${fmtPrice(e.price)} (+${e.changePercent.toFixed(2)}%)`;
+            } else if (e.kind === 'down') {
+                bg = '#e5484d';
+                label = `${coin.symbol} ▼ $${fmtPrice(e.price)} (${e.changePercent.toFixed(2)}%)`;
+            } else { // initial
+                bg = '#2196F3';
+                label = `${coin.symbol} $${fmtPrice(e.price)}`;
+            }
+            return {
+                id: e.id,
+                label: label,
+                start: e.time,
+                grouping: coin.name,
+                style: { backgroundColor: bg, fontColor: '#ffffff', borderRadius: 4 }
+            };
+        }
+
+        // Append an event and refresh the tape if it's visible in the current view.
+        function addEvent(e) {
+            e.id = eventIdCounter++;
+            events.push(e);
+            if (events.length > MAX_EVENTS) events = events.slice(-MAX_EVENTS);
+
+            const visible = !focusedCoin || e.coinId === focusedCoin;
+            if (visible) renderTape(true);
         }
 
         // Update a single coin's watchlist row on EVERY trade (not just >0.1% moves)
@@ -457,10 +703,11 @@
             if (changePercent > 0) row.classList.add('up');
             else if (changePercent < 0) row.classList.add('down');
 
-            // brief flash based on tick direction vs last price
+            // Flash uses the SAME session basis as the row colour, so a coin that's
+            // up on the session only ever flashes green (never red on a bump).
             const prev = lastPrices[coin.id];
             if (prev !== undefined && price !== prev) {
-                const cls = price > prev ? 'flash-up' : 'flash-down';
+                const cls = changePercent >= 0 ? 'flash-up' : 'flash-down';
                 row.classList.remove('flash-up', 'flash-down');
                 void row.offsetWidth; // restart animation
                 row.classList.add(cls);
@@ -484,16 +731,16 @@
                     timeline.destroy();
                 }
 
-                // Set initial range to show recent price events (last 1 minute)
+                // A one-minute default window gives items room to spread out.
                 const now = new Date();
-                const startTime = new Date(now.getTime() - 1 * 60 * 1000); // 1 minute ago
-                const endTime = now; // Now
+                const startTime = new Date(now.getTime() - 60 * 1000); // 1 minute ago
+                const endTime = new Date(now.getTime() + 5 * 1000);    // small lead
 
                 timeline = new tempis_timeline.TempisTimeline('#timeline-canvas', {
                     responsive: true,
                     verticalFill: 'fill-canvas',
                     items: [],
-                    selection: 'single',
+                    selection: 'none',
                     style: {
                         font: { family: "Geist, system-ui, -apple-system, Roboto, sans-serif", size: 12 }
                     },
@@ -504,7 +751,9 @@
                         zoom: {
                             enabled: true
                         }
-                    }
+                    },
+                    // Clicking an event opens a detail dialog (no selection state on the timeline).
+                    onItemClick: function(id) { openEventDialog(id); }
                 });
 
                 console.log('Timeline initialized successfully');
@@ -559,6 +808,9 @@
                 };
 
                 websocket.onerror = function(error) {
+                    // Ignore errors that fire as a result of us deliberately stopping —
+                    // only surface them while we're actually trying to stream.
+                    if (!isStreaming) return;
                     console.error('WebSocket error:', error);
                     setConnection('error', 'Connection error');
                     setStatus('WebSocket connection error');
@@ -590,103 +842,119 @@
 
         function processBinanceUpdate(trade) {
             // Binance sends individual trade messages
-            // trade.s = symbol (e.g., "BTCUSDT")
-            // trade.p = price
+            // trade.s = symbol (e.g., "BTCUSDT"), trade.p = price
             const symbol = trade.s.toLowerCase();
             const coinInfo = cryptoCoins.find(c => c.id === symbol);
             if (!coinInfo) return;
 
             const currentPrice = parseFloat(trade.p);
-            const lastPrice = lastPrices[symbol];
             const now = new Date();
 
             // Live metrics: every trade message counts
             totalMsgs++;
             msgsThisSecond++;
-            statMsgs.textContent = totalMsgs.toLocaleString('en-US');
             statLast.textContent = now.toLocaleTimeString('en-US', { hour12: false });
 
-            // Update the watchlist row on EVERY trade (before recording lastPrice for flash direction)
+            // Update the watchlist row on EVERY trade (the live continuous view).
             updateWatchlistRow(coinInfo, currentPrice);
 
-            // Create event for significant price changes or first time seeing this coin
-            let shouldCreateEvent = false;
-            let eventType = 'price_update';
-            let changePercent = 0;
+            // Decide whether this trade is a significant enough move to add to the timeline.
+            recordIfSignificant(coinInfo, currentPrice, now);
 
-            if (lastPrice === undefined) {
-                // First time seeing this coin
-                shouldCreateEvent = true;
-                eventType = 'initial_price';
-            } else {
-                // Calculate price change since last update
-                changePercent = ((currentPrice - lastPrice) / lastPrice) * 100;
-
-                // Create event for changes > 0.1% (more sensitive for real-time data)
-                if (Math.abs(changePercent) > 0.1) {
-                    shouldCreateEvent = true;
-                    eventType = changePercent > 0 ? 'price_increase' : 'price_decrease';
-                }
-            }
-
-            if (shouldCreateEvent) {
-                let label = '';
-                let itemStyle = {};
-
-                if (eventType === 'initial_price') {
-                    label = `${coinInfo.symbol} $${currentPrice.toFixed(2)}`;
-                    itemStyle = {
-                        backgroundColor: '#2196F3', // Blue for initial price
-                        fontColor: '#ffffff'
-                    };
-                } else {
-                    const direction = changePercent > 0 ? '↗' : '↘';
-                    label = `${coinInfo.symbol} $${currentPrice.toFixed(2)} ${direction} ${Math.abs(changePercent).toFixed(2)}%`;
-                    itemStyle = {
-                        backgroundColor: changePercent > 0 ? '#15a46b' : '#e5484d', // Green up / red down
-                        fontColor: '#ffffff'
-                    };
-                }
-
-                const newEvent = {
-                    id: eventIdCounter++,
-                    label: label,
-                    start: now,
-                    grouping: coinInfo.name,
-                    style: itemStyle
-                };
-
-                allEvents.push(newEvent);
-
-                // Keep only the last 100 events
-                if (allEvents.length > 100) {
-                    allEvents = allEvents.slice(-100);
-                }
-
-                // Update timeline items
-                timeline.setItems([...allEvents]);
-
-                // Focus on the newest event with animation (follow the latest)
-                timeline.focus({
-                    id: newEvent.id,
-                    animate: true,
-                    duration: 800,
-                    easing: 'easeOutCubic',
-                    zoom: false
-                });
-
-                statEvents.textContent = allEvents.length.toLocaleString('en-US');
-                setStatus('Streaming');
-            }
-
-            // Update last price
             lastPrices[symbol] = currentPrice;
+            setStatus('Streaming');
         }
 
-        // ───────────── Msgs/sec ticker ─────────────
+        // ───────────── Significant-change detection ─────────────
+        // The first time we see a coin we log its initial price. After that we only
+        // add an item when the price has moved at least `thresholdPct` from the last
+        // recorded point — an "up" (green ▲) or a "down" (red ▼).
+        function recordIfSignificant(coin, price, now) {
+            const symbol = coin.id;
+            const prev = lastRecorded[symbol];
+
+            if (prev === undefined) {
+                lastRecorded[symbol] = price;
+                addEvent({ coinId: symbol, kind: 'initial', price: price, changePercent: 0, time: now });
+                return;
+            }
+
+            const changePercent = ((price - prev) / prev) * 100;
+            if (Math.abs(changePercent) >= thresholdPct) {
+                lastRecorded[symbol] = price;
+                addEvent({
+                    coinId: symbol,
+                    kind: changePercent > 0 ? 'up' : 'down',
+                    price: price,
+                    changePercent: changePercent,
+                    time: now
+                });
+            }
+        }
+
+        // ───────────── Event detail dialog ─────────────
+        const EVENT_KIND_LABEL = {
+            'initial': 'Initial price',
+            'up': 'Price up',
+            'down': 'Price down'
+        };
+
+        function openEventDialog(id) {
+            const d = events.find(e => e.id === id);
+            if (!d) return;
+            const coin = coinById[d.coinId];
+
+            document.getElementById('dlgDot').style.background = coin.color;
+            document.getElementById('dlgCoin').innerHTML = `${coin.symbol} <small>${coin.name}</small>`;
+
+            const chgClass = d.changePercent > 0 ? 'up' : d.changePercent < 0 ? 'down' : '';
+            const chgText = `${d.changePercent >= 0 ? '+' : ''}${d.changePercent.toFixed(2)}%`;
+
+            let rows = `
+                <div class="dialog-row"><span class="k">Event</span><span class="v">${EVENT_KIND_LABEL[d.kind]}</span></div>
+                <div class="dialog-row"><span class="k">Price</span><span class="v">$${fmtPrice(d.price)}</span></div>`;
+            if (d.kind !== 'initial') {
+                rows += `
+                <div class="dialog-row"><span class="k">Change</span><span class="v ${chgClass}">${chgText}</span></div>`;
+            }
+            rows += `
+                <div class="dialog-row"><span class="k">Pair</span><span class="v">${coin.symbol}USDT</span></div>
+                <div class="dialog-row"><span class="k">Time</span><span class="v">${d.time.toLocaleTimeString('en-US', { hour12: false })}</span></div>`;
+
+            document.getElementById('dlgBody').innerHTML = rows;
+            eventOverlay.classList.add('open');
+        }
+        function closeEventDialog() { eventOverlay.classList.remove('open'); }
+
+        document.getElementById('dlgClose').addEventListener('click', closeEventDialog);
+        eventOverlay.addEventListener('click', (e) => { if (e.target === eventOverlay) closeEventDialog(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeEventDialog(); });
+        allBtn.addEventListener('click', () => setFocusedCoin(null));
+
+        // Threshold dropdown — controls how big a move counts as significant.
+        thresholdSelect.addEventListener('change', (e) => {
+            setThreshold(parseFloat(e.target.value));
+        });
+
+        // ───────────── Live stats ticker ─────────────
         setInterval(() => {
-            statRate.textContent = msgsThisSecond.toString();
+            statRate.textContent = `${msgsThisSecond} msg/s`;
             msgsThisSecond = 0;
+
+            // Top mover = coin with the largest absolute session % change so far.
+            let best = null;
+            for (const coin of cryptoCoins) {
+                const ref = refPrices[coin.id];
+                const last = lastPrices[coin.id];
+                if (ref === undefined || last === undefined || ref === 0) continue;
+                const pct = ((last - ref) / ref) * 100;
+                if (!best || Math.abs(pct) > Math.abs(best.pct)) best = { coin, pct };
+            }
+            if (best) {
+                const sign = best.pct >= 0 ? '+' : '';
+                statTopMover.textContent = `${best.coin.symbol} ${sign}${best.pct.toFixed(2)}%`;
+                statTopMover.className = 'val ' + (best.pct >= 0 ? 'up' : 'down');
+            }
         }, 1000);
 
         // ───────────── Controls ─────────────
@@ -709,6 +977,9 @@
             stopBtn.disabled = true;
 
             if (websocket) {
+                // Detach handlers first so the close/error that follows our own
+                // close() call can't override the "stopped" status.
+                websocket.onopen = websocket.onmessage = websocket.onerror = websocket.onclose = null;
                 websocket.close();
                 websocket = null;
             }
@@ -732,18 +1003,21 @@
             if (timeline) {
                 timeline.setItems([]);
             }
-            allEvents = [];
+            events = [];
             lastPrices = {};
             refPrices = {};
+            lastRecorded = {};
             eventIdCounter = 1;
             totalMsgs = 0;
             msgsThisSecond = 0;
             statEvents.textContent = '0';
-            statMsgs.textContent = '0';
-            statRate.textContent = '0';
+            statTopMover.textContent = '—';
+            statTopMover.className = 'val';
+            statRate.textContent = '0 msg/s';
             statLast.textContent = '—';
+            setFocusedCoin(null);
             buildWatchlist();
-            setStatus('Timeline cleared');
+            setStatus('Events cleared');
         });
 
         // ───────────── Boot ─────────────
@@ -758,6 +1032,7 @@
         console.log('Setting up timeline...');
         buildWatchlist();
         initializeTimeline();
+        applyThresholdOptions(false); // start in the overview with its options/default
 
         // Start streaming automatically on page load
         setTimeout(() => {
