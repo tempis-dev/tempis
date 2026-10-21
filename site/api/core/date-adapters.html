@@ -5,7 +5,7 @@
 <p>The timeline uses a date adapter for all date operations: parsing input dates, calculating tick positions, snapping to time boundaries, and formatting labels. By default, a built-in adapter using the browser's native <code>Date</code> object handles everything. If you need timezone-aware rendering or custom locale formatting, you can register a custom adapter that wraps a library like Luxon or Day.js.</p>
 
 <h2>Built-in Native Adapter</h2>
-<p>The default adapter works out of the box with no configuration. It uses the browser's local timezone and supports the following format tokens for axis labels and tooltips:</p>
+<p>The default adapter needs no configuration. It works in the browser's local timezone and supports these format tokens for axis labels and tooltips:</p>
 
 <table>
   <thead><tr><th>Token</th><th>Output</th><th>Example</th></tr></thead>

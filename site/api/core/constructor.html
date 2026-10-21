@@ -62,7 +62,18 @@ const timeline = new TempisTimeline(canvas, { items: [...] });</code></pre>
 </table>
 
 <h3>destroy()</h3>
-<p>Removes all event listeners, disconnects observers, cancels animations, and clears the canvas. Always call this before removing the timeline from the DOM to prevent memory leaks.</p>
-<div class="note">In single-page applications, always call <code>destroy()</code> when removing the timeline from the DOM to prevent memory leaks from orphaned event listeners and resize observers.</div>
+<p>Removes the ten canvas event listeners, disconnects the resize observer, cancels in-flight animations, tears down the tooltip and legend views, and clears the canvas. Call it before the canvas leaves the DOM; otherwise the listeners and observer keep the instance alive.</p>
 <pre><code class="language-typescript">timeline.destroy();</code></pre>
-<p>In frameworks like React, the <code>&lt;TempisTimeline&gt;</code> component handles this automatically on unmount.</p>
+<p>The React and Vue components call this for you on unmount.</p>
+
+<h2>Static Methods</h2>
+<p>These are set on the class, not an instance, and apply globally. Register a date adapter before constructing any timeline.</p>
+<table>
+  <thead><tr><th>Method</th><th>Description</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><code>TempisTimeline.registerDateAdapter(adapter)</code></td><td>Replace the native date implementation.</td><td><a href="#core/date-adapters">Date adapters</a></td></tr>
+    <tr><td><code>TempisTimeline.getDateAdapter()</code></td><td>Get the active adapter.</td><td><a href="#core/date-adapters">Date adapters</a></td></tr>
+    <tr><td><code>TempisTimeline.setGlobalPalette(colors)</code></td><td>Set the palette used for categories with no explicit colour.</td><td><a href="#core/color-palette">Colour palette</a></td></tr>
+    <tr><td><code>TempisTimeline.getGlobalPalette()</code></td><td>Get the current palette.</td><td><a href="#core/color-palette">Colour palette</a></td></tr>
+  </tbody>
+</table>

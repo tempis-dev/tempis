@@ -201,7 +201,7 @@
     // Only customise tooltips for items with a specific category
     const item = timeline.getItems().find(i =&gt; i.id === id);
     if (item?.category === 'milestone') {
-      return '&lt;div style="padding: 8px;"&gt;🎯 Milestone reached&lt;/div&gt;';
+      return '&lt;div style="padding: 8px;"&gt;Milestone reached&lt;/div&gt;';
     }
     return null; // Default tooltip for everything else
   }
