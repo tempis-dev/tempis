@@ -968,10 +968,10 @@ a.pkg:hover {
 .install-box .pkg-highlight { color: var(--accent-text); font-weight: 500; }
 
 .install-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .install-label {
