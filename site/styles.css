@@ -1196,6 +1196,15 @@ pre code.hljs {
 .ex-group { margin-bottom: 48px; }
 
 .ex-group > .eyebrow { margin-bottom: 18px; }
+.ex-group > .eyebrow:has(+ .group-intro) { margin-bottom: 8px; }
+
+.group-intro {
+  color: var(--ink-3);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  max-width: 760px;
+  margin-bottom: 20px;
+}
 
 .ex-grid {
   display: grid;

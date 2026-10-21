@@ -70,39 +70,46 @@
 
     <section class="ex-group">
       <p class="eyebrow">Applications</p>
+      <p class="group-intro">Complete, self-contained apps showing the timeline working as one component inside a larger interface — each with its own layout, controls and surrounding panels.</p>
       <div class="ex-grid">
         <a href="examples/dashboard.html" class="ex-card">
           <img src="images/examples/dashboard_tile.png" alt="Fleet maintenance dashboard with KPI cards above a grouped timeline" loading="lazy">
           <div class="ex-card-body">
-            <h3>Fleet dashboard</h3>
-            <p>A timeline embedded alongside KPI cards and a detail panel, with region filtering driving the item set.</p>
-            <div class="tag-row"><span class="tag">selection</span><span class="tag">setItems</span><span class="tag">categories</span></div>
+            <h3>Fleet Maintenance Dashboard</h3>
+            <p>A full maintenance-scheduling app — KPI cards, region filters, a detail/edit panel and a right-click menu all wired to the timeline.</p>
+            <div class="tag-row"><span class="tag">selection</span><span class="tag">setItems</span><span class="tag">context menu</span></div>
           </div>
         </a>
         <a href="examples/production-downtime.html" class="ex-card">
-          <img src="images/examples/production_tile.png" alt="Production line downtime timeline with a detail panel" loading="lazy">
+          <img src="images/examples/production_tile.png" alt="Plant operations console with OEE tiles and a downtime timeline" loading="lazy">
           <div class="ex-card-body">
-            <h3>Production downtime</h3>
-            <p>Machine downtime per line. Selecting a period populates a detail form from the same data source.</p>
-            <div class="tag-row"><span class="tag">onSelectionChange</span><span class="tag">grouping</span></div>
+            <h3>Plant Operations Console</h3>
+            <p>An industrial OEE monitoring console — availability, MTTR and downtime KPIs above the timeline, with a side panel that swaps to full event details on selection.</p>
+            <div class="tag-row"><span class="tag">onSelectionChange</span><span class="tag">grouping</span><span class="tag">KPIs</span></div>
           </div>
         </a>
         <a href="examples/streaming-data.html" class="ex-card">
-          <img src="images/examples/crypto_tile.png" alt="Live cryptocurrency price ticks rendered as timeline markers" loading="lazy">
+          <img src="images/examples/crypto_tile.png" alt="Live trading terminal with a watchlist beside a streaming timeline" loading="lazy">
           <div class="ex-card-body">
-            <h3>Streaming prices</h3>
-            <p>Live trades over a WebSocket. Each tick is appended and the view follows the latest point.</p>
-            <div class="tag-row"><span class="tag">setItems</span><span class="tag">focus</span><span class="tag">per-item style</span></div>
+            <h3>Live Trading Terminal</h3>
+            <p>A market-monitor app streaming real Binance trades over a WebSocket — a live watchlist beside the timeline, which appends ticks and follows the latest price.</p>
+            <div class="tag-row"><span class="tag">setItems</span><span class="tag">focus</span><span class="tag">live data</span></div>
           </div>
         </a>
         <a href="examples/lazy-loading.html" class="ex-card">
-          <img src="images/examples/logs_tile.png" alt="Server log timeline loading more entries while panning" loading="lazy">
+          <img src="images/examples/logs_tile.png" alt="Request log explorer loading more entries while panning" loading="lazy">
           <div class="ex-card-body">
-            <h3>Lazy loading</h3>
-            <p>Server logs fetched per window. <code>onRangeChange</code> triggers a load for ranges not yet retrieved.</p>
-            <div class="tag-row"><span class="tag">onRangeChange</span><span class="tag">getRange</span></div>
+            <h3>Request Log Explorer</h3>
+            <p>An observability tool that fetches request logs on demand as you pan and zoom, with cache stats, an error-rate metric and a live fetch-activity feed.</p>
+            <div class="tag-row"><span class="tag">onRangeChange</span><span class="tag">getRange</span><span class="tag">lazy load</span></div>
           </div>
         </a>
+      </div>
+    </section>
+
+    <section class="ex-group">
+      <p class="eyebrow">Features</p>
+      <div class="ex-grid">
         <a href="examples/selection-grid.html" class="ex-card">
           <img src="images/examples/ext_selection_tile.png" alt="Table of rows synchronised with timeline selection" loading="lazy">
           <div class="ex-card-body">
@@ -119,12 +126,6 @@
             <div class="tag-row"><span class="tag">onItemContextClick</span></div>
           </div>
         </a>
-      </div>
-    </section>
-
-    <section class="ex-group">
-      <p class="eyebrow">Features</p>
-      <div class="ex-grid">
         <a href="examples/dependencies.html" class="ex-card">
           <img src="images/examples/dependencies_tile.png" alt="Timeline with dependency arrows between tasks" loading="lazy">
           <div class="ex-card-body">
@@ -205,35 +206,6 @@
             <div class="tag-row"><span class="tag">toImage</span><span class="tag">dpr</span></div>
           </div>
         </a>
-        <a href="examples/keypress.html" class="ex-card">
-          <img src="images/examples/keylog_tile.png" alt="Keystroke events plotted on a millisecond timeline" loading="lazy">
-          <div class="ex-card-body">
-            <h3>Millisecond resolution</h3>
-            <p>Keystrokes captured as point-in-time items, zoomed to a sub-second range.</p>
-            <div class="tag-row"><span class="tag">zoom.min</span><span class="tag">point-in-time</span></div>
-          </div>
-        </a>
-      </div>
-    </section>
-
-    <section class="ex-group">
-      <p class="eyebrow">Single-option demos</p>
-      <div class="ex-list">
-        <a href="examples/basic.html">Basic</a>
-        <a href="examples/categories.html">Categories</a>
-        <a href="examples/selection.html">Selection modes</a>
-        <a href="examples/focus.html">Focus</a>
-        <a href="examples/stack-mode.html">Stack modes</a>
-        <a href="examples/vertical-fill.html">Vertical fill</a>
-        <a href="examples/min_max.html">Min and max range</a>
-        <a href="examples/static.html">Fixed range</a>
-        <a href="examples/tooltips.html">Default tooltips</a>
-        <a href="examples/styling.html">Styling</a>
-        <a href="examples/bands.html">Band styles</a>
-        <a href="examples/set-items.html">Replacing items</a>
-        <a href="examples/fullscreen.html">Fullscreen</a>
-        <a href="examples/stress-test.html">Stress test</a>
-        <a href="examples/single-item.html">Single item</a>
       </div>
     </section>
   </div>

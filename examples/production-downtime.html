@@ -2,907 +2,1200 @@
 <html lang="en">
 <head>
   <link rel="icon" type="image/png" href="../images/logo.png">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Production Downtime - Tempis Timeline</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plant Operations Console — Tempis Timeline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
   <style>
-        body {
-            font-family: Geist, system-ui, -apple-system, Roboto, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: #f5f5f5;
-        }
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        h1 {
-            margin-top: 0;
-            color: #333;
-        }
-        .controls {
-            margin-bottom: 20px;
-            padding: 12px 20px;
-            background: #f9f9f9;
-            border-radius: 4px;
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .main-content {
-            display: flex;
-            gap: 20px;
-            position: relative;
-        }
-        .timeline-container {
-            width: 100%;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            height: 600px;
-            overflow: hidden;
-            transition: width 0.4s ease-out;
-        }
-        .timeline-container.with-details {
-            width: 65%;
-        }
-        .details-panel {
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 0;
-            height: 600px;
-            overflow: hidden;
-            background: #f9f9f9;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-            opacity: 0;
-            transition: width 0.4s ease-out, opacity 0.4s ease-out;
-            display: flex;
-            flex-direction: column;
-        }
-        .details-panel.visible {
-            width: calc(35% - 20px);
-            opacity: 1;
-        }
-        .details-content {
-            padding: 20px;
-            flex: 1;
-            overflow-y: auto;
-        }
-        .details-content::-webkit-scrollbar {
-            width: 8px;
-        }
-        .details-content::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .details-content::-webkit-scrollbar-thumb {
-            background: transparent;
-            border-radius: 4px;
-        }
-        .details-content:hover::-webkit-scrollbar-thumb {
-            background: #bbb;
-        }
-        .details-content::-webkit-scrollbar-thumb:hover {
-            background: #999;
-        }
-        /* Firefox */
-        .details-content {
-            scrollbar-width: thin;
-            scrollbar-color: transparent transparent;
-        }
-        .details-content:hover {
-            scrollbar-color: #bbb transparent;
-        }
-        .details-header {
-            padding: 20px 20px 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #ddd;
-            flex-shrink: 0;
-        }
-        .details-header h2 {
-            margin: 0;
-            color: #333;
-            font-size: 1.3em;
-        }
-        .close-btn {
-            background: #f44336;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.2s;
-        }
-        .close-btn:hover {
-            background: #d32f2f;
-        }
-        .detail-section {
-            margin-bottom: 20px;
-        }
-        .detail-section h3 {
-            margin: 0 0 10px 0;
-            color: #666;
-            font-size: 0.9em;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .detail-section p {
-            margin: 0;
-            color: #333;
-            font-size: 1em;
-            line-height: 1.6;
-        }
-        .detail-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.85em;
-            font-weight: 500;
-            margin-right: 8px;
-        }
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 0.9em;
-            font-weight: 500;
-            display: inline-block;
-        }
-        .info {
-            margin-top: 15px;
-            padding: 15px;
-            background: #e3f2fd;
-            border-left: 4px solid #2196F3;
-            border-radius: 4px;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-    </style>
+    :root {
+      --bg:        #f3f5f8;
+      --panel:     #ffffff;
+      --panel-2:   #f7f9fc;
+      --line:      #e4e8ef;
+      --line-soft: #eef1f6;
+      --text:      #111827;
+      --text-dim:  #5b6676;
+      --text-mut:  #98a2b3;
+      --accent:    #d97706;   /* amber */
+      --accent-2:  #0891b2;   /* cyan */
+      --good:      #15a46b;
+      --warn:      #d97706;
+      --bad:       #e5484d;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: Geist, system-ui, -apple-system, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .mono {
+      font-family: "Geist Mono", ui-monospace, Consolas, monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ===== Top app bar ===== */
+    .appbar {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 12px 22px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand .logo {
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), #b45309);
+      display: grid; place-items: center;
+      color: #ffffff; font-weight: 600; font-size: 18px;
+      box-shadow: 0 2px 8px rgba(217,119,6,0.25);
+    }
+    .brand .title { line-height: 1.15; }
+    .brand .title .line {
+      font-size: 15px; font-weight: 600; letter-spacing: 0.2px;
+    }
+    .brand .title .sub {
+      font-size: 11.5px; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 1.2px;
+    }
+
+    .appbar-spacer { flex: 1; }
+
+    .pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--panel-2);
+      font-size: 12.5px;
+      color: var(--text-dim);
+    }
+    .pill .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--good);
+      box-shadow: 0 0 0 3px rgba(21,164,107,0.18);
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0.35; }
+    }
+    .pill .k { color: var(--text-mut); }
+    .pill .v { color: var(--text); font-weight: 500; }
+
+    .clock {
+      font-size: 14px; color: var(--text);
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== Layout ===== */
+    .wrap {
+      flex: 1;
+      min-height: 0;
+      padding: 18px 22px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      max-width: 1700px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ===== KPI tiles ===== */
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+    }
+    .kpi {
+      position: relative;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px 15px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(16,24,40,0.04);
+    }
+    .kpi::before {
+      content: "";
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; background: var(--accent);
+      opacity: 0.85;
+    }
+    .kpi.cyan::before { background: var(--accent-2); }
+    .kpi.good::before { background: var(--good); }
+    .kpi.bad::before  { background: var(--bad); }
+    .kpi .label {
+      font-size: 11px; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 1px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .kpi .value {
+      margin-top: 8px;
+      font-size: 28px; font-weight: 500;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      line-height: 1;
+    }
+    .kpi .value .unit {
+      font-size: 14px; color: var(--text-dim); font-weight: 400;
+      margin-left: 3px;
+    }
+    .kpi .foot {
+      margin-top: 8px; font-size: 11.5px; color: var(--text-mut);
+    }
+    .kpi .foot .up   { color: var(--good); }
+    .kpi .foot .down { color: var(--bad); }
+
+    /* ===== Main grid ===== */
+    .grid {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      grid-template-rows: minmax(0, 1fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(16,24,40,0.04);
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--line-soft);
+      background: var(--panel-2);
+    }
+    .panel-head h2 {
+      font-size: 13.5px; font-weight: 600; letter-spacing: 0.3px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .panel-head h2 .accent-bar {
+      width: 3px; height: 15px; border-radius: 2px; background: var(--accent);
+    }
+    .panel-head .spacer { flex: 1; }
+
+    .btn {
+      font-family: inherit;
+      font-size: 12px;
+      padding: 7px 12px;
+      border-radius: 7px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn:hover {
+      color: var(--text);
+      border-color: #cbd2dd;
+      background: var(--panel-2);
+    }
+    .btn.active {
+      color: #ffffff;
+      background: var(--accent);
+      border-color: var(--accent);
+      font-weight: 500;
+    }
+    .btn.ghost {
+      background: transparent;
+    }
+    .btn-group {
+      display: inline-flex;
+      gap: 6px;
+    }
+
+    /* timeline host — fills the panel; the panel's height is bounded by the
+       viewport-height flex chain (body 100vh → wrap → grid → panel), so the
+       responsive canvas always has a constrained parent and never runs away. */
+    .timeline-host {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+    }
+    .timeline-host canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* ===== Side column ===== */
+    .side {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    /* Side panel fills its grid cell (same height as the timeline panel).
+       Its body scrolls internally, so selecting an item never grows the page. */
+    .side-panel {
+      flex: 1;
+      min-height: 0;
+    }
+
+    .details-body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 16px;
+      scrollbar-width: thin;
+      scrollbar-color: #cbd2dd transparent;
+    }
+    .details-body::-webkit-scrollbar { width: 8px; }
+    .details-body::-webkit-scrollbar-thumb { background: #dce1e8; border-radius: 4px; }
+    .details-body:hover::-webkit-scrollbar-thumb { background: #cbd2dd; }
+
+    .empty-state {
+      height: 100%;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--text-mut);
+      gap: 10px;
+      padding: 24px;
+    }
+    .empty-state .ico {
+      width: 46px; height: 46px; border-radius: 12px;
+      border: 1px dashed #cbd2dd;
+      display: grid; place-items: center;
+      font-size: 22px; color: var(--text-dim);
+    }
+    .empty-state .t { font-size: 13.5px; color: var(--text-dim); font-weight: 500; }
+    .empty-state .s { font-size: 12px; max-width: 220px; line-height: 1.5; }
+
+    .det-title {
+      font-size: 16px; font-weight: 600; margin-bottom: 4px;
+    }
+    .det-cat {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .det-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .det-cell {
+      background: var(--panel-2);
+      border: 1px solid var(--line-soft);
+      border-radius: 9px;
+      padding: 10px 12px;
+    }
+    .det-cell.full { grid-column: 1 / -1; }
+    .det-cell .k {
+      font-size: 10px; color: var(--text-mut);
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .det-cell .v {
+      margin-top: 5px; font-size: 13.5px; color: var(--text); line-height: 1.5;
+    }
+    .det-cell .v.big {
+      font-size: 18px; font-weight: 500;
+    }
+    .sev {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-weight: 600;
+    }
+    .sev .dot { width: 9px; height: 9px; border-radius: 50%; }
+
+    /* ===== Causes breakdown ===== */
+    .cause-hint {
+      font-size: 12px; color: var(--text-mut); line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .cause-list { display: flex; flex-direction: column; gap: 13px; }
+    .cause-row { display: flex; flex-direction: column; gap: 5px; }
+    .cause-row .top { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+    .cause-row .top .nm { color: var(--text); }
+    .cause-row .top .ct {
+      margin-left: auto; color: var(--text-dim);
+      font-size: 12px;
+    }
+    .cause-row .swatch { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .bar {
+      height: 6px; border-radius: 4px; background: var(--line-soft); overflow: hidden;
+    }
+    .bar > span { display: block; height: 100%; border-radius: 4px; }
+
+    @media (max-width: 1100px) {
+      /* On narrow screens, stack and allow the page to scroll instead of
+         squeezing everything into one viewport height. */
+      body { height: auto; min-height: 100vh; overflow: auto; }
+      .wrap { min-height: 0; }
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+      .grid { grid-template-columns: 1fr; flex: none; }
+      .timeline-host { height: 460px; flex: none; }
+      .side-panel { height: 460px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Production Line Downtime</h1>
-        
-        <div class="controls">
-            <div style="color: #666; font-size: 14px;">
-                <strong>Click on any downtime event</strong> to view details
-            </div>
-        </div>
-
-        <div class="main-content">
-            <div class="timeline-container" id="timelineContainer">
-                <canvas id="timeline-canvas"></canvas>
-            </div>
-            
-            <div class="details-panel" id="detailsPanel">
-                <div class="details-header">
-                    <h2>Downtime Details</h2>
-                    <button class="close-btn" onclick="closeDetails()">Close</button>
-                </div>
-                <div class="details-content" id="detailsContent">
-                    <!-- Details will be populated here -->
-                </div>
-            </div>
-        </div>
-
-        <div class="info">
-            <strong>Production Downtime Tracking</strong><br>
-            This timeline shows downtime events across multiple production machines. Each event is categorized by downtime type and grouped by machine.
-            Click on any event to see detailed information including cause, duration, who recorded it, and additional notes.
-        </div>
+  <!-- ===== Top app bar ===== -->
+  <header class="appbar">
+    <div class="brand">
+      <div class="logo">⬢</div>
+      <div class="title">
+        <div class="line">Plant Operations Console</div>
+        <div class="sub">Line 3 — Assembly</div>
+      </div>
     </div>
 
-    <script src="../lib/tempis_timeline.js"></script>
-    <script>
-        const canvas = document.getElementById('timeline-canvas');
-        const timelineContainer = document.getElementById('timelineContainer');
-        const detailsPanel = document.getElementById('detailsPanel');
-        const detailsContent = document.getElementById('detailsContent');
-        
-        let timeline = null;
-        let selectedEventId = null;
-        
-        // Downtime categories
-        const downtimeCategories = [
-            {
-                name: 'mechanical',
-                label: 'Mechanical Failure',
-                style: {
-                    backgroundColor: '#f44336',
-                    fontColor: '#ffffff'
-                }
-            },
-            {
-                name: 'electrical',
-                label: 'Electrical Issue',
-                style: {
-                    backgroundColor: '#ff9800',
-                    fontColor: '#ffffff'
-                }
-            },
-            {
-                name: 'material',
-                label: 'Material Shortage',
-                style: {
-                    backgroundColor: '#ffc107',
-                    fontColor: '#000000'
-                }
-            },
-            {
-                name: 'maintenance',
-                label: 'Scheduled Maintenance',
-                style: {
-                    backgroundColor: '#2196f3',
-                    fontColor: '#ffffff'
-                }
-            },
-            {
-                name: 'changeover',
-                label: 'Product Changeover',
-                style: {
-                    backgroundColor: '#9c27b0',
-                    fontColor: '#ffffff'
-                }
-            },
-            {
-                name: 'quality',
-                label: 'Quality Issue',
-                style: {
-                    backgroundColor: '#e91e63',
-                    fontColor: '#ffffff'
-                }
-            }
-        ];
-        
-        // Sample downtime events with detailed information
-        const downtimeEvents = [
-            {
-                id: 1,
-                label: 'Conveyor Belt Jam',
-                start: new Date(2024, 0, 15, 8, 30),
-                end: new Date(2024, 0, 15, 9, 15),
-                category: 'mechanical',
-                grouping: 'Machine A',
-                style: {
-                    fontColor: '#ffffff'
-                },
-                details: {
-                    cause: 'Conveyor belt jammed due to foreign object',
-                    recordedBy: 'John Smith',
-                    resolution: 'Removed obstruction and realigned belt',
-                    notes: 'Recommend installing additional safety guards to prevent recurrence',
-                    severity: 'Medium',
-                    cost: '$450'
-                }
-            },
-            {
-                id: 2,
-                label: 'Power Supply Failure',
-                start: new Date(2024, 0, 15, 10, 0),
-                end: new Date(2024, 0, 15, 11, 30),
-                category: 'electrical',
-                grouping: 'Machine B',
-                style: {
-                    fontColor: '#ffffff'
-                },
-                details: {
-                    cause: 'Main power supply unit failed',
-                    recordedBy: 'Sarah Johnson',
-                    resolution: 'Replaced power supply unit',
-                    notes: 'Unit was past its recommended service life. Scheduled replacement of similar units.',
-                    severity: 'High',
-                    cost: '$1,200'
-                }
-            },
-            {
-                id: 3,
-                label: 'Raw Material Delay',
-                start: new Date(2024, 0, 15, 13, 0),
-                end: new Date(2024, 0, 15, 14, 45),
-                category: 'material',
-                grouping: 'Machine A',
-                style: {
-                    fontColor: '#ffffff'
-                },
-                details: {
-                    cause: 'Supplier delivery delayed',
-                    recordedBy: 'Mike Chen',
-                    resolution: 'Emergency order from backup supplier',
-                    notes: 'Reviewing supplier contracts to include penalty clauses for delays',
-                    severity: 'Medium',
-                    cost: '$800'
-                }
-            },
-            {
-                id: 4,
-                label: 'Scheduled PM',
-                start: new Date(2024, 0, 15, 6, 0),
-                end: new Date(2024, 0, 15, 7, 30),
-                category: 'maintenance',
-                grouping: 'Machine C',
-                style: {
-                    fontColor: '#ffffff'
-                },
-                details: {
-                    cause: 'Quarterly preventive maintenance',
-                    recordedBy: 'Maintenance Team',
-                    resolution: 'Completed all scheduled tasks',
-                    notes: 'All systems operating within normal parameters. Next PM scheduled for April 15.',
-                    severity: 'Low',
-                    cost: '$300'
-                }
-            },
-            {
-                id: 5,
-                label: 'Product Line Switch',
-                start: new Date(2024, 0, 15, 15, 0),
-                end: new Date(2024, 0, 15, 16, 0),
-                category: 'changeover',
-                grouping: 'Machine B',
-                style: {
-                    fontColor: '#ffffff'
-                },
-                details: {
-                    cause: 'Switching from Product A to Product B',
-                    recordedBy: 'Production Supervisor',
-                    resolution: 'Changeover completed successfully',
-                    notes: 'Changeover time within target. New tooling performed well.',
-                    severity: 'Low',
-                    cost: '$200'
-                }
-            },
-            {
-                id: 6,
-                label: 'Hydraulic Leak',
-                start: new Date(2024, 0, 15, 11, 45),
-                end: new Date(2024, 0, 15, 13, 30),
-                category: 'mechanical',
-                grouping: 'Machine C',
-                style: {
-                    fontColor: '#ffffff'
-                },
-                details: {
-                    cause: 'Hydraulic hose rupture',
-                    recordedBy: 'Tom Wilson',
-                    resolution: 'Replaced hydraulic hose and refilled system',
-                    notes: 'Hose showed signs of wear. Implementing more frequent inspections.',
-                    severity: 'High',
-                    cost: '$950'
-                }
-            },
-            {
-                id: 7,
-                label: 'Sensor Malfunction',
-                start: new Date(2024, 0, 15, 9, 30),
-                end: new Date(2024, 0, 15, 10, 15),
-                category: 'electrical',
-                grouping: 'Machine A',
-                style: {
-                    fontColor: '#ffffff'
-                },
-                details: {
-                    cause: 'Proximity sensor giving false readings',
-                    recordedBy: 'Lisa Anderson',
-                    resolution: 'Recalibrated sensor and cleaned mounting area',
-                    notes: 'Sensor was covered in dust. Added to daily cleaning checklist.',
-                    severity: 'Low',
-                    cost: '$150'
-                }
-            },
-            {
-                id: 8,
-                label: 'Quality Defects',
-                start: new Date(2024, 0, 15, 14, 0),
-                end: new Date(2024, 0, 15, 15, 30),
-                category: 'quality',
-                grouping: 'Machine B',
-                style: {
-                    fontColor: '#ffffff'
-                },
-                details: {
-                    cause: 'High defect rate detected in output',
-                    recordedBy: 'Quality Control',
-                    resolution: 'Adjusted machine parameters and replaced worn tooling',
-                    notes: 'Root cause was worn cutting tool. Implemented tool life monitoring.',
-                    severity: 'Medium',
-                    cost: '$600'
-                }
-            },
-            {
-                id: 9,
-                label: 'Bearing Failure',
-                start: new Date(2024, 0, 15, 7, 45),
-                end: new Date(2024, 0, 15, 9, 0),
-                category: 'mechanical',
-                grouping: 'Machine B',
-                style: {
-                    fontColor: '#ffffff'
-                },
-                details: {
-                    cause: 'Main shaft bearing seized',
-                    recordedBy: 'John Smith',
-                    resolution: 'Replaced bearing and lubricated shaft',
-                    notes: 'Bearing was not properly lubricated. Updated maintenance schedule.',
-                    severity: 'High',
-                    cost: '$1,100'
-                }
-            },
-            {
-                id: 10,
-                label: 'Control Panel Error',
-                start: new Date(2024, 0, 15, 12, 15),
-                end: new Date(2024, 0, 15, 12, 45),
-                category: 'electrical',
-                grouping: 'Machine C',
-                style: {
-                    fontColor: '#ffffff'
-                },
-                details: {
-                    cause: 'PLC communication error',
-                    recordedBy: 'Sarah Johnson',
-                    resolution: 'Reset PLC and verified communication cables',
-                    notes: 'Loose cable connection. Secured all connections and tested.',
-                    severity: 'Low',
-                    cost: '$100'
-                }
-            },
-            {
-                id: 11,
-                label: 'Material Quality Issue',
-                start: new Date(2024, 0, 15, 10, 30),
-                end: new Date(2024, 0, 15, 11, 15),
-                category: 'material',
-                grouping: 'Machine C',
-                style: {
-                    fontColor: '#ffffff'
-                },
-                details: {
-                    cause: 'Substandard raw material batch',
-                    recordedBy: 'Mike Chen',
-                    resolution: 'Rejected batch and sourced replacement',
-                    notes: 'Supplier notified. Implementing incoming material inspection.',
-                    severity: 'Medium',
-                    cost: '$700'
-                }
-            },
-            {
-                id: 12,
-                label: 'Lubrication Service',
-                start: new Date(2024, 0, 15, 16, 30),
-                end: new Date(2024, 0, 15, 17, 15),
-                category: 'maintenance',
-                grouping: 'Machine A',
-                style: {
-                    fontColor: '#ffffff'
-                },
-                details: {
-                    cause: 'Monthly lubrication service',
-                    recordedBy: 'Maintenance Team',
-                    resolution: 'All lubrication points serviced',
-                    notes: 'All bearings and moving parts properly lubricated. No issues found.',
-                    severity: 'Low',
-                    cost: '$150'
-                }
-            },
-            {
-                id: 13,
-                label: 'Tooling Changeover',
-                start: new Date(2024, 0, 15, 8, 0),
-                end: new Date(2024, 0, 15, 8, 45),
-                category: 'changeover',
-                grouping: 'Machine A',
-                style: {
-                    fontColor: '#ffffff'
-                },
-                details: {
-                    cause: 'New product run requires different tooling',
-                    recordedBy: 'Production Supervisor',
-                    resolution: 'Tooling changed and first article approved',
-                    notes: 'Changeover completed ahead of schedule. Team training effective.',
-                    severity: 'Low',
-                    cost: '$180'
-                }
-            },
-            {
-                id: 14,
-                label: 'Dimensional Variance',
-                start: new Date(2024, 0, 15, 16, 15),
-                end: new Date(2024, 0, 15, 17, 30),
-                category: 'quality',
-                grouping: 'Machine C',
-                style: {
-                    fontColor: '#ffffff'
-                },
-                details: {
-                    cause: 'Parts measuring out of tolerance',
-                    recordedBy: 'Quality Control',
-                    resolution: 'Recalibrated machine and adjusted cutting parameters',
-                    notes: 'Temperature fluctuation affected precision. Installing climate control.',
-                    severity: 'Medium',
-                    cost: '$550'
-                }
-            },
-            {
-                id: 15,
-                label: 'Emergency Stop Activation',
-                start: new Date(2024, 0, 15, 13, 45),
-                end: new Date(2024, 0, 15, 14, 15),
-                category: 'mechanical',
-                grouping: 'Machine A',
-                style: {
-                    fontColor: '#ffffff'
-                },
-                details: {
-                    cause: 'Safety guard triggered emergency stop',
-                    recordedBy: 'Tom Wilson',
-                    resolution: 'Cleared area and reset safety system',
-                    notes: 'Operator training reinforced. No equipment damage.',
-                    severity: 'Low',
-                    cost: '$120'
-                }
-            },
-            {
-                id: 16,
-                label: 'Motor Overheating',
-                start: new Date(2024, 0, 15, 15, 30),
-                end: new Date(2024, 0, 15, 16, 45),
-                category: 'electrical',
-                grouping: 'Machine A',
-                style: { fontColor: '#ffffff' },
-                details: {
-                    cause: 'Drive motor exceeded temperature threshold',
-                    recordedBy: 'Lisa Anderson',
-                    resolution: 'Replaced cooling fan and cleaned ventilation ducts',
-                    notes: 'Dust buildup restricted airflow. Added monthly vent cleaning to schedule.',
-                    severity: 'High',
-                    cost: '$880'
-                }
-            },
-            {
-                id: 17,
-                label: 'Pneumatic Line Leak',
-                start: new Date(2024, 0, 15, 6, 30),
-                end: new Date(2024, 0, 15, 7, 15),
-                category: 'mechanical',
-                grouping: 'Machine B',
-                style: { fontColor: '#ffffff' },
-                details: {
-                    cause: 'Air leak detected in pneumatic actuator line',
-                    recordedBy: 'Tom Wilson',
-                    resolution: 'Replaced fitting and tested for leaks',
-                    notes: 'Fitting had corroded. Switching to stainless steel fittings.',
-                    severity: 'Low',
-                    cost: '$90'
-                }
-            },
-            {
-                id: 18,
-                label: 'Batch Contamination',
-                start: new Date(2024, 0, 15, 11, 0),
-                end: new Date(2024, 0, 15, 12, 30),
-                category: 'quality',
-                grouping: 'Machine A',
-                style: { fontColor: '#ffffff' },
-                details: {
-                    cause: 'Cross-contamination from previous product run',
-                    recordedBy: 'Quality Control',
-                    resolution: 'Full machine purge and cleaning cycle',
-                    notes: 'Changeover procedure updated to include mandatory purge step.',
-                    severity: 'High',
-                    cost: '$1,400'
-                }
-            },
-            {
-                id: 19,
-                label: 'Coolant System Flush',
-                start: new Date(2024, 0, 15, 17, 0),
-                end: new Date(2024, 0, 15, 18, 0),
-                category: 'maintenance',
-                grouping: 'Machine B',
-                style: { fontColor: '#ffffff' },
-                details: {
-                    cause: 'Scheduled coolant replacement',
-                    recordedBy: 'Maintenance Team',
-                    resolution: 'Flushed system and refilled with fresh coolant',
-                    notes: 'Coolant concentration was within limits but discolored. No issues found.',
-                    severity: 'Low',
-                    cost: '$220'
-                }
-            },
-            {
-                id: 20,
-                label: 'Die Changeover',
-                start: new Date(2024, 0, 15, 9, 0),
-                end: new Date(2024, 0, 15, 10, 0),
-                category: 'changeover',
-                grouping: 'Machine C',
-                style: { fontColor: '#ffffff' },
-                details: {
-                    cause: 'Switching to new die set for order #4521',
-                    recordedBy: 'Production Supervisor',
-                    resolution: 'Die installed and first article inspection passed',
-                    notes: 'New quick-change system reduced changeover time by 20%.',
-                    severity: 'Low',
-                    cost: '$160'
-                }
-            },
-            {
-                id: 21,
-                label: 'Packaging Material Shortage',
-                start: new Date(2024, 0, 15, 14, 30),
-                end: new Date(2024, 0, 15, 15, 15),
-                category: 'material',
-                grouping: 'Machine B',
-                style: { fontColor: '#ffffff' },
-                details: {
-                    cause: 'Ran out of packaging material mid-run',
-                    recordedBy: 'Mike Chen',
-                    resolution: 'Expedited delivery from warehouse',
-                    notes: 'Kanban levels being reviewed. Min stock level increased.',
-                    severity: 'Medium',
-                    cost: '$350'
-                }
-            },
-            {
-                id: 22,
-                label: 'VFD Fault',
-                start: new Date(2024, 0, 15, 7, 0),
-                end: new Date(2024, 0, 15, 8, 30),
-                category: 'electrical',
-                grouping: 'Machine C',
-                style: { fontColor: '#ffffff' },
-                details: {
-                    cause: 'Variable frequency drive threw overcurrent fault',
-                    recordedBy: 'Sarah Johnson',
-                    resolution: 'Cleared fault, inspected wiring, and performed test run',
-                    notes: 'Intermittent wiring issue found. Reterminated motor leads.',
-                    severity: 'High',
-                    cost: '$750'
-                }
-            },
-            {
-                id: 23,
-                label: 'Gearbox Noise',
-                start: new Date(2024, 0, 15, 16, 0),
-                end: new Date(2024, 0, 15, 17, 0),
-                category: 'mechanical',
-                grouping: 'Machine B',
-                style: { fontColor: '#ffffff' },
-                details: {
-                    cause: 'Unusual grinding noise from main gearbox',
-                    recordedBy: 'John Smith',
-                    resolution: 'Replaced worn gear and topped up oil',
-                    notes: 'Gear teeth showed excessive wear. Ordering spare set for stock.',
-                    severity: 'Medium',
-                    cost: '$680'
-                }
-            },
-            {
-                id: 24,
-                label: 'Surface Finish Defects',
-                start: new Date(2024, 0, 15, 10, 15),
-                end: new Date(2024, 0, 15, 11, 0),
-                category: 'quality',
-                grouping: 'Machine B',
-                style: { fontColor: '#ffffff' },
-                details: {
-                    cause: 'Surface roughness exceeding specification',
-                    recordedBy: 'Quality Control',
-                    resolution: 'Replaced worn insert and adjusted feed rate',
-                    notes: 'Insert life tracking implemented to prevent recurrence.',
-                    severity: 'Medium',
-                    cost: '$420'
-                }
-            },
-            {
-                id: 25,
-                label: 'Adhesive Supply Issue',
-                start: new Date(2024, 0, 15, 12, 0),
-                end: new Date(2024, 0, 15, 12, 30),
-                category: 'material',
-                grouping: 'Machine A',
-                style: { fontColor: '#ffffff' },
-                details: {
-                    cause: 'Adhesive viscosity out of spec due to temperature',
-                    recordedBy: 'Mike Chen',
-                    resolution: 'Conditioned adhesive to correct temperature and tested',
-                    notes: 'Storage area temperature control being installed.',
-                    severity: 'Low',
-                    cost: '$180'
-                }
-            }
-        ];
-        
-        function initializeTimeline() {
-            try {
-                console.log('Initializing timeline...');
-                
-                if (timeline) {
-                    timeline.destroy();
-                }
-                
-                // Set range to show the full day
-                const startTime = new Date(2024, 0, 15, 6, 0);
-                const endTime = new Date(2024, 0, 15, 18, 0);
-                
-                timeline = new tempis_timeline.TempisTimeline('#timeline-canvas', {
-                    responsive: true,
-                    verticalFill: 'fill-canvas',
-                    items: downtimeEvents,
-                    categories: downtimeCategories,
-                    legend: {
-                        position: 'bottom',
-                        alignment: 'center',
-                        isFilterOnClick: false
-                    },
-                    range: {
-                        position: 'bottom',
-                        start: startTime,
-                        end: endTime,
-                        zoom: {
-                            enabled: true
-                        }
-                    },
-                    selection: 'single',
-                    onSelectionChange: handleSelectionChange
-                });
-                
-                console.log('Timeline initialized successfully');
-                
-            } catch (error) {
-                console.error('Error initializing timeline:', error);
-            }
+    <div class="appbar-spacer"></div>
+
+    <div class="pill">
+      <span class="k">Shift</span>
+      <span class="v">Day · A-Crew</span>
+    </div>
+    <div class="pill">
+      <span class="dot"></span>
+      <span class="v">Monitoring Live</span>
+    </div>
+    <div class="pill">
+      <span class="k">Local</span>
+      <span class="v clock mono" id="clock">--:--:--</span>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <!-- ===== KPI tiles ===== -->
+    <section class="kpis" id="kpis">
+      <div class="kpi good">
+        <div class="label">Availability</div>
+        <div class="value mono"><span id="kpiAvail">--</span><span class="unit">%</span></div>
+        <div class="foot"><span class="up">▲ 1.4%</span> vs. yesterday</div>
+      </div>
+      <div class="kpi bad">
+        <div class="label">Total Downtime</div>
+        <div class="value mono"><span id="kpiDowntime">--</span><span class="unit">hrs</span></div>
+        <div class="foot"><span id="kpiEvents">--</span> events logged</div>
+      </div>
+      <div class="kpi">
+        <div class="label">MTTR</div>
+        <div class="value mono"><span id="kpiMttr">--</span><span class="unit">min</span></div>
+        <div class="foot">mean time to repair</div>
+      </div>
+      <div class="kpi cyan">
+        <div class="label">Events Today</div>
+        <div class="value mono" id="kpiEvents2">--</div>
+        <div class="foot"><span id="kpiHigh">--</span> high severity</div>
+      </div>
+      <div class="kpi">
+        <div class="label">OEE</div>
+        <div class="value mono"><span id="kpiOee">--</span><span class="unit">%</span></div>
+        <div class="foot"><span class="down">▼ 0.8%</span> vs. target</div>
+      </div>
+    </section>
+
+    <!-- ===== Main grid ===== -->
+    <section class="grid">
+      <!-- Timeline panel -->
+      <div class="panel">
+        <div class="panel-head">
+          <h2><span class="accent-bar"></span> Downtime Timeline</h2>
+          <div class="spacer"></div>
+          <div class="btn-group" id="rangePresets">
+            <button class="btn" data-range="morning">Morning</button>
+            <button class="btn" data-range="afternoon">Afternoon</button>
+            <button class="btn active" data-range="full">Full Shift</button>
+          </div>
+          <button class="btn ghost" id="clearSelBtn">Clear selection</button>
+        </div>
+        <div class="timeline-host">
+          <canvas id="timeline-canvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Side column — single panel that swaps between breakdown and event details -->
+      <div class="side">
+        <div class="panel side-panel">
+          <div class="panel-head">
+            <h2><span class="accent-bar"></span> <span id="sidePanelTitle">Downtime by Cause</span></h2>
+          </div>
+          <div class="details-body" id="detailsBody">
+            <!-- breakdown / event details injected here -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="../lib/tempis_timeline.js"></script>
+  <script>
+    // ============================================================
+    // Downtime categories (preserved exactly)
+    // ============================================================
+    const downtimeCategories = [
+      {
+        name: 'mechanical',
+        label: 'Mechanical Failure',
+        style: { backgroundColor: '#f44336', fontColor: '#ffffff' }
+      },
+      {
+        name: 'electrical',
+        label: 'Electrical Issue',
+        style: { backgroundColor: '#ff9800', fontColor: '#ffffff' }
+      },
+      {
+        name: 'material',
+        label: 'Material Shortage',
+        style: { backgroundColor: '#ffc107', fontColor: '#000000' }
+      },
+      {
+        name: 'maintenance',
+        label: 'Scheduled Maintenance',
+        style: { backgroundColor: '#2196f3', fontColor: '#ffffff' }
+      },
+      {
+        name: 'changeover',
+        label: 'Product Changeover',
+        style: { backgroundColor: '#9c27b0', fontColor: '#ffffff' }
+      },
+      {
+        name: 'quality',
+        label: 'Quality Issue',
+        style: { backgroundColor: '#e91e63', fontColor: '#ffffff' }
+      }
+    ];
+
+    // ============================================================
+    // Downtime events (preserved exactly, with details objects)
+    // ============================================================
+    const downtimeEvents = [
+      {
+        id: 1,
+        label: 'Conveyor Belt Jam',
+        start: new Date(2024, 0, 15, 8, 30),
+        end: new Date(2024, 0, 15, 9, 15),
+        category: 'mechanical',
+        grouping: 'Machine A',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Conveyor belt jammed due to foreign object',
+          recordedBy: 'John Smith',
+          resolution: 'Removed obstruction and realigned belt',
+          notes: 'Recommend installing additional safety guards to prevent recurrence',
+          severity: 'Medium',
+          cost: '$450'
         }
-        
-        function handleSelectionChange(changes) {
-            console.log('Selection changed:', changes);
-            
-            // Update the items with new selection state
-            changes.forEach(change => {
-                const event = downtimeEvents.find(e => e.id === change.id);
-                if (event) {
-                    event.selected = change.selected;
-                }
-            });
-            
-            // Update the timeline with new selection state
-            timeline.setItems([...downtimeEvents]);
-            
-            // Find the selected item
-            const selectedChange = changes.find(c => c.selected === true);
-            
-            if (selectedChange) {
-                selectedEventId = selectedChange.id;
-                showDetails(selectedEventId);
-            } else {
-                selectedEventId = null;
-                hideDetails();
-            }
+      },
+      {
+        id: 2,
+        label: 'Power Supply Failure',
+        start: new Date(2024, 0, 15, 10, 0),
+        end: new Date(2024, 0, 15, 11, 30),
+        category: 'electrical',
+        grouping: 'Machine B',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Main power supply unit failed',
+          recordedBy: 'Sarah Johnson',
+          resolution: 'Replaced power supply unit',
+          notes: 'Unit was past its recommended service life. Scheduled replacement of similar units.',
+          severity: 'High',
+          cost: '$1,200'
         }
-        
-        function showDetails(eventId) {
-            const event = downtimeEvents.find(e => e.id === eventId);
-            if (!event) return;
-            
-            const category = downtimeCategories.find(c => c.name === event.category);
-            const duration = (event.end - event.start) / (1000 * 60); // minutes
-            
-            // Build details HTML
-            const html = `
-                <div class="detail-section">
-                    <h3>Event</h3>
-                    <p><strong>${event.label}</strong></p>
-                    <div style="margin-top: 8px;">
-                        <span class="detail-badge" style="background-color: ${category.style.backgroundColor}; color: ${category.style.fontColor};">
-                            ${category.label}
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="detail-section">
-                    <h3>Machine</h3>
-                    <p>${event.grouping}</p>
-                </div>
-                
-                <div class="detail-section">
-                    <h3>Duration</h3>
-                    <p>${duration.toFixed(0)} minutes</p>
-                    <p style="font-size: 0.9em; color: #666;">
-                        ${event.start.toLocaleTimeString()} - ${event.end.toLocaleTimeString()}
-                    </p>
-                </div>
-                
-                <div class="detail-section">
-                    <h3>Severity</h3>
-                    <span class="status-badge" style="background-color: ${getSeverityColor(event.details.severity)}; color: white;">
-                        ${event.details.severity}
-                    </span>
-                </div>
-                
-                <div class="detail-section">
-                    <h3>Estimated Cost</h3>
-                    <p style="font-size: 1.2em; font-weight: 500; color: #f44336;">${event.details.cost}</p>
-                </div>
-                
-                <div class="detail-section">
-                    <h3>Root Cause</h3>
-                    <p>${event.details.cause}</p>
-                </div>
-                
-                <div class="detail-section">
-                    <h3>Resolution</h3>
-                    <p>${event.details.resolution}</p>
-                </div>
-                
-                <div class="detail-section">
-                    <h3>Recorded By</h3>
-                    <p>${event.details.recordedBy}</p>
-                </div>
-                
-                <div class="detail-section">
-                    <h3>Notes</h3>
-                    <p>${event.details.notes}</p>
-                </div>
-            `;
-            
-            detailsContent.innerHTML = html;
-            
-            // Reset scroll position to top
-            detailsContent.scrollTop = 0;
-            
-            // Show the details panel with animation
-            timelineContainer.classList.add('with-details');
-            detailsPanel.classList.add('visible');
+      },
+      {
+        id: 3,
+        label: 'Raw Material Delay',
+        start: new Date(2024, 0, 15, 13, 0),
+        end: new Date(2024, 0, 15, 14, 45),
+        category: 'material',
+        grouping: 'Machine A',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Supplier delivery delayed',
+          recordedBy: 'Mike Chen',
+          resolution: 'Emergency order from backup supplier',
+          notes: 'Reviewing supplier contracts to include penalty clauses for delays',
+          severity: 'Medium',
+          cost: '$800'
         }
-        
-        function hideDetails() {
-            timelineContainer.classList.remove('with-details');
-            detailsPanel.classList.remove('visible');
+      },
+      {
+        id: 4,
+        label: 'Scheduled PM',
+        start: new Date(2024, 0, 15, 6, 0),
+        end: new Date(2024, 0, 15, 7, 30),
+        category: 'maintenance',
+        grouping: 'Machine C',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Quarterly preventive maintenance',
+          recordedBy: 'Maintenance Team',
+          resolution: 'Completed all scheduled tasks',
+          notes: 'All systems operating within normal parameters. Next PM scheduled for April 15.',
+          severity: 'Low',
+          cost: '$300'
         }
-        
-        function closeDetails() {
-            // Deselect the item in the timeline by updating the selection state
-            if (selectedEventId !== null) {
-                const event = downtimeEvents.find(e => e.id === selectedEventId);
-                if (event) {
-                    event.selected = false;
-                    timeline.setItems([...downtimeEvents]);
-                }
-            }
-            hideDetails();
+      },
+      {
+        id: 5,
+        label: 'Product Line Switch',
+        start: new Date(2024, 0, 15, 15, 0),
+        end: new Date(2024, 0, 15, 16, 0),
+        category: 'changeover',
+        grouping: 'Machine B',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Switching from Product A to Product B',
+          recordedBy: 'Production Supervisor',
+          resolution: 'Changeover completed successfully',
+          notes: 'Changeover time within target. New tooling performed well.',
+          severity: 'Low',
+          cost: '$200'
         }
-        
-        function getSeverityColor(severity) {
-            switch (severity) {
-                case 'High': return '#f44336';
-                case 'Medium': return '#ff9800';
-                case 'Low': return '#4caf50';
-                default: return '#9e9e9e';
-            }
+      },
+      {
+        id: 6,
+        label: 'Hydraulic Leak',
+        start: new Date(2024, 0, 15, 11, 45),
+        end: new Date(2024, 0, 15, 13, 30),
+        category: 'mechanical',
+        grouping: 'Machine C',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Hydraulic hose rupture',
+          recordedBy: 'Tom Wilson',
+          resolution: 'Replaced hydraulic hose and refilled system',
+          notes: 'Hose showed signs of wear. Implementing more frequent inspections.',
+          severity: 'High',
+          cost: '$950'
         }
-        
-        // Initialize
-        console.log('Setting up timeline...');
-        initializeTimeline();
-        
-        // Clean up on page unload
-        window.addEventListener('beforeunload', () => {
-            if (timeline) {
-                timeline.destroy();
-            }
+      },
+      {
+        id: 7,
+        label: 'Sensor Malfunction',
+        start: new Date(2024, 0, 15, 9, 30),
+        end: new Date(2024, 0, 15, 10, 15),
+        category: 'electrical',
+        grouping: 'Machine A',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Proximity sensor giving false readings',
+          recordedBy: 'Lisa Anderson',
+          resolution: 'Recalibrated sensor and cleaned mounting area',
+          notes: 'Sensor was covered in dust. Added to daily cleaning checklist.',
+          severity: 'Low',
+          cost: '$150'
+        }
+      },
+      {
+        id: 8,
+        label: 'Quality Defects',
+        start: new Date(2024, 0, 15, 14, 0),
+        end: new Date(2024, 0, 15, 15, 30),
+        category: 'quality',
+        grouping: 'Machine B',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'High defect rate detected in output',
+          recordedBy: 'Quality Control',
+          resolution: 'Adjusted machine parameters and replaced worn tooling',
+          notes: 'Root cause was worn cutting tool. Implemented tool life monitoring.',
+          severity: 'Medium',
+          cost: '$600'
+        }
+      },
+      {
+        id: 9,
+        label: 'Bearing Failure',
+        start: new Date(2024, 0, 15, 7, 45),
+        end: new Date(2024, 0, 15, 9, 0),
+        category: 'mechanical',
+        grouping: 'Machine B',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Main shaft bearing seized',
+          recordedBy: 'John Smith',
+          resolution: 'Replaced bearing and lubricated shaft',
+          notes: 'Bearing was not properly lubricated. Updated maintenance schedule.',
+          severity: 'High',
+          cost: '$1,100'
+        }
+      },
+      {
+        id: 10,
+        label: 'Control Panel Error',
+        start: new Date(2024, 0, 15, 12, 15),
+        end: new Date(2024, 0, 15, 12, 45),
+        category: 'electrical',
+        grouping: 'Machine C',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'PLC communication error',
+          recordedBy: 'Sarah Johnson',
+          resolution: 'Reset PLC and verified communication cables',
+          notes: 'Loose cable connection. Secured all connections and tested.',
+          severity: 'Low',
+          cost: '$100'
+        }
+      },
+      {
+        id: 11,
+        label: 'Material Quality Issue',
+        start: new Date(2024, 0, 15, 10, 30),
+        end: new Date(2024, 0, 15, 11, 15),
+        category: 'material',
+        grouping: 'Machine C',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Substandard raw material batch',
+          recordedBy: 'Mike Chen',
+          resolution: 'Rejected batch and sourced replacement',
+          notes: 'Supplier notified. Implementing incoming material inspection.',
+          severity: 'Medium',
+          cost: '$700'
+        }
+      },
+      {
+        id: 12,
+        label: 'Lubrication Service',
+        start: new Date(2024, 0, 15, 16, 30),
+        end: new Date(2024, 0, 15, 17, 15),
+        category: 'maintenance',
+        grouping: 'Machine A',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Monthly lubrication service',
+          recordedBy: 'Maintenance Team',
+          resolution: 'All lubrication points serviced',
+          notes: 'All bearings and moving parts properly lubricated. No issues found.',
+          severity: 'Low',
+          cost: '$150'
+        }
+      },
+      {
+        id: 13,
+        label: 'Tooling Changeover',
+        start: new Date(2024, 0, 15, 8, 0),
+        end: new Date(2024, 0, 15, 8, 45),
+        category: 'changeover',
+        grouping: 'Machine A',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'New product run requires different tooling',
+          recordedBy: 'Production Supervisor',
+          resolution: 'Tooling changed and first article approved',
+          notes: 'Changeover completed ahead of schedule. Team training effective.',
+          severity: 'Low',
+          cost: '$180'
+        }
+      },
+      {
+        id: 14,
+        label: 'Dimensional Variance',
+        start: new Date(2024, 0, 15, 16, 15),
+        end: new Date(2024, 0, 15, 17, 30),
+        category: 'quality',
+        grouping: 'Machine C',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Parts measuring out of tolerance',
+          recordedBy: 'Quality Control',
+          resolution: 'Recalibrated machine and adjusted cutting parameters',
+          notes: 'Temperature fluctuation affected precision. Installing climate control.',
+          severity: 'Medium',
+          cost: '$550'
+        }
+      },
+      {
+        id: 15,
+        label: 'Emergency Stop Activation',
+        start: new Date(2024, 0, 15, 13, 45),
+        end: new Date(2024, 0, 15, 14, 15),
+        category: 'mechanical',
+        grouping: 'Machine A',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Safety guard triggered emergency stop',
+          recordedBy: 'Tom Wilson',
+          resolution: 'Cleared area and reset safety system',
+          notes: 'Operator training reinforced. No equipment damage.',
+          severity: 'Low',
+          cost: '$120'
+        }
+      },
+      {
+        id: 16,
+        label: 'Motor Overheating',
+        start: new Date(2024, 0, 15, 15, 30),
+        end: new Date(2024, 0, 15, 16, 45),
+        category: 'electrical',
+        grouping: 'Machine A',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Drive motor exceeded temperature threshold',
+          recordedBy: 'Lisa Anderson',
+          resolution: 'Replaced cooling fan and cleaned ventilation ducts',
+          notes: 'Dust buildup restricted airflow. Added monthly vent cleaning to schedule.',
+          severity: 'High',
+          cost: '$880'
+        }
+      },
+      {
+        id: 17,
+        label: 'Pneumatic Line Leak',
+        start: new Date(2024, 0, 15, 6, 30),
+        end: new Date(2024, 0, 15, 7, 15),
+        category: 'mechanical',
+        grouping: 'Machine B',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Air leak detected in pneumatic actuator line',
+          recordedBy: 'Tom Wilson',
+          resolution: 'Replaced fitting and tested for leaks',
+          notes: 'Fitting had corroded. Switching to stainless steel fittings.',
+          severity: 'Low',
+          cost: '$90'
+        }
+      },
+      {
+        id: 18,
+        label: 'Batch Contamination',
+        start: new Date(2024, 0, 15, 11, 0),
+        end: new Date(2024, 0, 15, 12, 30),
+        category: 'quality',
+        grouping: 'Machine A',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Cross-contamination from previous product run',
+          recordedBy: 'Quality Control',
+          resolution: 'Full machine purge and cleaning cycle',
+          notes: 'Changeover procedure updated to include mandatory purge step.',
+          severity: 'High',
+          cost: '$1,400'
+        }
+      },
+      {
+        id: 19,
+        label: 'Coolant System Flush',
+        start: new Date(2024, 0, 15, 17, 0),
+        end: new Date(2024, 0, 15, 18, 0),
+        category: 'maintenance',
+        grouping: 'Machine B',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Scheduled coolant replacement',
+          recordedBy: 'Maintenance Team',
+          resolution: 'Flushed system and refilled with fresh coolant',
+          notes: 'Coolant concentration was within limits but discolored. No issues found.',
+          severity: 'Low',
+          cost: '$220'
+        }
+      },
+      {
+        id: 20,
+        label: 'Die Changeover',
+        start: new Date(2024, 0, 15, 9, 0),
+        end: new Date(2024, 0, 15, 10, 0),
+        category: 'changeover',
+        grouping: 'Machine C',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Switching to new die set for order #4521',
+          recordedBy: 'Production Supervisor',
+          resolution: 'Die installed and first article inspection passed',
+          notes: 'New quick-change system reduced changeover time by 20%.',
+          severity: 'Low',
+          cost: '$160'
+        }
+      },
+      {
+        id: 21,
+        label: 'Packaging Material Shortage',
+        start: new Date(2024, 0, 15, 14, 30),
+        end: new Date(2024, 0, 15, 15, 15),
+        category: 'material',
+        grouping: 'Machine B',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Ran out of packaging material mid-run',
+          recordedBy: 'Mike Chen',
+          resolution: 'Expedited delivery from warehouse',
+          notes: 'Kanban levels being reviewed. Min stock level increased.',
+          severity: 'Medium',
+          cost: '$350'
+        }
+      },
+      {
+        id: 22,
+        label: 'VFD Fault',
+        start: new Date(2024, 0, 15, 7, 0),
+        end: new Date(2024, 0, 15, 8, 30),
+        category: 'electrical',
+        grouping: 'Machine C',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Variable frequency drive threw overcurrent fault',
+          recordedBy: 'Sarah Johnson',
+          resolution: 'Cleared fault, inspected wiring, and performed test run',
+          notes: 'Intermittent wiring issue found. Reterminated motor leads.',
+          severity: 'High',
+          cost: '$750'
+        }
+      },
+      {
+        id: 23,
+        label: 'Gearbox Noise',
+        start: new Date(2024, 0, 15, 16, 0),
+        end: new Date(2024, 0, 15, 17, 0),
+        category: 'mechanical',
+        grouping: 'Machine B',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Unusual grinding noise from main gearbox',
+          recordedBy: 'John Smith',
+          resolution: 'Replaced worn gear and topped up oil',
+          notes: 'Gear teeth showed excessive wear. Ordering spare set for stock.',
+          severity: 'Medium',
+          cost: '$680'
+        }
+      },
+      {
+        id: 24,
+        label: 'Surface Finish Defects',
+        start: new Date(2024, 0, 15, 10, 15),
+        end: new Date(2024, 0, 15, 11, 0),
+        category: 'quality',
+        grouping: 'Machine B',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Surface roughness exceeding specification',
+          recordedBy: 'Quality Control',
+          resolution: 'Replaced worn insert and adjusted feed rate',
+          notes: 'Insert life tracking implemented to prevent recurrence.',
+          severity: 'Medium',
+          cost: '$420'
+        }
+      },
+      {
+        id: 25,
+        label: 'Adhesive Supply Issue',
+        start: new Date(2024, 0, 15, 12, 0),
+        end: new Date(2024, 0, 15, 12, 30),
+        category: 'material',
+        grouping: 'Machine A',
+        style: { fontColor: '#ffffff' },
+        details: {
+          cause: 'Adhesive viscosity out of spec due to temperature',
+          recordedBy: 'Mike Chen',
+          resolution: 'Conditioned adhesive to correct temperature and tested',
+          notes: 'Storage area temperature control being installed.',
+          severity: 'Low',
+          cost: '$180'
+        }
+      }
+    ];
+
+    // ============================================================
+    // Shift window / range presets
+    // ============================================================
+    const SHIFT_START = new Date(2024, 0, 15, 6, 0);
+    const SHIFT_END   = new Date(2024, 0, 15, 18, 0);
+    const RANGES = {
+      morning:   { start: new Date(2024, 0, 15, 6, 0),  end: new Date(2024, 0, 15, 12, 0) },
+      afternoon: { start: new Date(2024, 0, 15, 12, 0), end: new Date(2024, 0, 15, 18, 0) },
+      full:      { start: SHIFT_START, end: SHIFT_END }
+    };
+
+    let timeline = null;
+    let selectedEventId = null;
+
+    // DOM refs
+    const detailsBody = document.getElementById('detailsBody');
+
+    // ============================================================
+    // Timeline init
+    // ============================================================
+    function initializeTimeline() {
+      try {
+        if (timeline) timeline.destroy();
+
+        timeline = new tempis_timeline.TempisTimeline('#timeline-canvas', {
+          responsive: true,
+          verticalFill: 'fill-canvas',
+          items: downtimeEvents,
+          categories: downtimeCategories,
+          selection: 'single',
+          style: {
+            item: { fontColor: '#ffffff', borderRadius: 5, padding: 8 },
+            font: { family: "Geist, system-ui, -apple-system, Roboto, sans-serif", size: 12 }
+          },
+          legend: {
+            position: 'bottom',
+            alignment: 'center',
+            isFilterOnClick: false
+          },
+          range: {
+            position: 'bottom',
+            start: RANGES.full.start,
+            end: RANGES.full.end,
+            zoom: { enabled: true }
+          },
+          onSelectionChange: handleSelectionChange
         });
-        
-        console.log('Script loaded successfully');
-    </script>
+      } catch (error) {
+        console.error('Error initializing timeline:', error);
+      }
+    }
+
+    // ============================================================
+    // Controlled selection -> detail panel
+    // ============================================================
+    function handleSelectionChange(changes) {
+      const selectedChange = changes.find(c => c.selected === true);
+      if (selectedChange) {
+        selectedEventId = selectedChange.id;
+        timeline.setSelection([selectedEventId]);
+        showDetails(selectedEventId);
+      } else {
+        selectedEventId = null;
+        timeline.setSelection([]);
+        showEmptyState();
+      }
+    }
+
+    function clearSelection() {
+      selectedEventId = null;
+      if (timeline) timeline.setSelection([]);
+      showEmptyState();
+    }
+
+    // ============================================================
+    // Detail panel rendering (carried over faithfully)
+    // ============================================================
+    function getSeverityColor(severity) {
+      switch (severity) {
+        case 'High':   return '#ff453a';
+        case 'Medium': return '#ff9f0a';
+        case 'Low':    return '#30d158';
+        default:       return '#9e9e9e';
+      }
+    }
+
+    // When nothing is selected the side panel shows the downtime-by-cause breakdown.
+    function showEmptyState() {
+      document.getElementById('sidePanelTitle').textContent = 'Downtime by Cause';
+      renderCauses();
+      detailsBody.scrollTop = 0;
+    }
+
+    function showDetails(eventId) {
+      const event = downtimeEvents.find(e => e.id === eventId);
+      if (!event) return;
+
+      const category = downtimeCategories.find(c => c.name === event.category);
+      const duration = (event.end - event.start) / (1000 * 60); // minutes
+      const sevColor = getSeverityColor(event.details.severity);
+
+      document.getElementById('sidePanelTitle').textContent = 'Event Details';
+
+      detailsBody.innerHTML = `
+        <div class="det-title">${event.label}</div>
+        <span class="det-cat" style="background-color:${category.style.backgroundColor}; color:${category.style.fontColor};">
+          ${category.label}
+        </span>
+
+        <div class="det-grid">
+          <div class="det-cell">
+            <div class="k">Machine</div>
+            <div class="v">${event.grouping}</div>
+          </div>
+          <div class="det-cell">
+            <div class="k">Duration</div>
+            <div class="v mono">${duration.toFixed(0)} min</div>
+          </div>
+          <div class="det-cell">
+            <div class="k">Window</div>
+            <div class="v mono">${event.start.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} – ${event.end.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+          </div>
+          <div class="det-cell">
+            <div class="k">Severity</div>
+            <div class="v"><span class="sev" style="color:${sevColor};"><span class="dot" style="background:${sevColor};"></span>${event.details.severity}</span></div>
+          </div>
+          <div class="det-cell full">
+            <div class="k">Estimated Cost</div>
+            <div class="v big mono" style="color:#ff6b6b;">${event.details.cost}</div>
+          </div>
+          <div class="det-cell full">
+            <div class="k">Root Cause</div>
+            <div class="v">${event.details.cause}</div>
+          </div>
+          <div class="det-cell full">
+            <div class="k">Resolution</div>
+            <div class="v">${event.details.resolution}</div>
+          </div>
+          <div class="det-cell">
+            <div class="k">Recorded By</div>
+            <div class="v">${event.details.recordedBy}</div>
+          </div>
+          <div class="det-cell">
+            <div class="k">Event ID</div>
+            <div class="v mono">#${String(event.id).padStart(4, '0')}</div>
+          </div>
+          <div class="det-cell full">
+            <div class="k">Notes</div>
+            <div class="v">${event.details.notes}</div>
+          </div>
+        </div>`;
+
+      detailsBody.scrollTop = 0;
+    }
+
+    // ============================================================
+    // KPI computation (derived from the events data where possible)
+    // ============================================================
+    function parseCost(str) {
+      return Number(String(str).replace(/[^0-9.]/g, '')) || 0;
+    }
+
+    function computeKpis() {
+      let totalMinutes = 0;
+      let highCount = 0;
+      downtimeEvents.forEach(e => {
+        totalMinutes += (e.end - e.start) / 60000;
+        if (e.details.severity === 'High') highCount++;
+      });
+
+      const count = downtimeEvents.length;
+      const downtimeHrs = totalMinutes / 60;
+      const mttr = totalMinutes / count;
+
+      // Availability relative to the shift window per machine (3 machines x 12h)
+      const plannedMinutes = 3 * 12 * 60; // 2160
+      const availability = Math.max(0, (1 - totalMinutes / plannedMinutes) * 100);
+      // Representative performance & quality factors -> OEE
+      const performance = 0.94;
+      const quality = 0.985;
+      const oee = (availability / 100) * performance * quality * 100;
+
+      document.getElementById('kpiAvail').textContent    = availability.toFixed(1);
+      document.getElementById('kpiDowntime').textContent = downtimeHrs.toFixed(1);
+      document.getElementById('kpiMttr').textContent     = mttr.toFixed(0);
+      document.getElementById('kpiEvents').textContent   = count;
+      document.getElementById('kpiEvents2').textContent  = count;
+      document.getElementById('kpiHigh').textContent     = highCount;
+      document.getElementById('kpiOee').textContent      = oee.toFixed(1);
+    }
+
+    // ============================================================
+    // Downtime-by-cause breakdown
+    // ============================================================
+    function renderCauses() {
+      const totals = {};
+      let maxMin = 0;
+      downtimeCategories.forEach(c => { totals[c.name] = 0; });
+      downtimeEvents.forEach(e => {
+        const mins = (e.end - e.start) / 60000;
+        totals[e.category] = (totals[e.category] || 0) + mins;
+      });
+
+      const rows = downtimeCategories
+        .map(c => ({ cat: c, mins: totals[c.name] || 0 }))
+        .sort((a, b) => b.mins - a.mins);
+
+      maxMin = Math.max(...rows.map(r => r.mins), 1);
+
+      const rowsHtml = rows.map(r => {
+        const pct = (r.mins / maxMin) * 100;
+        const hrs = (r.mins / 60).toFixed(1);
+        return `
+          <div class="cause-row">
+            <div class="top">
+              <span class="swatch" style="background:${r.cat.style.backgroundColor};"></span>
+              <span class="nm">${r.cat.label}</span>
+              <span class="ct mono">${hrs}h</span>
+            </div>
+            <div class="bar"><span style="width:${pct}%; background:${r.cat.style.backgroundColor};"></span></div>
+          </div>`;
+      }).join('');
+
+      detailsBody.innerHTML = `
+        <div class="cause-hint">Total downtime by category across the shift. Select any event on the timeline to view its full details.</div>
+        <div class="cause-list">${rowsHtml}</div>`;
+    }
+
+    // ============================================================
+    // Range presets
+    // ============================================================
+    function applyRange(key) {
+      const r = RANGES[key];
+      if (!r || !timeline) return;
+      timeline.focus({ range: [r.start, r.end], animate: true, duration: 400 });
+    }
+
+    document.getElementById('rangePresets').addEventListener('click', (ev) => {
+      const btn = ev.target.closest('button[data-range]');
+      if (!btn) return;
+      document.querySelectorAll('#rangePresets .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyRange(btn.dataset.range);
+    });
+
+    document.getElementById('clearSelBtn').addEventListener('click', clearSelection);
+
+    // ============================================================
+    // Live clock
+    // ============================================================
+    function tickClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString([], { hour12: false });
+    }
+
+    // ============================================================
+    // Boot
+    // ============================================================
+    initializeTimeline();
+    computeKpis();
+    showEmptyState();
+    tickClock();
+    setInterval(tickClock, 1000);
+
+    window.addEventListener('beforeunload', () => {
+      if (timeline) timeline.destroy();
+    });
+  </script>
 </body>
 </html>

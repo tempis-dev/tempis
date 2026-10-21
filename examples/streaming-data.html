@@ -1,136 +1,407 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/png" href="../images/logo.png">
+    <link rel="icon" type="image/png" href="../images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Price Stream - Tempis Timeline</title>
+    <title>Tempis Markets — Live Trading Terminal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
-  <style>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+    <style>
+        :root {
+            --bg: #f4f6f9;
+            --panel: #ffffff;
+            --panel-2: #f7f9fc;
+            --border: #e4e8ef;
+            --border-soft: #eef1f6;
+            --text: #111827;
+            --text-dim: #5b6676;
+            --text-faint: #98a2b3;
+            --up: #15a46b;
+            --down: #e5484d;
+            --accent: #2563eb;
+            --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
         body {
             font-family: Geist, system-ui, -apple-system, Roboto, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: #f5f5f5;
-        }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        h1 {
-            margin-top: 0;
-            color: #333;
-        }
-        .controls {
-            margin-bottom: 20px;
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 4px;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
             display: flex;
-            gap: 15px;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ───────────── Top bar ───────────── */
+        .topbar {
+            display: flex;
             align-items: center;
-            flex-wrap: wrap;
+            gap: 18px;
+            padding: 10px 18px;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            flex: 0 0 auto;
+            min-height: 54px;
         }
-        button {
-            padding: 10px 20px;
-            background: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: 0.2px;
+        }
+        .brand .logo {
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            background: linear-gradient(135deg, #2563eb, #15a46b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
             font-size: 14px;
+            color: #ffffff;
+        }
+        .brand .sub {
+            color: var(--text-faint);
+            font-weight: 400;
+            font-size: 12px;
+            padding-left: 10px;
+            margin-left: 2px;
+            border-left: 1px solid var(--border);
+        }
+
+        .spacer { flex: 1 1 auto; }
+
+        /* connection pill */
+        .conn-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--panel-2);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            white-space: nowrap;
+        }
+        .conn-pill .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-faint);
+            box-shadow: 0 0 0 0 rgba(0,0,0,0);
             transition: background 0.2s;
-            font-weight: 500;
         }
-        button:hover {
-            background: #1976D2;
+        .conn-pill.connected { color: var(--up); border-color: rgba(21,164,107,0.35); }
+        .conn-pill.connected .dot {
+            background: var(--up);
+            box-shadow: 0 0 6px 1px rgba(21,164,107,0.5);
+            animation: pulse 1.6s infinite;
         }
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
+        .conn-pill.connecting { color: #b26a00; border-color: rgba(217,119,6,0.35); }
+        .conn-pill.connecting .dot { background: #d97706; box-shadow: 0 0 6px 1px rgba(217,119,6,0.4); }
+        .conn-pill.error { color: var(--down); border-color: rgba(229,72,77,0.35); }
+        .conn-pill.error .dot { background: var(--down); box-shadow: 0 0 6px 1px rgba(229,72,77,0.4); }
+
+        @keyframes pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(21,164,107,0.4); }
+            70%  { box-shadow: 0 0 0 6px rgba(21,164,107,0); }
+            100% { box-shadow: 0 0 0 0 rgba(21,164,107,0); }
         }
-        .status {
-            padding: 10px 15px;
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 500;
-            background: #fff3e0;
-            color: #f57c00;
-            border: 1px solid #ff9800;
+
+        /* terminal buttons */
+        .controls { display: flex; gap: 8px; }
+        .btn {
+            font-family: var(--mono);
+            font-size: 12px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            padding: 7px 13px;
+            background: var(--panel);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
         }
-        .canvas-container {
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 100%;
-            height: 600px;
+        .btn:hover:not(:disabled) { border-color: #cbd2dd; background: var(--panel-2); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn.start { color: var(--up); border-color: rgba(21,164,107,0.4); }
+        .btn.start:hover:not(:disabled) { background: rgba(21,164,107,0.08); }
+        .btn.stop { color: var(--down); border-color: rgba(229,72,77,0.4); }
+        .btn.stop:hover:not(:disabled) { background: rgba(229,72,77,0.08); }
+
+        /* ───────────── Layout ───────────── */
+        .workspace {
+            flex: 1 1 auto;
+            display: flex;
+            min-height: 0;
             overflow: hidden;
         }
-        .info {
-            margin-top: 15px;
-            padding: 15px;
-            background: #e3f2fd;
-            border-left: 4px solid #2196F3;
-            border-radius: 4px;
-            font-size: 14px;
-            line-height: 1.6;
+
+        /* watchlist */
+        .watchlist {
+            flex: 0 0 280px;
+            background: var(--panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 11px 14px;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            border-bottom: 1px solid var(--border);
+            flex: 0 0 auto;
+        }
+        .panel-head .hint { color: var(--text-faint); letter-spacing: 0.3px; text-transform: none; font-size: 11px; }
+
+        .watchlist-body { overflow-y: auto; flex: 1 1 auto; }
+
+        .ticker-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            grid-template-rows: auto auto;
+            gap: 2px 8px;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-soft);
+            cursor: default;
+            transition: background 0.15s;
+        }
+        .ticker-row:hover { background: var(--panel-2); }
+        .ticker-row .sym {
+            font-weight: 600;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ticker-row .sym .swatch {
+            width: 8px; height: 8px; border-radius: 2px; flex: 0 0 auto;
+        }
+        .ticker-row .name {
+            grid-column: 1;
+            font-size: 11px;
+            color: var(--text-faint);
+        }
+        .ticker-row .price {
+            grid-column: 2;
+            grid-row: 1;
+            font-family: var(--mono);
+            font-size: 13px;
+            text-align: right;
+            color: var(--text);
+            transition: color 0.3s;
+        }
+        .ticker-row .chg {
+            grid-column: 2;
+            grid-row: 2;
+            font-family: var(--mono);
+            font-size: 11px;
+            text-align: right;
+            color: var(--text-faint);
+        }
+        .ticker-row.up .price { color: var(--up); }
+        .ticker-row.up .chg { color: var(--up); }
+        .ticker-row.down .price { color: var(--down); }
+        .ticker-row.down .chg { color: var(--down); }
+
+        /* flash on update */
+        .flash-up { animation: flashUp 0.5s ease-out; }
+        .flash-down { animation: flashDown 0.5s ease-out; }
+        @keyframes flashUp { 0% { background: rgba(21,164,107,0.16); } 100% { background: transparent; } }
+        @keyframes flashDown { 0% { background: rgba(229,72,77,0.16); } 100% { background: transparent; } }
+
+        /* main */
+        .main {
+            flex: 1 1 auto;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            min-height: 0;
+            background: var(--bg);
+        }
+
+        .timeline-wrap {
+            flex: 1 1 auto;
+            min-height: 0;
+            position: relative;
+            margin: 0;
+        }
+        #timeline-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* stats strip */
+        .stats {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 0;
+            background: var(--panel);
+            border-top: 1px solid var(--border);
+            font-family: var(--mono);
+            font-size: 12px;
+        }
+        .stat {
+            padding: 9px 16px;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            border-right: 1px solid var(--border-soft);
+        }
+        .stat .label {
+            font-family: Geist, sans-serif;
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-faint);
+        }
+        .stat .val { color: var(--text); font-size: 13px; }
+        .stat .val.accent { color: var(--accent); }
+        .stat .val.up { color: var(--up); }
+
+        /* scrollbars */
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d4dae3; border-radius: 6px; }
+        ::-webkit-scrollbar-thumb:hover { background: #bcc4d0; }
+
+        /* responsive */
+        @media (max-width: 820px) {
+            .workspace { flex-direction: column; }
+            .watchlist {
+                flex: 0 0 auto;
+                max-height: 190px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+            .watchlist-body {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .ticker-row { border-right: 1px solid var(--border-soft); }
+            .brand .sub { display: none; }
+            .stats { overflow-x: auto; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Crypto Price Stream</h1>
-        
+    <!-- Top bar -->
+    <header class="topbar">
+        <div class="brand">
+            <span class="logo">T</span>
+            <span>Tempis Markets</span>
+            <span class="sub">Live Tape · Binance Spot</span>
+        </div>
+        <div class="spacer"></div>
+        <div id="connPill" class="conn-pill">
+            <span class="dot"></span>
+            <span id="connText">Disconnected</span>
+        </div>
         <div class="controls">
-            <button id="startBtn">Start Streaming</button>
-            <button id="stopBtn" disabled>Stop Streaming</button>
-            <button id="clearBtn">Clear Timeline</button>
-            <div id="status" class="status">Ready to start</div>
+            <button id="startBtn" class="btn start">▶ Start</button>
+            <button id="stopBtn" class="btn stop" disabled>■ Stop</button>
+            <button id="clearBtn" class="btn">⌫ Clear</button>
         </div>
+    </header>
 
-        <div class="canvas-container">
-            <canvas id="timeline-canvas"></canvas>
-        </div>
+    <!-- Workspace -->
+    <div class="workspace">
+        <!-- Watchlist -->
+        <aside class="watchlist">
+            <div class="panel-head">
+                <span>Watchlist</span>
+                <span class="hint">10 pairs</span>
+            </div>
+            <div id="watchlistBody" class="watchlist-body"></div>
+        </aside>
 
-        <div class="info">
-            <strong>Live Cryptocurrency Price Stream</strong><br>
-            This demo connects to Binance's public WebSocket API for real-time cryptocurrency prices and demonstrates streaming by adding price events to the timeline with <code>setItems()</code>. 
-            Each significant price movement creates a new timeline event with smooth animations.
-        </div>
+        <!-- Main -->
+        <main class="main">
+            <div class="panel-head">
+                <span>Trade Tape — Price Movement Stream</span>
+                <span class="hint">moves &gt; 0.1%</span>
+            </div>
+            <div class="timeline-wrap">
+                <canvas id="timeline-canvas"></canvas>
+            </div>
+            <!-- Stats strip -->
+            <div class="stats">
+                <div class="stat">
+                    <span class="label">Events</span>
+                    <span id="statEvents" class="val accent">0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Msgs/sec</span>
+                    <span id="statRate" class="val">0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Total Msgs</span>
+                    <span id="statMsgs" class="val">0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Last Update</span>
+                    <span id="statLast" class="val">—</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Status</span>
+                    <span id="statStatus" class="val">Ready to start</span>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script src="../lib/tempis_timeline.js"></script>
     <script>
         console.log('Script starting...');
-        
-        // Check if tempis_timeline is loaded
-        if (typeof tempis_timeline === 'undefined') {
-            console.error('tempis_timeline is not loaded!');
-            document.getElementById('status').textContent = 'Error: Timeline library not loaded';
-            document.getElementById('status').style.background = '#ffebee';
-            document.getElementById('status').style.color = '#c62828';
-        } else {
-            console.log('tempis_timeline loaded successfully');
-        }
-        
-        const canvas = document.getElementById('timeline-canvas');
+
+        // ───────────── DOM refs ─────────────
         const startBtn = document.getElementById('startBtn');
         const stopBtn = document.getElementById('stopBtn');
         const clearBtn = document.getElementById('clearBtn');
-        const status = document.getElementById('status');
-        
+        const connPill = document.getElementById('connPill');
+        const connText = document.getElementById('connText');
+        const watchlistBody = document.getElementById('watchlistBody');
+        const statEvents = document.getElementById('statEvents');
+        const statRate = document.getElementById('statRate');
+        const statMsgs = document.getElementById('statMsgs');
+        const statLast = document.getElementById('statLast');
+        const statStatus = document.getElementById('statStatus');
+
+        // ───────────── State ─────────────
         let timeline = null;
         let websocket = null;
         let allEvents = [];
         let isStreaming = false;
-        let lastPrices = {}; // Track previous prices for change detection
-        let eventIdCounter = 1; // Simple counter for unique IDs
-        
+        let lastPrices = {};      // Track previous prices for change detection (event logic)
+        let refPrices = {};       // First-seen price per coin (watchlist % change)
+        let eventIdCounter = 1;   // Simple counter for unique IDs
+        let totalMsgs = 0;        // All WebSocket trade messages
+        let msgsThisSecond = 0;   // Rolling counter for msgs/sec
+
         // Cryptocurrency data (matching Binance symbols)
         const cryptoCoins = [
             { id: 'btcusdt', name: 'Bitcoin', symbol: 'BTC', color: '#f7931a' },
@@ -144,25 +415,88 @@
             { id: 'maticusdt', name: 'Polygon', symbol: 'MATIC', color: '#8247e5' },
             { id: 'ltcusdt', name: 'Litecoin', symbol: 'LTC', color: '#345d9d' }
         ];
-        
+
+        // ───────────── Watchlist UI ─────────────
+        function fmtPrice(p) {
+            if (p >= 1000) return p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            if (p >= 1) return p.toFixed(2);
+            return p.toFixed(4);
+        }
+
+        function buildWatchlist() {
+            watchlistBody.innerHTML = '';
+            cryptoCoins.forEach(coin => {
+                const row = document.createElement('div');
+                row.className = 'ticker-row';
+                row.id = `row-${coin.id}`;
+                row.innerHTML = `
+                    <div class="sym"><span class="swatch" style="background:${coin.color}"></span>${coin.symbol}</div>
+                    <div class="price" id="price-${coin.id}">—</div>
+                    <div class="name">${coin.name}</div>
+                    <div class="chg" id="chg-${coin.id}">—</div>
+                `;
+                watchlistBody.appendChild(row);
+            });
+        }
+
+        // Update a single coin's watchlist row on EVERY trade (not just >0.1% moves)
+        function updateWatchlistRow(coin, price) {
+            const row = document.getElementById(`row-${coin.id}`);
+            const priceEl = document.getElementById(`price-${coin.id}`);
+            const chgEl = document.getElementById(`chg-${coin.id}`);
+            if (!row || !priceEl || !chgEl) return;
+
+            if (refPrices[coin.id] === undefined) refPrices[coin.id] = price;
+            const changePercent = ((price - refPrices[coin.id]) / refPrices[coin.id]) * 100;
+
+            priceEl.textContent = `$${fmtPrice(price)}`;
+            const arrow = changePercent > 0 ? '▲' : changePercent < 0 ? '▼' : '•';
+            chgEl.textContent = `${arrow} ${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%`;
+
+            row.classList.remove('up', 'down');
+            if (changePercent > 0) row.classList.add('up');
+            else if (changePercent < 0) row.classList.add('down');
+
+            // brief flash based on tick direction vs last price
+            const prev = lastPrices[coin.id];
+            if (prev !== undefined && price !== prev) {
+                const cls = price > prev ? 'flash-up' : 'flash-down';
+                row.classList.remove('flash-up', 'flash-down');
+                void row.offsetWidth; // restart animation
+                row.classList.add(cls);
+            }
+        }
+
+        // ───────────── Connection status pill ─────────────
+        function setConnection(state, text) {
+            connPill.classList.remove('connected', 'connecting', 'error');
+            if (state) connPill.classList.add(state);
+            connText.textContent = text;
+        }
+        function setStatus(text) { statStatus.textContent = text; }
+
+        // ───────────── Timeline ─────────────
         function initializeTimeline() {
             try {
                 console.log('Initializing timeline...');
-                
+
                 if (timeline) {
                     timeline.destroy();
                 }
-                
+
                 // Set initial range to show recent price events (last 1 minute)
                 const now = new Date();
                 const startTime = new Date(now.getTime() - 1 * 60 * 1000); // 1 minute ago
                 const endTime = now; // Now
-                
+
                 timeline = new tempis_timeline.TempisTimeline('#timeline-canvas', {
                     responsive: true,
                     verticalFill: 'fill-canvas',
                     items: [],
-                    // No categories - using groups instead
+                    selection: 'single',
+                    style: {
+                        font: { family: "Geist, system-ui, -apple-system, Roboto, sans-serif", size: 12 }
+                    },
                     range: {
                         position: 'bottom',
                         start: startTime,
@@ -170,25 +504,24 @@
                         zoom: {
                             enabled: true
                         }
-                    },
-                    selection: 'single'
+                    }
                 });
-                
+
                 console.log('Timeline initialized successfully');
-                status.textContent = 'Timeline ready';
-                
+                setStatus('Timeline ready');
+
             } catch (error) {
                 console.error('Error initializing timeline:', error);
-                status.textContent = `Error: ${error.message}`;
-                status.style.background = '#ffebee';
-                status.style.color = '#c62828';
+                setStatus(`Error: ${error.message}`);
+                setConnection('error', 'Error');
             }
         }
-        
+
+        // ───────────── WebSocket ─────────────
         function connectWebSocket() {
             try {
                 console.log('Connecting to Binance WebSocket...');
-                
+
                 // Use Binance's public WebSocket API - no authentication required
                 // Subscribe to multiple crypto pairs
                 const streams = [
@@ -203,16 +536,17 @@
                     'maticusdt@trade',
                     'ltcusdt@trade'
                 ].join('/');
-                
+
+                setConnection('connecting', 'Connecting…');
+
                 websocket = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
-                
+
                 websocket.onopen = function(event) {
                     console.log('WebSocket connected successfully');
-                    status.textContent = 'Connected - waiting for price updates...';
-                    status.style.background = '#e8f5e8';
-                    status.style.color = '#2e7d32';
+                    setConnection('connected', 'Connected');
+                    setStatus('Waiting for price updates…');
                 };
-                
+
                 websocket.onmessage = function(event) {
                     try {
                         const message = JSON.parse(event.data);
@@ -223,38 +557,37 @@
                         console.error('Error parsing WebSocket message:', error);
                     }
                 };
-                
+
                 websocket.onerror = function(error) {
                     console.error('WebSocket error:', error);
-                    status.textContent = 'WebSocket connection error';
-                    status.style.background = '#ffebee';
-                    status.style.color = '#c62828';
+                    setConnection('error', 'Connection error');
+                    setStatus('WebSocket connection error');
                 };
-                
+
                 websocket.onclose = function(event) {
                     console.log('WebSocket connection closed:', event.code, event.reason);
                     if (isStreaming) {
-                        status.textContent = 'Connection lost - attempting to reconnect...';
-                        status.style.background = '#fff3e0';
-                        status.style.color = '#f57c00';
-                        
+                        setConnection('connecting', 'Reconnecting…');
+                        setStatus('Connection lost - attempting to reconnect…');
+
                         // Attempt to reconnect after 3 seconds
                         setTimeout(() => {
                             if (isStreaming) {
                                 connectWebSocket();
                             }
                         }, 3000);
+                    } else {
+                        setConnection('', 'Disconnected');
                     }
                 };
-                
+
             } catch (error) {
                 console.error('Failed to connect WebSocket:', error);
-                status.textContent = `Connection error: ${error.message}`;
-                status.style.background = '#ffebee';
-                status.style.color = '#c62828';
+                setConnection('error', 'Connection error');
+                setStatus(`Connection error: ${error.message}`);
             }
         }
-        
+
         function processBinanceUpdate(trade) {
             // Binance sends individual trade messages
             // trade.s = symbol (e.g., "BTCUSDT")
@@ -262,16 +595,25 @@
             const symbol = trade.s.toLowerCase();
             const coinInfo = cryptoCoins.find(c => c.id === symbol);
             if (!coinInfo) return;
-            
+
             const currentPrice = parseFloat(trade.p);
             const lastPrice = lastPrices[symbol];
             const now = new Date();
-            
+
+            // Live metrics: every trade message counts
+            totalMsgs++;
+            msgsThisSecond++;
+            statMsgs.textContent = totalMsgs.toLocaleString('en-US');
+            statLast.textContent = now.toLocaleTimeString('en-US', { hour12: false });
+
+            // Update the watchlist row on EVERY trade (before recording lastPrice for flash direction)
+            updateWatchlistRow(coinInfo, currentPrice);
+
             // Create event for significant price changes or first time seeing this coin
             let shouldCreateEvent = false;
             let eventType = 'price_update';
             let changePercent = 0;
-            
+
             if (lastPrice === undefined) {
                 // First time seeing this coin
                 shouldCreateEvent = true;
@@ -279,33 +621,33 @@
             } else {
                 // Calculate price change since last update
                 changePercent = ((currentPrice - lastPrice) / lastPrice) * 100;
-                
+
                 // Create event for changes > 0.1% (more sensitive for real-time data)
                 if (Math.abs(changePercent) > 0.1) {
                     shouldCreateEvent = true;
                     eventType = changePercent > 0 ? 'price_increase' : 'price_decrease';
                 }
             }
-            
+
             if (shouldCreateEvent) {
                 let label = '';
                 let itemStyle = {};
-                
+
                 if (eventType === 'initial_price') {
-                    label = `$${currentPrice.toFixed(2)}`;
+                    label = `${coinInfo.symbol} $${currentPrice.toFixed(2)}`;
                     itemStyle = {
-                        backgroundColor: '#2196F3',
+                        backgroundColor: '#2196F3', // Blue for initial price
                         fontColor: '#ffffff'
                     };
                 } else {
                     const direction = changePercent > 0 ? '↗' : '↘';
-                    label = `$${currentPrice.toFixed(2)} ${direction} ${Math.abs(changePercent).toFixed(2)}%`;
+                    label = `${coinInfo.symbol} $${currentPrice.toFixed(2)} ${direction} ${Math.abs(changePercent).toFixed(2)}%`;
                     itemStyle = {
-                        backgroundColor: changePercent > 0 ? '#4CAF50' : '#F44336',
+                        backgroundColor: changePercent > 0 ? '#15a46b' : '#e5484d', // Green up / red down
                         fontColor: '#ffffff'
                     };
                 }
-                
+
                 const newEvent = {
                     id: eventIdCounter++,
                     label: label,
@@ -313,18 +655,18 @@
                     grouping: coinInfo.name,
                     style: itemStyle
                 };
-                
+
                 allEvents.push(newEvent);
-                
+
                 // Keep only the last 100 events
                 if (allEvents.length > 100) {
                     allEvents = allEvents.slice(-100);
                 }
-                
+
                 // Update timeline items
                 timeline.setItems([...allEvents]);
-                
-                // Focus on the newest event with animation
+
+                // Focus on the newest event with animation (follow the latest)
                 timeline.focus({
                     id: newEvent.id,
                     animate: true,
@@ -332,153 +674,59 @@
                     easing: 'easeOutCubic',
                     zoom: false
                 });
-                
-                status.textContent = `Streaming (${allEvents.length} events)`;
-                status.style.background = '#e8f5e8';
-                status.style.color = '#2e7d32';
+
+                statEvents.textContent = allEvents.length.toLocaleString('en-US');
+                setStatus('Streaming');
             }
-            
+
             // Update last price
             lastPrices[symbol] = currentPrice;
         }
-        
-        function processPriceUpdate(priceData) {
-            const newEvents = [];
-            const now = new Date();
-            
-            for (const [coinId, priceString] of Object.entries(priceData)) {
-                const coinInfo = cryptoCoins.find(c => c.id === coinId);
-                if (!coinInfo) continue;
-                
-                const currentPrice = parseFloat(priceString);
-                const lastPrice = lastPrices[coinId];
-                
-                // Create event for significant price changes or first time seeing this coin
-                let shouldCreateEvent = false;
-                let eventType = 'price_update';
-                let changePercent = 0;
-                
-                if (lastPrice === undefined) {
-                    // First time seeing this coin
-                    shouldCreateEvent = true;
-                    eventType = 'initial_price';
-                } else {
-                    // Calculate price change since last update
-                    changePercent = ((currentPrice - lastPrice) / lastPrice) * 100;
-                    
-                    // Create event for changes > 0.1% (more sensitive for real-time data)
-                    if (Math.abs(changePercent) > 0.1) {
-                        shouldCreateEvent = true;
-                        eventType = changePercent > 0 ? 'price_increase' : 'price_decrease';
-                    }
-                }
-                
-                if (shouldCreateEvent) {
-                    let label = '';
-                    let itemStyle = {};
-                    
-                    if (eventType === 'initial_price') {
-                        label = `$${currentPrice.toFixed(2)}`;
-                        itemStyle = {
-                            backgroundColor: '#2196F3', // Blue for initial price
-                            fontColor: '#ffffff'
-                        };
-                    } else {
-                        const direction = changePercent > 0 ? '↗' : '↘';
-                        label = `$${currentPrice.toFixed(2)} ${direction} ${Math.abs(changePercent).toFixed(2)}%`;
-                        itemStyle = {
-                            backgroundColor: changePercent > 0 ? '#4CAF50' : '#F44336', // Green for increase, red for decrease
-                            fontColor: '#ffffff'
-                        };
-                    }
-                    
-                    newEvents.push({
-                        id: eventIdCounter++,
-                        label: label,
-                        start: now,
-                        grouping: coinInfo.name, // Use crypto name as group
-                        style: itemStyle
-                    });
-                }
-                
-                // Update last price
-                lastPrices[coinId] = currentPrice;
-            }
-            
-            if (newEvents.length > 0) {
-                // Add new events to our collection
-                allEvents = [...allEvents, ...newEvents];
-                
-                // Keep only the last 100 events to prevent memory issues
-                if (allEvents.length > 100) {
-                    allEvents = allEvents.slice(-100);
-                }
-                
-                // Update timeline items
-                console.log("setItems", allEvents.length, "new events:", newEvents.length);
-                timeline.setItems(allEvents);
-                
-                // Focus on the newest event with animation
-                const newestEvent = newEvents[newEvents.length - 1];
-                setTimeout(() => {
-                    timeline.focus({
-                        id: newestEvent.id,
-                        animate: true,
-                        duration: 800,
-                        easing: 'easeInOutCubic',
-                        zoom: false
-                    });
-                }, 100);
-                
-                status.textContent = `Streaming (+${newEvents.length} events, ${allEvents.length} total)`;
-                status.style.background = '#e8f5e8';
-                status.style.color = '#2e7d32';
-            }
-        }
-        
+
+        // ───────────── Msgs/sec ticker ─────────────
+        setInterval(() => {
+            statRate.textContent = msgsThisSecond.toString();
+            msgsThisSecond = 0;
+        }, 1000);
+
+        // ───────────── Controls ─────────────
         function startStreaming() {
             if (isStreaming) return;
-            
+
             isStreaming = true;
             startBtn.disabled = true;
             stopBtn.disabled = false;
-            
-            status.textContent = 'Connecting to live stream...';
-            status.style.background = '#e8f5e8';
-            status.style.color = '#2e7d32';
-            
-            // Connect to WebSocket
+
+            setStatus('Connecting to live stream…');
             connectWebSocket();
         }
-        
+
         function stopStreaming() {
             if (!isStreaming) return;
-            
+
             isStreaming = false;
             startBtn.disabled = false;
             stopBtn.disabled = true;
-            
+
             if (websocket) {
                 websocket.close();
                 websocket = null;
             }
-            
-            status.textContent = 'Streaming stopped';
-            status.style.background = '#fff3e0';
-            status.style.color = '#f57c00';
+
+            setConnection('', 'Disconnected');
+            setStatus('Streaming stopped');
         }
-        
-        // Event listeners
+
         startBtn.addEventListener('click', () => {
             console.log('Start button clicked');
             startStreaming();
         });
-        
+
         stopBtn.addEventListener('click', () => {
             console.log('Stop button clicked');
             stopStreaming();
         });
-        
+
         clearBtn.addEventListener('click', () => {
             console.log('Clear button clicked');
             if (timeline) {
@@ -486,21 +734,36 @@
             }
             allEvents = [];
             lastPrices = {};
+            refPrices = {};
             eventIdCounter = 1;
-            status.textContent = 'Timeline cleared';
-            status.style.background = '#fff3e0';
-            status.style.color = '#f57c00';
+            totalMsgs = 0;
+            msgsThisSecond = 0;
+            statEvents.textContent = '0';
+            statMsgs.textContent = '0';
+            statRate.textContent = '0';
+            statLast.textContent = '—';
+            buildWatchlist();
+            setStatus('Timeline cleared');
         });
-        
-        // Initialize
+
+        // ───────────── Boot ─────────────
+        if (typeof tempis_timeline === 'undefined') {
+            console.error('tempis_timeline is not loaded!');
+            setConnection('error', 'Library error');
+            setStatus('Error: Timeline library not loaded');
+        } else {
+            console.log('tempis_timeline loaded successfully');
+        }
+
         console.log('Setting up timeline...');
+        buildWatchlist();
         initializeTimeline();
-        
+
         // Start streaming automatically on page load
         setTimeout(() => {
             startStreaming();
         }, 1000); // Small delay to ensure timeline is fully initialized
-        
+
         // Clean up on page unload
         window.addEventListener('beforeunload', () => {
             stopStreaming();
@@ -508,7 +771,7 @@
                 timeline.destroy();
             }
         });
-        
+
         console.log('Script loaded successfully');
     </script>
 </body>
