@@ -498,7 +498,7 @@ export class TimelineDataView {
                     ? milliRenderWidth * (rangeToDt.getTime() - band.start.getTime())
                     : milliRenderWidth * (band.start.getTime() - rangeFromDt.getTime());
 
-                // Use border color if available, otherwise fall back to band color
+                // Use border colour if available, otherwise fall back to band colour
                 const lineColor = band.style.borderColor || band.style.color || "#000000";
                 const lineWidth = band.style.borderThickness || 2;
 
@@ -901,9 +901,9 @@ export class TimelineDataView {
             // TODO Make this configurable.
             context.lineWidth = 2;
 
-            // The color we use to draw the downward marker line and the little downward triangle should be:
-            // - The item background color if no border is being drawn.
-            // - The item border color if an item border is being drawn.
+            // The colour we use to draw the downward marker line and the little downward triangle should be:
+            // - The item background colour if no border is being drawn.
+            // - The item border colour if an item border is being drawn.
             context.fillStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
             context.strokeStyle = itemBorderThickness && itemBorderColor ? itemBorderColor : itemBackgroundColor;
 
@@ -1001,7 +1001,7 @@ export class TimelineDataView {
             }
         }
 
-        // Draw the item border if a border thickness and border color are configured.
+        // Draw the item border if a border thickness and border colour are configured.
         if (itemBorderThickness && itemBorderColor) {
             context.strokeStyle = itemBorderColor;
             context.lineWidth = itemBorderThickness;

@@ -31,8 +31,8 @@
   window._layoutDemo = new tempis_timeline.TempisTimeline('#demo-layout', Object.assign({}, window._layoutBase, window._layoutConfig));
 </script>
 
-<h2>Vertical Fill Modes</h2>
-<table>
+<h2 id="TempisTimelineVerticalFillMode">Vertical Fill Modes <code class="type-tag">TempisTimelineVerticalFillMode</code></h2>
+<table class="modes-table">
   <thead><tr><th>Mode</th><th>Description</th></tr></thead>
   <tbody>
     <tr><td><code>"content"</code></td><td>The timeline height is determined by its content. It takes up only as much vertical space as needed to render all visible items. Best for timelines embedded in scrollable pages. This is the default.</td></tr>
@@ -50,8 +50,8 @@
   range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' }
 });</code></pre>
 
-<h2>Stack Modes</h2>
-<table>
+<h2 id="TempisTimelineStackMode">Stack Modes <code class="type-tag">TempisTimelineStackMode</code></h2>
+<table class="modes-table">
   <thead><tr><th>Mode</th><th>Description</th></tr></thead>
   <tbody>
     <tr><td><code>"compact"</code></td><td>Items are stacked based on visible items only. More compact, but items may shift position when panning. Point-in-time labels are adjusted to fit within canvas bounds. Layout updates on every pan.</td></tr>

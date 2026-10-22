@@ -49,8 +49,8 @@
         });
         tl.setSelection(sel);
       },
-      onRangeChange: function(start, end) { log('onRangeChange', start.toISOString().slice(0,10) + ' → ' + end.toISOString().slice(0,10)); },
-      onGroupToggle: function(group, collapsed) { log('onGroupToggle', 'group: ' + group + ' collpsed: ' + collapsed); }
+      onRangeChange: function(start, end) { log('onRangeChange', start.toISOString().slice(0,10) + ' to ' + end.toISOString().slice(0,10)); },
+      onGroupToggle: function(group, collapsed) { log('onGroupToggle', 'group: ' + group + ' collapsed: ' + collapsed); }
     });
   })();
 </script>

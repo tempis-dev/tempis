@@ -261,11 +261,11 @@ export class TimelineDataSet {
         // Keep track of existing category names to handle duplicates.
         const categoryNames: string[] = [];
 
-        // A generator function to get the next available palette color.
+        // A generator function to get the next available palette colour.
         function* paletteCycle(): Generator<string, never, unknown> {
             let paletteIndex = 0;
 
-            // Grab the global color palette.
+            // Grab the global colour palette.
             const palette = ColorPalette.get();
 
             while (true) {
@@ -290,8 +290,8 @@ export class TimelineDataSet {
 
             const categoryStyle = categoryDefinition.style ?? {};
 
-            // Each category must have a unique background color defined, this background color is used as the category color.
-            // If the user has not defined a category color then we will grab the next available one from the global color palette.
+            // Each category must have a unique background colour defined, this background colour is used as the category colour.
+            // If the user has not defined a category colour then we will grab the next available one from the global colour palette.
             categoryStyle.backgroundColor = categoryStyle.backgroundColor ?? getNextPaletteColor.next().value;
 
             this._categories.push(

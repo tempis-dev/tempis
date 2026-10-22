@@ -139,6 +139,25 @@
 
     .api-content td:first-child code { color: var(--ink); }
     .api-content tr:hover td { background: var(--surface-2); }
+    /* A type name that links to its own documentation section. */
+    .api-content td a code { color: var(--accent-text); cursor: pointer; }
+    .api-content td a:hover code { text-decoration: underline; }
+    /* Literal values shown under an exported type name in a type cell. */
+    .api-content .type-values { display: block; margin-top: 3px; color: var(--ink-3); font-size: 0.8125rem; font-family: var(--mono, monospace); }
+    /* Exported type name shown beside a section heading. */
+    .api-content h2 .type-tag {
+      font-size: 0.8125rem; font-weight: 400; color: var(--accent-text);
+      background: var(--accent-wash, #fff0f6); padding: 2px 7px; border-radius: 5px;
+      margin-left: 8px; vertical-align: middle;
+    }
+    /* Keep short mode/value tables from wrapping their first column. */
+    .api-content .modes-table td:first-child { white-space: nowrap; }
+    /* Brief highlight when a type link scrolls to its section. */
+    .api-content .anchor-flash { animation: anchorFlash 1.6s ease-out; }
+    @keyframes anchorFlash {
+      0%, 30% { background: var(--accent-wash, #fff0f6); box-shadow: -8px 0 0 var(--accent-wash, #fff0f6), 8px 0 0 var(--accent-wash, #fff0f6); }
+      100% { background: transparent; box-shadow: none; }
+    }
 
     .api-demo {
       border: 1px solid var(--line);
@@ -423,23 +442,45 @@
       return html + '</nav>';
     }
 
-    function render(hash, html) {
-      contentEl.innerHTML = html + buildPrevNext(hash);
-      hljs.highlightAll();
-      runScripts();
-      document.getElementById('api-content').scrollTop = 0;
+    // After rendering, scroll to an in-page anchor if one was requested, otherwise
+    // reset to the top of the content.
+    function applyScroll(anchor) {
+      var content = document.getElementById('api-content');
+      if (anchor) {
+        var target = document.getElementById(anchor);
+        if (target) {
+          target.scrollIntoView({ block: 'start' });
+          // Briefly highlight the target so it's clear which section was linked to.
+          target.classList.add('anchor-flash');
+          setTimeout(function () { target.classList.remove('anchor-flash'); }, 1600);
+          return;
+        }
+      }
+      content.scrollTop = 0;
       window.scrollTo(0, 0);
     }
 
-    function loadPage(hash) {
-      hash = hash || 'core/getting-started';
+    function render(hash, html, anchor) {
+      contentEl.innerHTML = html + buildPrevNext(hash);
+      hljs.highlightAll();
+      runScripts();
+      applyScroll(anchor);
+    }
+
+    // A route can carry an optional in-page anchor after a "$":
+    //   core/range$range-options  ->  page "core/range", anchor "range-options".
+    function loadPage(raw) {
+      raw = raw || 'core/getting-started';
+      var parts = raw.split('$');
+      var hash = parts[0];
+      var anchor = parts[1] || '';
 
       links.forEach(function (a) {
         a.classList.toggle('active', a.getAttribute('href') === '#' + hash);
       });
 
       if (cache[hash]) {
-        render(hash, cache[hash]);
+        render(hash, cache[hash], anchor);
         return;
       }
 
@@ -449,7 +490,7 @@
         })
         .then(function (html) {
           cache[hash] = html;
-          render(hash, html);
+          render(hash, html, anchor);
         });
     }
 

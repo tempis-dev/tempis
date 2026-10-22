@@ -1,7 +1,7 @@
 <h1>Grouping</h1>
 <p class="subtitle">Organise items into labelled rows with optional custom sort order and collapse.</p>
 
-<h2>TempisTimelineGroupingOptions</h2>
+<h2 id="TempisTimelineGroupingOptions">TempisTimelineGroupingOptions</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
   <tbody>
@@ -17,7 +17,7 @@
 <h2>Collapsible Groups</h2>
 <p>When <code>collapsible</code> is <code>true</code>, each group header displays a chevron indicator. Click the header to collapse or expand the group. Collapsed groups hide their items and take up minimal vertical space.</p>
 
-<h3>Methods</h3>
+<h2>Methods</h2>
 <table>
   <thead><tr><th>Method</th><th>Description</th></tr></thead>
   <tbody>
@@ -26,7 +26,7 @@
   </tbody>
 </table>
 
-<h3>Callback</h3>
+<h2>Callback</h2>
 <p><code>onGroupToggle(group: string, collapsed: boolean)</code> fires when a user clicks a group header to collapse or expand it. It does not fire for programmatic calls to <code>setGroupCollapsed()</code>.</p>
 
 <pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {

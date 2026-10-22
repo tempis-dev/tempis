@@ -40,7 +40,7 @@ export interface ImageGenerationOptions {
      */
     dpr?: number;
     /**
-     * Optional background color for the exported image (e.g. "#ffffff"). By default the canvas background is transparent.
+     * Optional background colour for the exported image (e.g. "#ffffff"). By default the canvas background is transparent.
      */
     backgroundColor?: string;
 }
@@ -233,16 +233,16 @@ export class TempisTimeline {
     }
 
     /**
-     * Set the global color palette used for categories that don't specify an explicit backgroundColor.
-     * @param palette An array of color strings.
+     * Set the global colour palette used for categories that don't specify an explicit backgroundColor.
+     * @param palette An array of colour strings.
      */
     static setGlobalPalette(palette: string[]): void {
         ColorPalette.set(palette);
     }
 
     /**
-     * Get the current global color palette.
-     * @returns The global color palette array.
+     * Get the current global colour palette.
+     * @returns The global colour palette array.
      */
     static getGlobalPalette(): string[] {
         return ColorPalette.get();
@@ -470,7 +470,7 @@ export class TempisTimeline {
 
         const offCtx = offscreen.getContext("2d")!;
 
-        // If a background color was requested, fill the offscreen canvas before compositing the timeline.
+        // If a background colour was requested, fill the offscreen canvas before compositing the timeline.
         if (options?.backgroundColor) {
             offCtx.fillStyle = options.backgroundColor;
             offCtx.fillRect(0, 0, width, height);
