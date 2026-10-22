@@ -68,39 +68,7 @@
           <div class="ex-card-body">
             <h3>Fleet Maintenance Dashboard</h3>
             <p>A full maintenance-scheduling app. KPI cards, region filters, a detail/edit panel and a right-click menu all wired to the timeline.</p>
-            <div class="tag-row"><span class="tag">Selection</span><span class="tag">Live updates</span><span class="tag">Right-click menu</span></div>
-          </div>
-        </a>
-        <a href="examples/production-downtime.html" class="ex-card">
-          <img src="images/examples/production_tile.png" alt="Plant operations console with OEE tiles and a downtime timeline" loading="lazy">
-          <div class="ex-card-body">
-            <h3>Plant Operations Console</h3>
-            <p>An industrial OEE monitoring console. Availability, MTTR and downtime KPIs sit above the timeline, with a side panel that swaps to full event details on selection.</p>
-            <div class="tag-row"><span class="tag">Selection</span><span class="tag">Grouping</span><span class="tag">Detail panel</span></div>
-          </div>
-        </a>
-        <a href="examples/streaming-data.html" class="ex-card">
-          <img src="images/examples/crypto_tile.png" alt="Live trading terminal with a watchlist beside a streaming timeline" loading="lazy">
-          <div class="ex-card-body">
-            <h3>Live Trading Terminal</h3>
-            <p>A market-monitor app streaming real Binance trades over a WebSocket. A live watchlist sits beside the timeline, which appends ticks and follows the latest price.</p>
-            <div class="tag-row"><span class="tag">Live data</span><span class="tag">Auto-follow</span><span class="tag">Streaming</span></div>
-          </div>
-        </a>
-        <a href="examples/lazy-loading.html" class="ex-card">
-          <img src="images/examples/logs_tile.png" alt="Request log explorer loading more entries while panning" loading="lazy">
-          <div class="ex-card-body">
-            <h3>Request Log Explorer</h3>
-            <p>An observability tool that fetches request logs on demand as you pan and zoom, with cache stats, an error-rate metric and a live fetch-activity feed.</p>
-            <div class="tag-row"><span class="tag">Lazy loading</span><span class="tag">Pan &amp; zoom</span><span class="tag">Grouping</span></div>
-          </div>
-        </a>
-        <a href="examples/dashboard-builder.html" class="ex-card">
-          <img src="images/examples/dashboard_builder_tile.svg" alt="Drag-and-drop dashboard builder with a timeline widget among other cards" loading="lazy">
-          <div class="ex-card-body">
-            <h3>Dashboard Builder</h3>
-            <p>A drag-and-drop dashboard composer. Drop in a timeline widget, resize it in the grid and repoint it at a different data source from the inspector, all live.</p>
-            <div class="tag-row"><span class="tag">Responsive</span><span class="tag">Live updates</span></div>
+            <div class="tag-row"><span class="tag">Selection</span><span class="tag">Live updates</span><span class="tag">Context menu</span><span class="tag">Filtering</span><span class="tag">Detail panel</span></div>
           </div>
         </a>
         <a href="examples/project-planner.html" class="ex-card">
@@ -108,7 +76,39 @@
           <div class="ex-card-body">
             <h3>Project Planner</h3>
             <p>A Gantt-style planner with a collapsible phase tree, dependency arrows, progress bars and a task detail drawer. Zoom presets jump between week, quarter and the full plan.</p>
-            <div class="tag-row"><span class="tag">Dependencies</span><span class="tag">Progress bars</span><span class="tag">Grouping</span></div>
+            <div class="tag-row"><span class="tag">Dependencies</span><span class="tag">Progress bars</span><span class="tag">Grouping</span><span class="tag">Zoom presets</span><span class="tag">Notes</span></div>
+          </div>
+        </a>
+        <a href="examples/streaming-data.html" class="ex-card">
+          <img src="images/examples/crypto_tile.png" alt="Live trading terminal with a watchlist beside a streaming timeline" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Live Trading Terminal</h3>
+            <p>A market-monitor app streaming real Binance trades over a WebSocket. A live watchlist sits beside the timeline, which appends ticks and follows the latest price.</p>
+            <div class="tag-row"><span class="tag">Live data</span><span class="tag">Auto-follow</span><span class="tag">Streaming</span><span class="tag">Filtering</span><span class="tag">Detail dialog</span></div>
+          </div>
+        </a>
+        <a href="examples/lazy-loading.html" class="ex-card">
+          <img src="images/examples/logs_tile.png" alt="Request log explorer loading more entries while panning" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Request Log Explorer</h3>
+            <p>An observability tool that fetches request logs on demand as you pan and zoom, with cache stats, an error-rate metric and a live fetch-activity feed.</p>
+            <div class="tag-row"><span class="tag">Lazy loading</span><span class="tag">Pan &amp; zoom</span><span class="tag">Grouping</span><span class="tag">Live metrics</span><span class="tag">Collapsible groups</span></div>
+          </div>
+        </a>
+        <a href="examples/dashboard-builder.html" class="ex-card">
+          <img src="images/examples/dashboard_builder_tile.svg" alt="Drag-and-drop dashboard builder with a timeline widget among other cards" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Dashboard Builder</h3>
+            <p>A drag-and-drop dashboard composer. Drop in a timeline widget, resize it in the grid and repoint it at a different data source from the inspector, all live.</p>
+            <div class="tag-row"><span class="tag">Responsive</span><span class="tag">Live updates</span><span class="tag">Drag &amp; drop</span><span class="tag">Resizable</span></div>
+          </div>
+        </a>
+        <a href="examples/production-downtime.html" class="ex-card">
+          <img src="images/examples/production_tile.png" alt="Plant operations console with OEE tiles and a downtime timeline" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Plant Operations Console</h3>
+            <p>An industrial OEE monitoring console. Availability, MTTR and downtime KPIs sit above the timeline, with a side panel that swaps to full event details on selection.</p>
+            <div class="tag-row"><span class="tag">Selection</span><span class="tag">Grouping</span><span class="tag">Detail panel</span><span class="tag">Range presets</span><span class="tag">Live metrics</span></div>
           </div>
         </a>
       </div>
@@ -122,7 +122,7 @@
           <div class="ex-card-body">
             <h3>Table-driven selection</h3>
             <p>Controlled selection kept in sync both ways between a table and the timeline.</p>
-            <div class="tag-row"><span class="tag">Selection</span><span class="tag">Two-way sync</span></div>
+            <div class="tag-row"><span class="tag">Selection</span><span class="tag">Two-way sync</span><span class="tag">Controlled state</span></div>
           </div>
         </a>
         <a href="examples/context-menu.html" class="ex-card">
@@ -130,7 +130,7 @@
           <div class="ex-card-body">
             <h3>Context menu</h3>
             <p>A film production schedule where right-clicking an item opens contextual actions at the pointer.</p>
-            <div class="tag-row"><span class="tag">Right-click menu</span></div>
+            <div class="tag-row"><span class="tag">Context menu</span><span class="tag">Selection</span><span class="tag">Grouping</span></div>
           </div>
         </a>
         <a href="examples/dependencies.html" class="ex-card">
@@ -138,7 +138,7 @@
           <div class="ex-card-body">
             <h3>Dependencies</h3>
             <p>An app launch plan with finish-to-start arrows routed across planning, design, build, QA and release.</p>
-            <div class="tag-row"><span class="tag">Dependencies</span></div>
+            <div class="tag-row"><span class="tag">Dependencies</span><span class="tag">Grouping</span><span class="tag">Progress bars</span></div>
           </div>
         </a>
         <a href="examples/minimap.html" class="ex-card">
@@ -146,7 +146,7 @@
           <div class="ex-card-body">
             <h3>Minimap</h3>
             <p>A year-long roadmap with the overview bar enabled for jumping between quarters.</p>
-            <div class="tag-row"><span class="tag">Minimap</span></div>
+            <div class="tag-row"><span class="tag">Minimap</span><span class="tag">Pan &amp; zoom</span><span class="tag">Grouping</span></div>
           </div>
         </a>
         <a href="examples/progress.html" class="ex-card">
@@ -154,7 +154,7 @@
           <div class="ex-card-body">
             <h3>Progress bars</h3>
             <p>Completion shown as a fill inside each range item, clipped to the item's corner radius.</p>
-            <div class="tag-row"><span class="tag">Progress bars</span></div>
+            <div class="tag-row"><span class="tag">Progress bars</span><span class="tag">Per-item styling</span></div>
           </div>
         </a>
         <a href="examples/custom-tooltips.html" class="ex-card">
@@ -162,7 +162,7 @@
           <div class="ex-card-body">
             <h3>Custom tooltips</h3>
             <p>Tooltip content built from your own DOM, with assignee, status and progress.</p>
-            <div class="tag-row"><span class="tag">Custom tooltips</span></div>
+            <div class="tag-row"><span class="tag">Custom tooltips</span><span class="tag">Progress bars</span></div>
           </div>
         </a>
         <a href="examples/item-styles.html" class="ex-card">
@@ -170,7 +170,7 @@
           <div class="ex-card-body">
             <h3>Per-item styling</h3>
             <p>Borders, dash patterns, colours and radii applied per item to encode status.</p>
-            <div class="tag-row"><span class="tag">Per-item styling</span></div>
+            <div class="tag-row"><span class="tag">Per-item styling</span><span class="tag">Colour palettes</span></div>
           </div>
         </a>
         <a href="examples/color-palettes.html" class="ex-card">
@@ -178,7 +178,7 @@
           <div class="ex-card-body">
             <h3>Colour palettes</h3>
             <p>Categories without an explicit colour draw from the global palette. Swap it at runtime.</p>
-            <div class="tag-row"><span class="tag">Colour palettes</span></div>
+            <div class="tag-row"><span class="tag">Colour palettes</span><span class="tag">Live updates</span></div>
           </div>
         </a>
         <a href="examples/band-demo.html" class="ex-card">
@@ -186,7 +186,7 @@
           <div class="ex-card-body">
             <h3>Bands</h3>
             <p>Cluster events with maintenance windows and incident periods shaded behind the items.</p>
-            <div class="tag-row"><span class="tag">Bands</span></div>
+            <div class="tag-row"><span class="tag">Bands</span><span class="tag">Grouping</span></div>
           </div>
         </a>
         <a href="examples/timezones.html" class="ex-card">
@@ -202,7 +202,7 @@
           <div class="ex-card-body">
             <h3>Right to left</h3>
             <p>An Arabic project schedule with the axis, items, legend and tooltips all mirrored.</p>
-            <div class="tag-row"><span class="tag">RTL layout</span></div>
+            <div class="tag-row"><span class="tag">RTL layout</span><span class="tag">Grouping</span></div>
           </div>
         </a>
         <a href="examples/to-image.html" class="ex-card">
@@ -210,7 +210,7 @@
           <div class="ex-card-body">
             <h3>Image export</h3>
             <p>Export the current view as PNG, JPEG or WebP, with device pixel ratio and background colour options.</p>
-            <div class="tag-row"><span class="tag">Image export</span></div>
+            <div class="tag-row"><span class="tag">Image export</span><span class="tag">Grouping</span></div>
           </div>
         </a>
       </div>
