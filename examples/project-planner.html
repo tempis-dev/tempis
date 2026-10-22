@@ -383,6 +383,14 @@
 
   function buildItems() { return tasks.map(toItem); }
 
+  // Rebuild the timeline items and keep the current selection highlighted. Calling
+  // setItems rebuilds the dataset and drops the selection, so we re-apply it here
+  // whenever an edit in the drawer changes an item while it stays selected.
+  function refreshItems() {
+    timeline.setItems(buildItems());
+    if (selectedId != null && taskById[selectedId]) timeline.setSelection([selectedId]);
+  }
+
   var timeline = new TT('#timeline', {
     responsive: true,
     verticalFill: 'fill-canvas',
@@ -624,7 +632,7 @@
         t.progress = range.value / 100;
         document.getElementById('dFill').style.width = range.value + '%';
         document.getElementById('dProgLabel').textContent = 'Progress ' + range.value + '%';
-        timeline.setItems(buildItems());
+        refreshItems();
         var treeRow = treeBody.querySelector('.task-row[data-id="' + id + '"] .tpct');
         if (treeRow) treeRow.textContent = range.value + '%';
       });
@@ -635,19 +643,19 @@
       if (!e.target.value) return;
       t.start = e.target.value;
       if (t.end && new Date(t.end) < new Date(t.start)) { t.end = t.start; document.getElementById('dEnd').value = toDateValue(t.end); }
-      timeline.setItems(buildItems());
+      refreshItems();
     });
     document.getElementById('dEnd').addEventListener('change', function (e) {
       // Clearing the end date turns the task into a milestone (point in time).
       t.end = e.target.value || undefined;
       if (t.end && new Date(t.end) < new Date(t.start)) { t.end = t.start; e.target.value = toDateValue(t.end); }
-      timeline.setItems(buildItems());
+      refreshItems();
     });
 
     // Assignee editing. An empty value means unassigned.
     document.getElementById('dAssignee').addEventListener('change', function (e) {
       t.assignee = e.target.value || null;
-      timeline.setItems(buildItems());
+      refreshItems();
     });
 
     // Add a dependency.
@@ -677,7 +685,7 @@
         // Only redraw the timeline when the note presence actually changed, so the
         // note glyph appears or disappears without rebuilding on every keystroke.
         if (hasNote(t) !== had) {
-          timeline.setItems(buildItems());
+          refreshItems();
           updateTreeNote(id);
         }
       });
