@@ -10,19 +10,19 @@
     <tr><td><code>rtl</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Right-to-left rendering.</td></tr>
     <tr><td><code>stackMode</code></td><td><code>"compact" | "stable"</code></td><td><code>"stable"</code></td><td>Item stacking behaviour.</td></tr>
     <tr><td><code>selection</code></td><td><code>"none" | "single" | "multi"</code></td><td><code>"none"</code></td><td>Selection mode.</td></tr>
-    <tr><td><code>range</code></td><td><code>TempisTimelineRangeOptions</code></td><td>—</td><td>Range configuration.</td></tr>
-    <tr><td><code>legend</code></td><td><code>TempisTimelineLegendOptions</code></td><td>—</td><td>Legend configuration.</td></tr>
-    <tr><td><code>tooltip</code></td><td><code>TempisTimelineTooltipOptions</code></td><td>—</td><td>Tooltip configuration.</td></tr>
-    <tr><td><code>style</code></td><td><code>TempisTimelineStyleOptions</code></td><td>—</td><td>Style overrides.</td></tr>
-    <tr><td><code>scrollbar</code></td><td><code>TempisTimelineScrollbarOptions</code></td><td>—</td><td>Scrollbar options.</td></tr>
-    <tr><td><code>grouping</code></td><td><code>TempisTimelineGroupingOptions</code></td><td>—</td><td>Grouping options.</td></tr>
-    <tr><td><code>accessibility</code></td><td><code>TempisTimelineAccessibilityOptions</code></td><td>—</td><td>Accessibility options.</td></tr>
-    <tr><td><code>minimap</code></td><td><code>TempisTimelineMinimapOptions</code></td><td>—</td><td>Minimap overview bar. Provide to enable.</td></tr>
+    <tr><td><code>range</code></td><td><code>TempisTimelineRangeOptions</code></td><td> - </td><td>Range configuration.</td></tr>
+    <tr><td><code>legend</code></td><td><code>TempisTimelineLegendOptions</code></td><td> - </td><td>Legend configuration.</td></tr>
+    <tr><td><code>tooltip</code></td><td><code>TempisTimelineTooltipOptions</code></td><td> - </td><td>Tooltip configuration.</td></tr>
+    <tr><td><code>style</code></td><td><code>TempisTimelineStyleOptions</code></td><td> - </td><td>Style overrides.</td></tr>
+    <tr><td><code>scrollbar</code></td><td><code>TempisTimelineScrollbarOptions</code></td><td> - </td><td>Scrollbar options.</td></tr>
+    <tr><td><code>grouping</code></td><td><code>TempisTimelineGroupingOptions</code></td><td> - </td><td>Grouping options.</td></tr>
+    <tr><td><code>accessibility</code></td><td><code>TempisTimelineAccessibilityOptions</code></td><td> - </td><td>Accessibility options.</td></tr>
+    <tr><td><code>minimap</code></td><td><code>TempisTimelineMinimapOptions</code></td><td> - </td><td>Minimap overview bar. Provide to enable.</td></tr>
   </tbody>
 </table>
 
 <h2>Instance Recreate</h2>
-<p>Changes to the <code>options</code> prop trigger a full destroy-and-recreate of the underlying core instance. The component uses <code>JSON.stringify</code> to compare the previous and next options, so passing inline objects is safe — a recreate only happens when the serialised value actually changes.</p>
+<p>Changes to the <code>options</code> prop trigger a full destroy-and-recreate of the underlying core instance. The component uses <code>JSON.stringify</code> to compare the previous and next options, so passing inline objects is safe. A recreate only happens when the serialised value actually changes.</p>
 
 <h2>useMemo Is Optional</h2>
 <p>Because the component compares options by value (via <code>JSON.stringify</code>), you do not need to wrap your options in <code>useMemo</code>. However, if your options object is expensive to construct, <code>useMemo</code> can still help avoid unnecessary work during renders.</p>

@@ -63,7 +63,7 @@
     <tr><td><code>onItemDoubleClick</code></td><td><code>(id: string | number) =&gt; void</code></td><td>A timeline item is double-clicked.</td></tr>
     <tr><td><code>onItemContextClick</code></td><td><code>(id: string | number, position: { x: number; y: number }) =&gt; void</code></td><td>A timeline item is right-clicked. The browser's default context menu is suppressed. Receives the item <code>id</code> and viewport coordinates for positioning a custom menu.</td></tr>
     <tr><td><code>onItemHover</code></td><td><code>(id: string | number | null) =&gt; void</code></td><td>The pointer enters an item (<code>id</code>) or leaves all items (<code>null</code>).</td></tr>
-    <tr><td><code>onSelectionChange</code></td><td><code>(changes: SelectionChangeEvent[]) =&gt; void</code></td><td>The selection changes via user interaction. Enables controlled selection — you must call <code>setSelection()</code> to apply changes. See <a href="#core/selection">Selection</a>.</td></tr>
+    <tr><td><code>onSelectionChange</code></td><td><code>(changes: SelectionChangeEvent[]) =&gt; void</code></td><td>The selection changes via user interaction. Enables controlled selection: you must call <code>setSelection()</code> to apply changes. See <a href="#core/selection">Selection</a>.</td></tr>
     <tr><td><code>onRangeChange</code></td><td><code>(start: Date, end: Date) =&gt; void</code></td><td>The visible range changes due to panning, zooming, or programmatic update.</td></tr>
     <tr><td><code>onGroupToggle</code></td><td><code>(group: string, collapsed: boolean) =&gt; void</code></td><td>A group header is clicked to collapse or expand. Only fires when <code>grouping.collapsible</code> is <code>true</code>.</td></tr>
   </tbody>

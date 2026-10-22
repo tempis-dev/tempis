@@ -30,13 +30,13 @@
   <tbody>
     <tr><td><code>fixed</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Lock the range so users cannot pan or zoom.</td></tr>
     <tr><td><code>position</code></td><td><code>"top" | "bottom" | "both" | "none"</code></td><td><code>"bottom"</code></td><td>Where the time axis is rendered.</td></tr>
-    <tr><td><code>start</code></td><td><code>string | number | Date</code></td><td>—</td><td>Initial start of the visible range.</td></tr>
-    <tr><td><code>end</code></td><td><code>string | number | Date</code></td><td>—</td><td>Initial end of the visible range.</td></tr>
-    <tr><td><code>min</code></td><td><code>string | number | Date</code></td><td>—</td><td>Earliest date the user can scroll to.</td></tr>
-    <tr><td><code>max</code></td><td><code>string | number | Date</code></td><td>—</td><td>Latest date the user can scroll to.</td></tr>
-    <tr><td><code>zoom</code></td><td><code>TempisTimelineRangeZoomOptions</code></td><td>—</td><td>Zoom configuration (see below).</td></tr>
-    <tr><td><code>minorUnit</code></td><td><code>TempisTimelineRangeUnitOptions</code></td><td>—</td><td>Minor tick label font and format overrides.</td></tr>
-    <tr><td><code>majorUnit</code></td><td><code>TempisTimelineRangeUnitOptions</code></td><td>—</td><td>Major tick label font and format overrides.</td></tr>
+    <tr><td><code>start</code></td><td><code>string | number | Date</code></td><td> - </td><td>Initial start of the visible range.</td></tr>
+    <tr><td><code>end</code></td><td><code>string | number | Date</code></td><td> - </td><td>Initial end of the visible range.</td></tr>
+    <tr><td><code>min</code></td><td><code>string | number | Date</code></td><td> - </td><td>Earliest date the user can scroll to.</td></tr>
+    <tr><td><code>max</code></td><td><code>string | number | Date</code></td><td> - </td><td>Latest date the user can scroll to.</td></tr>
+    <tr><td><code>zoom</code></td><td><code>TempisTimelineRangeZoomOptions</code></td><td> - </td><td>Zoom configuration (see below).</td></tr>
+    <tr><td><code>minorUnit</code></td><td><code>TempisTimelineRangeUnitOptions</code></td><td> - </td><td>Minor tick label font and format overrides.</td></tr>
+    <tr><td><code>majorUnit</code></td><td><code>TempisTimelineRangeUnitOptions</code></td><td> - </td><td>Major tick label font and format overrides.</td></tr>
   </tbody>
 </table>
 
@@ -47,8 +47,8 @@
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
   <tbody>
     <tr><td><code>enabled</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Enable or disable zooming.</td></tr>
-    <tr><td><code>min</code></td><td><code>number</code></td><td>—</td><td>Minimum visible range in milliseconds.</td></tr>
-    <tr><td><code>max</code></td><td><code>number</code></td><td>—</td><td>Maximum visible range in milliseconds.</td></tr>
+    <tr><td><code>min</code></td><td><code>number</code></td><td> - </td><td>Minimum visible range in milliseconds.</td></tr>
+    <tr><td><code>max</code></td><td><code>number</code></td><td> - </td><td>Maximum visible range in milliseconds.</td></tr>
     <tr><td><code>wheelSensitivity</code></td><td><code>number</code></td><td><code>1.0</code></td><td>Mouse wheel zoom speed multiplier.</td></tr>
     <tr><td><code>pinchSensitivity</code></td><td><code>number</code></td><td><code>1.0</code></td><td>Touch pinch zoom speed multiplier.</td></tr>
     <tr><td><code>requireModifier</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Swaps the default scroll wheel behaviour. When <code>false</code>, scrolling zooms and Ctrl/Cmd + scroll vertically scrolls the data view. When <code>true</code>, scrolling vertically scrolls and Ctrl/Cmd + scroll zooms.</td></tr>

@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Examples — Tempis Timeline</title>
+  <title>Examples | Tempis Timeline</title>
   <meta name="description" content="Live Tempis Timeline examples: dashboards, streaming data, lazy loading, dependencies, minimap, custom tooltips, timezones, RTL layout and image export.">
   <link rel="canonical" href="https://tempis.dev/examples.html">
-  <meta property="og:title" content="Examples — Tempis Timeline">
+  <meta property="og:title" content="Examples | Tempis Timeline">
   <meta property="og:description" content="Live Tempis Timeline examples: dashboards, streaming data, dependencies, tooltips, timezones and more.">
   <meta property="og:url" content="https://tempis.dev/examples.html">
   <meta property="og:type" content="website">
@@ -33,7 +33,6 @@
         <a href="https://github.com/tempis-dev/tempis" class="nav-github" aria-label="Tempis on GitHub">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
         </a>
-        <a href="get-started.html" class="btn btn-primary btn-sm">Get started</a>
       </div>
       <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.mobile-menu').classList.add('open');document.querySelector('.mobile-menu-overlay').classList.add('active');">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -60,40 +59,32 @@
       <p>Every example below is a single self-contained HTML file running the real library. View source on any of them to see the exact options used.</p>
     </div>
 
-    <div class="callout">
-      <div>
-        <h2>Playground</h2>
-        <p>Toggle options, switch stack modes and edit data against a live timeline, without writing any code.</p>
-      </div>
-      <a href="examples/playground.html" class="btn btn-outline">Open playground</a>
-    </div>
-
     <section class="ex-group">
       <p class="eyebrow">Applications</p>
-      <p class="group-intro">Complete, self-contained apps showing the timeline working as one component inside a larger interface — each with its own layout, controls and surrounding panels.</p>
+      <p class="group-intro">Complete, self-contained example apps showing the timeline working as one component inside a larger interface, each with its own layout, controls and surrounding panels.</p>
       <div class="ex-grid">
         <a href="examples/dashboard.html" class="ex-card">
           <img src="images/examples/dashboard_tile.png" alt="Fleet maintenance dashboard with KPI cards above a grouped timeline" loading="lazy">
           <div class="ex-card-body">
             <h3>Fleet Maintenance Dashboard</h3>
-            <p>A full maintenance-scheduling app — KPI cards, region filters, a detail/edit panel and a right-click menu all wired to the timeline.</p>
-            <div class="tag-row"><span class="tag">selection</span><span class="tag">setItems</span><span class="tag">context menu</span></div>
+            <p>A full maintenance-scheduling app. KPI cards, region filters, a detail/edit panel and a right-click menu all wired to the timeline.</p>
+            <div class="tag-row"><span class="tag">Selection</span><span class="tag">Live updates</span><span class="tag">Right-click menu</span></div>
           </div>
         </a>
         <a href="examples/production-downtime.html" class="ex-card">
           <img src="images/examples/production_tile.png" alt="Plant operations console with OEE tiles and a downtime timeline" loading="lazy">
           <div class="ex-card-body">
             <h3>Plant Operations Console</h3>
-            <p>An industrial OEE monitoring console — availability, MTTR and downtime KPIs above the timeline, with a side panel that swaps to full event details on selection.</p>
-            <div class="tag-row"><span class="tag">onSelectionChange</span><span class="tag">grouping</span><span class="tag">KPIs</span></div>
+            <p>An industrial OEE monitoring console. Availability, MTTR and downtime KPIs sit above the timeline, with a side panel that swaps to full event details on selection.</p>
+            <div class="tag-row"><span class="tag">Selection</span><span class="tag">Grouping</span><span class="tag">Detail panel</span></div>
           </div>
         </a>
         <a href="examples/streaming-data.html" class="ex-card">
           <img src="images/examples/crypto_tile.png" alt="Live trading terminal with a watchlist beside a streaming timeline" loading="lazy">
           <div class="ex-card-body">
             <h3>Live Trading Terminal</h3>
-            <p>A market-monitor app streaming real Binance trades over a WebSocket — a live watchlist beside the timeline, which appends ticks and follows the latest price.</p>
-            <div class="tag-row"><span class="tag">setItems</span><span class="tag">focus</span><span class="tag">live data</span></div>
+            <p>A market-monitor app streaming real Binance trades over a WebSocket. A live watchlist sits beside the timeline, which appends ticks and follows the latest price.</p>
+            <div class="tag-row"><span class="tag">Live data</span><span class="tag">Auto-follow</span><span class="tag">Streaming</span></div>
           </div>
         </a>
         <a href="examples/lazy-loading.html" class="ex-card">
@@ -101,7 +92,7 @@
           <div class="ex-card-body">
             <h3>Request Log Explorer</h3>
             <p>An observability tool that fetches request logs on demand as you pan and zoom, with cache stats, an error-rate metric and a live fetch-activity feed.</p>
-            <div class="tag-row"><span class="tag">onRangeChange</span><span class="tag">getRange</span><span class="tag">lazy load</span></div>
+            <div class="tag-row"><span class="tag">Lazy loading</span><span class="tag">Pan &amp; zoom</span><span class="tag">Grouping</span></div>
           </div>
         </a>
       </div>
@@ -115,7 +106,7 @@
           <div class="ex-card-body">
             <h3>Table-driven selection</h3>
             <p>Controlled selection kept in sync both ways between a table and the timeline.</p>
-            <div class="tag-row"><span class="tag">setSelection</span><span class="tag">controlled</span></div>
+            <div class="tag-row"><span class="tag">Selection</span><span class="tag">Two-way sync</span></div>
           </div>
         </a>
         <a href="examples/context-menu.html" class="ex-card">
@@ -123,7 +114,7 @@
           <div class="ex-card-body">
             <h3>Context menu</h3>
             <p>A film production schedule where right-clicking an item opens contextual actions at the pointer.</p>
-            <div class="tag-row"><span class="tag">onItemContextClick</span></div>
+            <div class="tag-row"><span class="tag">Right-click menu</span></div>
           </div>
         </a>
         <a href="examples/dependencies.html" class="ex-card">
@@ -131,7 +122,7 @@
           <div class="ex-card-body">
             <h3>Dependencies</h3>
             <p>An app launch plan with finish-to-start arrows routed across planning, design, build, QA and release.</p>
-            <div class="tag-row"><span class="tag">dependencies</span></div>
+            <div class="tag-row"><span class="tag">Dependencies</span></div>
           </div>
         </a>
         <a href="examples/minimap.html" class="ex-card">
@@ -139,7 +130,7 @@
           <div class="ex-card-body">
             <h3>Minimap</h3>
             <p>A year-long roadmap with the overview bar enabled for jumping between quarters.</p>
-            <div class="tag-row"><span class="tag">minimap</span></div>
+            <div class="tag-row"><span class="tag">Minimap</span></div>
           </div>
         </a>
         <a href="examples/progress.html" class="ex-card">
@@ -147,7 +138,7 @@
           <div class="ex-card-body">
             <h3>Progress bars</h3>
             <p>Completion shown as a fill inside each range item, clipped to the item's corner radius.</p>
-            <div class="tag-row"><span class="tag">progress</span></div>
+            <div class="tag-row"><span class="tag">Progress bars</span></div>
           </div>
         </a>
         <a href="examples/custom-tooltips.html" class="ex-card">
@@ -155,7 +146,7 @@
           <div class="ex-card-body">
             <h3>Custom tooltips</h3>
             <p>Tooltip content built from your own DOM, with assignee, status and progress.</p>
-            <div class="tag-row"><span class="tag">tooltip.template</span><span class="tag">shouldShow</span></div>
+            <div class="tag-row"><span class="tag">Custom tooltips</span></div>
           </div>
         </a>
         <a href="examples/item-styles.html" class="ex-card">
@@ -163,7 +154,7 @@
           <div class="ex-card-body">
             <h3>Per-item styling</h3>
             <p>Borders, dash patterns, colours and radii applied per item to encode status.</p>
-            <div class="tag-row"><span class="tag">item.style</span><span class="tag">borderStyle</span></div>
+            <div class="tag-row"><span class="tag">Per-item styling</span></div>
           </div>
         </a>
         <a href="examples/color-palettes.html" class="ex-card">
@@ -171,7 +162,7 @@
           <div class="ex-card-body">
             <h3>Colour palettes</h3>
             <p>Categories without an explicit colour draw from the global palette. Swap it at runtime.</p>
-            <div class="tag-row"><span class="tag">setGlobalPalette</span></div>
+            <div class="tag-row"><span class="tag">Colour palettes</span></div>
           </div>
         </a>
         <a href="examples/band-demo.html" class="ex-card">
@@ -179,7 +170,7 @@
           <div class="ex-card-body">
             <h3>Bands</h3>
             <p>Cluster events with maintenance windows and incident periods shaded behind the items.</p>
-            <div class="tag-row"><span class="tag">bands</span></div>
+            <div class="tag-row"><span class="tag">Bands</span></div>
           </div>
         </a>
         <a href="examples/timezones.html" class="ex-card">
@@ -187,7 +178,7 @@
           <div class="ex-card-body">
             <h3>Timezones</h3>
             <p>A Luxon date adapter registered in place of the native one, with the display zone switchable live.</p>
-            <div class="tag-row"><span class="tag">registerDateAdapter</span><span class="tag">Luxon</span></div>
+            <div class="tag-row"><span class="tag">Timezones</span><span class="tag">Date adapters</span></div>
           </div>
         </a>
         <a href="examples/rtl-demo.html" class="ex-card">
@@ -195,7 +186,7 @@
           <div class="ex-card-body">
             <h3>Right to left</h3>
             <p>An Arabic project schedule with the axis, items, legend and tooltips all mirrored.</p>
-            <div class="tag-row"><span class="tag">rtl</span></div>
+            <div class="tag-row"><span class="tag">RTL layout</span></div>
           </div>
         </a>
         <a href="examples/to-image.html" class="ex-card">
@@ -203,11 +194,19 @@
           <div class="ex-card-body">
             <h3>Image export</h3>
             <p>Export the current view as PNG, JPEG or WebP, with device pixel ratio and background colour options.</p>
-            <div class="tag-row"><span class="tag">toImage</span><span class="tag">dpr</span></div>
+            <div class="tag-row"><span class="tag">Image export</span></div>
           </div>
         </a>
       </div>
     </section>
+
+    <div class="callout">
+      <div>
+        <h2>Playground</h2>
+        <p>Toggle options, switch stack modes and edit data against a live timeline, without writing any code.</p>
+      </div>
+      <a href="examples/playground.html" class="btn btn-outline">Open playground</a>
+    </div>
   </div>
 
   <footer>

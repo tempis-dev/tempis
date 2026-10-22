@@ -12,8 +12,8 @@
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
   <tbody>
-    <tr><td><code>type</code></td><td><code>string</code></td><td><code>"image/png"</code></td><td>MIME type — <code>"image/png"</code>, <code>"image/jpeg"</code>, or <code>"image/webp"</code>.</td></tr>
-    <tr><td><code>quality</code></td><td><code>number</code></td><td>—</td><td>Quality for lossy formats (0–1). Ignored for PNG.</td></tr>
+    <tr><td><code>type</code></td><td><code>string</code></td><td><code>"image/png"</code></td><td>MIME type: <code>"image/png"</code>, <code>"image/jpeg"</code>, or <code>"image/webp"</code>.</td></tr>
+    <tr><td><code>quality</code></td><td><code>number</code></td><td> - </td><td>Quality for lossy formats (0 to 1). Ignored for PNG.</td></tr>
     <tr><td><code>dpr</code></td><td><code>number</code></td><td><code>1</code></td><td>Device pixel ratio. Use values &gt; 1 for higher resolution exports.</td></tr>
     <tr><td><code>backgroundColor</code></td><td><code>string</code></td><td>transparent</td><td>Background fill colour (e.g. <code>"#ffffff"</code>).</td></tr>
   </tbody>
@@ -23,7 +23,7 @@
 
 <div class="note">The minimap and scrollbar are automatically hidden during export. The exported image contains only the timeline content.</div>
 
-<h2>Example — Download as PNG</h2>
+<h2>Example: Download as PNG</h2>
 <div class="api-demo"><canvas id="demo-export"></canvas></div>
 <div class="btn-group" style="display: flex; gap: 8px; margin: 0 0 16px;">
   <button class="btn btn-outline btn-sm" onclick="window._exportDemo.toImage({ type: 'image/png', dpr: 2, backgroundColor: '#ffffff' }).then(function(b) { var u = window.URL.createObjectURL(b); var a = document.createElement('a'); a.href = u; a.download = 'timeline.png'; a.click(); window.URL.revokeObjectURL(u); })">Download PNG (2x)</button>

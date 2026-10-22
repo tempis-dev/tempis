@@ -56,13 +56,13 @@ AdapterRegistry.register(myAdapter);</code></pre>
 
 <h2>When to Use a Custom Adapter</h2>
 <ul>
-  <li><strong>Fixed timezone display</strong> — show all events in UTC or a specific timezone regardless of the user's local clock.</li>
-  <li><strong>Non-Gregorian calendars</strong> — render dates in Hijri, Hebrew, or other calendar systems.</li>
-  <li><strong>Custom locale formatting</strong> — use locale-specific month/day names beyond what the browser provides.</li>
-  <li><strong>DST-aware calculations</strong> — ensure "add 1 day" always means 24 hours, even across daylight saving transitions.</li>
+  <li><strong>Fixed timezone display</strong>: show all events in UTC or a specific timezone regardless of the user's local clock.</li>
+  <li><strong>Non-Gregorian calendars</strong>: render dates in Hijri, Hebrew, or other calendar systems.</li>
+  <li><strong>Custom locale formatting</strong>: use locale-specific month/day names beyond what the browser provides.</li>
+  <li><strong>DST-aware calculations</strong>: ensure "add 1 day" always means 24 hours, even across daylight saving transitions.</li>
 </ul>
 
-<h2>Example — Luxon Adapter</h2>
+<h2>Example: Luxon Adapter</h2>
 <p>This adapter renders all dates in the <code>America/New_York</code> timezone using Luxon:</p>
 <pre><code class="language-typescript">import { DateTime } from 'luxon';
 import { AdapterRegistry } from '@tempis/timeline';
@@ -89,7 +89,7 @@ const luxonAdapter: TempisTimelineDateAdapter = {
   },
 
   format(instant, pattern) {
-    // Luxon uses different tokens — map common ones.
+    // Luxon uses different tokens - map common ones.
     const luxonPattern = pattern
       .replace('YYYY', 'yyyy')
       .replace('D', 'd')
@@ -104,7 +104,7 @@ AdapterRegistry.register(luxonAdapter);</code></pre>
 
 <div class="note">Luxon and the native adapter use different format tokens. Your <code>format</code> method should either map the Tempis tokens to your library's tokens, or configure the timeline's <code>range.minorUnit.formats</code> and <code>range.majorUnit.formats</code> to use your library's native token syntax.</div>
 
-<h2>Example — Day.js Adapter</h2>
+<h2>Example: Day.js Adapter</h2>
 <pre><code class="language-typescript">import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';

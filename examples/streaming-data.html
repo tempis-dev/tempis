@@ -532,7 +532,7 @@
 
         // Master event log across ALL coins. Coin selection just filters the view.
         // Each entry: { id, coinId, kind, price, changePercent, time }
-        //   kind: 'up' | 'down'   (all point-in-time)
+        //   kind: 'initial' | 'up' | 'down'   (all point-in-time)
         let events = [];
         const MAX_EVENTS = 300;   // keep the log bounded
 
@@ -589,7 +589,7 @@
         // coarser so the all-pairs feed stays readable.
         const OVERVIEW_THRESHOLDS = ['0.02', '0.05', '0.075', '0.1', '0.25', '0.5', '1'];
         const FOCUS_THRESHOLDS = ['0.001', '0.005', '0.01', '0.02', '0.05', '0.075', '0.1', '0.25', '0.5', '1'];
-        const OVERVIEW_DEFAULT = '0.075';
+        const OVERVIEW_DEFAULT = '0.05';
         const FOCUS_DEFAULT = '0.02';
 
         const thresholdSelect = document.getElementById('thresholdSelect');
@@ -650,16 +650,23 @@
         }
 
         // Turn an event into a point-in-time timeline item.
-        //   up    → green ▲ with the % rise
-        //   down  → red ▼ with the % fall
+        //   initial → blue, just the first observed price
+        //   up      → green ▲ with the % rise
+        //   down    → red ▼ with the % fall
         function eventToItem(e) {
             const coin = coinById[e.coinId];
-            const isUp = e.kind === 'up';
-            const bg = isUp ? '#15a46b' : '#e5484d';
-            const arrow = isUp ? '▲' : '▼';
-            const sign = isUp ? '+' : '';
-            // 3dp so the smallest selectable threshold (0.001%) still shows a value.
-            const label = `${coin.symbol} ${arrow} $${fmtPrice(e.price)} (${sign}${e.changePercent.toFixed(3)}%)`;
+            let bg, label;
+            if (e.kind === 'initial') {
+                bg = '#2196F3';
+                label = `${coin.symbol} $${fmtPrice(e.price)}`;
+            } else {
+                const isUp = e.kind === 'up';
+                bg = isUp ? '#15a46b' : '#e5484d';
+                const arrow = isUp ? '▲' : '▼';
+                const sign = isUp ? '+' : '';
+                // 3dp so the smallest selectable threshold (0.001%) still shows a value.
+                label = `${coin.symbol} ${arrow} $${fmtPrice(e.price)} (${sign}${e.changePercent.toFixed(3)}%)`;
+            }
             return {
                 id: e.id,
                 label: label,
@@ -860,15 +867,17 @@
         }
 
         // ───────────── Significant-change detection ─────────────
-        // The first price we see for a coin just sets its baseline — no item. After
-        // that, every item represents a move of at least `thresholdPct` from the last
-        // recorded point: an "up" (green ▲) or a "down" (red ▼).
+        // The first price we see for a coin is always posted as a neutral "initial"
+        // (blue) marker so the timeline fills up immediately instead of sitting empty.
+        // After that, every item represents a move of at least `thresholdPct` from the
+        // last recorded point: an "up" (green ▲) or a "down" (red ▼).
         function recordIfSignificant(coin, price, now) {
             const symbol = coin.id;
             const prev = lastRecorded[symbol];
 
             if (prev === undefined) {
-                lastRecorded[symbol] = price; // baseline only
+                lastRecorded[symbol] = price;
+                addEvent({ coinId: symbol, kind: 'initial', price: price, changePercent: 0, time: now });
                 return;
             }
 
@@ -887,6 +896,7 @@
 
         // ───────────── Event detail dialog ─────────────
         const EVENT_KIND_LABEL = {
+            'initial': 'First price',
             'up': 'Price up',
             'down': 'Price down'
         };
@@ -899,16 +909,20 @@
             document.getElementById('dlgDot').style.background = coin.color;
             document.getElementById('dlgCoin').innerHTML = `${coin.symbol} <small>${coin.name}</small>`;
 
-            const chgClass = d.changePercent >= 0 ? 'up' : 'down';
-            const chgText = `${d.changePercent >= 0 ? '+' : ''}${d.changePercent.toFixed(3)}%`;
-
-            document.getElementById('dlgBody').innerHTML = `
+            let rows = `
                 <div class="dialog-row"><span class="k">Event</span><span class="v">${EVENT_KIND_LABEL[d.kind]}</span></div>
-                <div class="dialog-row"><span class="k">Price</span><span class="v">$${fmtPrice(d.price)}</span></div>
-                <div class="dialog-row"><span class="k">Change</span><span class="v ${chgClass}">${chgText}</span></div>
+                <div class="dialog-row"><span class="k">Price</span><span class="v">$${fmtPrice(d.price)}</span></div>`;
+            if (d.kind !== 'initial') {
+                const chgClass = d.changePercent >= 0 ? 'up' : 'down';
+                const chgText = `${d.changePercent >= 0 ? '+' : ''}${d.changePercent.toFixed(3)}%`;
+                rows += `
+                <div class="dialog-row"><span class="k">Change</span><span class="v ${chgClass}">${chgText}</span></div>`;
+            }
+            rows += `
                 <div class="dialog-row"><span class="k">Pair</span><span class="v">${coin.symbol}USDT</span></div>
                 <div class="dialog-row"><span class="k">Time</span><span class="v">${d.time.toLocaleTimeString('en-US', { hour12: false })}</span></div>`;
 
+            document.getElementById('dlgBody').innerHTML = rows;
             eventOverlay.classList.add('open');
         }
         function closeEventDialog() { eventOverlay.classList.remove('open'); }

@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Get Started — Tempis Timeline</title>
+  <title>Get Started | Tempis Timeline</title>
   <meta name="description" content="Install Tempis Timeline and render your first timeline. Setup for vanilla TypeScript, React, Vue, and the browser bundle.">
   <link rel="canonical" href="https://tempis.dev/get-started.html">
-  <meta property="og:title" content="Get Started — Tempis Timeline">
+  <meta property="og:title" content="Get Started | Tempis Timeline">
   <meta property="og:description" content="Install Tempis Timeline and render your first timeline. Setup for vanilla TypeScript, React, Vue, and the browser bundle.">
   <meta property="og:url" content="https://tempis.dev/get-started.html">
   <meta property="og:type" content="website">
@@ -37,7 +37,6 @@
         <a href="https://github.com/tempis-dev/tempis" class="nav-github" aria-label="Tempis on GitHub">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
         </a>
-        <a href="api.html" class="btn btn-primary btn-sm">API reference</a>
       </div>
       <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.mobile-menu').classList.add('open');document.querySelector('.mobile-menu-overlay').classList.add('active');">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -73,7 +72,7 @@
 
     <h2 id="core">Core library</h2>
 
-    <p>The core package has no runtime dependencies and works with any framework, or none.</p>
+    <p>The core package has no runtime dependencies and works with any framework, or none. <a href="api.html#core/getting-started">See the core API reference</a> for every option, method and callback.</p>
     <div class="install-box"><span class="prompt">$</span> npm install <span class="pkg-highlight">@tempis/timeline</span></div>
 
     <h3>Render a timeline</h3>
@@ -114,6 +113,7 @@ const timeline = new TempisTimeline('#timeline', {
   range: { start: '2026-01-25', end: '2026-03-01' }
 });</code></pre>
     <p>A category without an explicit <code>backgroundColor</code> takes the next colour from the global palette, so you can omit styling entirely and still get distinct colours.</p>
+    <p class="api-ref">Reference: <a href="api.html#core/categories">Categories</a>, <a href="api.html#core/legend">Legend</a>, <a href="api.html#core/color-palette">Color palette</a>.</p>
 
     <h3>Updating data</h3>
     <p>Pass replacement arrays. Each setter rebuilds what it needs to and redraws.</p>
@@ -121,6 +121,7 @@ const timeline = new TempisTimeline('#timeline', {
 timeline.setCategories(categories);
 timeline.setBands(bands);
 timeline.setDependencies(dependencies);</code></pre>
+    <p class="api-ref">Reference: <a href="api.html#core/items">Items</a>, <a href="api.html#core/bands">Bands</a>, <a href="api.html#core/dependencies">Dependencies</a>.</p>
 
     <h3>Moving the view</h3>
     <p><code>focus()</code> pans and, where it makes sense, zooms. With no arguments it fits the full extent of the data.</p>
@@ -129,6 +130,7 @@ timeline.focus({ date: '2026-06-15' });                    // centre on an insta
 timeline.focus({ range: ['2026-01-01', '2026-12-31'] });    // fit a range
 timeline.focus();                                          // fit all items</code></pre>
     <p>By default <code>zoom: 'auto'</code> only changes the zoom level when the target is a range item long enough to warrant it; point-in-time items keep the current zoom and are centred. Pass <code>zoom: false</code> to always preserve the zoom level. Animation is skipped automatically when the user prefers reduced motion.</p>
+    <p class="api-ref">Reference: <a href="api.html#core/focus">Focus</a>, <a href="api.html#core/range">Range</a>.</p>
 
     <h3>Teardown</h3>
     <p><code>destroy()</code> removes the canvas listeners, disconnects the resize observer, cancels animations and clears the canvas. Call it before the element leaves the DOM.</p>
@@ -136,7 +138,7 @@ timeline.focus();                                          // fit all items</cod
 
     <h2 id="react">React</h2>
 
-    <p><code>@tempis/timeline</code> is a peer dependency, so install both.</p>
+    <p><code>@tempis/timeline</code> is a peer dependency, so install both. <a href="api.html#react/getting-started">See the React API reference</a> for the full component, props and ref API.</p>
     <div class="install-box"><span class="prompt">$</span> npm install <span class="pkg-highlight">@tempis/react</span> @tempis/timeline</div>
 
     <h3>Render a timeline</h3>
@@ -180,6 +182,7 @@ export function Schedule() {
   );
 }</code></pre>
     <p>The ref carries the same methods as the core instance, plus <code>getInstance()</code> and <code>getCanvas()</code> as escape hatches. <code>destroy()</code> is deliberately absent; unmounting handles it.</p>
+    <p class="api-ref">Reference: <a href="api.html#react/ref">Ref API</a>, <a href="api.html#react/props">Props</a>.</p>
 
     <h3>Selection</h3>
     <p>Providing <code>onSelectionChange</code> puts selection into controlled mode: the timeline reports what the user did but does not change its own state, so you apply the result with <code>setSelection()</code>. Omit the callback to let it manage selection internally.</p>
@@ -196,11 +199,12 @@ export function Schedule() {
     timeline.current?.setSelection([...next]);
   }}
 /&gt;</code></pre>
+    <p class="api-ref">Reference: <a href="api.html#react/props">Props &amp; selection</a>, <a href="api.html#core/selection">Selection modes</a>.</p>
 
     <h2 id="vue">Vue</h2>
 
     <div class="install-box"><span class="prompt">$</span> npm install <span class="pkg-highlight">@tempis/vue</span> @tempis/timeline</div>
-    <p>Requires Vue 3.3 or later.</p>
+    <p>Requires Vue 3.3 or later. <a href="api.html#vue/getting-started">See the Vue API reference</a> for the full component, props, events and ref API.</p>
 
     <h3>Render a timeline</h3>
 <pre><code class="language-html">&lt;script setup lang="ts"&gt;
@@ -237,6 +241,7 @@ const options = { responsive: true, selection: 'multi' as const };
   &lt;TempisTimeline v-model:selection="selected" :items="items" :options="options" /&gt;
 &lt;/template&gt;</code></pre>
     <p>Leave the prop off entirely and the timeline tracks selection itself.</p>
+    <p class="api-ref">Reference: <a href="api.html#vue/props">Props &amp; events</a>.</p>
 
     <h3>Imperative methods</h3>
 <pre><code class="language-html">&lt;script setup lang="ts"&gt;
@@ -250,6 +255,7 @@ const timeline = ref&lt;TempisTimelineExposed | null&gt;(null);
   &lt;button @click="timeline?.focus({ id: 1, animate: true })"&gt;Focus discovery&lt;/button&gt;
   &lt;TempisTimeline ref="timeline" :items="items" :options="options" /&gt;
 &lt;/template&gt;</code></pre>
+    <p class="api-ref">Reference: <a href="api.html#vue/ref">Template ref API</a>, <a href="api.html#vue/options">Options</a>.</p>
 
     <h2 id="browser">Browser bundle</h2>
 
@@ -267,6 +273,7 @@ const timeline = ref&lt;TempisTimelineExposed | null&gt;(null);
   });
 &lt;/script&gt;</code></pre>
     <p><code>AdapterRegistry</code> is on the same global if you need to register a custom date adapter.</p>
+    <p class="api-ref">Reference: <a href="api.html#core/getting-started">Core API</a>, <a href="api.html#core/date-adapters">Date adapters</a>.</p>
 
     <h2>Next</h2>
     <ul>

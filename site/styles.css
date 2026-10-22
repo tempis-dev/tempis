@@ -35,7 +35,7 @@
   /* Geometry */
   --r: 3px;
   --r-lg: 4px;
-  --wrap: 1180px;
+  --wrap: 1300px;
   --gutter: 24px;
   --nav-h: 60px;
 
@@ -55,6 +55,9 @@
 }
 
 html {
+  /* Slightly larger root so the whole rem-based type scale reads comfortably
+     on high-density displays (everything below is sized in rem). */
+  font-size: 17px;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
 }
@@ -140,7 +143,7 @@ hr {
 /* Small uppercase technical label */
 .eyebrow {
   font-family: var(--mono);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -480,12 +483,12 @@ nav .nav-github svg { width: 18px; height: 18px; }
 }
 
 .hero h1 {
-  /* Capped so the static line clears the narrower copy column at every
-     breakpoint, including the tight two-column range around 1024px. */
-  font-size: clamp(1.75rem, 3vw, 2.375rem);
+  /* Scales up with the viewport for a punchy hero, capped so the static line
+     still clears the narrower copy column in the two-column range around 1024px. */
+  font-size: clamp(2.5rem, 4.4vw, 3.5rem);
   font-weight: 700;
   letter-spacing: -0.035em;
-  line-height: 1.08;
+  line-height: 1.05;
   margin: 16px 0 18px;
   /* Lines are marked up explicitly, so no balancing. */
   text-wrap: normal;
@@ -645,7 +648,7 @@ nav .nav-github svg { width: 18px; height: 18px; }
   grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
   gap: 56px;
   align-items: center;
-  padding: 64px 0;
+  padding: 48px 0;
   border-top: 1px solid var(--line);
 }
 
@@ -1057,6 +1060,15 @@ a.pkg:hover {
 .page-wrapper p {
   margin-bottom: 14px;
   color: var(--ink-2);
+}
+
+/* Contextual "see API reference" line under a get-started section. */
+.page-wrapper p.api-ref {
+  font-size: 0.875rem;
+  color: var(--ink-3);
+  margin: -2px 0 22px;
+  padding-left: 12px;
+  border-left: 2px solid var(--line);
 }
 
 .page-wrapper ul,

@@ -51,8 +51,8 @@
 <h2>Controlled vs Uncontrolled</h2>
 <p>Selection behaviour depends on whether <code>onSelectionChange</code> is provided:</p>
 <ul>
-  <li><strong>Uncontrolled</strong> (no <code>onSelectionChange</code>) — the timeline manages selection state internally. Clicking an item selects it and redraws automatically.</li>
-  <li><strong>Controlled</strong> (with <code>onSelectionChange</code>) — the timeline fires the callback but does not update selection state. You must call <code>setSelection()</code> yourself to apply the changes. This gives you full control over selection logic.</li>
+  <li><strong>Uncontrolled</strong> (no <code>onSelectionChange</code>): the timeline manages selection state internally. Clicking an item selects it and redraws automatically.</li>
+  <li><strong>Controlled</strong> (with <code>onSelectionChange</code>): the timeline fires the callback but does not update selection state. You must call <code>setSelection()</code> yourself to apply the changes. This gives you full control over selection logic.</li>
 </ul>
 
 <div class="note">If you provide <code>onSelectionChange</code>, you are responsible for calling <code>setSelection()</code> to update the visual state. Without it, clicks will fire the callback but items won't appear selected.</div>
@@ -63,10 +63,10 @@
 <p>Fires whenever the selection changes, whether by user interaction or programmatic update. Receives an array of <code>SelectionChangeEvent</code> objects describing which items were selected or deselected.</p>
 <pre><code class="language-typescript">onSelectionChange(changes: SelectionChangeEvent[]): void</code></pre>
 
-<h2>Example — Uncontrolled</h2>
+<h2>Example: Uncontrolled</h2>
 <pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
 
-// No onSelectionChange — selection is managed automatically
+// No onSelectionChange - selection is managed automatically
 const timeline = new TempisTimeline('#canvas', {
   responsive: true,
   selection: 'multi',
@@ -77,7 +77,7 @@ const timeline = new TempisTimeline('#canvas', {
   range: { start: '2026-02-25', end: '2026-04-01', position: 'bottom' }
 });</code></pre>
 
-<h2>Example — Controlled</h2>
+<h2>Example: Controlled</h2>
 <pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
 
 const timeline = new TempisTimeline('#canvas', {

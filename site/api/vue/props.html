@@ -6,15 +6,15 @@
   <thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
   <tbody>
     <tr><td><code>items</code></td><td><code>TempisTimelineItem[]</code></td><td>required</td><td>Timeline items to display.</td></tr>
-    <tr><td><code>categories</code></td><td><code>TempisTimelineCategory[]</code></td><td>—</td><td>Item categories.</td></tr>
-    <tr><td><code>bands</code></td><td><code>TempisTimelineBand[]</code></td><td>—</td><td>Timeline bands.</td></tr>
-    <tr><td><code>dependencies</code></td><td><code>TempisTimelineDependency[]</code></td><td>—</td><td>Item dependency arrows.</td></tr>
-    <tr><td><code>selection</code></td><td><code>(string | number)[]</code></td><td>—</td><td>Selected item IDs (<code>v-model:selection</code>). Enables controlled selection when provided.</td></tr>
+    <tr><td><code>categories</code></td><td><code>TempisTimelineCategory[]</code></td><td> - </td><td>Item categories.</td></tr>
+    <tr><td><code>bands</code></td><td><code>TempisTimelineBand[]</code></td><td> - </td><td>Timeline bands.</td></tr>
+    <tr><td><code>dependencies</code></td><td><code>TempisTimelineDependency[]</code></td><td> - </td><td>Item dependency arrows.</td></tr>
+    <tr><td><code>selection</code></td><td><code>(string | number)[]</code></td><td> - </td><td>Selected item IDs (<code>v-model:selection</code>). Enables controlled selection when provided.</td></tr>
     <tr><td><code>options</code></td><td><code>TempisTimelineConfig</code></td><td><code>{}</code></td><td>Configuration options (see <a href="#vue/options">Options</a>).</td></tr>
     <tr><td><code>width</code></td><td><code>string | number</code></td><td><code>"100%"</code></td><td>Canvas width.</td></tr>
     <tr><td><code>height</code></td><td><code>string | number</code></td><td><code>300</code></td><td>Canvas height.</td></tr>
-    <tr><td><code>wrapperClass</code></td><td><code>string</code></td><td>—</td><td>CSS class for the wrapper <code>&lt;div&gt;</code>.</td></tr>
-    <tr><td><code>wrapperStyle</code></td><td><code>CSSProperties</code></td><td>—</td><td>Inline styles for the wrapper <code>&lt;div&gt;</code>.</td></tr>
+    <tr><td><code>wrapperClass</code></td><td><code>string</code></td><td> - </td><td>CSS class for the wrapper <code>&lt;div&gt;</code>.</td></tr>
+    <tr><td><code>wrapperStyle</code></td><td><code>CSSProperties</code></td><td> - </td><td>Inline styles for the wrapper <code>&lt;div&gt;</code>.</td></tr>
   </tbody>
 </table>
 
@@ -36,7 +36,7 @@
 <p>Selection behaviour depends on two things: the <code>selection</code> mode in options (<code>"none"</code>, <code>"single"</code>, or <code>"multi"</code>) and whether you bind <code>v-model:selection</code>.</p>
 
 <h3>Uncontrolled (default)</h3>
-<p>Don't pass the <code>selection</code> prop. The timeline manages selection state internally — items highlight immediately on click.</p>
+<p>Don't pass the <code>selection</code> prop. The timeline manages selection state internally, so items highlight immediately on click.</p>
 <pre><code class="language-typescript">&lt;TempisTimeline
   :items="items"
   :options="{ selection: 'multi' }"
@@ -62,7 +62,7 @@ const selectedIds = ref&lt;(string | number)[]&gt;([])
 &lt;/template&gt;</code></pre>
 
 <h2>Reactive vs Structural</h2>
-<p><code>items</code>, <code>categories</code>, <code>bands</code>, <code>dependencies</code>, and <code>selection</code> are reactive — changes are synced to the existing instance via <code>watch</code> without recreating it. The <code>options</code> prop is structural — when its serialised value changes, the entire timeline instance is destroyed and recreated.</p>
+<p><code>items</code>, <code>categories</code>, <code>bands</code>, <code>dependencies</code>, and <code>selection</code> are reactive. Changes are synced to the existing instance via <code>watch</code> without recreating it. The <code>options</code> prop is structural: when its serialised value changes, the entire timeline instance is destroyed and recreated.</p>
 
 <h2>Example</h2>
 <pre><code class="language-typescript">&lt;script setup lang="ts"&gt;
