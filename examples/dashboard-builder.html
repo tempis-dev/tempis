@@ -212,14 +212,18 @@
       label: 'Deployments',
       categories: [
         { name: 'deploy', label: 'Deploy', style: { backgroundColor: '#4f46e5', fontColor: '#fff' } },
-        { name: 'rollback', label: 'Rollback', style: { backgroundColor: '#ef4444', fontColor: '#fff' } }
+        { name: 'rollback', label: 'Rollback', style: { backgroundColor: '#ef4444', fontColor: '#fff' } },
+        { name: 'milestone', label: 'Milestone', style: { backgroundColor: '#8b5cf6', fontColor: '#fff' } }
       ],
       items: [
         { id: 1, label: 'v3.1.0', start: '2026-05-04', end: '2026-05-05', category: 'deploy', grouping: 'web' },
         { id: 2, label: 'v3.1.1', start: '2026-05-06', end: '2026-05-07', category: 'deploy', grouping: 'web' },
         { id: 3, label: 'hotfix', start: '2026-05-07', end: '2026-05-08', category: 'rollback', grouping: 'web' },
         { id: 4, label: 'api v2.4', start: '2026-05-05', end: '2026-05-06', category: 'deploy', grouping: 'api' },
-        { id: 5, label: 'api v2.5', start: '2026-05-08', end: '2026-05-09', category: 'deploy', grouping: 'api' }
+        { id: 5, label: 'api v2.5', start: '2026-05-08', end: '2026-05-09', category: 'deploy', grouping: 'api' },
+        // Point-in-time milestones (no end).
+        { id: 6, label: 'GA release', start: '2026-05-07T12:00', category: 'milestone', grouping: 'web' },
+        { id: 7, label: 'Code freeze', start: '2026-05-09T09:00', category: 'milestone', grouping: 'api' }
       ],
       range: ['2026-05-03', '2026-05-11']
     },
@@ -244,14 +248,18 @@
       categories: [
         { name: 'focus', label: 'Focus', style: { backgroundColor: '#0ea5e9', fontColor: '#fff' } },
         { name: 'meeting', label: 'Meeting', style: { backgroundColor: '#8b5cf6', fontColor: '#fff' } },
-        { name: 'off', label: 'Out', style: { backgroundColor: '#94a3b8', fontColor: '#fff' } }
+        { name: 'off', label: 'Out', style: { backgroundColor: '#94a3b8', fontColor: '#fff' } },
+        { name: 'standup', label: 'Standup', style: { backgroundColor: '#f59e0b', fontColor: '#fff' } }
       ],
       items: [
         { id: 1, label: 'Design review', start: '2026-05-04T10:00', end: '2026-05-04T11:00', category: 'meeting', grouping: 'Ava' },
         { id: 2, label: 'Deep work', start: '2026-05-04T13:00', end: '2026-05-04T17:00', category: 'focus', grouping: 'Ava' },
         { id: 3, label: 'PTO', start: '2026-05-05', end: '2026-05-06', category: 'off', grouping: 'Marcus' },
         { id: 4, label: 'Sprint planning', start: '2026-05-04T09:00', end: '2026-05-04T10:00', category: 'meeting', grouping: 'Priya' },
-        { id: 5, label: 'Build pipeline', start: '2026-05-04T11:00', end: '2026-05-04T16:00', category: 'focus', grouping: 'Priya' }
+        { id: 5, label: 'Build pipeline', start: '2026-05-04T11:00', end: '2026-05-04T16:00', category: 'focus', grouping: 'Priya' },
+        // Point-in-time standups (no end).
+        { id: 6, label: 'Standup', start: '2026-05-04T09:00', category: 'standup', grouping: 'Ava' },
+        { id: 7, label: 'Standup', start: '2026-05-05T09:00', category: 'standup', grouping: 'Marcus' }
       ],
       range: ['2026-05-04T08:00', '2026-05-06T18:00']
     },
@@ -259,13 +267,17 @@
       label: 'Batch jobs',
       categories: [
         { name: 'ok', label: 'Succeeded', style: { backgroundColor: '#10b981', fontColor: '#fff' } },
-        { name: 'fail', label: 'Failed', style: { backgroundColor: '#ef4444', fontColor: '#fff' } }
+        { name: 'fail', label: 'Failed', style: { backgroundColor: '#ef4444', fontColor: '#fff' } },
+        { name: 'checkpoint', label: 'Checkpoint', style: { backgroundColor: '#8b5cf6', fontColor: '#fff' } }
       ],
       items: [
         { id: 1, label: 'ETL nightly', start: '2026-05-04T02:00', end: '2026-05-04T03:10', category: 'ok', grouping: 'Pipeline' },
         { id: 2, label: 'Reindex', start: '2026-05-04T03:15', end: '2026-05-04T04:00', category: 'ok', grouping: 'Pipeline' },
         { id: 3, label: 'Backup', start: '2026-05-04T04:00', end: '2026-05-04T05:30', category: 'fail', grouping: 'Storage' },
-        { id: 4, label: 'Report gen', start: '2026-05-04T05:30', end: '2026-05-04T06:15', category: 'ok', grouping: 'Analytics' }
+        { id: 4, label: 'Report gen', start: '2026-05-04T05:30', end: '2026-05-04T06:15', category: 'ok', grouping: 'Analytics' },
+        // Point-in-time checkpoints (no end).
+        { id: 5, label: 'SLA check', start: '2026-05-04T06:00', category: 'checkpoint', grouping: 'Pipeline' },
+        { id: 6, label: 'Snapshot', start: '2026-05-04T05:30', category: 'checkpoint', grouping: 'Storage' }
       ],
       range: ['2026-05-04T01:30', '2026-05-04T07:00']
     }

@@ -78,7 +78,14 @@
     .phase-head .chevron { width: 10px; transition: transform 0.15s; color: var(--text-3); font-size: 10px; }
     .phase-head.collapsed .chevron { transform: rotate(-90deg); }
     .phase-head .swatch { width: 9px; height: 9px; border-radius: 3px; }
-    .phase-head .count { margin-left: auto; font-size: 11px; color: var(--text-3); font-weight: 400; }
+    .phase-head .pname { flex: 1; }
+    .phase-head .count { font-size: 11px; color: var(--text-3); font-weight: 400; }
+    .phase-add {
+      border: none; background: none; cursor: pointer; color: var(--text-3); font-size: 16px; line-height: 1;
+      padding: 0 6px; border-radius: 5px; opacity: 0; transition: opacity 0.12s, color 0.12s, background 0.12s;
+    }
+    .phase-head:hover .phase-add { opacity: 1; }
+    .phase-add:hover { color: var(--primary); background: var(--primary-soft); }
     .phase-tasks.collapsed { display: none; }
     .task-row {
       display: flex; align-items: center; gap: 8px; padding: 7px 14px 7px 32px; cursor: pointer;
@@ -89,6 +96,42 @@
     .task-row .tname { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .task-row .tnote { font-size: 11px; line-height: 1; opacity: 0.85; }
     .task-row .tpct { font-family: "Geist Mono", monospace; font-size: 11px; color: var(--text-3); }
+
+    /* Bands panel */
+    .tree-head.bands-head { display: flex; align-items: center; gap: 8px; position: static; }
+    .bands-head span { flex: 1; }
+    .band-add-btn {
+      font-family: inherit; font-size: 11px; font-weight: 600; letter-spacing: 0; text-transform: none;
+      color: var(--primary); background: var(--primary-soft); border: none; border-radius: 6px;
+      padding: 4px 9px; cursor: pointer;
+    }
+    .band-add-btn:hover { background: #e3e8ff; }
+    .bands-body { padding: 4px 14px 18px; }
+    .bands-empty { font-size: 12px; color: var(--text-3); line-height: 1.5; padding: 4px 0; }
+    .band-row { padding: 10px 0; border-bottom: 1px solid var(--border-soft); }
+    .band-row:last-child { border-bottom: none; }
+    .band-top { display: flex; align-items: center; gap: 8px; }
+    .band-dot { width: 14px; height: 14px; border-radius: 4px; flex: 0 0 auto; border: none; cursor: pointer; padding: 0; box-shadow: 0 0 0 1px rgba(0,0,0,0.08); }
+    .band-dot:hover { box-shadow: 0 0 0 2px var(--primary-soft); }
+    .band-swatches { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; padding-left: 17px; }
+    .swatch-opt { width: 20px; height: 20px; border-radius: 5px; border: 2px solid transparent; cursor: pointer; padding: 0; box-shadow: 0 0 0 1px rgba(0,0,0,0.08); }
+    .swatch-opt:hover { transform: scale(1.08); }
+    .swatch-opt.active { border-color: var(--text); }
+    .band-label {
+      flex: 1; min-width: 0; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text);
+      background: none; border: 1px solid transparent; border-radius: 6px; padding: 4px 6px; outline: none;
+    }
+    .band-label:hover { border-color: var(--border); }
+    .band-label:focus { border-color: var(--primary); background: var(--card); }
+    .band-remove { border: none; background: none; cursor: pointer; color: var(--text-3); font-size: 16px; line-height: 1; padding: 0 3px; }
+    .band-remove:hover { color: #ef4444; }
+    .band-dates { display: flex; align-items: center; gap: 6px; margin-top: 7px; padding-left: 17px; }
+    .band-dates input[type="date"] {
+      flex: 1; min-width: 0; font-family: inherit; font-size: 11.5px; color: var(--text-2); background: var(--card);
+      border: 1px solid var(--border); border-radius: 6px; padding: 5px 6px; outline: none;
+    }
+    .band-dates input[type="date"]:focus { border-color: var(--primary); }
+    .band-to { font-size: 11px; color: var(--text-3); flex: 0 0 auto; }
 
     /* Main / timeline */
     .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
@@ -127,8 +170,32 @@
     .progress-track { height: 8px; border-radius: 5px; background: var(--bg); overflow: hidden; margin-top: 4px; }
     .progress-fill { height: 100%; border-radius: 5px; background: var(--primary); transition: width 0.3s; }
     .range-input { width: 100%; accent-color: var(--primary); margin-top: 6px; }
-    .deps { display: flex; flex-direction: column; gap: 6px; }
-    .dep-chip { font-size: 12px; color: var(--text-2); background: var(--bg); border: 1px solid var(--border-soft); border-radius: 6px; padding: 5px 9px; }
+    .size-row { display: flex; gap: 10px; }
+    .size-row .field { flex: 1; min-width: 0; }
+    .field input[type="date"] {
+      width: 100%; font-family: inherit; font-size: 13px; color: var(--text); background: var(--card);
+      border: 1px solid var(--border); border-radius: 8px; padding: 7px 9px; outline: none;
+    }
+    .field input[type="date"]:focus { border-color: var(--primary); }
+    .deps { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+    .deps-empty { font-size: 12px; color: var(--text-3); }
+    .dep-chip {
+      display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-2);
+      background: var(--bg); border: 1px solid var(--border-soft); border-radius: 6px; padding: 5px 6px 5px 9px;
+    }
+    .dep-chip span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dep-remove { border: none; background: none; cursor: pointer; color: var(--text-3); font-size: 16px; line-height: 1; padding: 0 3px; }
+    .dep-remove:hover { color: #ef4444; }
+    .dep-add {
+      width: 100%; font-family: inherit; font-size: 13px; color: var(--text); background: var(--card);
+      border: 1px solid var(--border); border-radius: 8px; padding: 7px 9px; cursor: pointer; outline: none;
+    }
+    .dep-add:focus { border-color: var(--primary); }
+    .danger-btn {
+      width: 100%; margin-top: 4px; font-family: inherit; font-size: 13px; font-weight: 500;
+      color: #dc2626; background: #fff; border: 1px solid #f3c6c6; border-radius: 8px; padding: 9px; cursor: pointer;
+    }
+    .danger-btn:hover { background: #fef2f2; border-color: #ef4444; }
     .note-input {
       width: 100%; min-height: 84px; resize: vertical; font-family: inherit; font-size: 13px;
       line-height: 1.5; color: var(--text); background: var(--card);
@@ -169,17 +236,23 @@
   </header>
 
   <div class="workspace">
-    <!-- Task tree -->
+    <!-- Task tree + bands -->
     <aside class="tree">
       <div class="tree-head">Phases &amp; Tasks</div>
       <div id="treeBody"></div>
+
+      <div class="tree-head bands-head">
+        <span>Schedule bands</span>
+        <button class="band-add-btn" id="addBandBtn" title="Add band">+ Add</button>
+      </div>
+      <div id="bandsBody" class="bands-body"></div>
     </aside>
 
     <!-- Timeline -->
     <main class="main">
       <div class="main-head">
         <h2>Schedule</h2>
-        <span class="hint">Gantt view with dependencies and progress</span>
+        <span class="hint">Select a task to edit dates, dependencies and notes. Add tasks from the tree, bands from the panel below it.</span>
         <span class="spacer"></span>
         <label class="toggle"><input type="checkbox" id="showDeps" checked> Dependencies</label>
       </div>
@@ -260,13 +333,42 @@
   var assigneeFilter = 'all';
   var selectedId = null;
 
+  // Next ids for user-created tasks and bands (task ids start high to avoid clashes).
+  var nextTaskId = 1000;
+  var nextBandId = 1;
+
+  // Soft background colours used for user-added bands, cycled as they are created.
+  var BAND_COLORS = ['#4f46e5', '#ec4899', '#0ea5e9', '#f59e0b', '#10b981', '#ef4444', '#64748b'];
+
+  // User-managed schedule bands. The "today" marker is always rendered in addition.
+  var userBands = [
+    { id: nextBandId++, label: 'Design freeze', start: '2026-03-20', end: '2026-03-27', color: '#ec4899' },
+    { id: nextBandId++, label: 'Release window', start: '2026-06-08', end: '2026-06-15', color: '#10b981' }
+  ];
+
+  // Build the full band list for the timeline: the fixed "today" marker plus every
+  // user band. Bands need a start and end to render as a shaded window.
+  function buildBands() {
+    var bands = [
+      { start: '2026-04-06', style: { color: '#4f46e5', borderColor: '#4f46e5', borderThickness: 1, opacity: 0.08 } }
+    ];
+    userBands.forEach(function (b) {
+      if (!b.start || !b.end) return;
+      bands.push({ start: b.start, end: b.end, style: { color: b.color, opacity: 0.1 } });
+    });
+    return bands;
+  }
+
   // A task has a note when its note string is non-empty.
   function hasNote(t) { return !!(t.note && t.note.trim()); }
 
   // Build a timeline item from a task, honouring the current assignee filter. When a
   // note is stored against the task, a small note glyph is appended to the label.
   function toItem(t) {
-    var dimmed = assigneeFilter !== 'all' && t.assignee !== assigneeFilter;
+    // The "__none__" filter matches tasks with no assignee; otherwise match by name.
+    var matches = assigneeFilter === 'all' ||
+      (assigneeFilter === '__none__' ? !t.assignee : t.assignee === assigneeFilter);
+    var dimmed = !matches;
     return {
       id: t.id,
       label: t.name + (hasNote(t) ? '  \uD83D\uDCDD' : ''),
@@ -296,10 +398,7 @@
     grouping: { collapsible: true },
     legend: { position: 'bottom', markerStyle: 'circle' },
     range: { start: '2026-02-01', end: '2026-04-15', position: 'bottom', zoom: { enabled: true } },
-    bands: [
-      // "Today" marker.
-      { start: '2026-04-06', style: { color: '#4f46e5', borderColor: '#4f46e5', borderThickness: 1, opacity: 0.08 } }
-    ],
+    bands: buildBands(),
     items: buildItems(),
     dependencies: deps,
     tooltip: {
@@ -314,7 +413,7 @@
           : '';
         return '<div style="padding:11px 14px;font-family:' + FONT + ';font-size:13px;min-width:190px;max-width:260px;background:#fff;color:#1a1a2e;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);">' +
           '<div style="font-weight:600;margin-bottom:6px;">' + t.name + '</div>' +
-          '<div style="display:flex;justify-content:space-between;color:#5b6474;font-size:12px;margin-bottom:6px;"><span>' + t.phase + '</span><span>' + t.assignee + '</span></div>' +
+          '<div style="display:flex;justify-content:space-between;color:#5b6474;font-size:12px;margin-bottom:6px;"><span>' + t.phase + '</span><span>' + (t.assignee || 'Unassigned') + '</span></div>' +
           '<div style="height:6px;border-radius:4px;background:#eef0f5;overflow:hidden;"><div style="height:100%;width:' + pct + '%;background:' + phaseByName[t.phase].color + ';"></div></div>' +
           '<div style="font-size:11px;color:#9299a8;margin-top:4px;">' + pct + '% complete</div>' +
           noteBlock +
@@ -350,7 +449,13 @@
       head.className = 'phase-head';
       head.dataset.phase = p.name;
       head.innerHTML = '<span class="chevron">▾</span><span class="swatch" style="background:' + p.color + '"></span>' +
-        p.name + '<span class="count">' + group.length + '</span>';
+        '<span class="pname">' + p.name + '</span>' +
+        '<button class="phase-add" title="Add task to ' + p.name + '">+</button>' +
+        '<span class="count">' + group.length + '</span>';
+      head.querySelector('.phase-add').addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        addTask(p.name);
+      });
 
       var list = document.createElement('div');
       list.className = 'phase-tasks';
@@ -384,6 +489,75 @@
     highlightTreeRow();
   }
 
+  // ── Bands panel ──
+  var bandsBody = document.getElementById('bandsBody');
+  function buildBandsPanel() {
+    bandsBody.innerHTML = '';
+    if (!userBands.length) {
+      bandsBody.innerHTML = '<div class="bands-empty">No bands yet. Add one to shade a window on the schedule.</div>';
+      return;
+    }
+    userBands.forEach(function (b) {
+      var row = document.createElement('div');
+      row.className = 'band-row';
+      var swatches = BAND_COLORS.map(function (c) {
+        return '<button class="swatch-opt' + (c === b.color ? ' active' : '') + '" data-color="' + c + '" style="background:' + c + '" title="' + c + '"></button>';
+      }).join('');
+      row.innerHTML =
+        '<div class="band-top">' +
+          '<button class="band-dot" style="background:' + b.color + '" title="Change colour"></button>' +
+          '<input class="band-label" value="' + escapeHtml(b.label) + '">' +
+          '<button class="band-remove" title="Remove band">×</button>' +
+        '</div>' +
+        '<div class="band-swatches" hidden>' + swatches + '</div>' +
+        '<div class="band-dates">' +
+          '<input type="date" class="band-start" value="' + toDateValue(b.start) + '">' +
+          '<span class="band-to">to</span>' +
+          '<input type="date" class="band-end" value="' + toDateValue(b.end) + '">' +
+        '</div>';
+
+      // Toggle the colour swatch row from the band's colour dot.
+      var dot = row.querySelector('.band-dot');
+      var swatchRow = row.querySelector('.band-swatches');
+      dot.addEventListener('click', function () { swatchRow.hidden = !swatchRow.hidden; });
+      Array.prototype.forEach.call(row.querySelectorAll('.swatch-opt'), function (sw) {
+        sw.addEventListener('click', function () {
+          b.color = sw.dataset.color;
+          dot.style.background = b.color;
+          Array.prototype.forEach.call(row.querySelectorAll('.swatch-opt'), function (o) { o.classList.toggle('active', o === sw); });
+          swatchRow.hidden = true;
+          timeline.setBands(buildBands());
+        });
+      });
+
+      row.querySelector('.band-label').addEventListener('input', function (e) { b.label = e.target.value; });
+      row.querySelector('.band-start').addEventListener('change', function (e) {
+        b.start = e.target.value;
+        if (b.end && b.start && new Date(b.end) < new Date(b.start)) { b.end = b.start; row.querySelector('.band-end').value = toDateValue(b.end); }
+        timeline.setBands(buildBands());
+      });
+      row.querySelector('.band-end').addEventListener('change', function (e) {
+        b.end = e.target.value;
+        if (b.end && b.start && new Date(b.end) < new Date(b.start)) { b.start = b.end; row.querySelector('.band-start').value = toDateValue(b.start); }
+        timeline.setBands(buildBands());
+      });
+      row.querySelector('.band-remove').addEventListener('click', function () {
+        userBands = userBands.filter(function (x) { return x !== b; });
+        timeline.setBands(buildBands());
+        buildBandsPanel();
+      });
+
+      bandsBody.appendChild(row);
+    });
+  }
+
+  document.getElementById('addBandBtn').addEventListener('click', function () {
+    var color = BAND_COLORS[(nextBandId - 1) % BAND_COLORS.length];
+    userBands.push({ id: nextBandId++, label: 'New band', start: '2026-04-06', end: '2026-04-20', color: color });
+    timeline.setBands(buildBands());
+    buildBandsPanel();
+  });
+
   // Show or hide the note glyph on a tree row to match the task's note state.
   function updateTreeNote(id) {
     var t = taskById[id];
@@ -411,19 +585,38 @@
     document.getElementById('dName').textContent = t.name;
     document.getElementById('dPhase').textContent = t.phase;
 
-    var incoming = deps.filter(function (d) { return d.target === id; }).map(function (d) { return taskById[d.source].name; });
-    var fmt = function (s) { return s ? new Date(s).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'n/a'; };
     var pct = Math.round(t.progress * 100);
 
+    // Incoming dependencies (tasks this one depends on).
+    var incoming = deps.filter(function (d) { return d.target === id; });
+    var depRows = incoming.map(function (d) {
+      return '<div class="dep-chip" data-src="' + d.source + '"><span>' + escapeHtml(taskById[d.source].name) +
+        '</span><button class="dep-remove" data-src="' + d.source + '" title="Remove dependency">×</button></div>';
+    }).join('');
+
+    // Tasks that can still be added as a dependency (not self, not already linked).
+    var linked = {}; incoming.forEach(function (d) { linked[d.source] = true; });
+    var depOptions = tasks.filter(function (o) { return o.id !== id && !linked[o.id]; })
+      .map(function (o) { return '<option value="' + o.id + '">' + escapeHtml(o.name) + '</option>'; }).join('');
+
+    var assigneeOpts = '<option value=""' + (!t.assignee ? ' selected' : '') + '>Unassigned</option>' +
+      assignees.map(function (a) { return '<option value="' + escapeHtml(a) + '"' + (a === t.assignee ? ' selected' : '') + '>' + escapeHtml(a) + '</option>'; }).join('');
+
     document.getElementById('dBody').innerHTML =
-      '<div class="field"><label>Assignee</label><div class="val" style="font-family:' + FONT + '">' + t.assignee + '</div></div>' +
-      '<div class="field"><label>Schedule</label><div class="val">' + fmt(t.start) + (t.end ? ' to ' + fmt(t.end) : ', milestone') + '</div></div>' +
+      '<div class="field"><label>Assignee</label><select id="dAssignee" class="dep-add">' + assigneeOpts + '</select></div>' +
+      '<div class="size-row">' +
+        '<div class="field"><label>Start</label><input type="date" id="dStart" value="' + toDateValue(t.start) + '"></div>' +
+        '<div class="field"><label>End</label><input type="date" id="dEnd" value="' + toDateValue(t.end) + '"></div>' +
+      '</div>' +
       '<div class="field"><label id="dProgLabel">Progress ' + pct + '%</label>' +
         '<div class="progress-track"><div class="progress-fill" id="dFill" style="width:' + pct + '%;background:' + p.color + '"></div></div>' +
         '<input class="range-input" type="range" min="0" max="100" value="' + pct + '" id="dRange"></div>' +
-      (incoming.length ? '<div class="field"><label>Depends on</label><div class="deps">' + incoming.map(function (n) { return '<div class="dep-chip">' + n + '</div>'; }).join('') + '</div></div>' : '') +
+      '<div class="field"><label>Depends on</label>' +
+        '<div class="deps" id="dDeps">' + (depRows || '<div class="deps-empty">No dependencies yet.</div>') + '</div>' +
+        '<select id="dAddDep" class="dep-add"><option value="">Add a dependency...</option>' + depOptions + '</select></div>' +
       '<div class="field"><label>Note</label>' +
-        '<textarea id="dNote" class="note-input" placeholder="Add a note for this task...">' + (t.note ? escapeHtml(t.note) : '') + '</textarea></div>';
+        '<textarea id="dNote" class="note-input" placeholder="Add a note for this task...">' + (t.note ? escapeHtml(t.note) : '') + '</textarea></div>' +
+      '<button class="danger-btn" id="dDelete">Remove task</button>';
 
     var range = document.getElementById('dRange');
     if (range) {
@@ -436,6 +629,45 @@
         if (treeRow) treeRow.textContent = range.value + '%';
       });
     }
+
+    // Start / end date editing.
+    document.getElementById('dStart').addEventListener('change', function (e) {
+      if (!e.target.value) return;
+      t.start = e.target.value;
+      if (t.end && new Date(t.end) < new Date(t.start)) { t.end = t.start; document.getElementById('dEnd').value = toDateValue(t.end); }
+      timeline.setItems(buildItems());
+    });
+    document.getElementById('dEnd').addEventListener('change', function (e) {
+      // Clearing the end date turns the task into a milestone (point in time).
+      t.end = e.target.value || undefined;
+      if (t.end && new Date(t.end) < new Date(t.start)) { t.end = t.start; e.target.value = toDateValue(t.end); }
+      timeline.setItems(buildItems());
+    });
+
+    // Assignee editing. An empty value means unassigned.
+    document.getElementById('dAssignee').addEventListener('change', function (e) {
+      t.assignee = e.target.value || null;
+      timeline.setItems(buildItems());
+    });
+
+    // Add a dependency.
+    document.getElementById('dAddDep').addEventListener('change', function (e) {
+      var src = parseInt(e.target.value, 10);
+      if (!src) return;
+      deps.push({ source: src, target: id });
+      applyDeps();
+      selectItem(id);   // re-render the drawer with the new dependency row
+    });
+
+    // Remove a dependency.
+    Array.prototype.forEach.call(document.querySelectorAll('#dDeps .dep-remove'), function (btn) {
+      btn.addEventListener('click', function () {
+        var src = parseInt(btn.dataset.src, 10);
+        deps = deps.filter(function (d) { return !(d.source === src && d.target === id); });
+        applyDeps();
+        selectItem(id);
+      });
+    });
 
     var noteEl = document.getElementById('dNote');
     if (noteEl) {
@@ -451,8 +683,50 @@
       });
     }
 
+    document.getElementById('dDelete').addEventListener('click', function () { deleteTask(id); });
+
     drawer.classList.add('open');
     highlightTreeRow();
+  }
+
+  // Apply the current dependency list to the timeline, honouring the Dependencies toggle.
+  function applyDeps() {
+    timeline.setDependencies(document.getElementById('showDeps').checked ? deps : []);
+  }
+
+  // Format a date string as the YYYY-MM-DD value a <input type="date"> expects.
+  function toDateValue(s) {
+    if (!s) return '';
+    var d = new Date(s);
+    if (isNaN(d)) return '';
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + m + '-' + day;
+  }
+
+  // Remove a task and any dependencies touching it, then refresh everything.
+  function deleteTask(id) {
+    tasks = tasks.filter(function (t) { return t.id !== id; });
+    delete taskById[id];
+    deps = deps.filter(function (d) { return d.source !== id && d.target !== id; });
+    timeline.setItems(buildItems());
+    applyDeps();
+    buildTree();
+    closeDrawer();
+  }
+
+  // Create a new task in the given phase and open it for editing.
+  function addTask(phase) {
+    var p = phaseByName[phase];
+    var start = '2026-04-06', end = '2026-04-13';
+    var t = { id: nextTaskId++, name: 'New task', phase: phase, start: start, end: end, progress: 0, assignee: null, note: '' };
+    tasks.push(t);
+    taskById[t.id] = t;
+    timeline.setItems(buildItems());
+    buildTree();
+    timeline.setSelection([t.id]);
+    timeline.focus({ id: t.id, animate: true, duration: 450 });
+    selectItem(t.id);
   }
 
   function escapeHtml(s) {
@@ -481,21 +755,22 @@
   });
 
   // ── Dependencies toggle ──
-  document.getElementById('showDeps').addEventListener('change', function (e) {
-    timeline.setDependencies(e.target.checked ? deps : []);
-  });
+  document.getElementById('showDeps').addEventListener('change', applyDeps);
 
   // ── Assignee filter ──
   var af = document.getElementById('assigneeFilter');
   assignees.forEach(function (a) {
     var o = document.createElement('option'); o.value = a; o.textContent = a; af.appendChild(o);
   });
+  // A dedicated option for tasks with no assignee.
+  var noneOpt = document.createElement('option'); noneOpt.value = '__none__'; noneOpt.textContent = 'Unassigned'; af.appendChild(noneOpt);
   af.addEventListener('change', function () {
     assigneeFilter = af.value;
     timeline.setItems(buildItems());
   });
 
   buildTree();
+  buildBandsPanel();
   window.addEventListener('beforeunload', function () { timeline.destroy(); });
 })();
 </script>
