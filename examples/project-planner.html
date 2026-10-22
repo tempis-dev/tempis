@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="../images/logo.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Planner | Tempis Timeline</title>
+  <script src="../lib/tempis_timeline.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+  <style>
+    :root {
+      --bg: #f5f6fa;
+      --card: #ffffff;
+      --border: #e7e9f0;
+      --border-soft: #eef0f5;
+      --text: #1a1a2e;
+      --text-2: #5b6474;
+      --text-3: #9299a8;
+      --primary: #4f46e5;
+      --primary-soft: #eef2ff;
+      --radius: 12px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      font-family: Geist, system-ui, -apple-system, Roboto, sans-serif;
+      background: var(--bg); color: var(--text); font-size: 14px;
+      display: flex; flex-direction: column; overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top bar */
+    .topbar {
+      flex: 0 0 auto; background: var(--card); border-bottom: 1px solid var(--border);
+      padding: 0 20px; height: 56px; display: flex; align-items: center; gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; }
+    .brand .logo {
+      width: 28px; height: 28px; border-radius: 7px;
+      background: linear-gradient(135deg, #4f46e5, #7c6cf6);
+      display: flex; align-items: center; justify-content: center; color: #fff; font-size: 15px;
+    }
+    .brand .sub { font-weight: 400; font-size: 12px; color: var(--text-3); padding-left: 10px; margin-left: 2px; border-left: 1px solid var(--border); }
+    .topbar .spacer { flex: 1; }
+    .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .seg button {
+      font-family: inherit; font-size: 12px; font-weight: 500; padding: 6px 14px;
+      background: var(--card); color: var(--text-2); border: none; cursor: pointer; border-right: 1px solid var(--border);
+    }
+    .seg button:last-child { border-right: none; }
+    .seg button:hover { background: var(--bg); color: var(--text); }
+    .seg button.active { background: var(--primary); color: #fff; }
+    .topbar .ctrl { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-2); }
+    .topbar select {
+      font-family: inherit; font-size: 12px; color: var(--text); background: var(--card);
+      border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; cursor: pointer; outline: none;
+    }
+    .topbar select:focus { border-color: var(--primary); }
+
+    /* Workspace */
+    .workspace { flex: 1; min-height: 0; display: grid; grid-template-columns: 300px minmax(0, 1fr); }
+
+    /* Task tree */
+    .tree { background: var(--card); border-right: 1px solid var(--border); overflow-y: auto; min-height: 0; }
+    .tree-head {
+      padding: 12px 16px; font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--text-3); border-bottom: 1px solid var(--border-soft);
+      position: sticky; top: 0; background: var(--card); z-index: 1;
+    }
+    .phase { border-bottom: 1px solid var(--border-soft); }
+    .phase-head {
+      display: flex; align-items: center; gap: 8px; padding: 10px 14px; cursor: pointer;
+      font-weight: 600; font-size: 13px; user-select: none;
+    }
+    .phase-head:hover { background: var(--bg); }
+    .phase-head .chevron { width: 10px; transition: transform 0.15s; color: var(--text-3); font-size: 10px; }
+    .phase-head.collapsed .chevron { transform: rotate(-90deg); }
+    .phase-head .swatch { width: 9px; height: 9px; border-radius: 3px; }
+    .phase-head .count { margin-left: auto; font-size: 11px; color: var(--text-3); font-weight: 400; }
+    .phase-tasks.collapsed { display: none; }
+    .task-row {
+      display: flex; align-items: center; gap: 8px; padding: 7px 14px 7px 32px; cursor: pointer;
+      font-size: 13px; color: var(--text-2); border-left: 2px solid transparent;
+    }
+    .task-row:hover { background: var(--bg); }
+    .task-row.selected { background: var(--primary-soft); border-left-color: var(--primary); color: var(--text); font-weight: 500; }
+    .task-row .tname { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .task-row .tnote { font-size: 11px; line-height: 1; opacity: 0.85; }
+    .task-row .tpct { font-family: "Geist Mono", monospace; font-size: 11px; color: var(--text-3); }
+
+    /* Main / timeline */
+    .main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+    .main-head {
+      flex: 0 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 12px;
+      border-bottom: 1px solid var(--border); background: var(--card);
+    }
+    .main-head h2 { font-size: 14px; font-weight: 600; }
+    .main-head .hint { font-size: 12px; color: var(--text-3); }
+    .main-head .spacer { flex: 1; }
+    .toggle {
+      display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-2);
+      cursor: pointer; user-select: none;
+    }
+    .toggle input { accent-color: var(--primary); }
+    .timeline-host { flex: 1; min-height: 0; position: relative; }
+    .timeline-host canvas { display: block; width: 100%; height: 100%; }
+
+    /* Detail drawer */
+    .drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 340px; max-width: calc(100vw - 20px);
+      background: var(--card); border-left: 1px solid var(--border); box-shadow: -8px 0 32px rgba(20,20,45,0.1);
+      transform: translateX(100%); transition: transform 0.22s ease; z-index: 50; display: flex; flex-direction: column;
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer-head { padding: 18px 20px; border-bottom: 1px solid var(--border-soft); display: flex; align-items: flex-start; gap: 10px; }
+    .drawer-head .cat-dot { width: 12px; height: 12px; border-radius: 3px; margin-top: 4px; flex: 0 0 auto; }
+    .drawer-head h3 { font-size: 15px; font-weight: 600; line-height: 1.3; }
+    .drawer-head .phase-name { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+    .drawer-head .x { margin-left: auto; cursor: pointer; border: none; background: none; color: var(--text-3); font-size: 20px; line-height: 1; }
+    .drawer-head .x:hover { color: var(--text); }
+    .drawer-body { padding: 18px 20px; overflow-y: auto; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-3); margin-bottom: 5px; }
+    .field .val { font-size: 14px; font-family: "Geist Mono", monospace; }
+    .progress-track { height: 8px; border-radius: 5px; background: var(--bg); overflow: hidden; margin-top: 4px; }
+    .progress-fill { height: 100%; border-radius: 5px; background: var(--primary); transition: width 0.3s; }
+    .range-input { width: 100%; accent-color: var(--primary); margin-top: 6px; }
+    .deps { display: flex; flex-direction: column; gap: 6px; }
+    .dep-chip { font-size: 12px; color: var(--text-2); background: var(--bg); border: 1px solid var(--border-soft); border-radius: 6px; padding: 5px 9px; }
+    .note-input {
+      width: 100%; min-height: 84px; resize: vertical; font-family: inherit; font-size: 13px;
+      line-height: 1.5; color: var(--text); background: var(--card);
+      border: 1px solid var(--border); border-radius: 8px; padding: 9px 11px; outline: none;
+    }
+    .note-input:focus { border-color: var(--primary); }
+    .note-input::placeholder { color: var(--text-3); }
+
+    ::-webkit-scrollbar { width: 9px; height: 9px; }
+    ::-webkit-scrollbar-thumb { background: #d6dae3; border-radius: 6px; }
+    ::-webkit-scrollbar-thumb:hover { background: #c2c8d4; }
+
+    @media (max-width: 860px) {
+      .workspace { grid-template-columns: 1fr; }
+      .tree { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">◪</span>
+      <span>Orbit Planner</span>
+      <span class="sub">Mobile App Launch</span>
+    </div>
+    <div class="spacer"></div>
+    <div class="ctrl">
+      <span>Assignee</span>
+      <select id="assigneeFilter">
+        <option value="all">Everyone</option>
+      </select>
+    </div>
+    <div class="seg" id="zoomSeg">
+      <button data-zoom="month" class="active">Month</button>
+      <button data-zoom="quarter">Quarter</button>
+      <button data-zoom="all">All</button>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <!-- Task tree -->
+    <aside class="tree">
+      <div class="tree-head">Phases &amp; Tasks</div>
+      <div id="treeBody"></div>
+    </aside>
+
+    <!-- Timeline -->
+    <main class="main">
+      <div class="main-head">
+        <h2>Schedule</h2>
+        <span class="hint">Gantt view with dependencies and progress</span>
+        <span class="spacer"></span>
+        <label class="toggle"><input type="checkbox" id="showDeps" checked> Dependencies</label>
+      </div>
+      <div class="timeline-host"><canvas id="timeline"></canvas></div>
+    </main>
+  </div>
+
+  <!-- Detail drawer -->
+  <div class="drawer" id="drawer">
+    <div class="drawer-head">
+      <span class="cat-dot" id="dCat"></span>
+      <div>
+        <h3 id="dName"></h3>
+        <div class="phase-name" id="dPhase"></div>
+      </div>
+      <button class="x" id="dClose" aria-label="Close">×</button>
+    </div>
+    <div class="drawer-body" id="dBody"></div>
+  </div>
+
+<script>
+(function () {
+  var TT = tempis_timeline.TempisTimeline;
+
+  // ── Phases (groups) ──
+  var phases = [
+    { name: 'Planning',    color: '#6366f1' },
+    { name: 'Design',      color: '#ec4899' },
+    { name: 'Development',  color: '#0ea5e9' },
+    { name: 'QA',          color: '#f59e0b' },
+    { name: 'Release',     color: '#10b981' }
+  ];
+  var phaseByName = {};
+  phases.forEach(function (p) { phaseByName[p.name] = p; });
+
+  var assignees = ['Ava Chen', 'Marcus Lee', 'Priya Nair', 'Tom Rivera', 'Sofia Berg'];
+
+  // ── Tasks ──
+  var tasks = [
+    { id: 1,  name: 'Market research',       phase: 'Planning',    start: '2026-02-02', end: '2026-02-13', progress: 1.0,  assignee: 'Ava Chen', note: 'Focus groups done. Report shared in the Planning channel.' },
+    { id: 2,  name: 'Requirements spec',      phase: 'Planning',    start: '2026-02-10', end: '2026-02-24', progress: 1.0,  assignee: 'Marcus Lee' },
+    { id: 3,  name: 'Project kickoff',        phase: 'Planning',    start: '2026-02-25', progress: 1.0,  assignee: 'Ava Chen' },
+
+    { id: 10, name: 'Wireframes',             phase: 'Design',      start: '2026-02-23', end: '2026-03-09', progress: 1.0,  assignee: 'Priya Nair' },
+    { id: 11, name: 'Visual design',          phase: 'Design',      start: '2026-03-06', end: '2026-03-24', progress: 0.85, assignee: 'Priya Nair', note: 'Waiting on final brand palette before locking the component library.' },
+    { id: 12, name: 'Design review',          phase: 'Design',      start: '2026-03-23', end: '2026-03-27', progress: 0.5,  assignee: 'Marcus Lee' },
+
+    { id: 20, name: 'API & data layer',       phase: 'Development', start: '2026-03-16', end: '2026-04-10', progress: 0.7,  assignee: 'Tom Rivera' },
+    { id: 21, name: 'Auth & onboarding',      phase: 'Development', start: '2026-03-30', end: '2026-04-17', progress: 0.45, assignee: 'Tom Rivera' },
+    { id: 22, name: 'Core screens',           phase: 'Development', start: '2026-04-06', end: '2026-05-01', progress: 0.3,  assignee: 'Sofia Berg', note: 'Blocked on the design review. Stubbing screens with mock data for now.' },
+    { id: 23, name: 'Push notifications',     phase: 'Development', start: '2026-04-27', end: '2026-05-11', progress: 0.0,  assignee: 'Sofia Berg' },
+
+    { id: 30, name: 'Integration testing',    phase: 'QA',          start: '2026-05-04', end: '2026-05-18', progress: 0.0,  assignee: 'Marcus Lee' },
+    { id: 31, name: 'Beta program',           phase: 'QA',          start: '2026-05-14', end: '2026-05-29', progress: 0.0,  assignee: 'Ava Chen' },
+    { id: 32, name: 'Bug fix sprint',         phase: 'QA',          start: '2026-05-25', end: '2026-06-05', progress: 0.0,  assignee: 'Tom Rivera' },
+
+    { id: 40, name: 'Store submission',       phase: 'Release',     start: '2026-06-08', end: '2026-06-12', progress: 0.0,  assignee: 'Marcus Lee' },
+    { id: 41, name: 'Launch',                 phase: 'Release',     start: '2026-06-15', progress: 0.0,  assignee: 'Ava Chen' }
+  ];
+  var taskById = {};
+  tasks.forEach(function (t) { taskById[t.id] = t; });
+
+  // ── Dependencies (finish-to-start) ──
+  var deps = [
+    { source: 1, target: 2 }, { source: 2, target: 3 }, { source: 3, target: 10 },
+    { source: 10, target: 11 }, { source: 11, target: 12 }, { source: 12, target: 22 },
+    { source: 20, target: 21 }, { source: 20, target: 22 }, { source: 22, target: 23 },
+    { source: 22, target: 30 }, { source: 30, target: 31 }, { source: 31, target: 32 },
+    { source: 32, target: 40 }, { source: 40, target: 41 }
+  ];
+
+  var FONT = "Geist, system-ui, -apple-system, Roboto, sans-serif";
+  var assigneeFilter = 'all';
+  var selectedId = null;
+
+  // A task has a note when its note string is non-empty.
+  function hasNote(t) { return !!(t.note && t.note.trim()); }
+
+  // Build a timeline item from a task, honouring the current assignee filter. When a
+  // note is stored against the task, a small note glyph is appended to the label.
+  function toItem(t) {
+    var dimmed = assigneeFilter !== 'all' && t.assignee !== assigneeFilter;
+    return {
+      id: t.id,
+      label: t.name + (hasNote(t) ? '  \uD83D\uDCDD' : ''),
+      start: t.start,
+      end: t.end,
+      grouping: t.phase,
+      category: t.phase,
+      progress: t.end ? t.progress : undefined,
+      style: dimmed ? { backgroundColor: '#d8dbe4', fontColor: '#8a90a0' } : undefined
+    };
+  }
+
+  function buildItems() { return tasks.map(toItem); }
+
+  var timeline = new TT('#timeline', {
+    responsive: true,
+    verticalFill: 'fill-canvas',
+    selection: 'single',
+    stackMode: 'stable',
+    style: {
+      font: { family: FONT, size: 13 },
+      item: { borderRadius: 5, fontColor: '#fff', padding: 8 }
+    },
+    categories: phases.map(function (p) {
+      return { name: p.name, label: p.name, style: { backgroundColor: p.color, fontColor: '#fff' } };
+    }),
+    grouping: { collapsible: true },
+    legend: { position: 'bottom', markerStyle: 'circle' },
+    range: { start: '2026-02-01', end: '2026-04-15', position: 'bottom', zoom: { enabled: true } },
+    bands: [
+      // "Today" marker.
+      { start: '2026-04-06', style: { color: '#4f46e5', borderColor: '#4f46e5', borderThickness: 1, opacity: 0.08 } }
+    ],
+    items: buildItems(),
+    dependencies: deps,
+    tooltip: {
+      overflowBehavior: 'viewport',
+      template: function (id) {
+        var t = taskById[id];
+        if (!t) return null;
+        var pct = Math.round(t.progress * 100);
+        var noteBlock = hasNote(t)
+          ? '<div style="display:flex;gap:6px;margin-top:9px;padding-top:9px;border-top:1px solid #eef0f5;font-size:12px;color:#5b6474;line-height:1.45;">' +
+              '<span style="flex:0 0 auto;">\uD83D\uDCDD</span><span>' + escapeHtml(t.note) + '</span></div>'
+          : '';
+        return '<div style="padding:11px 14px;font-family:' + FONT + ';font-size:13px;min-width:190px;max-width:260px;background:#fff;color:#1a1a2e;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);">' +
+          '<div style="font-weight:600;margin-bottom:6px;">' + t.name + '</div>' +
+          '<div style="display:flex;justify-content:space-between;color:#5b6474;font-size:12px;margin-bottom:6px;"><span>' + t.phase + '</span><span>' + t.assignee + '</span></div>' +
+          '<div style="height:6px;border-radius:4px;background:#eef0f5;overflow:hidden;"><div style="height:100%;width:' + pct + '%;background:' + phaseByName[t.phase].color + ';"></div></div>' +
+          '<div style="font-size:11px;color:#9299a8;margin-top:4px;">' + pct + '% complete</div>' +
+          noteBlock +
+        '</div>';
+      }
+    },
+    onSelectionChange: function (changes) {
+      var sel = changes.find(function (c) { return c.selected; });
+      if (sel) { selectItem(sel.id); } else { closeDrawer(); }
+      timeline.setSelection(sel ? [sel.id] : []);
+    },
+    onGroupToggle: function (group, collapsed) {
+      // Keep the tree's collapse state in sync with the timeline.
+      var head = document.querySelector('.phase-head[data-phase="' + CSS.escape(group) + '"]');
+      if (head) {
+        head.classList.toggle('collapsed', collapsed);
+        head.nextElementSibling.classList.toggle('collapsed', collapsed);
+      }
+    }
+  });
+
+  // ── Task tree ──
+  var treeBody = document.getElementById('treeBody');
+  function buildTree() {
+    treeBody.innerHTML = '';
+    phases.forEach(function (p) {
+      var group = tasks.filter(function (t) { return t.phase === p.name; });
+
+      var phaseEl = document.createElement('div');
+      phaseEl.className = 'phase';
+
+      var head = document.createElement('div');
+      head.className = 'phase-head';
+      head.dataset.phase = p.name;
+      head.innerHTML = '<span class="chevron">▾</span><span class="swatch" style="background:' + p.color + '"></span>' +
+        p.name + '<span class="count">' + group.length + '</span>';
+
+      var list = document.createElement('div');
+      list.className = 'phase-tasks';
+
+      group.forEach(function (t) {
+        var row = document.createElement('div');
+        row.className = 'task-row';
+        row.dataset.id = t.id;
+        row.innerHTML = '<span class="tname">' + t.name + '</span>' +
+          '<span class="tnote" title="Has a note"' + (hasNote(t) ? '' : ' style="display:none"') + '>\uD83D\uDCDD</span>' +
+          '<span class="tpct">' + Math.round(t.progress * 100) + '%</span>';
+        row.addEventListener('click', function () {
+          timeline.setSelection([t.id]);
+          timeline.focus({ id: t.id, animate: true, duration: 450 });
+          selectItem(t.id);
+        });
+        list.appendChild(row);
+      });
+
+      head.addEventListener('click', function () {
+        var collapsed = !head.classList.contains('collapsed');
+        head.classList.toggle('collapsed', collapsed);
+        list.classList.toggle('collapsed', collapsed);
+        timeline.setGroupCollapsed(p.name, collapsed);
+      });
+
+      phaseEl.appendChild(head);
+      phaseEl.appendChild(list);
+      treeBody.appendChild(phaseEl);
+    });
+    highlightTreeRow();
+  }
+
+  // Show or hide the note glyph on a tree row to match the task's note state.
+  function updateTreeNote(id) {
+    var t = taskById[id];
+    var row = treeBody.querySelector('.task-row[data-id="' + id + '"] .tnote');
+    if (row) row.style.display = hasNote(t) ? '' : 'none';
+  }
+
+  function highlightTreeRow() {
+    document.querySelectorAll('.task-row.selected').forEach(function (r) { r.classList.remove('selected'); });
+    if (selectedId != null) {
+      var row = treeBody.querySelector('.task-row[data-id="' + selectedId + '"]');
+      if (row) row.classList.add('selected');
+    }
+  }
+
+  // ── Detail drawer ──
+  var drawer = document.getElementById('drawer');
+  function selectItem(id) {
+    var t = taskById[id];
+    if (!t) return;
+    selectedId = id;
+    var p = phaseByName[t.phase];
+
+    document.getElementById('dCat').style.background = p.color;
+    document.getElementById('dName').textContent = t.name;
+    document.getElementById('dPhase').textContent = t.phase;
+
+    var incoming = deps.filter(function (d) { return d.target === id; }).map(function (d) { return taskById[d.source].name; });
+    var fmt = function (s) { return s ? new Date(s).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'n/a'; };
+    var pct = Math.round(t.progress * 100);
+
+    document.getElementById('dBody').innerHTML =
+      '<div class="field"><label>Assignee</label><div class="val" style="font-family:' + FONT + '">' + t.assignee + '</div></div>' +
+      '<div class="field"><label>Schedule</label><div class="val">' + fmt(t.start) + (t.end ? ' to ' + fmt(t.end) : ', milestone') + '</div></div>' +
+      '<div class="field"><label id="dProgLabel">Progress ' + pct + '%</label>' +
+        '<div class="progress-track"><div class="progress-fill" id="dFill" style="width:' + pct + '%;background:' + p.color + '"></div></div>' +
+        '<input class="range-input" type="range" min="0" max="100" value="' + pct + '" id="dRange"></div>' +
+      (incoming.length ? '<div class="field"><label>Depends on</label><div class="deps">' + incoming.map(function (n) { return '<div class="dep-chip">' + n + '</div>'; }).join('') + '</div></div>' : '') +
+      '<div class="field"><label>Note</label>' +
+        '<textarea id="dNote" class="note-input" placeholder="Add a note for this task...">' + (t.note ? escapeHtml(t.note) : '') + '</textarea></div>';
+
+    var range = document.getElementById('dRange');
+    if (range) {
+      range.addEventListener('input', function () {
+        t.progress = range.value / 100;
+        document.getElementById('dFill').style.width = range.value + '%';
+        document.getElementById('dProgLabel').textContent = 'Progress ' + range.value + '%';
+        timeline.setItems(buildItems());
+        var treeRow = treeBody.querySelector('.task-row[data-id="' + id + '"] .tpct');
+        if (treeRow) treeRow.textContent = range.value + '%';
+      });
+    }
+
+    var noteEl = document.getElementById('dNote');
+    if (noteEl) {
+      noteEl.addEventListener('input', function () {
+        var had = hasNote(t);
+        t.note = noteEl.value;
+        // Only redraw the timeline when the note presence actually changed, so the
+        // note glyph appears or disappears without rebuilding on every keystroke.
+        if (hasNote(t) !== had) {
+          timeline.setItems(buildItems());
+          updateTreeNote(id);
+        }
+      });
+    }
+
+    drawer.classList.add('open');
+    highlightTreeRow();
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function closeDrawer() {
+    drawer.classList.remove('open');
+    selectedId = null;
+    timeline.clearSelection();
+    highlightTreeRow();
+  }
+  document.getElementById('dClose').addEventListener('click', closeDrawer);
+
+  // ── Zoom presets ──
+  var RANGES = {
+    month:   ['2026-03-15', '2026-04-20'],
+    quarter: ['2026-02-01', '2026-05-01'],
+    all:     ['2026-01-28', '2026-06-22']
+  };
+  document.getElementById('zoomSeg').addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-zoom]');
+    if (!btn) return;
+    document.querySelectorAll('#zoomSeg button').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    timeline.focus({ range: RANGES[btn.dataset.zoom], animate: true, duration: 450 });
+  });
+
+  // ── Dependencies toggle ──
+  document.getElementById('showDeps').addEventListener('change', function (e) {
+    timeline.setDependencies(e.target.checked ? deps : []);
+  });
+
+  // ── Assignee filter ──
+  var af = document.getElementById('assigneeFilter');
+  assignees.forEach(function (a) {
+    var o = document.createElement('option'); o.value = a; o.textContent = a; af.appendChild(o);
+  });
+  af.addEventListener('change', function () {
+    assigneeFilter = af.value;
+    timeline.setItems(buildItems());
+  });
+
+  buildTree();
+  window.addEventListener('beforeunload', function () { timeline.destroy(); });
+})();
+</script>
+</body>
+</html>

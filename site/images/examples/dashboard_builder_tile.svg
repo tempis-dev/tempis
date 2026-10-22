@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" width="320" height="200" role="img" aria-label="Dashboard builder preview">
+  <rect width="320" height="200" fill="#f1f3f9"/>
+  <!-- palette rail -->
+  <rect x="0" y="0" width="52" height="200" fill="#ffffff"/>
+  <rect x="10" y="16" width="32" height="14" rx="4" fill="#eef2ff"/>
+  <rect x="10" y="38" width="32" height="14" rx="4" fill="#eef2ff"/>
+  <rect x="10" y="60" width="32" height="14" rx="4" fill="#eef2ff"/>
+  <rect x="10" y="82" width="32" height="14" rx="4" fill="#eef2ff"/>
+  <!-- board widgets -->
+  <!-- timeline widget -->
+  <rect x="66" y="16" width="168" height="86" rx="8" fill="#ffffff" stroke="#e2e5ee"/>
+  <rect x="66" y="16" width="168" height="20" rx="8" fill="#ffffff"/>
+  <rect x="78" y="23" width="54" height="6" rx="3" fill="#c7cdda"/>
+  <rect x="82" y="48" width="44" height="10" rx="3" fill="#4f46e5"/>
+  <rect x="118" y="48" width="60" height="10" rx="3" fill="#0ea5e9"/>
+  <rect x="96" y="64" width="70" height="10" rx="3" fill="#4f46e5"/>
+  <rect x="150" y="64" width="40" height="10" rx="3" fill="#ef4444"/>
+  <rect x="82" y="80" width="90" height="10" rx="3" fill="#0ea5e9"/>
+  <!-- kpi widget -->
+  <rect x="240" y="16" width="66" height="40" rx="8" fill="#ffffff" stroke="#e2e5ee"/>
+  <rect x="250" y="26" width="30" height="12" rx="3" fill="#161a26"/>
+  <rect x="250" y="43" width="20" height="5" rx="2.5" fill="#10b981"/>
+  <!-- donut widget -->
+  <rect x="240" y="62" width="66" height="40" rx="8" fill="#ffffff" stroke="#e2e5ee"/>
+  <circle cx="262" cy="82" r="13" fill="none" stroke="#eef0f5" stroke-width="5"/>
+  <circle cx="262" cy="82" r="13" fill="none" stroke="#4f46e5" stroke-width="5" stroke-dasharray="48 82" transform="rotate(-90 262 82)"/>
+  <!-- bars widget -->
+  <rect x="66" y="112" width="110" height="72" rx="8" fill="#ffffff" stroke="#e2e5ee"/>
+  <rect x="80" y="150" width="12" height="22" rx="2" fill="#4f46e5"/>
+  <rect x="98" y="138" width="12" height="34" rx="2" fill="#4f46e5"/>
+  <rect x="116" y="156" width="12" height="16" rx="2" fill="#4f46e5"/>
+  <rect x="134" y="130" width="12" height="42" rx="2" fill="#4f46e5"/>
+  <rect x="152" y="146" width="12" height="26" rx="2" fill="#4f46e5"/>
+  <!-- note widget -->
+  <rect x="182" y="112" width="124" height="72" rx="8" fill="#ffffff" stroke="#e2e5ee"/>
+  <rect x="194" y="126" width="84" height="6" rx="3" fill="#d7dbe6"/>
+  <rect x="194" y="140" width="100" height="6" rx="3" fill="#e4e7ef"/>
+  <rect x="194" y="154" width="70" height="6" rx="3" fill="#e4e7ef"/>
+  <rect x="194" y="168" width="90" height="6" rx="3" fill="#e4e7ef"/>
+</svg>

@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" type="image/png" href="../images/logo.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Builder | Tempis Timeline</title>
+  <script src="../lib/tempis_timeline.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+  <style>
+    :root {
+      --bg: #eef0f5;
+      --card: #ffffff;
+      --border: #e2e5ee;
+      --border-soft: #eef0f5;
+      --text: #161a26;
+      --text-2: #5b6474;
+      --text-3: #9299a8;
+      --primary: #4f46e5;
+      --primary-soft: #eef2ff;
+      --radius: 12px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      font-family: Geist, system-ui, -apple-system, Roboto, sans-serif;
+      background: var(--bg); color: var(--text); font-size: 14px;
+      display: flex; flex-direction: column; overflow: hidden; -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top bar */
+    .topbar { flex: 0 0 auto; background: var(--card); border-bottom: 1px solid var(--border); height: 56px; padding: 0 20px; display: flex; align-items: center; gap: 14px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; }
+    .brand .logo { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg, #4f46e5, #7c6cf6); display: flex; align-items: center; justify-content: center; color: #fff; }
+    .brand .sub { font-weight: 400; font-size: 12px; color: var(--text-3); padding-left: 10px; margin-left: 2px; border-left: 1px solid var(--border); }
+    .topbar .spacer { flex: 1; }
+    .hint-pill { font-size: 12px; color: var(--text-2); background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 6px 13px; }
+    .btn { font-family: inherit; font-size: 12px; font-weight: 500; padding: 7px 13px; border: 1px solid var(--border); background: var(--card); color: var(--text-2); border-radius: 8px; cursor: pointer; }
+    .btn:hover { color: var(--text); border-color: #ccd1dc; }
+
+    /* Layout */
+    .workspace { flex: 1; min-height: 0; display: grid; grid-template-columns: 220px minmax(0, 1fr) 280px; }
+
+    /* Widget palette */
+    .palette { background: var(--card); border-right: 1px solid var(--border); padding: 16px; overflow-y: auto; }
+    .palette h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 12px; }
+    .palette-item {
+      display: flex; align-items: center; gap: 10px; padding: 11px 12px; margin-bottom: 8px;
+      border: 1px solid var(--border); border-radius: 10px; cursor: grab; background: var(--card);
+      font-size: 13px; font-weight: 500; transition: border-color 0.15s, box-shadow 0.15s;
+      user-select: none;
+    }
+    .palette-item:hover { border-color: var(--primary); box-shadow: 0 2px 8px rgba(79,70,229,0.08); }
+    .palette-item:active { cursor: grabbing; }
+    .palette-item .ic { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: var(--primary-soft); color: var(--primary); flex: 0 0 auto; }
+    .palette-item .ic svg { width: 16px; height: 16px; }
+    .palette .tip { margin-top: 16px; font-size: 12px; color: var(--text-3); line-height: 1.5; }
+
+    /* Canvas grid: a fixed 12 x 8 board that fills the available area. Widgets are
+       placed at an absolute (col, row) with a column/row span, and can be dragged or
+       resized to any cell. */
+    .canvas-wrap { padding: 20px; min-height: 0; overflow: hidden; }
+    .grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      gap: 0;
+      width: 100%; height: 100%;
+      /* With no grid gap, each CSS cell is exactly 1/12 wide and 1/8 tall, so the
+         grid lines (shown only while dragging) line up precisely with widget cells
+         and the drop preview. The visual spacing between widgets comes from a
+         transparent margin on each widget instead. */
+      background-size: calc(100% / 12) calc(100% / 8);
+      border-radius: 14px;
+      transition: background-color 0.15s;
+    }
+    /* The cell grid is only drawn while something is being dragged or resized. */
+    .grid.drag-active {
+      background-image:
+        linear-gradient(to right, rgba(79,70,229,0.18) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(79,70,229,0.18) 1px, transparent 1px);
+      background-color: rgba(79,70,229,0.02);
+      outline: 2px dashed #c3c8d6; outline-offset: 4px;
+    }
+    .widget.dragging { opacity: 0.85; z-index: 20; box-shadow: 0 8px 24px rgba(20,22,40,0.18); }
+    /* Preview of where a dragged/resized widget will land. */
+    .drop-preview {
+      position: absolute; pointer-events: none; z-index: 5;
+      border: 2px dashed var(--primary); background: rgba(79,70,229,0.08);
+      border-radius: var(--radius); display: none;
+    }
+    .drop-preview.blocked { border-color: #ef4444; background: rgba(239,68,68,0.08); }
+    .empty-hint { grid-column: 1 / span 12; grid-row: 1 / span 8; display: flex; align-items: center; justify-content: center; color: var(--text-3); font-size: 14px; border: 2px dashed var(--border); border-radius: 14px; }
+
+    /* Widget shell. The 5px margin creates a 10px visual gutter between neighbouring
+       widgets while each widget still occupies its full grid cell(s), keeping the
+       background grid lines perfectly aligned. */
+    .widget { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; overflow: hidden; position: relative; box-shadow: 0 1px 2px rgba(20,22,40,0.04); min-height: 0; min-width: 0; margin: 5px; }
+    .widget.selected { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft); z-index: 10; }
+    .widget-head { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-bottom: 1px solid var(--border-soft); cursor: grab; flex: 0 0 auto; user-select: none; }
+    .widget-head:active { cursor: grabbing; }
+    .widget-head .wtitle { font-size: 12.5px; font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .widget-head .wsrc { font-size: 11px; color: var(--text-3); font-family: "Geist Mono", monospace; }
+    .widget-head .wx { cursor: pointer; color: var(--text-3); border: none; background: none; font-size: 16px; line-height: 1; padding: 0 2px; }
+    .widget-head .wx:hover { color: #ef4444; }
+    .widget-body { flex: 1; min-height: 0; position: relative; }
+    .widget-body canvas { display: block; width: 100%; height: 100%; }
+
+    /* Resize handle */
+    .resize-handle { position: absolute; right: 2px; bottom: 2px; width: 16px; height: 16px; cursor: nwse-resize; color: var(--text-3); }
+    .resize-handle svg { width: 100%; height: 100%; }
+
+    /* KPI widget */
+    .kpi-widget { display: flex; flex-direction: column; justify-content: center; padding: 6px 16px; height: 100%; }
+    .kpi-widget .v { font-size: 2em; font-weight: 800; line-height: 1; }
+    .kpi-widget .d { font-size: 12px; margin-top: 6px; color: #10b981; }
+    .kpi-widget .d.down { color: #ef4444; }
+    /* Bars widget */
+    .bars-widget { display: flex; align-items: flex-end; gap: 5px; padding: 14px 16px; height: 100%; }
+    .bars-widget .b { flex: 1; background: var(--primary); border-radius: 3px 3px 0 0; opacity: 0.85; }
+    /* Donut widget */
+    .donut-widget { display: flex; align-items: center; justify-content: center; gap: 16px; height: 100%; padding: 10px; }
+    .donut-widget svg { transform: rotate(-90deg); flex: 0 0 auto; }
+    .donut-widget .dlegend { font-size: 11px; color: var(--text-2); }
+    .donut-widget .dlegend div { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .donut-widget .dlegend .dt { width: 8px; height: 8px; border-radius: 50%; }
+    /* Note widget */
+    .note-widget { padding: 14px 16px; font-size: 13px; color: var(--text-2); line-height: 1.5; height: 100%; overflow: auto; }
+
+    /* Inspector */
+    .inspector { background: var(--card); border-left: 1px solid var(--border); padding: 18px 18px 28px; overflow-y: auto; }
+    .inspector h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); margin-bottom: 14px; }
+    .inspector .empty { color: var(--text-3); font-size: 13px; line-height: 1.5; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-3); margin-bottom: 5px; }
+    .field input, .field select { width: 100%; font-family: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); outline: none; }
+    .field input:focus, .field select:focus { border-color: var(--primary); }
+    .size-row { display: flex; gap: 10px; }
+    .size-row .field { flex: 1; }
+
+    ::-webkit-scrollbar { width: 9px; height: 9px; }
+    ::-webkit-scrollbar-thumb { background: #d6dae3; border-radius: 6px; }
+    ::-webkit-scrollbar-thumb:hover { background: #c2c8d4; }
+
+    @media (max-width: 1000px) {
+      .workspace { grid-template-columns: 180px minmax(0, 1fr); }
+      .inspector { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">▦</span>
+      <span>Canvas Boards</span>
+      <span class="sub">Dashboard builder</span>
+    </div>
+    <div class="spacer"></div>
+    <span class="hint-pill">Drag widgets onto the 12 x 8 grid, then drag headers to move and corners to resize</span>
+    <button class="btn" id="resetBtn">Reset board</button>
+  </header>
+
+  <div class="workspace">
+    <!-- Palette -->
+    <aside class="palette">
+      <h4>Widgets</h4>
+      <div class="palette-item" data-type="timeline">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="13" height="4" rx="2"/><rect x="7" y="15" width="14" height="4" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg></span> Timeline
+      </div>
+      <div class="palette-item" data-type="kpi">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"/><path d="M4 15l5-5 4 3 7-8"/></svg></span> KPI stat
+      </div>
+      <div class="palette-item" data-type="bars">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="12"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="18" y1="20" x2="18" y2="14"/></svg></span> Bar chart
+      </div>
+      <div class="palette-item" data-type="donut">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg></span> Donut
+      </div>
+      <div class="palette-item" data-type="note">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5z"/><line x1="8" y1="10" x2="15" y2="10"/><line x1="8" y1="14" x2="15" y2="14"/></svg></span> Note
+      </div>
+      <p class="tip">Drag a widget onto the grid. Move it by its header, resize from the corner, and point it at a different dataset from the inspector.</p>
+    </aside>
+
+    <!-- Board -->
+    <div class="canvas-wrap">
+      <div class="grid" id="grid">
+        <div class="drop-preview" id="dropPreview"></div>
+        <div class="empty-hint" id="emptyHint">Drop widgets here to build your dashboard</div>
+      </div>
+    </div>
+
+    <!-- Inspector -->
+    <aside class="inspector" id="inspector">
+      <h4>Inspector</h4>
+      <div class="empty" id="inspectorEmpty">Select a widget on the board to edit its title, size and dataset.</div>
+      <div id="inspectorForm" style="display:none;"></div>
+    </aside>
+  </div>
+
+<script>
+(function () {
+  var TT = tempis_timeline.TempisTimeline;
+  var FONT = "Geist, system-ui, -apple-system, Roboto, sans-serif";
+
+  // ── Mock datasets for the timeline widget ──
+  var SOURCES = {
+    deployments: {
+      label: 'Deployments',
+      categories: [
+        { name: 'deploy', label: 'Deploy', style: { backgroundColor: '#4f46e5', fontColor: '#fff' } },
+        { name: 'rollback', label: 'Rollback', style: { backgroundColor: '#ef4444', fontColor: '#fff' } }
+      ],
+      items: [
+        { id: 1, label: 'v3.1.0', start: '2026-05-04', end: '2026-05-05', category: 'deploy', grouping: 'web' },
+        { id: 2, label: 'v3.1.1', start: '2026-05-06', end: '2026-05-07', category: 'deploy', grouping: 'web' },
+        { id: 3, label: 'hotfix', start: '2026-05-07', end: '2026-05-08', category: 'rollback', grouping: 'web' },
+        { id: 4, label: 'api v2.4', start: '2026-05-05', end: '2026-05-06', category: 'deploy', grouping: 'api' },
+        { id: 5, label: 'api v2.5', start: '2026-05-08', end: '2026-05-09', category: 'deploy', grouping: 'api' }
+      ],
+      range: ['2026-05-03', '2026-05-11']
+    },
+    incidents: {
+      label: 'Incidents',
+      categories: [
+        { name: 'sev1', label: 'Sev 1', style: { backgroundColor: '#ef4444', fontColor: '#fff' } },
+        { name: 'sev2', label: 'Sev 2', style: { backgroundColor: '#f59e0b', fontColor: '#fff' } }
+      ],
+      items: [
+        { id: 1, label: 'API latency spike', start: '2026-05-04T08:00', end: '2026-05-04T12:30', category: 'sev1', grouping: 'API' },
+        { id: 2, label: 'Timeout surge', start: '2026-05-04T15:00', end: '2026-05-04T18:00', category: 'sev2', grouping: 'API' },
+        { id: 3, label: 'DB failover', start: '2026-05-04T10:30', end: '2026-05-04T15:00', category: 'sev1', grouping: 'Database' },
+        { id: 4, label: 'Replica lag', start: '2026-05-04T17:30', end: '2026-05-04T20:30', category: 'sev2', grouping: 'Database' },
+        { id: 5, label: 'CDN errors', start: '2026-05-04T09:30', end: '2026-05-04T13:00', category: 'sev2', grouping: 'Edge' },
+        { id: 6, label: 'Cache purge', start: '2026-05-04T16:00', end: '2026-05-04T19:00', category: 'sev2', grouping: 'Edge' }
+      ],
+      range: ['2026-05-04T07:00', '2026-05-04T22:00']
+    },
+    team: {
+      label: 'Team schedule',
+      categories: [
+        { name: 'focus', label: 'Focus', style: { backgroundColor: '#0ea5e9', fontColor: '#fff' } },
+        { name: 'meeting', label: 'Meeting', style: { backgroundColor: '#8b5cf6', fontColor: '#fff' } },
+        { name: 'off', label: 'Out', style: { backgroundColor: '#94a3b8', fontColor: '#fff' } }
+      ],
+      items: [
+        { id: 1, label: 'Design review', start: '2026-05-04T10:00', end: '2026-05-04T11:00', category: 'meeting', grouping: 'Ava' },
+        { id: 2, label: 'Deep work', start: '2026-05-04T13:00', end: '2026-05-04T17:00', category: 'focus', grouping: 'Ava' },
+        { id: 3, label: 'PTO', start: '2026-05-05', end: '2026-05-06', category: 'off', grouping: 'Marcus' },
+        { id: 4, label: 'Sprint planning', start: '2026-05-04T09:00', end: '2026-05-04T10:00', category: 'meeting', grouping: 'Priya' },
+        { id: 5, label: 'Build pipeline', start: '2026-05-04T11:00', end: '2026-05-04T16:00', category: 'focus', grouping: 'Priya' }
+      ],
+      range: ['2026-05-04T08:00', '2026-05-06T18:00']
+    },
+    jobs: {
+      label: 'Batch jobs',
+      categories: [
+        { name: 'ok', label: 'Succeeded', style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+        { name: 'fail', label: 'Failed', style: { backgroundColor: '#ef4444', fontColor: '#fff' } }
+      ],
+      items: [
+        { id: 1, label: 'ETL nightly', start: '2026-05-04T02:00', end: '2026-05-04T03:10', category: 'ok', grouping: 'Pipeline' },
+        { id: 2, label: 'Reindex', start: '2026-05-04T03:15', end: '2026-05-04T04:00', category: 'ok', grouping: 'Pipeline' },
+        { id: 3, label: 'Backup', start: '2026-05-04T04:00', end: '2026-05-04T05:30', category: 'fail', grouping: 'Storage' },
+        { id: 4, label: 'Report gen', start: '2026-05-04T05:30', end: '2026-05-04T06:15', category: 'ok', grouping: 'Analytics' }
+      ],
+      range: ['2026-05-04T01:30', '2026-05-04T07:00']
+    }
+  };
+
+  // ── Mock datasets for every widget type. Each entry is { label, ... } so the
+  // inspector can offer a dataset dropdown for any widget, not just the timeline. ──
+  var KPI_SOURCES = {
+    users:   { label: 'Active users',  v: '12.4k', d: '8.2% WoW',  up: true },
+    uptime:  { label: 'Uptime',        v: '99.95%', d: '0.02% MoM', up: true },
+    issues:  { label: 'Open issues',   v: '42',    d: '5 new today', up: false },
+    revenue: { label: 'Revenue (MRR)', v: '$86.1k', d: '3.4% MoM', up: true }
+  };
+  var BARS_SOURCES = {
+    volume:  { label: 'Weekly volume', data: [45, 62, 38, 71, 55, 80, 48] },
+    signups: { label: 'Signups',       data: [20, 28, 24, 33, 41, 39, 52] },
+    errors:  { label: 'Error rate',    data: [12, 8, 15, 6, 9, 4, 7] }
+  };
+  var DONUT_SOURCES = {
+    status:  { label: 'Task status',    segments: [{ c: '#4f46e5', p: 58, l: 'In progress' }, { c: '#10b981', p: 27, l: 'Done' }, { c: '#e2e5ee', p: 15, l: 'Blocked' }] },
+    traffic: { label: 'Traffic source', segments: [{ c: '#0ea5e9', p: 46, l: 'Organic' }, { c: '#8b5cf6', p: 34, l: 'Referral' }, { c: '#f59e0b', p: 20, l: 'Paid' }] },
+    device:  { label: 'Device split',   segments: [{ c: '#4f46e5', p: 62, l: 'Desktop' }, { c: '#ec4899', p: 31, l: 'Mobile' }, { c: '#e2e5ee', p: 7, l: 'Tablet' }] }
+  };
+  var NOTE_SOURCES = {
+    intro:   { label: 'Getting started', text: 'This board is fully editable. Drag in more widgets, drag a widget header to move it anywhere on the grid, resize from the corner, and repoint any widget at a different source from the inspector.' },
+    standup: { label: 'Standup notes',   text: 'Yesterday: shipped v3.1.1 and cleared the incident backlog. Today: auth onboarding and the push-notification spike. Blockers: waiting on design sign-off.' },
+    release: { label: 'Release checklist', text: 'Cut release branch · run full regression · update changelog · submit to stores · schedule announcement · monitor error rate for 24h.' }
+  };
+
+  // Per-type catalog + the default source id for each type.
+  var CATALOG = {
+    timeline: { sources: SOURCES,        label: 'Dataset' },
+    kpi:      { sources: KPI_SOURCES,    label: 'Dataset' },
+    bars:     { sources: BARS_SOURCES,   label: 'Dataset' },
+    donut:    { sources: DONUT_SOURCES,  label: 'Dataset' },
+    note:     { sources: NOTE_SOURCES,   label: 'Dataset' }
+  };
+
+  var grid = document.getElementById('grid');
+  var emptyHint = document.getElementById('emptyHint');
+  var dropPreview = document.getElementById('dropPreview');
+  var widgets = [];      // { id, type, el, title, source, instance, x, y, w, h }
+  var selectedWidget = null;
+  var nextWid = 1;
+
+  var COLS = 12, ROWS = 8;
+
+  // ── Grid geometry helpers ──
+  // Return the pixel size of one cell (including the gap contribution handled by CSS).
+  function cellSize() {
+    var rect = grid.getBoundingClientRect();
+    return { rect: rect, cw: rect.width / COLS, ch: rect.height / ROWS };
+  }
+  // Convert a client (x, y) point to the nearest grid cell (col, row).
+  function pointToCell(clientX, clientY) {
+    var g = cellSize();
+    var col = Math.floor((clientX - g.rect.left) / g.cw);
+    var row = Math.floor((clientY - g.rect.top) / g.ch);
+    return { col: clamp(col, 0, COLS - 1), row: clamp(row, 0, ROWS - 1) };
+  }
+  // Apply a widget's (x, y, w, h) to its element as absolute grid placement.
+  function placeWidget(w) {
+    w.el.style.gridColumn = (w.x + 1) + ' / span ' + w.w;
+    w.el.style.gridRow = (w.y + 1) + ' / span ' + w.h;
+  }
+  // Show the drop preview at a given cell footprint. When `blocked`, the target
+  // overlaps another widget and is tinted red to signal the drop will be rejected.
+  function showPreview(x, y, ww, hh, blocked) {
+    var g = cellSize();
+    // Inset by the same 5px widgets use for their margin so the preview lines up
+    // exactly with where the widget will sit.
+    dropPreview.style.display = 'block';
+    dropPreview.style.left = (x * g.cw + 5) + 'px';
+    dropPreview.style.top = (y * g.ch + 5) + 'px';
+    dropPreview.style.width = (ww * g.cw - 10) + 'px';
+    dropPreview.style.height = (hh * g.ch - 10) + 'px';
+    dropPreview.classList.toggle('blocked', !!blocked);
+  }
+  function hidePreview() { dropPreview.style.display = 'none'; }
+
+  // ── Drag a widget type in from the palette (pointer based) ──
+  document.querySelectorAll('.palette-item').forEach(function (item) {
+    item.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      var type = item.dataset.type;
+      var def = DEFAULTS[type];
+      grid.classList.add('drag-active');
+
+      function move(ev) {
+        var g = cellSize();
+        var inside = ev.clientX >= g.rect.left && ev.clientX <= g.rect.right &&
+                     ev.clientY >= g.rect.top && ev.clientY <= g.rect.bottom;
+        if (!inside) { hidePreview(); return; }
+        var cell = pointToCell(ev.clientX, ev.clientY);
+        var x = clamp(cell.col, 0, COLS - def.w);
+        var y = clamp(cell.row, 0, ROWS - def.h);
+        showPreview(x, y, def.w, def.h, rectCollides(x, y, def.w, def.h, null));
+      }
+      function up(ev) {
+        document.removeEventListener('mousemove', move);
+        document.removeEventListener('mouseup', up);
+        grid.classList.remove('drag-active');
+        hidePreview();
+        var g = cellSize();
+        var inside = ev.clientX >= g.rect.left && ev.clientX <= g.rect.right &&
+                     ev.clientY >= g.rect.top && ev.clientY <= g.rect.bottom;
+        if (!inside) return;
+        var cell = pointToCell(ev.clientX, ev.clientY);
+        var x = clamp(cell.col, 0, COLS - def.w);
+        var y = clamp(cell.row, 0, ROWS - def.h);
+        // If the drop cell is occupied, fall back to the first free cell that fits.
+        if (rectCollides(x, y, def.w, def.h, null)) {
+          var free = findFreeCell(def.w, def.h);
+          x = free.x; y = free.y;
+        }
+        addWidget(type, x, y);
+      }
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', up);
+    });
+  });
+
+  // ── Default widget sizes (grid columns / rows), start cell and dataset ──
+  var DEFAULTS = {
+    timeline: { w: 8, h: 4, title: 'Widget title', source: 'deployments' },
+    kpi:      { w: 3, h: 1, title: 'Widget title', source: 'users' },
+    bars:     { w: 4, h: 2, title: 'Widget title', source: 'volume' },
+    donut:    { w: 4, h: 2, title: 'Widget title', source: 'status' },
+    note:     { w: 4, h: 2, title: 'Widget title', source: 'intro' }
+  };
+
+  function removeWidget(w) {
+    if (w.instance) { w.instance.destroy(); w.instance = null; }
+    w.el.remove();
+    widgets = widgets.filter(function (x) { return x !== w; });
+    if (selectedWidget === w) { selectedWidget = null; renderInspector(); }
+    if (!widgets.length) emptyHint.style.display = '';
+  }
+
+  // ── Render a widget's body by type ──
+  function renderBody(w) {
+    var body = w.el.querySelector('.widget-body');
+    if (w.instance) { w.instance.destroy(); w.instance = null; }
+    body.innerHTML = '';
+
+    if (w.type === 'timeline') {
+      var canvas = document.createElement('canvas');
+      body.appendChild(canvas);
+      var src = SOURCES[w.source];
+      // The star of the show: a live, responsive Tempis timeline inside a resizable widget.
+      w.instance = new TT(canvas, {
+        responsive: true,
+        verticalFill: 'fill-canvas',
+        style: { font: { family: FONT, size: 14 }, item: { borderRadius: 999, fontColor: '#fff', padding: 9 } },
+        categories: src.categories,
+        legend: { position: 'bottom', markerStyle: 'circle' },
+        range: { start: src.range[0], end: src.range[1], position: 'bottom', zoom: { enabled: true } },
+        items: src.items
+      });
+    } else if (w.type === 'kpi') {
+      var k = KPI_SOURCES[w.source];
+      body.innerHTML = '<div class="kpi-widget"><div class="v">' + k.v + '</div><div class="d ' + (k.up ? '' : 'down') + '">' + (k.up ? '↑' : '↓') + ' ' + k.d + '</div></div>';
+    } else if (w.type === 'bars') {
+      var b = BARS_SOURCES[w.source];
+      var max = Math.max.apply(null, b.data);
+      var bars = b.data.map(function (v) { return '<div class="b" style="height:' + Math.round((v / max) * 100) + '%"></div>'; }).join('');
+      body.innerHTML = '<div class="bars-widget">' + bars + '</div>';
+    } else if (w.type === 'donut') {
+      var d = DONUT_SOURCES[w.source];
+      var off = 0, arcs = '', legend = '';
+      d.segments.forEach(function (s) {
+        arcs += '<circle cx="18" cy="18" r="15.9" fill="none" stroke="' + s.c + '" stroke-width="4" stroke-dasharray="' + s.p + ' ' + (100 - s.p) + '" stroke-dashoffset="' + (-off) + '" stroke-linecap="round"/>';
+        legend += '<div><span class="dt" style="background:' + s.c + (s.c === '#e2e5ee' ? ';border:1px solid #d6dae3' : '') + '"></span>' + s.l + ' ' + s.p + '%</div>';
+        off += s.p;
+      });
+      body.innerHTML = '<div class="donut-widget"><svg width="72" height="72" viewBox="0 0 36 36">' +
+        '<circle cx="18" cy="18" r="15.9" fill="none" stroke="#eef0f5" stroke-width="4"/>' + arcs +
+        '</svg><div class="dlegend">' + legend + '</div></div>';
+    } else if (w.type === 'note') {
+      body.innerHTML = '<div class="note-widget">' + NOTE_SOURCES[w.source].text + '</div>';
+    }
+  }
+
+  // ── Move a placed widget by dragging its header (pointer based, snaps to a cell) ──
+  function setupDrag(w) {
+    var head = w.el.querySelector('.widget-head');
+    head.addEventListener('mousedown', function (e) {
+      // Ignore drags that start on the remove button.
+      if (e.target.classList.contains('wx')) return;
+      e.preventDefault();
+      selectWidget(w);
+      grid.classList.add('drag-active');
+      w.el.classList.add('dragging');
+
+      // Offset of the pointer within the widget, in cells, so the widget doesn't jump.
+      var g = cellSize();
+      var startCol = Math.floor((e.clientX - g.rect.left) / g.cw);
+      var startRow = Math.floor((e.clientY - g.rect.top) / g.ch);
+      var grabColOffset = startCol - w.x;
+      var grabRowOffset = startRow - w.y;
+      // Track the last position that did not overlap another widget; the drop only
+      // commits to a free cell, so widgets can never sit on top of each other.
+      var validX = w.x, validY = w.y;
+
+      function move(ev) {
+        var cell = pointToCell(ev.clientX, ev.clientY);
+        var x = clamp(cell.col - grabColOffset, 0, COLS - w.w);
+        var y = clamp(cell.row - grabRowOffset, 0, ROWS - w.h);
+        var blocked = rectCollides(x, y, w.w, w.h, w);
+        if (!blocked) { validX = x; validY = y; }
+        showPreview(x, y, w.w, w.h, blocked);
+      }
+      function up() {
+        document.removeEventListener('mousemove', move);
+        document.removeEventListener('mouseup', up);
+        grid.classList.remove('drag-active');
+        w.el.classList.remove('dragging');
+        hidePreview();
+        w.x = validX; w.y = validY;
+        placeWidget(w);
+      }
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', up);
+    });
+  }
+
+  // ── Resize a widget by dragging the corner handle (snaps the span to cells) ──
+  function setupResize(w) {
+    var handle = w.el.querySelector('.resize-handle');
+    handle.addEventListener('mousedown', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      selectWidget(w);
+      grid.classList.add('drag-active');
+      w.el.classList.add('dragging');
+      // Track the last span that did not overlap another widget.
+      var validW = w.w, validH = w.h;
+
+      function move(ev) {
+        // The far (right/bottom) edge of the widget tracks the pointer; span is the
+        // distance from the widget's current top-left cell to that edge.
+        var cell = pointToCell(ev.clientX, ev.clientY);
+        var ww = clamp(cell.col - w.x + 1, 1, COLS - w.x);
+        var hh = clamp(cell.row - w.y + 1, 1, ROWS - w.y);
+        var blocked = rectCollides(w.x, w.y, ww, hh, w);
+        if (!blocked) { validW = ww; validH = hh; }
+        showPreview(w.x, w.y, ww, hh, blocked);
+      }
+      function up() {
+        document.removeEventListener('mousemove', move);
+        document.removeEventListener('mouseup', up);
+        grid.classList.remove('drag-active');
+        w.el.classList.remove('dragging');
+        hidePreview();
+        w.w = validW; w.h = validH;
+        placeWidget(w);
+        if (selectedWidget === w) syncSizeInputs(w);
+      }
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', up);
+    });
+  }
+
+  // ── Selection + inspector ──
+  function selectWidget(w) {
+    selectedWidget = w;
+    widgets.forEach(function (x) { x.el.classList.toggle('selected', x === w); });
+    renderInspector();
+  }
+
+  var inspectorEmpty = document.getElementById('inspectorEmpty');
+  var inspectorForm = document.getElementById('inspectorForm');
+
+  function renderInspector() {
+    var w = selectedWidget;
+    if (!w) { inspectorEmpty.style.display = ''; inspectorForm.style.display = 'none'; return; }
+    inspectorEmpty.style.display = 'none';
+    inspectorForm.style.display = '';
+
+    // Every widget type has a dataset dropdown.
+    var cat = CATALOG[w.type];
+    var opts = Object.keys(cat.sources).map(function (k) {
+      return '<option value="' + k + '"' + (k === w.source ? ' selected' : '') + '>' + cat.sources[k].label + '</option>';
+    }).join('');
+    var sourceField = '<div class="field"><label>' + cat.label + '</label><select id="iSource">' + opts + '</select></div>';
+
+    inspectorForm.innerHTML =
+      '<div class="field"><label>Widget type</label><input value="' + capitalise(w.type) + '" disabled></div>' +
+      '<div class="field"><label>Title</label><input id="iTitle" value="' + w.title.replace(/"/g, '&quot;') + '"></div>' +
+      sourceField +
+      '<div class="size-row">' +
+        '<div class="field"><label>Width</label><input id="iW" type="number" min="1" max="12" value="' + w.w + '"></div>' +
+        '<div class="field"><label>Height</label><input id="iH" type="number" min="1" max="8" value="' + w.h + '"></div>' +
+      '</div>';
+
+    document.getElementById('iTitle').addEventListener('input', function (e) {
+      w.title = e.target.value;
+      w.el.querySelector('.wtitle').textContent = w.title;
+    });
+
+    document.getElementById('iSource').addEventListener('change', function (e) {
+      w.source = e.target.value;
+      var srcLabel = w.el.querySelector('.wsrc');
+      if (srcLabel) srcLabel.textContent = CATALOG[w.type].sources[w.source].label;
+
+      if (w.type === 'timeline') {
+        // Swap the whole dataset live, no flicker, no re-instantiation needed.
+        var src = SOURCES[w.source];
+        w.instance.setCategories(src.categories);
+        w.instance.setItems(src.items);
+        w.instance.focus({ range: src.range, animate: true, duration: 400 });
+      } else {
+        // Other widget types just re-render their body from the new source.
+        renderBody(w);
+      }
+    });
+
+    document.getElementById('iW').addEventListener('input', function (e) {
+      var nw = clamp(parseInt(e.target.value, 10) || w.w, 1, COLS - w.x);
+      // Only apply the new span if it keeps the widget clear of its neighbours.
+      if (!rectCollides(w.x, w.y, nw, w.h, w)) { w.w = nw; placeWidget(w); }
+      else { e.target.value = w.w; }
+    });
+    document.getElementById('iH').addEventListener('input', function (e) {
+      var nh = clamp(parseInt(e.target.value, 10) || w.h, 1, ROWS - w.y);
+      if (!rectCollides(w.x, w.y, w.w, nh, w)) { w.h = nh; placeWidget(w); }
+      else { e.target.value = w.h; }
+    });
+  }
+
+  function syncSizeInputs(w) {
+    var iw = document.getElementById('iW'), ih = document.getElementById('iH');
+    if (iw) iw.value = w.w; if (ih) ih.value = w.h;
+  }
+
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function capitalise(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  // Board-level click clears selection.
+  document.querySelector('.canvas-wrap').addEventListener('click', function (e) {
+    if (e.target === grid || e.target.classList.contains('canvas-wrap')) {
+      selectedWidget = null;
+      widgets.forEach(function (x) { x.el.classList.remove('selected'); });
+      renderInspector();
+    }
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', function () {
+    widgets.slice().forEach(removeWidget);
+    seedDefaultBoard();
+  });
+
+  // True if the footprint (x, y, ww, hh) collides with any widget other than `ignore`.
+  function rectCollides(x, y, ww, hh, ignore) {
+    return widgets.some(function (o) {
+      if (o === ignore) return false;
+      return !(x + ww <= o.x || o.x + o.w <= x || y + hh <= o.y || o.y + o.h <= y);
+    });
+  }
+
+  // Find a free top-left cell for a widget of the given footprint (simple scan).
+  function findFreeCell(ww, hh) {
+    for (var y = 0; y <= ROWS - hh; y++) {
+      for (var x = 0; x <= COLS - ww; x++) {
+        if (!rectCollides(x, y, ww, hh, null)) return { x: x, y: y };
+      }
+    }
+    return { x: 0, y: 0 };
+  }
+
+  // Create a widget of the given type at an optional (x, y) cell, seed data, render.
+  function addWidget(type, x, y, ww, hh) {
+    emptyHint.style.display = 'none';
+    var def = DEFAULTS[type];
+    var wW = ww || def.w, wH = hh || def.h;
+    if (x == null || y == null) { var free = findFreeCell(wW, wH); x = free.x; y = free.y; }
+    var w = { id: nextWid++, type: type, title: def.title, source: def.source,
+              x: clamp(x, 0, COLS - wW), y: clamp(y, 0, ROWS - wH), w: wW, h: wH, instance: null };
+
+    var el = document.createElement('div');
+    el.className = 'widget';
+    w.el = el;
+    placeWidget(w);
+    el.innerHTML =
+      '<div class="widget-head">' +
+        '<span class="wtitle">' + w.title + '</span>' +
+        '<span class="wsrc">' + CATALOG[type].sources[w.source].label + '</span>' +
+        '<button class="wx" title="Remove">×</button>' +
+      '</div>' +
+      '<div class="widget-body"></div>' +
+      '<span class="resize-handle"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M11 15l4-4M6 15l9-9"/></svg></span>';
+    grid.appendChild(el);
+
+    el.querySelector('.wx').addEventListener('click', function (ev) { ev.stopPropagation(); removeWidget(w); });
+    el.querySelector('.widget-body').addEventListener('click', function () { selectWidget(w); });
+
+    setupDrag(w);
+    setupResize(w);
+    renderBody(w);
+    widgets.push(w);
+    selectWidget(w);
+    return w;
+  };
+
+  function seedDefaultBoard() {
+    // A light starter: a timeline, a KPI and a donut across the top, leaving the
+    // bottom half of the 12 x 8 grid empty for users to drop new widgets into.
+    addWidget('timeline', 0, 0, 8, 3);   // cols 0-7, rows 0-2
+    addWidget('kpi', 8, 0, 4, 1);        // cols 8-11, row 0
+    addWidget('donut', 8, 1, 4, 2);      // cols 8-11, rows 1-2
+
+    selectedWidget = null;
+    widgets.forEach(function (x) { x.el.classList.remove('selected'); });
+    renderInspector();
+  }
+
+  seedDefaultBoard();
+  window.addEventListener('beforeunload', function () { widgets.forEach(function (w) { if (w.instance) w.instance.destroy(); }); });
+})();
+</script>
+</body>
+</html>
