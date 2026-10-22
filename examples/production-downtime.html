@@ -435,9 +435,9 @@
           <h2><span class="accent-bar"></span> Downtime Timeline</h2>
           <div class="spacer"></div>
           <div class="btn-group" id="rangePresets">
-            <button class="btn" data-range="morning">Morning</button>
+            <button class="btn active" data-range="morning">Morning</button>
             <button class="btn" data-range="afternoon">Afternoon</button>
-            <button class="btn active" data-range="full">Full Shift</button>
+            <button class="btn" data-range="full">Full Shift</button>
           </div>
           <button class="btn ghost" id="clearSelBtn">Clear selection</button>
         </div>
@@ -970,8 +970,8 @@
           },
           range: {
             position: 'bottom',
-            start: RANGES.full.start,
-            end: RANGES.full.end,
+            start: RANGES.morning.start,
+            end: RANGES.morning.end,
             zoom: { enabled: true }
           },
           onSelectionChange: handleSelectionChange

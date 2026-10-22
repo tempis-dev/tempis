@@ -243,12 +243,17 @@
   tasks.forEach(function (t) { taskById[t.id] = t; });
 
   // ── Dependencies (finish-to-start) ──
+  // A trimmed set of key hand-offs. We keep the arrows whose source finishes before
+  // the target starts, so lines don't have to loop back across overlapping bars.
   var deps = [
-    { source: 1, target: 2 }, { source: 2, target: 3 }, { source: 3, target: 10 },
-    { source: 10, target: 11 }, { source: 11, target: 12 }, { source: 12, target: 22 },
-    { source: 20, target: 21 }, { source: 20, target: 22 }, { source: 22, target: 23 },
-    { source: 22, target: 30 }, { source: 30, target: 31 }, { source: 31, target: 32 },
-    { source: 32, target: 40 }, { source: 40, target: 41 }
+    { source: 2, target: 3 },     // Requirements spec -> Project kickoff
+    { source: 3, target: 10 },    // Kickoff -> Wireframes
+    { source: 10, target: 11 },   // Wireframes -> Visual design
+    { source: 12, target: 22 },   // Design review -> Core screens
+    { source: 22, target: 30 },   // Core screens -> Integration testing
+    { source: 30, target: 31 },   // Integration testing -> Beta program
+    { source: 32, target: 40 },   // Bug fix sprint -> Store submission
+    { source: 40, target: 41 }    // Store submission -> Launch
   ];
 
   var FONT = "Geist, system-ui, -apple-system, Roboto, sans-serif";
