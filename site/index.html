@@ -115,6 +115,7 @@
   </header>
 
   <script>
+    // Live star count. If the fetch fails (offline or GitHub rate limit), the count simply stays hidden, which is fine.
     fetch('https://api.github.com/repos/tempis-dev/tempis')
       .then(r => r.json())
       .then(d => { if (d.stargazers_count) document.getElementById('starCount').textContent = '\u2605 ' + d.stargazers_count; })
