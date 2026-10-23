@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tempis OG card</title>
+  <script src="lib/tempis_timeline.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+      min-height: 100vh; padding: 24px; background: #2a2b31;
+      font-family: 'Geist', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased;
+    }
+    .dl-bar { display: flex; gap: 12px; align-items: center; }
+    .dl-bar button { font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; color: #fff; background: #ff0071; border: none; border-radius: 8px; padding: 10px 18px; }
+    .dl-bar button:hover { background: #e00063; }
+    .dl-bar .hint { color: #c9cbd6; font-size: 13px; }
+
+    .card {
+      width: 1200px; height: 630px; flex: 0 0 auto; position: relative; overflow: hidden;
+      background:
+        radial-gradient(1100px 700px at 78% -20%, rgba(124,108,246,0.30), transparent 55%),
+        radial-gradient(900px 600px at 8% 120%, rgba(255,0,113,0.22), transparent 55%),
+        linear-gradient(145deg, #0a0a12 0%, #111018 55%, #0c0b14 100%);
+      color: #fff;
+    }
+    .card::before {
+      content: ''; position: absolute; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 54px 54px;
+      mask-image: radial-gradient(95% 95% at 70% 40%, #000 18%, transparent 82%);
+      -webkit-mask-image: radial-gradient(95% 95% at 70% 40%, #000 18%, transparent 82%);
+    }
+
+    /* Brand + tagline sit in the dark area above the glass card. */
+    .header { position: absolute; z-index: 2; left: 58px; top: 48px; width: 400px; }
+    .header .brand { display: flex; align-items: center; gap: 14px; }
+    .header .brand img { width: 46px; height: 46px; border-radius: 11px; display: block; }
+    .header .brand .name { font-size: 31px; font-weight: 700; letter-spacing: -0.02em; }
+    .header h1 { margin-top: 42px; font-size: 32px; font-weight: 800; line-height: 1.12; letter-spacing: -0.03em; }
+    .header h1 .hl { background: linear-gradient(90deg, #ff6aa6, #a99bff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    /* Tilted, faded timeline panel in 3D space. */
+    .stage { position: absolute; inset: 0; z-index: 1; perspective: 1800px; perspective-origin: 32% 42%; }
+    .tl-tilt {
+      position: absolute; top: 70px; left: 486px; width: 960px; height: 500px;
+      transform: rotateY(-25deg) rotateX(8deg) rotateZ(-2deg); transform-origin: left center;
+      border-radius: 18px; overflow: hidden; background: #fff;
+      border: 1px solid rgba(255,255,255,0.22);
+      box-shadow: 0 44px 100px -26px rgba(0,0,0,0.78), 0 0 0 1px rgba(255,255,255,0.05) inset;
+      mask-image: linear-gradient(103deg, #000 46%, rgba(0,0,0,0.25) 88%, transparent 100%);
+      -webkit-mask-image: linear-gradient(103deg, #000 46%, rgba(0,0,0,0.25) 88%, transparent 100%);
+    }
+    .tl-tilt canvas { display: block; width: 100%; height: 100%; }
+    .tl-tilt::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0) 30%); }
+
+    /* Shorter glass panel: only the feature points and the install pill. */
+    .glass {
+      position: absolute; z-index: 2; left: 58px; bottom: 94px; width: 668px;
+      display: flex; flex-direction: column;
+      padding: 28px 34px; border-radius: 20px;
+      background: linear-gradient(160deg, rgba(22,20,34,0.82), rgba(14,13,22,0.74));
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: 0 24px 60px -20px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.14) inset;
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    }
+    .glass .points { display: grid; grid-template-columns: 1fr 1fr; gap: 11px 24px; }
+    .glass .points li { list-style: none; display: flex; align-items: center; gap: 10px; font-size: 15px; color: #dfe0ea; font-weight: 500; }
+    .glass .points li .tick { width: 19px; height: 19px; border-radius: 50%; flex: 0 0 auto; background: rgba(255,106,166,0.2); color: #ff8ab8; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+    .glass .pill { align-self: flex-start; margin-top: 22px; font-family: 'Geist Mono', monospace; font-size: 13px; color: #eceef5; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.16); border-radius: 999px; padding: 9px 16px; }
+  </style>
+</head>
+<body>
+  <div class="dl-bar">
+    <button id="dlJpg" type="button">Download JPEG (1x)</button>
+    <button id="dlPng1" type="button">Download PNG (1x)</button>
+    <button id="dlPng2" type="button">Download PNG (2x)</button>
+    <span class="hint">1200x630. JPEG is smallest and best for an OG image.</span>
+  </div>
+
+  <div class="card" id="card">
+    <div class="stage">
+      <div class="tl-tilt"><canvas id="og-timeline"></canvas></div>
+    </div>
+
+    <div class="header">
+      <div class="brand"><img src="images/logo.png" alt=""><span class="name">Tempis</span></div>
+      <h1>The <span class="hl">timeline</span> for the web, built for schedules, logs, roadmaps and more</h1>
+    </div>
+
+    <div class="glass">
+      <ul class="points">
+        <li><span class="tick">&#10003;</span> Grouping, dependencies and bands</li>
+        <li><span class="tick">&#10003;</span> Smooth pan, zoom and touch</li>
+        <li><span class="tick">&#10003;</span> Handles thousands of items</li>
+        <li><span class="tick">&#10003;</span> Progress bars and milestones</li>
+        <li><span class="tick">&#10003;</span> Works with React and Vue</li>
+        <li><span class="tick">&#10003;</span> Custom tooltips and styling</li>
+        <li><span class="tick">&#10003;</span> Under 18 kB, no dependencies</li>
+        <li><span class="tick">&#10003;</span> Export to PNG, JPEG or WebP</li>
+      </ul>
+      <span class="pill">npm i @tempis/timeline</span>
+    </div>
+  </div>
+
+  <script>
+    var FONT = "Geist, system-ui, -apple-system, sans-serif";
+    new tempis_timeline.TempisTimeline('#og-timeline', {
+      responsive: true, verticalFill: 'fill-canvas', stackMode: 'stable',
+      grouping: { collapsible: true }, minimap: { height: 30 },
+      style: { font: { family: FONT, size: 12 }, item: { borderRadius: 5, fontColor: '#fff', padding: 6 } },
+      categories: [
+        { name: 'design',   label: 'Design',    style: { backgroundColor: '#6366f1', fontColor: '#fff' } },
+        { name: 'build',    label: 'Build',     style: { backgroundColor: '#ec4899', fontColor: '#fff' } },
+        { name: 'qa',       label: 'QA',        style: { backgroundColor: '#10b981', fontColor: '#fff' } },
+        { name: 'incident', label: 'Review',    style: { backgroundColor: '#f59e0b', fontColor: '#fff' } },
+        { name: 'key',      label: 'Milestone', style: { backgroundColor: '#0ea5e9', fontColor: '#fff' } }
+      ],
+      legend: { position: 'bottom', markerStyle: 'circle' },
+      range: { start: '2026-01-01', end: '2026-04-01', position: 'bottom' },
+      bands: [
+        { start: '2026-02-16', end: '2026-02-27', style: { color: '#6366f1', opacity: 0.08 } },
+        { start: '2026-03-23', end: '2026-03-30', style: { color: '#f59e0b', opacity: 0.09 } }
+      ],
+      dependencies: [
+        { source: 1, target: 2 },
+        { source: 2, target: 3 },
+        { source: 3, target: 10 },
+        { source: 10, target: 11 },
+        { source: 11, target: 20 },
+        { source: 20, target: 21 },
+        { source: 21, target: 30 }
+      ],
+      items: [
+        { id: 1,  label: 'Research',        start: '2026-01-05', end: '2026-01-15', category: 'design', grouping: 'Design',  progress: 1 },
+        { id: 2,  label: 'Visual design',   start: '2026-01-17', end: '2026-01-30', category: 'design', grouping: 'Design',  progress: 1 },
+        { id: 3,  label: 'Design sign-off', start: '2026-01-31', category: 'key', grouping: 'Design' },
+        { id: 10, label: 'API layer',       start: '2026-02-02', end: '2026-02-13', category: 'build', grouping: 'Build',   progress: 1 },
+        { id: 11, label: 'Core screens',    start: '2026-02-15', end: '2026-02-27', category: 'build', grouping: 'Build',   progress: 0.75 },
+        { id: 12, label: 'Integrations',    start: '2026-02-18', end: '2026-03-04', category: 'build', grouping: 'Build',   progress: 0.5 },
+        { id: 13, label: 'Billing',         start: '2026-02-24', end: '2026-03-09', category: 'build', grouping: 'Build',   progress: 0.35 },
+        { id: 20, label: 'Test plan',       start: '2026-03-02', end: '2026-03-10', category: 'qa', grouping: 'QA',         progress: 0.7 },
+        { id: 21, label: 'Regression',      start: '2026-03-12', end: '2026-03-22', category: 'qa', grouping: 'QA',         progress: 0.3 },
+        { id: 22, label: 'Security review', start: '2026-03-15', end: '2026-03-20', category: 'incident', grouping: 'QA' },
+        { id: 30, label: 'Beta',            start: '2026-03-24', end: '2026-04-01', category: 'qa', grouping: 'Release',    progress: 0.15 },
+        { id: 31, label: 'Launch',          start: '2026-04-03', category: 'key', grouping: 'Release' }
+      ]
+    });
+
+    // Export helpers. JPEG at 1x is the smallest and best choice for an OG image;
+    // the 1x/2x PNG buttons are there if you want a lossless file instead.
+    var card = document.getElementById('card');
+    function save(dataUrl, name) {
+      var a = document.createElement('a'); a.download = name; a.href = dataUrl; a.click();
+    }
+    document.getElementById('dlJpg').addEventListener('click', function () {
+      htmlToImage.toJpeg(card, { width: 1200, height: 630, pixelRatio: 1, quality: 0.9, cacheBust: true })
+        .then(function (u) { save(u, 'og-image.jpg'); })
+        .catch(function (e) { console.error('Export failed', e); });
+    });
+    document.getElementById('dlPng1').addEventListener('click', function () {
+      htmlToImage.toPng(card, { width: 1200, height: 630, pixelRatio: 1, cacheBust: true })
+        .then(function (u) { save(u, 'og-image.png'); })
+        .catch(function (e) { console.error('Export failed', e); });
+    });
+    document.getElementById('dlPng2').addEventListener('click', function () {
+      htmlToImage.toPng(card, { width: 1200, height: 630, pixelRatio: 2, cacheBust: true })
+        .then(function (u) { save(u, 'og-image@2x.png'); })
+        .catch(function (e) { console.error('Export failed', e); });
+    });
+  </script>
+</body>
+</html>

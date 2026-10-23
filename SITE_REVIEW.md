@@ -8,15 +8,10 @@ Scope of the review: `index.html`, `pricing.html`, `get-started.html`, `examples
 
 ## 1. SEO
 
-### 1.1 Social share image
-Every page uses `images/logo.png` as the OG image. A bare logo makes a poor social card for a visual product.
-
-Create a 1200x630 `og-image.png` showing a real timeline screenshot with the wordmark. Reference it from `og:image` and `twitter:image` on every page, and switch `twitter:card` from `summary` to `summary_large_image`. Needs a design asset before the markup can be wired up.
-
-### 1.2 Per-page meta on the main pages
+### 1.1 Per-page meta on the main pages
 The API doc files are fragments served through the `api.html` shell, so they correctly have no per-page meta and are no longer in the sitemap. Confirm the eight real standalone pages (`index`, `get-started`, `api`, `examples`, `pricing`, `changelog`, `privacy`, `terms`) each have a unique `<title>`, `<meta name="description">`, and `<link rel="canonical">`. Add where missing.
 
-### 1.3 Keyword targeting
+### 1.2 Keyword targeting
 The homepage title "Canvas-powered timeline for the web" is brand-led. High-intent searches are "javascript gantt chart library", "react timeline component", "vue timeline component", "canvas timeline library". Work "Gantt", "scheduling", "React timeline component" and "Vue timeline component" naturally into H2s and meta descriptions.
 
 ---
@@ -66,16 +61,15 @@ The FAQ says annual billing is "coming soon". Annual plans improve LTV and cash 
 ## 5. Prioritised next steps
 
 **P1 (high leverage, needs your input or assets)**
-1. 1200x630 OG image + `summary_large_image` sitewide (1.1).
-2. Strengthen the pricing page: value-led commercial card, unlimited-devs differentiator, cancel-anytime reassurance at the button (2.2).
-3. Add social proof to the homepage (2.1).
+1. Strengthen the pricing page: value-led commercial card, unlimited-devs differentiator, cancel-anytime reassurance at the button (2.2).
+2. Add social proof to the homepage (2.1).
 
 **P2 (self-contained, can be done without new input)**
-4. Confirm/add unique title, description and canonical on the eight standalone pages (1.2).
-5. Keyword targeting pass on H2s and meta descriptions (1.3).
-6. Add the "Using it at work? See licensing" CTA to the homepage closing band (2.3).
-7. Quantify the homepage "large datasets" performance claim (4).
-8. Improve playground discoverability (4).
+3. Confirm/add unique title, description and canonical on the eight standalone pages (1.1).
+4. Keyword targeting pass on H2s and meta descriptions (1.2).
+5. Add the "Using it at work? See licensing" CTA to the homepage closing band (2.3).
+6. Quantify the homepage "large datasets" performance claim (4).
+7. Improve playground discoverability (4).
 
 **P3 (needs a decision or external change)**
 9. Annual billing in Lemon Squeezy, then copy/FAQ update (2.4).
