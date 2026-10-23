@@ -106,7 +106,7 @@
     .widget-head .wsrc { font-size: 11px; color: var(--text-3); font-family: "Geist Mono", monospace; }
     .widget-head .wx { cursor: pointer; color: var(--text-3); border: none; background: none; font-size: 16px; line-height: 1; padding: 0 2px; }
     .widget-head .wx:hover { color: #ef4444; }
-    .widget-body { flex: 1; min-height: 0; position: relative; }
+    .widget-body { flex: 1; min-height: 0; position: relative; container-type: size; }
     .widget-body canvas { display: block; width: 100%; height: 100%; }
 
     /* Resize handle */
@@ -115,8 +115,10 @@
 
     /* KPI widget */
     .kpi-widget { display: flex; flex-direction: column; justify-content: center; padding: 6px 16px; height: 100%; }
-    .kpi-widget .v { font-size: 2em; font-weight: 800; line-height: 1; }
-    .kpi-widget .d { font-size: 12px; margin-top: 6px; color: #10b981; }
+    /* Value scales with the widget body height (container query units), clamped so
+       it stays readable in a tall cell and never overflows a short one. */
+    .kpi-widget .v { font-size: clamp(20px, 34cqh, 52px); font-weight: 800; line-height: 1; }
+    .kpi-widget .d { font-size: clamp(10px, 11cqh, 13px); margin-top: 6px; color: #10b981; }
     .kpi-widget .d.down { color: #ef4444; }
     /* Bars widget */
     .bars-widget { display: flex; align-items: flex-end; gap: 5px; padding: 14px 16px; height: 100%; }
@@ -684,9 +686,9 @@
   function seedDefaultBoard() {
     // A light starter: a timeline, a KPI and a donut across the top, leaving the
     // bottom half of the 12 x 8 grid empty for users to drop new widgets into.
-    addWidget('timeline', 0, 0, 8, 3);   // cols 0-7, rows 0-2
-    addWidget('kpi', 8, 0, 4, 1);        // cols 8-11, row 0
-    addWidget('donut', 8, 1, 4, 2);      // cols 8-11, rows 1-2
+    addWidget('timeline', 0, 0, 8, 4);   // cols 0-7, rows 0-2
+    addWidget('kpi', 8, 0, 4, 2);        // cols 8-11, row 0
+    addWidget('donut', 8, 2, 4, 2);      // cols 8-11, rows 1-2
 
     selectedWidget = null;
     widgets.forEach(function (x) { x.el.classList.remove('selected'); });
