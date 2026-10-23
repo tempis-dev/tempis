@@ -78,7 +78,7 @@ interface TempisTimelineItem {
   category?: string;                // Category name (must match a defined category).
   style?: TempisTimelineItemStyle;  // Per-item style overrides.
   selected?: boolean;               // Whether initially selected.
-  progress?: number;                // Completion progress (0–1). Renders as fill bar.
+  progress?: number;                // Completion progress (0 to 1). Renders as fill bar.
 }
 ```
 
@@ -131,7 +131,7 @@ interface TempisTimelineDependency {
     color?: string;
     lineWidth?: number;
     lineStyle?: "solid" | "dashed" | "dotted" | "dash-dot" | "long-dash";
-    opacity?: number;                 // 0–1. Default: 1.
+    opacity?: number;                 // 0 to 1. Default: 1.
   };
 }
 ```
@@ -303,7 +303,7 @@ interface FocusOptions {
 ```typescript
 interface ImageGenerationOptions {
   type?: string;                    // "image/png" | "image/jpeg" | "image/webp". Default: "image/png".
-  quality?: number;                 // 0–1 for lossy formats.
+  quality?: number;                 // 0 to 1 for lossy formats.
   dpr?: number;                     // Device pixel ratio. Default: 1.
   backgroundColor?: string;         // Default: transparent.
 }
@@ -324,6 +324,7 @@ interface SelectionChangeEvent {
 TempisTimeline.setGlobalPalette(colors: string[]): void
 TempisTimeline.getGlobalPalette(): string[]
 TempisTimeline.registerDateAdapter(adapter: TempisTimelineDateAdapter): void
+TempisTimeline.getDateAdapter(): TempisTimelineDateAdapter
 ```
 
 ## Date Adapter Interface
@@ -425,8 +426,8 @@ Structural props (trigger recreate on change): options
 Events: `item-click`, `item-double-click`, `item-context-click`, `item-hover`, `update:selection` (use with `v-model:selection`), `range-change`, `group-toggle`
 
 Selection:
-- Uncontrolled — omit the `selection` prop; the timeline manages state internally.
-- Controlled — bind `v-model:selection` to own the selected IDs.
+- Uncontrolled: omit the `selection` prop; the timeline manages state internally.
+- Controlled: bind `v-model:selection` to own the selected IDs.
 
 ## Ref API (Vue)
 

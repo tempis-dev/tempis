@@ -47,15 +47,15 @@
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
   <tbody>
     <tr><td><code>enabled</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Enable or disable zooming.</td></tr>
-    <tr><td><code>min</code></td><td><code>number</code></td><td> - </td><td>Minimum visible range in milliseconds.</td></tr>
-    <tr><td><code>max</code></td><td><code>number</code></td><td> - </td><td>Maximum visible range in milliseconds.</td></tr>
+    <tr><td><code>min</code></td><td><code>number</code></td><td> - </td><td>Minimum visible range in milliseconds. Clamped to a hard floor of 1000 ms (1 second).</td></tr>
+    <tr><td><code>max</code></td><td><code>number</code></td><td> - </td><td>Maximum visible range in milliseconds. Clamped to a hard ceiling of roughly 10,000 years.</td></tr>
     <tr><td><code>wheelSensitivity</code></td><td><code>number</code></td><td><code>1.0</code></td><td>Mouse wheel zoom speed multiplier.</td></tr>
     <tr><td><code>pinchSensitivity</code></td><td><code>number</code></td><td><code>1.0</code></td><td>Touch pinch zoom speed multiplier.</td></tr>
     <tr><td><code>requireModifier</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Swaps the default scroll wheel behaviour. When <code>false</code>, scrolling zooms and Ctrl/Cmd + scroll vertically scrolls the data view. When <code>true</code>, scrolling vertically scrolls and Ctrl/Cmd + scroll zooms.</td></tr>
   </tbody>
 </table>
 
-<div class="note">Setting <code>zoom.min</code> prevents users from zooming in too far (e.g. to millisecond level), while <code>zoom.max</code> prevents zooming out beyond a useful range.</div>
+<div class="note">Setting <code>zoom.min</code> prevents users from zooming in too far (e.g. to millisecond level), while <code>zoom.max</code> prevents zooming out beyond a useful range. Both are clamped to the engine's own limits: the closest zoom is 1000 ms (1 second) of visible range, and the widest is about 10,000 years, so values outside that band have no further effect.</div>
 
 <h3 id="TempisTimelineRangeUnitOptions">Tick Label Options <code class="type-tag">TempisTimelineRangeUnitOptions</code></h3>
 <p>Both <code>minorUnit</code> and <code>majorUnit</code> take these options to override the axis tick label font and date formats.</p>

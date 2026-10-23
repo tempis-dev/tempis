@@ -42,14 +42,22 @@
   <tbody>
     <tr><td><code>start</code></td><td><code>string | number | Date</code></td><td>Band start date (required).</td></tr>
     <tr><td><code>end</code></td><td><code>string | number | Date</code></td><td>Band end date. Omit for a point-in-time band.</td></tr>
-    <tr><td><code>style.color</code></td><td><code>string</code></td><td>Fill colour of the band.</td></tr>
-    <tr><td><code>style.borderColor</code></td><td><code>string</code></td><td>Border colour.</td></tr>
-    <tr><td><code>style.borderThickness</code></td><td><code>number</code></td><td>Border thickness in pixels.</td></tr>
-    <tr><td><code>style.opacity</code></td><td><code>number</code></td><td>Band opacity (0 to 1).</td></tr>
+    <tr><td><code>style</code></td><td><a href="#core/bands$TempisTimelineBandStyle"><code>TempisTimelineBandStyle</code></a></td><td>Fill, border and opacity of the band.</td></tr>
   </tbody>
 </table>
 
 <div class="note">Bands are rendered behind items, so they work well as background highlights. They span the full height of the timeline regardless of which groups are visible.</div>
+
+<h2 id="TempisTimelineBandStyle">TempisTimelineBandStyle</h2>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>color</code></td><td><code>string</code></td><td> - </td><td>Fill colour of the band.</td></tr>
+    <tr><td><code>borderColor</code></td><td><code>string</code></td><td> - </td><td>Border colour.</td></tr>
+    <tr><td><code>borderThickness</code></td><td><code>number</code></td><td> - </td><td>Border thickness in pixels.</td></tr>
+    <tr><td><code>opacity</code></td><td><code>number</code></td><td> - </td><td>Band opacity, 0 to 1.</td></tr>
+  </tbody>
+</table>
 
 <h2>Range Bands vs Point-in-Time Bands</h2>
 <p>Bands with both <code>start</code> and <code>end</code> render as shaded rectangular regions spanning the full height of the timeline. Bands with only <code>start</code> render as a vertical line at that date, which is useful for deadlines or milestones.</p>

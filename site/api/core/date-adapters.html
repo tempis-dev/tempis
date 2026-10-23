@@ -47,11 +47,17 @@
 <p><code>year</code>, <code>month</code>, <code>week</code>, <code>day</code>, <code>hour</code>, <code>minute</code>, <code>second</code>, <code>millisecond</code></p>
 
 <h2>Registering an Adapter</h2>
-<pre><code class="language-typescript">import { AdapterRegistry } from '@tempis/timeline';
+<p>Register an adapter with the static <code>TempisTimeline.registerDateAdapter</code> method. Read the active adapter back with <a href="#core/constructor">TempisTimeline.getDateAdapter</a>.</p>
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
 
-AdapterRegistry.register(myAdapter);</code></pre>
+TempisTimeline.registerDateAdapter(myAdapter);</code></pre>
 
 <div class="note">A registered adapter applies globally to all timeline instances. Register it once at application startup, before creating any timelines. There is no way to use different adapters for different instances.</div>
+
+<p><code>TempisTimeline.registerDateAdapter</code> delegates to the lower-level <code>AdapterRegistry.register</code>, which is also exported if you prefer to call it directly. The two are equivalent; pick whichever reads better in your setup.</p>
+<pre><code class="language-typescript">import { AdapterRegistry } from '@tempis/timeline';
+
+AdapterRegistry.register(myAdapter);   // equivalent to TempisTimeline.registerDateAdapter(myAdapter)</code></pre>
 
 <h2>When to Use a Custom Adapter</h2>
 <ul>
@@ -64,7 +70,7 @@ AdapterRegistry.register(myAdapter);</code></pre>
 <h2>Example: Luxon Adapter</h2>
 <p>This adapter renders all dates in the <code>America/New_York</code> timezone using Luxon:</p>
 <pre><code class="language-typescript">import { DateTime } from 'luxon';
-import { AdapterRegistry } from '@tempis/timeline';
+import { TempisTimeline } from '@tempis/timeline';
 import type { TempisTimelineDateAdapter } from '@tempis/timeline';
 
 const luxonAdapter: TempisTimelineDateAdapter = {
@@ -99,7 +105,7 @@ const luxonAdapter: TempisTimelineDateAdapter = {
 };
 
 // Register once at app startup.
-AdapterRegistry.register(luxonAdapter);</code></pre>
+TempisTimeline.registerDateAdapter(luxonAdapter);</code></pre>
 
 <div class="note">Luxon and the native adapter use different format tokens. Your <code>format</code> method should either map the Tempis tokens to your library's tokens, or configure the timeline's <code>range.minorUnit.formats</code> and <code>range.majorUnit.formats</code> to use your library's native token syntax.</div>
 
@@ -107,7 +113,7 @@ AdapterRegistry.register(luxonAdapter);</code></pre>
 <pre><code class="language-typescript">import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import { AdapterRegistry } from '@tempis/timeline';
+import { TempisTimeline } from '@tempis/timeline';
 import type { TempisTimelineDateAdapter } from '@tempis/timeline';
 
 dayjs.extend(utc);
@@ -136,4 +142,4 @@ const dayjsAdapter: TempisTimelineDateAdapter = {
   }
 };
 
-AdapterRegistry.register(dayjsAdapter);</code></pre>
+TempisTimeline.registerDateAdapter(dayjsAdapter);</code></pre>

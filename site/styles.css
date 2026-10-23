@@ -10,8 +10,8 @@
   /* Ink */
   --ink: #101014;
   --ink-2: #4a4a55;
-  --ink-3: #74747f;
-  --ink-4: #9d9da8;
+  --ink-3: #6e6e79; /* ~5:1 on white, passes WCAG AA for normal text */
+  --ink-4: #6c6c77; /* used for small uppercase labels; darkened to ~5.2:1 to pass AA */
 
   /* Surfaces */
   --surface: #ffffff;
@@ -94,6 +94,17 @@ a:hover { color: var(--accent); }
   outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 2px;
+}
+
+/* Timeline canvases fill a container with overflow:hidden, so a positive
+   outline-offset gets clipped on three sides and only the top edge shows. Draw the
+   focus ring just inside the canvas instead, so it reads as a clean, full box. A
+   neutral grey is used rather than the pink accent, so it reads as a focus indicator
+   rather than a selection or error state. */
+canvas:focus-visible {
+  outline: 2px solid var(--ink-4);
+  outline-offset: -2px;
+  border-radius: 0;
 }
 
 img, svg { display: block; max-width: 100%; }

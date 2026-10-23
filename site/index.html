@@ -53,7 +53,7 @@
         <li><a href="pricing.html">Pricing</a></li>
       </ul>
       <div class="nav-right">
-        <a href="https://github.com/tempis-dev/tempis" class="nav-github" aria-label="GitHub on GitHub">
+        <a href="https://github.com/tempis-dev/tempis" class="nav-github" aria-label="Tempis on GitHub">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
         </a>
       </div>
@@ -172,6 +172,7 @@
     new TempisTimeline('#hero-demo', {
       responsive: true,
       verticalFill: 'fill-canvas',
+      accessibility: { ariaLabel: 'Interactive demo: an operations timeline for 14 March. Drag to pan, scroll to zoom, arrow keys to move.' },
       range: {
         start: '2024-03-14T06:00:00',
         end: '2024-03-14T18:00:00',
@@ -372,7 +373,7 @@
     <div class="row-item reverse">
       <div class="row-text">
         <h2>Fully responsive</h2>
-        <p>The timeline redraws seamlessly as its container resizes. Resize a sidebar, collapse a panel, go fullscreen, it just works.</p>
+        <p>The timeline resizes with whatever contains it. Open a sidebar, collapse a panel or go fullscreen, and it redraws to fit straight away.</p>
       </div>
       <div class="row-demo row-demo-responsive" id="responsive-outer">
         <div class="resize-arrow resize-arrow-top">
@@ -456,6 +457,7 @@
       new TempisTimeline('#demo-perf', {
         responsive: true,
         verticalFill: 'fill-canvas',
+        accessibility: { ariaLabel: 'Interactive demo: a timeline rendering 5,000 items. Drag to pan, scroll to zoom, arrow keys to move.' },
         style: { font: { family: "'Geist', sans-serif", size: 13 }, item: { borderRadius: 3, fontColor: '#fff' } },
         categories: cats,
         legend: { position: 'bottom' },
@@ -468,6 +470,7 @@
     var focusDemo = new TempisTimeline('#demo-focus', {
       responsive: true,
       verticalFill: 'fill-canvas',
+      accessibility: { ariaLabel: 'Interactive demo: a film production schedule that animates focus between phases. Drag to pan, scroll to zoom, arrow keys to move.' },
       style: { font: { family: "'Geist', sans-serif", size: 13 }, item: { borderRadius: 4, fontColor: '#fff' } },
       grouping: { collapsible: true },
       categories: [
@@ -537,6 +540,7 @@
     new TempisTimeline('#demo-adapter', {
       responsive: true,
       verticalFill: 'fill-canvas',
+      accessibility: { ariaLabel: 'Interactive demo: a multi-timezone flight schedule. Drag to pan, scroll to zoom, arrow keys to move.' },
       style: { font: { family: "'Geist', sans-serif", size: 13 }, item: { borderRadius: 4, fontColor: '#fff' } },
       grouping: { collapsible: true },
       categories: [
@@ -564,6 +568,7 @@
     new TempisTimeline('#demo-responsive', {
       responsive: true,
       verticalFill: 'fill-canvas',
+      accessibility: { ariaLabel: 'Interactive demo: a festival schedule that resizes with its container. Drag to pan, scroll to zoom, arrow keys to move.' },
       style: { font: { family: "'Geist', sans-serif", size: 13 }, item: { borderRadius: 4, fontColor: '#fff' } },
       grouping: { collapsible: true },
       categories: [
@@ -712,6 +717,7 @@
       var rtTimeline = new TempisTimeline('#demo-realtime', {
         responsive: true,
         verticalFill: 'fill-canvas',
+        accessibility: { ariaLabel: 'Interactive demo: a live timeline with events streaming in real time. Drag to pan, scroll to zoom, arrow keys to move.' },
         style: { font: { family: "'Geist', sans-serif", size: 13 }, item: { borderRadius: 4 } },
         grouping: { collapsible: true, sort: function(a, b) { return a === 'ACME' ? -1 : 1; } },
         range: {
@@ -750,6 +756,7 @@
     new TempisTimeline('#demo-deps', {
       responsive: true,
       verticalFill: 'fill-canvas',
+      accessibility: { ariaLabel: 'Interactive demo: a timeline with dependency arrows between items. Drag to pan, scroll to zoom, arrow keys to move.' },
       style: { font: { family: "'Geist', sans-serif", size: 13 }, item: { borderRadius: 4, fontColor: '#fff' } },
       grouping: { collapsible: true },
       categories: [
@@ -785,6 +792,7 @@
     var exportTimeline = new TempisTimeline('#demo-export', {
       responsive: true,
       verticalFill: 'fill-canvas',
+      accessibility: { ariaLabel: 'Interactive demo: a timeline that can be exported to an image. Drag to pan, scroll to zoom, arrow keys to move.' },
       style: { font: { family: "'Geist', sans-serif", size: 13 }, item: { borderRadius: 4, fontColor: '#fff' } },
       grouping: { collapsible: true },
       categories: [

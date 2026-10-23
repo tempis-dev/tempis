@@ -47,3 +47,6 @@ function exportImage() {
     <tr><td><code>getCanvas</code></td><td><code>() =&gt; HTMLCanvasElement | null</code></td><td>Access the canvas element.</td></tr>
   </tbody>
 </table>
+
+<h2>Escape Hatches</h2>
+<p><code>getInstance()</code> returns the underlying core <code>TempisTimeline</code> instance (or <code>null</code> before mount). <code>getCanvas()</code> returns the raw <code>&lt;canvas&gt;</code> element. Use these when you need functionality not exposed by the template ref API.</p>
