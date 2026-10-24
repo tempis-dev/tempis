@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Get Started | Tempis Timeline</title>
-  <meta name="description" content="Install Tempis Timeline and render your first timeline. Setup for vanilla TypeScript, React, Vue, and the browser bundle.">
+  <meta name="description" content="Install Tempis Timeline and render your first timeline. Setup for vanilla TypeScript, the React timeline component, the Vue timeline component, and the browser bundle.">
   <link rel="canonical" href="https://tempis.dev/get-started.html">
   <meta property="og:title" content="Get Started | Tempis Timeline">
-  <meta property="og:description" content="Install Tempis Timeline and render your first timeline. Setup for vanilla TypeScript, React, Vue, and the browser bundle.">
+  <meta property="og:description" content="Install Tempis Timeline and render your first timeline. Setup for vanilla TypeScript, the React timeline component, the Vue timeline component, and the browser bundle.">
   <meta property="og:url" content="https://tempis.dev/get-started.html">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://tempis.dev/images/og-image.png">
@@ -166,7 +166,7 @@ export function Schedule() {
   );
 }</code></pre>
 
-    <div class="note"><strong>Changing <code>options</code> recreates the instance.</strong> The component compares the serialised value of <code>options</code>, so an inline object literal is fine &mdash; re-rendering with the same values changes nothing. But a genuine value change rebuilds the timeline and resets the current pan and zoom, so avoid driving frequently changing state through <code>options</code>. Callbacks and <code>tooltip.template</code> are exempt: they are held in a ref and can change freely.</div>
+    <div class="note"><strong>Changing <code>options</code> recreates the instance.</strong> The component compares the serialised value of <code>options</code>, so an inline object literal is fine, re-rendering with the same values changes nothing. But a genuine value change rebuilds the timeline and resets the current pan and zoom, so avoid driving frequently changing state through <code>options</code>. Callbacks and <code>tooltip.template</code> are exempt: they are held in a ref and can change freely.</div>
 
     <p>The <code>items</code>, <code>categories</code>, <code>bands</code> and <code>dependencies</code> props are synced through the corresponding setters, so updating them does not recreate the instance.</p>
 
@@ -282,12 +282,12 @@ const timeline = ref&lt;TempisTimelineExposed | null&gt;(null);
 
     <h2>Next</h2>
     <ul>
-      <li><a href="api.html">API reference</a> &mdash; every option, method and callback, with live demos.</li>
-      <li><a href="examples.html">Examples</a> &mdash; complete pages you can view source on.</li>
-      <li><a href="examples/playground.html">Playground</a> &mdash; change options against a live timeline.</li>
-      <li><a href="llms.txt" download>llms.txt</a> &mdash; the whole API as one file, for coding assistants.</li>
-      <li><a href="changelog.html">Changelog</a> &mdash; release notes.</li>
-      <li><a href="https://github.com/tempis-dev/tempis/issues">Issues</a> &mdash; bug reports and questions.</li>
+      <li><a href="api.html">API reference</a>: every option, method and callback, with live demos.</li>
+      <li><a href="examples.html">Examples</a>: complete pages you can view source on.</li>
+      <li><a href="examples/playground.html">Playground</a>: change options against a live timeline.</li>
+      <li><a href="llms.txt" download>llms.txt</a>: the whole API as one file, for coding assistants.</li>
+      <li><a href="changelog.html">Changelog</a>: release notes.</li>
+      <li><a href="https://github.com/tempis-dev/tempis/issues">Issues</a>: bug reports and questions.</li>
     </ul>
   </div>
 
