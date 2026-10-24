@@ -24,38 +24,48 @@
   window._rangeDemo = new tempis_timeline.TempisTimeline('#demo-range', window._rangeBase);
 </script>
 
-<h2>TempisTimelineRangeOptions</h2>
+<h2 id="TempisTimelineRangeOptions">TempisTimelineRangeOptions</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
   <tbody>
     <tr><td><code>fixed</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Lock the range so users cannot pan or zoom.</td></tr>
     <tr><td><code>position</code></td><td><code>"top" | "bottom" | "both" | "none"</code></td><td><code>"bottom"</code></td><td>Where the time axis is rendered.</td></tr>
-    <tr><td><code>start</code></td><td><code>string | number | Date</code></td><td>—</td><td>Initial start of the visible range.</td></tr>
-    <tr><td><code>end</code></td><td><code>string | number | Date</code></td><td>—</td><td>Initial end of the visible range.</td></tr>
-    <tr><td><code>min</code></td><td><code>string | number | Date</code></td><td>—</td><td>Earliest date the user can scroll to.</td></tr>
-    <tr><td><code>max</code></td><td><code>string | number | Date</code></td><td>—</td><td>Latest date the user can scroll to.</td></tr>
-    <tr><td><code>zoom</code></td><td><code>TempisTimelineRangeZoomOptions</code></td><td>—</td><td>Zoom configuration (see below).</td></tr>
-    <tr><td><code>minorUnit</code></td><td><code>TempisTimelineRangeUnitOptions</code></td><td>—</td><td>Minor tick label font and format overrides.</td></tr>
-    <tr><td><code>majorUnit</code></td><td><code>TempisTimelineRangeUnitOptions</code></td><td>—</td><td>Major tick label font and format overrides.</td></tr>
+    <tr><td><code>start</code></td><td><code>string | number | Date</code></td><td> - </td><td>Initial start of the visible range.</td></tr>
+    <tr><td><code>end</code></td><td><code>string | number | Date</code></td><td> - </td><td>Initial end of the visible range.</td></tr>
+    <tr><td><code>min</code></td><td><code>string | number | Date</code></td><td> - </td><td>Earliest date the user can scroll to.</td></tr>
+    <tr><td><code>max</code></td><td><code>string | number | Date</code></td><td> - </td><td>Latest date the user can scroll to.</td></tr>
+    <tr><td><code>zoom</code></td><td><a href="#core/range$TempisTimelineRangeZoomOptions"><code>TempisTimelineRangeZoomOptions</code></a></td><td> - </td><td>Zoom configuration (see below).</td></tr>
+    <tr><td><code>minorUnit</code></td><td><a href="#core/range$TempisTimelineRangeUnitOptions"><code>TempisTimelineRangeUnitOptions</code></a></td><td> - </td><td>Minor tick label font and format overrides.</td></tr>
+    <tr><td><code>majorUnit</code></td><td><a href="#core/range$TempisTimelineRangeUnitOptions"><code>TempisTimelineRangeUnitOptions</code></a></td><td> - </td><td>Major tick label font and format overrides.</td></tr>
   </tbody>
 </table>
 
 <div class="note">If <code>start</code> and <code>end</code> are omitted, the timeline automatically fits to show all items.</div>
 
-<h3>Zoom Options</h3>
+<h3 id="TempisTimelineRangeZoomOptions">Zoom Options <code class="type-tag">TempisTimelineRangeZoomOptions</code></h3>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
   <tbody>
     <tr><td><code>enabled</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Enable or disable zooming.</td></tr>
-    <tr><td><code>min</code></td><td><code>number</code></td><td>—</td><td>Minimum visible range in milliseconds.</td></tr>
-    <tr><td><code>max</code></td><td><code>number</code></td><td>—</td><td>Maximum visible range in milliseconds.</td></tr>
+    <tr><td><code>min</code></td><td><code>number</code></td><td> - </td><td>Minimum visible range in milliseconds. Clamped to a hard floor of 1000 ms (1 second).</td></tr>
+    <tr><td><code>max</code></td><td><code>number</code></td><td> - </td><td>Maximum visible range in milliseconds. Clamped to a hard ceiling of roughly 10,000 years.</td></tr>
     <tr><td><code>wheelSensitivity</code></td><td><code>number</code></td><td><code>1.0</code></td><td>Mouse wheel zoom speed multiplier.</td></tr>
     <tr><td><code>pinchSensitivity</code></td><td><code>number</code></td><td><code>1.0</code></td><td>Touch pinch zoom speed multiplier.</td></tr>
     <tr><td><code>requireModifier</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Swaps the default scroll wheel behaviour. When <code>false</code>, scrolling zooms and Ctrl/Cmd + scroll vertically scrolls the data view. When <code>true</code>, scrolling vertically scrolls and Ctrl/Cmd + scroll zooms.</td></tr>
   </tbody>
 </table>
 
-<div class="note">Setting <code>zoom.min</code> prevents users from zooming in too far (e.g. to millisecond level), while <code>zoom.max</code> prevents zooming out beyond a useful range.</div>
+<div class="note">Setting <code>zoom.min</code> prevents users from zooming in too far (e.g. to millisecond level), while <code>zoom.max</code> prevents zooming out beyond a useful range. Both are clamped to the engine's own limits: the closest zoom is 1000 ms (1 second) of visible range, and the widest is about 10,000 years, so values outside that band have no further effect.</div>
+
+<h3 id="TempisTimelineRangeUnitOptions">Tick Label Options <code class="type-tag">TempisTimelineRangeUnitOptions</code></h3>
+<p>Both <code>minorUnit</code> and <code>majorUnit</code> take these options to override the axis tick label font and date formats.</p>
+<table>
+  <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>font</code></td><td><a href="#core/styling$TempisTimelineFont"><code>TempisTimelineFont</code></a></td><td> - </td><td>Font applied to the tick labels for this unit.</td></tr>
+    <tr><td><code>formats</code></td><td><code>object</code></td><td> - </td><td>Date format patterns keyed by time unit.</td></tr>
+  </tbody>
+</table>
 
 <h2>Example</h2>
 <pre><code class="language-typescript">const timeline = new TempisTimeline('#canvas', {

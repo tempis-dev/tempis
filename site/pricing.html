@@ -3,22 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pricing — Tempis Timeline</title>
-  <meta name="description" content="Tempis Timeline pricing. Free for personal and open-source projects. One-time commercial licence for businesses — unlimited developers, unlimited projects.">
+  <title>Pricing | Tempis Timeline</title>
+  <meta name="description" content="Tempis Timeline pricing, the canvas timeline and Gantt library. Free for personal and open-source projects. One-time commercial licence for businesses, with unlimited developers and unlimited projects.">
   <link rel="canonical" href="https://tempis.dev/pricing.html">
-  <meta property="og:title" content="Pricing — Tempis Timeline">
-  <meta property="og:description" content="Free for personal and open-source projects. One-time commercial licence for businesses.">
+  <meta property="og:title" content="Pricing | Tempis Timeline">
+  <meta property="og:description" content="Free for personal and open-source projects. One-time commercial licence for the canvas timeline and Gantt library, for businesses.">
   <meta property="og:url" content="https://tempis.dev/pricing.html">
   <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://tempis.dev/images/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Tempis Timeline: a canvas-rendered project timeline with grouped tasks, dependencies and bands.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://tempis.dev/images/og-image.png">
   <link rel="icon" type="image/png" href="images/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Tempis Timeline",
+    "description": "A fast, zero-dependency, canvas-rendered timeline library for JavaScript and TypeScript.",
+    "url": "https://tempis.dev",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Cross-platform",
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "Community",
+        "price": "0",
+        "priceCurrency": "GBP",
+        "description": "Free for personal, educational and non-commercial projects."
+      },
+      {
+        "@type": "Offer",
+        "name": "Commercial",
+        "price": "30",
+        "priceCurrency": "GBP",
+        "description": "Per month, per organisation. Unlimited developers and projects for commercial use.",
+        "url": "https://tempis.dev/pricing.html"
+      }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What counts as commercial use?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Any use in a product, service, or tool that generates revenue, directly or indirectly. This includes SaaS applications, paid products, client projects, and internal business tools. If your organisation makes money and uses Tempis, you need a commercial licence." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I try it before buying?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. The library is fully functional without a licence. Use it freely for evaluation, prototyping, and non-commercial work. When you are ready to ship commercially, purchase a licence." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the licence per developer or per project?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Per organisation. A single licence covers your entire team, with unlimited developers, unlimited projects, and no seat limits." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I cancel anytime?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. Cancel whenever you like. Your licence remains valid until the end of the current billing period. No lock-in, no penalties." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use Tempis in a SaaS product?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes, with a commercial licence. The licence covers embedding Tempis in any product you distribute or host, including SaaS applications served to your customers." }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I get access to the source code?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. Tempis is source-available. Both community and commercial users have full access to the source code." }
+      },
+      {
+        "@type": "Question",
+        "name": "What support is included?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Commercial licence holders get priority email support for bug reports, integration questions, and feature requests. Community users can use GitHub issues." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I pay annually?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Not yet, but annual billing is coming soon. Get in touch if you would prefer to pay upfront for the year." }
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <nav>
     <div class="nav-inner">
       <a href="index.html" class="logo">
-        <img src="images/logo.png" alt="Tempis">
+        <img src="images/logo.png" alt="">
         Tempis
       </a>
       <ul class="nav-links">
@@ -28,73 +111,76 @@
         <li><a href="api.html">API</a></li>
         <li><a href="pricing.html" class="active">Pricing</a></li>
       </ul>
-      <a href="https://github.com/tempis-dev/tempis" class="nav-github" aria-label="GitHub">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-      </a>
+      <div class="nav-right">
+        <a href="https://github.com/tempis-dev/tempis" class="nav-github" aria-label="Tempis on GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        </a>
+      </div>
       <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.mobile-menu').classList.add('open');document.querySelector('.mobile-menu-overlay').classList.add('active');">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
     </div>
   </nav>
   <div class="mobile-menu-overlay" onclick="document.querySelector('.mobile-menu').classList.remove('open');this.classList.remove('active');"></div>
   <div class="mobile-menu">
     <button class="mobile-menu-close" aria-label="Close menu" onclick="this.parentElement.classList.remove('open');document.querySelector('.mobile-menu-overlay').classList.remove('active');">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
     <a href="index.html">Home</a>
     <a href="get-started.html">Get Started</a>
     <a href="examples.html">Examples</a>
     <a href="api.html">API</a>
-    <a href="pricing.html">Pricing</a>
-    <a href="https://github.com/tempis-dev/tempis" class="mobile-menu-github" aria-label="GitHub"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
+    <a href="pricing.html" class="active">Pricing</a>
+    <a href="examples/playground.html">Playground</a>
+    <a href="https://github.com/tempis-dev/tempis" class="mobile-menu-github">GitHub</a>
   </div>
 
   <div class="pricing-page">
     <div class="pricing-header">
-      <h1>Simple, honest pricing</h1>
-      <p>Free for personal and non-commercial projects. One plan for commercial use.</p>
+      <h1>Pricing</h1>
+      <p>Free for personal, educational and non-commercial work. One flat plan for everything else, covering your whole organisation.</p>
     </div>
 
     <div class="pricing-grid">
       <div class="pricing-card">
-        <div class="pricing-card-badge pricing-card-badge-muted">Community</div>
+        <div class="pricing-card-label">Community</div>
         <div class="pricing-card-price">
           <span class="price-amount">£0</span>
           <span class="price-period">forever</span>
         </div>
-        <p class="pricing-card-desc">For personal projects, education, and evaluation. Not for use in products or services that generate revenue.</p>
+        <p class="pricing-card-desc">Personal projects, education and evaluation. Not for use in anything that generates revenue.</p>
         <ul class="pricing-features">
-          <li><span class="check">✓</span> All features included</li>
-          <li><span class="check">✓</span> Unlimited projects</li>
-          <li><span class="check">✓</span> Community support</li>
-          <li><span class="check">✓</span> MIT-style usage for non-commercial</li>
+          <li><span class="check">&#10003;</span> Every feature, no gated functionality</li>
+          <li><span class="check">&#10003;</span> Unlimited projects</li>
+          <li><span class="check">&#10003;</span> Full source access</li>
+          <li><span class="check">&#10003;</span> Support via GitHub issues</li>
         </ul>
-        <a href="get-started.html" class="btn btn-outline pricing-btn">Get Started</a>
+        <a href="get-started.html" class="btn btn-outline pricing-btn">Get started</a>
       </div>
 
       <div class="pricing-card pricing-card-featured">
-        <div class="pricing-card-badge">Commercial</div>
+        <div class="pricing-card-label">Commercial</div>
         <div class="pricing-card-price">
           <span class="price-amount">£30</span>
-          <span class="price-period">/ month per organisation</span>
+          <span class="price-period">per month, per organisation</span>
         </div>
-        <p class="pricing-card-desc">For companies, SaaS products, client work, and internal tools. One licence covers your entire team.</p>
+        <p class="pricing-card-desc">Companies, SaaS products, client work and internal tools. One licence covers the whole team.</p>
         <ul class="pricing-features">
-          <li><span class="check">✓</span> All features included</li>
-          <li><span class="check">✓</span> Use in revenue-generating products</li>
-          <li><span class="check">✓</span> Unlimited developers &amp; projects</li>
-          <li><span class="check">✓</span> Priority email support</li>
+          <li><span class="check">&#10003;</span> Every feature, no gated functionality</li>
+          <li><span class="check">&#10003;</span> Use in revenue-generating products</li>
+          <li><span class="check">&#10003;</span> Unlimited developers and projects</li>
+          <li><span class="check">&#10003;</span> Priority email support</li>
         </ul>
-        <a href="https://tempis.lemonsqueezy.com/checkout/buy/c0eb842b-675d-4c8f-bba0-e15599b97950" class="btn btn-primary pricing-btn">Buy License</a>
+        <a href="https://tempis.lemonsqueezy.com/checkout/buy/c0eb842b-675d-4c8f-bba0-e15599b97950" class="btn btn-accent pricing-btn">Buy a licence</a>
       </div>
     </div>
 
     <div class="pricing-faq">
-      <h2>Frequently Asked Questions</h2>
+      <h2>Questions</h2>
       <div class="faq-grid">
         <div class="faq-item">
           <h3>What counts as commercial use?</h3>
-          <p>Any use in a product, service, or tool that generates revenue — directly or indirectly. This includes SaaS applications, paid products, client projects, and internal business tools. If your organisation makes money and uses Tempis, you need a commercial licence.</p>
+          <p>Any use in a product, service, or tool that generates revenue, directly or indirectly. This includes SaaS applications, paid products, client projects, and internal business tools. If your organisation makes money and uses Tempis, you need a commercial licence.</p>
         </div>
         <div class="faq-item">
           <h3>Can I try it before buying?</h3>
@@ -102,7 +188,7 @@
         </div>
         <div class="faq-item">
           <h3>Is the licence per developer or per project?</h3>
-          <p>Per organisation. A single licence covers your entire team — unlimited developers, unlimited projects, no seat limits.</p>
+          <p>Per organisation. A single licence covers your entire team, with unlimited developers, unlimited projects, and no seat limits.</p>
         </div>
         <div class="faq-item">
           <h3>Can I cancel anytime?</h3>
@@ -128,15 +214,48 @@
     </div>
 
     <div class="pricing-contact">
-      <h2>Questions? Get in touch.</h2>
-      <p>Need help deciding, want to discuss enterprise terms, or have a question not covered above?</p>
-      <a href="mailto:info@tempis.dev" class="btn btn-outline" style="margin-top: 12px;">info@tempis.dev</a>
-      <p style="margin-top: 16px; font-size: 0.85em; color: var(--text-secondary);"><a href="terms.html">Terms of Service</a> · <a href="privacy.html">Privacy Policy</a></p>
+      <div>
+        <h2>Something not covered here?</h2>
+        <p>Email us about enterprise terms, invoicing, or anything the FAQ misses. See also the <a href="terms.html">terms</a> and <a href="privacy.html">privacy policy</a>.</p>
+      </div>
+      <a href="mailto:info@tempis.dev" class="btn btn-outline">info@tempis.dev</a>
     </div>
   </div>
 
   <footer>
-    <p>Tempis Timeline is source-available. Free for non-commercial use. <a href="pricing.html">Commercial licence</a> required for business use.</p><p style="margin-top: 8px; font-size: 0.85em; opacity: 0.6;"><a href="terms.html">Terms</a> &middot; <a href="privacy.html">Privacy</a> &middot; <a href="changelog.html">Changelog</a></p>
+    <div class="footer-inner">
+      <div class="footer-cols">
+        <div class="footer-brand">
+          <a href="index.html" class="logo"><img src="images/logo.png" alt=""> Tempis</a>
+          <p>Canvas-rendered timelines for JavaScript and TypeScript.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Docs</h4>
+          <a href="get-started.html">Get started</a>
+          <a href="api.html">API reference</a>
+          <a href="examples.html">Examples</a>
+          <a href="llms.txt">llms.txt</a>
+        </div>
+        <div class="footer-col">
+          <h4>Project</h4>
+          <a href="https://github.com/tempis-dev/tempis">GitHub</a>
+          <a href="changelog.html">Changelog</a>
+          <a href="https://github.com/tempis-dev/tempis/issues">Issues</a>
+          <a href="https://www.npmjs.com/package/@tempis/timeline">npm</a>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="pricing.html">Pricing</a>
+          <a href="terms.html">Terms</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="mailto:info@tempis.dev">Contact</a>
+        </div>
+      </div>
+      <div class="footer-base">
+        <span>Source-available. Free for non-commercial use; a <a href="pricing.html">commercial licence</a> is required for business use.</span>
+        <span>&copy; 2026 Tempis</span>
+      </div>
+    </div>
   </footer>
 </body>
 </html>

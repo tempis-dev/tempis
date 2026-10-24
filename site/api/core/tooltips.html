@@ -29,10 +29,9 @@
   });
 </script>
 
-<h2>Overview</h2>
 <p>Tooltips appear when the user hovers over a timeline item. By default, they show the item label and date range. You can fully customise the content using a template function, control when they appear, adjust their positioning, and add a delay.</p>
 
-<h2>TempisTimelineTooltipOptions</h2>
+<h2 id="TempisTimelineTooltipOptions">TempisTimelineTooltipOptions</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
   <tbody>
@@ -40,8 +39,8 @@
     <tr><td><code>delay</code></td><td><code>number</code></td><td><code>0</code></td><td>Delay in milliseconds before the tooltip appears after hovering an item. Useful to avoid flickering when the user moves quickly across items.</td></tr>
     <tr><td><code>dateFormat</code></td><td><code>string</code></td><td><code>"D MMMM HH:mm:ss"</code></td><td>The date format pattern used in the default tooltip. Uses the same tokens as the date adapter (see <a href="#core/date-adapters">Date Adapters</a>).</td></tr>
     <tr><td><code>overflowBehavior</code></td><td><code>"none" | "canvas" | "viewport"</code></td><td><code>"none"</code></td><td>Controls how the tooltip repositions when it would overflow an edge.</td></tr>
-    <tr><td><code>template</code></td><td><code>(id: string | number) =&gt; HTMLElement | string | null</code></td><td>—</td><td>Custom template function for full control over tooltip content.</td></tr>
-    <tr><td><code>shouldShow</code></td><td><code>(id: string | number) =&gt; boolean</code></td><td>—</td><td>Predicate that controls whether a tooltip appears for a specific item.</td></tr>
+    <tr><td><code>template</code></td><td><code>(id: string | number) =&gt; HTMLElement | string | null</code></td><td> - </td><td>Custom template function for full control over tooltip content.</td></tr>
+    <tr><td><code>shouldShow</code></td><td><code>(id: string | number) =&gt; boolean</code></td><td> - </td><td>Predicate that controls whether a tooltip appears for a specific item.</td></tr>
   </tbody>
 </table>
 
@@ -60,9 +59,9 @@
 <h2>Overflow Behaviour</h2>
 <p>Tooltip positioning is relative to the cursor. When a tooltip would extend beyond an edge, the <code>overflowBehavior</code> setting controls what happens:</p>
 <ul>
-  <li><code>"none"</code> — the tooltip renders at the cursor position and may be clipped by the canvas or viewport. Use this when you want full control over positioning via CSS.</li>
-  <li><code>"canvas"</code> — the tooltip flips horizontally or vertically to stay within the canvas element bounds. Good for timelines embedded in scrollable containers.</li>
-  <li><code>"viewport"</code> — the tooltip flips to stay within the browser viewport. Best for most use cases — ensures the tooltip is always fully visible.</li>
+  <li><code>"none"</code>: the tooltip renders at the cursor position and may be clipped by the canvas or viewport. Use this when you want full control over positioning via CSS.</li>
+  <li><code>"canvas"</code>: the tooltip flips horizontally or vertically to stay within the canvas element bounds. Good for timelines embedded in scrollable containers.</li>
+  <li><code>"viewport"</code>: the tooltip flips to stay within the browser viewport. Best for most use cases, ensuring the tooltip is always fully visible.</li>
 </ul>
 
 <pre><code class="language-typescript">tooltip: {
@@ -72,9 +71,9 @@
 <h2>Custom Template</h2>
 <p>The <code>template</code> function gives you full control over tooltip content. It receives the item ID and should return one of:</p>
 <ul>
-  <li>An <strong>HTML string</strong> — injected as <code>innerHTML</code> into the tooltip container.</li>
-  <li>An <strong>HTMLElement</strong> — appended directly as the tooltip content.</li>
-  <li><strong><code>null</code></strong> — falls back to the default tooltip for that item.</li>
+  <li>An <strong>HTML string</strong>, injected as <code>innerHTML</code> into the tooltip container.</li>
+  <li>An <strong>HTMLElement</strong>, appended directly as the tooltip content.</li>
+  <li><strong><code>null</code></strong>, which falls back to the default tooltip for that item.</li>
 </ul>
 
 <h3>Returning a HTML String</h3>
@@ -201,7 +200,7 @@
     // Only customise tooltips for items with a specific category
     const item = timeline.getItems().find(i =&gt; i.id === id);
     if (item?.category === 'milestone') {
-      return '&lt;div style="padding: 8px;"&gt;🎯 Milestone reached&lt;/div&gt;';
+      return '&lt;div style="padding: 8px;"&gt;Milestone reached&lt;/div&gt;';
     }
     return null; // Default tooltip for everything else
   }
@@ -218,10 +217,10 @@
   }
 }</code></pre>
 
-<div class="note">When <code>shouldShow</code> returns <code>false</code>, no tooltip is rendered at all — the <code>template</code> function is not called.</div>
+<div class="note">When <code>shouldShow</code> returns <code>false</code>, no tooltip is rendered at all, and the <code>template</code> function is not called.</div>
 
 <h2>Styling</h2>
-<p>The tooltip container is a plain <code>&lt;div&gt;</code> positioned absolutely near the cursor. It has no default styling beyond positioning — your template controls the appearance entirely. For rich card-style tooltips, include padding, background, border-radius, and box-shadow in your template HTML.</p>
+<p>The tooltip container is a plain <code>&lt;div&gt;</code> positioned absolutely near the cursor. It has no default styling beyond positioning, so your template controls the appearance entirely. For rich card-style tooltips, include padding, background, border-radius, and box-shadow in your template HTML.</p>
 
 <div class="api-demo"><canvas id="demo-tooltip-styled"></canvas></div>
 <p style="margin: 0 0 16px; color: #64748b; font-size: 14px;">Hover over items to see the styled card tooltip.</p>

@@ -25,7 +25,7 @@
 
 <div class="note">Connectors are only drawn when both the source and target items are visible in the current view. Panning one item off-screen will hide the connector.</div>
 
-<h2>TempisTimelineDependency</h2>
+<h2 id="TempisTimelineDependency">TempisTimelineDependency</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
   <tbody>
@@ -35,7 +35,7 @@
   </tbody>
 </table>
 
-<h2>TempisTimelineDependencyStyle</h2>
+<h2 id="TempisTimelineDependencyStyle">TempisTimelineDependencyStyle</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
   <tbody>
@@ -69,7 +69,7 @@ const timeline = new TempisTimeline('#canvas', {
 <h2>Methods</h2>
 
 <h3>setDependencies(dependencies)</h3>
-<p>Replaces all dependencies and redraws. Does not affect item layout — only the connector arrows are updated.</p>
+<p>Replaces all dependencies and redraws. Does not affect item layout; only the connector arrows are updated.</p>
 <pre><code class="language-typescript">timeline.setDependencies([
   { source: 1, target: 2 },
   { source: 2, target: 3 },

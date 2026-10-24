@@ -18,7 +18,7 @@
   });
 </script>
 
-<h2>TempisTimelineStyleOptions</h2>
+<h2 id="TempisTimelineStyleOptions">TempisTimelineStyleOptions</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead>
   <tbody>
@@ -28,7 +28,7 @@
   </tbody>
 </table>
 
-<h2>TempisTimelineFont</h2>
+<h2 id="TempisTimelineFont">TempisTimelineFont</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
   <tbody>
@@ -36,21 +36,21 @@
     <tr><td><code>size</code></td><td><code>number</code></td><td><code>14</code></td><td>Font size in pixels.</td></tr>
     <tr><td><code>weight</code></td><td><code>string | number</code></td><td><code>"normal"</code></td><td>Font weight.</td></tr>
     <tr><td><code>style</code></td><td><code>string</code></td><td><code>"normal"</code></td><td>Font style (normal, italic).</td></tr>
-    <tr><td><code>lineHeight</code></td><td><code>string</code></td><td>—</td><td>CSS line-height value.</td></tr>
+    <tr><td><code>lineHeight</code></td><td><code>string</code></td><td> - </td><td>CSS line-height value.</td></tr>
   </tbody>
 </table>
 
-<h2>TempisTimelineItemStyle</h2>
+<h2 id="TempisTimelineItemStyle">TempisTimelineItemStyle</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
   <tbody>
     <tr><td><code>backgroundColor</code></td><td><code>string</code></td><td>palette colour</td><td>Item background colour.</td></tr>
-    <tr><td><code>fontColor</code></td><td><code>string</code></td><td>—</td><td>Item label colour.</td></tr>
-    <tr><td><code>padding</code></td><td><code>number</code></td><td>—</td><td>Inner padding in pixels.</td></tr>
-    <tr><td><code>borderColor</code></td><td><code>string</code></td><td>—</td><td>Border colour.</td></tr>
-    <tr><td><code>borderThickness</code></td><td><code>number</code></td><td>—</td><td>Border width in pixels.</td></tr>
+    <tr><td><code>fontColor</code></td><td><code>string</code></td><td> - </td><td>Item label colour.</td></tr>
+    <tr><td><code>padding</code></td><td><code>number</code></td><td> - </td><td>Inner padding in pixels.</td></tr>
+    <tr><td><code>borderColor</code></td><td><code>string</code></td><td> - </td><td>Border colour.</td></tr>
+    <tr><td><code>borderThickness</code></td><td><code>number</code></td><td> - </td><td>Border width in pixels.</td></tr>
     <tr><td><code>borderStyle</code></td><td><code>TempisTimelineLineStyle</code></td><td><code>"solid"</code></td><td>Border line style: <code>solid</code>, <code>dashed</code>, <code>dotted</code>, <code>dash-dot</code>, or <code>long-dash</code>.</td></tr>
-    <tr><td><code>borderRadius</code></td><td><code>number</code></td><td>—</td><td>Corner radius in pixels.</td></tr>
+    <tr><td><code>borderRadius</code></td><td><code>number</code></td><td> - </td><td>Corner radius in pixels.</td></tr>
   </tbody>
 </table>
 
@@ -60,23 +60,23 @@
 <div style="display: flex; flex-direction: column; gap: 0; margin: 20px 0 24px; font-size: 13px;">
   <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255, 0, 113, 0.1); border: 1px solid rgba(255, 0, 113, 0.25); border-radius: 10px 10px 4px 4px;">
     <span style="font-weight: 700; color: #ff0071; font-size: 18px; width: 24px; text-align: center;">1</span>
-    <span><strong>Per-item</strong> <code>style</code> — highest priority, set on individual items</span>
+    <span><strong>Per-item</strong> <code>style</code>: highest priority, set on individual items</span>
   </div>
   <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-left: 24px; background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 4px;">
     <span style="font-weight: 700; color: #6366f1; font-size: 18px; width: 24px; text-align: center;">2</span>
-    <span><strong>Category</strong> <code>style</code> — applied to all items in a category</span>
+    <span><strong>Category</strong> <code>style</code>: applied to all items in a category</span>
   </div>
   <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-left: 48px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 4px;">
     <span style="font-weight: 700; color: #10b981; font-size: 18px; width: 24px; text-align: center;">3</span>
-    <span><strong>Global</strong> <code>style.item</code> — from the constructor options</span>
+    <span><strong>Global</strong> <code>style.item</code>: from the constructor options</span>
   </div>
   <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-left: 72px; background: rgba(128, 128, 128, 0.06); border: 1px solid rgba(128, 128, 128, 0.15); border-radius: 4px 4px 10px 10px;">
     <span style="font-weight: 700; color: #808080; font-size: 18px; width: 24px; text-align: center;">4</span>
-    <span><strong>Library defaults</strong> — built-in fallback values</span>
+    <span><strong>Library defaults</strong>: built-in fallback values</span>
   </div>
 </div>
 
-<h2>Example — Dark Theme</h2>
+<h2>Example: Dark Theme</h2>
 <div class="api-demo" style="background: #0f172a; border-radius: 10px;"><canvas id="demo-dark-theme"></canvas></div>
 <script>
   new tempis_timeline.TempisTimeline('#demo-dark-theme', {

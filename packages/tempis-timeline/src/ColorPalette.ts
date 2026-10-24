@@ -1,6 +1,6 @@
 /**
- * Static registry for the global color palette.
- * Categories that don't specify an explicit backgroundColor will cycle through the colors in this palette.
+ * Static registry for the global colour palette.
+ * Categories that don't specify an explicit backgroundColor will cycle through the colours in this palette.
  */
 export class ColorPalette {
     /** The current global palette. */
@@ -22,19 +22,19 @@ export class ColorPalette {
     ];
 
     /**
-     * Set the global color palette.
-     * @param palette A non-empty array of color strings.
+     * Set the global colour palette.
+     * @param palette A non-empty array of colour strings.
      */
     static set(palette: string[]): void {
         if (!Array.isArray(palette) || palette.length === 0) {
-            throw new Error("Palette must be a non-empty array of color strings.");
+            throw new Error("Palette must be a non-empty array of colour strings.");
         }
         ColorPalette._palette = palette;
     }
 
     /**
-     * Get the current global color palette.
-     * @returns The global color palette.
+     * Get the current global colour palette.
+     * @returns The global colour palette.
      */
     static get(): string[] {
         return ColorPalette._palette;

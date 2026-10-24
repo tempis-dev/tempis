@@ -1,130 +1,498 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" type="image/png" href="../images/logo.png">
+    <link rel="icon" type="image/png" href="../images/logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lazy Loading - Tempis Timeline</title>
+    <title>LogScope — Request Explorer</title>
     <script>
         const timestamp = new Date().getTime();
         document.write('<script src="../lib/tempis_timeline.js?' + timestamp + '"><\/script>');
     </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
     <style>
+        :root {
+            --bg: #f4f5f7;
+            --panel: #ffffff;
+            --border: #e4e7ec;
+            --border-strong: #d0d5dd;
+            --text: #101828;
+            --text-muted: #667085;
+            --text-faint: #98a2b3;
+            --accent: #6366f1;
+            --accent-soft: #eef2ff;
+            --green: #12b76a;
+            --red: #f04438;
+            --amber: #f79009;
+            --radius: 10px;
+            --shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.1);
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            height: 100%;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Geist, system-ui, -apple-system, Roboto, sans-serif;
             margin: 0;
-            padding: 20px;
-            background: #f5f5f5;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
         }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        h1 {
-            margin-top: 0;
-            color: #333;
-        }
-        .subtitle {
-            color: #666;
-            margin-bottom: 16px;
-        }
-        .status-bar {
+
+        /* ---- Top bar ---- */
+        .topbar {
             display: flex;
             align-items: center;
             gap: 16px;
-            margin-bottom: 12px;
-            padding: 10px 16px;
-            background: #f9f9f9;
-            border-radius: 4px;
-            font-size: 14px;
+            padding: 0 20px;
+            height: 56px;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
         }
-        .status-bar .stat {
-            color: #555;
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            letter-spacing: -0.01em;
         }
-        .status-bar .stat strong {
-            color: #333;
+
+        .brand .logo {
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 15px;
+            box-shadow: 0 2px 6px rgba(99, 102, 241, 0.4);
         }
+
+        .brand .sub {
+            font-weight: 400;
+            font-size: 12px;
+            color: var(--text-faint);
+            border-left: 1px solid var(--border);
+            padding-left: 10px;
+            margin-left: 2px;
+        }
+
+        .topbar .spacer { flex: 1; }
+
+        .control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .control select {
+            font-family: inherit;
+            font-size: 13px;
+            color: var(--text);
+            background: var(--panel);
+            border: 1px solid var(--border-strong);
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .control select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+        .env-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 0 3px rgba(18, 183, 106, 0.18);
+        }
+
+        .live-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border-strong);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+            background: var(--panel);
+            transition: all 0.15s ease;
+        }
+
+        .live-toggle.active {
+            color: var(--green);
+            border-color: rgba(18, 183, 106, 0.5);
+            background: rgba(18, 183, 106, 0.06);
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-faint);
+        }
+
+        .live-toggle.active .live-dot {
+            background: var(--green);
+            animation: pulse 1.4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(18, 183, 106, 0.5); }
+            50% { box-shadow: 0 0 0 5px rgba(18, 183, 106, 0); }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+            background: var(--panel);
+            border: 1px solid var(--border-strong);
+            border-radius: 8px;
+            padding: 7px 12px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .btn:hover { background: #f9fafb; }
+        .btn:active { background: #f2f4f7; }
+
+        /* ---- Layout ---- */
+        .workspace {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 20px;
+            max-width: 1500px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* ---- Stats strip ---- */
+        .stats {
+            flex-shrink: 0;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+
+        .stat-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-card .value {
+            margin-top: 8px;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-card .value.small {
+            font-size: 15px;
+            font-weight: 500;
+            font-family: Geist Mono, ui-monospace, Consolas, monospace;
+            color: var(--text);
+        }
+
+        .stat-card .hint {
+            font-size: 12px;
+            color: var(--text-faint);
+            margin-top: 3px;
+        }
+
+        .stat-card .icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #fff;
+        }
+
+        .error-rate .value.ok { color: var(--green); }
+        .error-rate .value.warn { color: var(--amber); }
+        .error-rate .value.bad { color: var(--red); }
+
+        /* ---- Loading indicator ---- */
         .loading-indicator {
             display: none;
             align-items: center;
-            gap: 6px;
-            color: #667eea;
-            font-weight: 600;
+            gap: 7px;
+            color: var(--accent);
+            font-weight: 500;
+            font-size: 13px;
         }
-        .loading-indicator.active {
-            display: flex;
-        }
+        .loading-indicator.active { display: inline-flex; }
+
         .spinner {
-            width: 14px;
-            height: 14px;
-            border: 2px solid #667eea;
+            width: 13px;
+            height: 13px;
+            border: 2px solid var(--accent);
             border-top-color: transparent;
             border-radius: 50%;
             animation: spin 0.6s linear infinite;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .idle-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--green);
         }
-        .load-log {
-            margin-top: 12px;
-            max-height: 120px;
-            overflow-y: auto;
-            font-family: 'Consolas', 'Monaco', monospace;
+        .idle-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+        .loading-indicator.active ~ .idle-pill { display: none; }
+
+        /* ---- Main grid: explorer + activity ---- */
+        .main-grid {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 320px;
+            gap: 16px;
+            align-items: stretch;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            min-height: 0;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-header .title {
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .panel-header .meta {
             font-size: 12px;
-            background: #1e1e1e;
-            color: #d4d4d4;
-            padding: 10px 14px;
-            border-radius: 4px;
+            color: var(--text-faint);
         }
-        .load-log .entry {
-            padding: 2px 0;
+
+        .panel-header .spacer { flex: 1; }
+
+        .explorer-body {
+            padding: 12px 14px 14px;
+            flex: 1;
+            min-width: 0;
+            min-height: 0;
+            display: flex;
         }
-        .load-log .entry .time {
-            color: #6a9955;
-        }
-        .load-log .entry .count {
-            color: #dcdcaa;
-        }
-        .load-log .entry .range {
-            color: #9cdcfe;
-        }
-        .load-log .entry .cached {
-            color: #808080;
-        }
-        canvas {
-            width: 100%;
-            height: 500px;
-        }
+
         .canvas-container {
             width: 100%;
-            height: 500px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* ---- Activity feed ---- */
+        .activity .panel-header .badge {
+            font-size: 11px;
+            font-family: Geist Mono, ui-monospace, Consolas, monospace;
+            background: #1e1e2e;
+            color: #a6adc8;
+            padding: 2px 7px;
+            border-radius: 20px;
+        }
+
+        .load-log {
+            flex: 1;
+            min-height: 0;
+            margin: 0;
+            overflow-y: auto;
+            font-family: Geist Mono, ui-monospace, Consolas, monospace;
+            font-size: 12px;
+            line-height: 1.55;
+            background: #16161e;
+            color: #cdd6f4;
+            padding: 12px 14px;
+            border-bottom-left-radius: var(--radius);
+            border-bottom-right-radius: var(--radius);
+        }
+
+        .load-log .entry {
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .load-log .entry .time { color: #89b4fa; }
+        .load-log .entry .count { color: #f9e2af; }
+        .load-log .entry .range { color: #94e2d5; }
+        .load-log .entry .cached { color: #6c7086; }
+
+        .load-log::-webkit-scrollbar { width: 8px; }
+        .load-log::-webkit-scrollbar-thumb { background: #313244; border-radius: 4px; }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 1100px) {
+            /* Stack and allow scrolling instead of fitting one viewport height. */
+            body { height: auto; min-height: 100vh; overflow: auto; }
+            .workspace { min-height: 0; }
+            .main-grid { grid-template-columns: minmax(0, 1fr); flex: none; }
+            .explorer-body { height: 440px; flex: none; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .load-log { min-height: 220px; max-height: 320px; }
+        }
+
+        @media (max-width: 640px) {
+            .stats { grid-template-columns: 1fr; }
+            .brand .sub { display: none; }
+            .control.env .lbl { display: none; }
+            .workspace { padding: 14px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Server Request Logs</h1>
-        <p class="subtitle">Pan and zoom to lazily load request logs. Data is fetched on demand and cached per hour block.</p>
+    <!-- Top bar -->
+    <header class="topbar">
+        <div class="brand">
+            <span class="logo">◭</span>
+            LogScope
+            <span class="sub">Request Explorer</span>
+        </div>
 
-        <div class="status-bar">
-            <div class="loading-indicator" id="loadingIndicator">
-                <div class="spinner"></div>
-                <span>Loading...</span>
+        <div class="spacer"></div>
+
+        <div class="control env">
+            <span class="env-dot" id="envDot"></span>
+            <span class="lbl">Environment</span>
+            <select id="envSelect">
+                <option value="production">production</option>
+                <option value="staging">staging</option>
+                <option value="development">development</option>
+            </select>
+        </div>
+
+        <button class="btn" id="refreshBtn" title="Reset cache and refetch">↻ Refresh</button>
+
+        <div class="live-toggle active" id="liveToggle">
+            <span class="live-dot"></span>
+            <span>Live</span>
+        </div>
+    </header>
+
+    <!-- Workspace -->
+    <div class="workspace">
+        <!-- Stats strip -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="label"><span class="icon" style="background:#6366f1">Σ</span> Requests loaded</div>
+                <div class="value" id="itemCount">0</div>
+                <div class="hint" id="rpsHint">across cached blocks</div>
             </div>
-            <div class="stat">Items loaded: <strong id="itemCount">0</strong></div>
-            <div class="stat">Hour blocks cached: <strong id="blockCount">0</strong></div>
-            <div class="stat">Range: <strong id="rangeDisplay">-</strong></div>
+            <div class="stat-card">
+                <div class="label"><span class="icon" style="background:#0ea5e9">⛁</span> Hour blocks cached</div>
+                <div class="value" id="blockCount">0</div>
+                <div class="hint">fetched on demand</div>
+            </div>
+            <div class="stat-card error-rate">
+                <div class="label"><span class="icon" style="background:#f04438">!</span> Error rate</div>
+                <div class="value ok" id="errorRate">0.0%</div>
+                <div class="hint" id="errorHint">4xx + 5xx responses</div>
+            </div>
+            <div class="stat-card">
+                <div class="label"><span class="icon" style="background:#12b76a">◷</span> Visible range</div>
+                <div class="value small" id="rangeDisplay">—</div>
+                <div class="hint" style="display:flex;align-items:center;gap:10px;margin-top:6px">
+                    <span class="loading-indicator" id="loadingIndicator">
+                        <span class="spinner"></span> Fetching…
+                    </span>
+                    <span class="idle-pill" id="idlePill"><span class="dot"></span> Up to date</span>
+                </div>
+            </div>
         </div>
 
-        <div class="canvas-container">
-            <canvas id="canvas"></canvas>
-        </div>
+        <!-- Explorer + activity -->
+        <div class="main-grid">
+            <section class="panel explorer">
+                <div class="panel-header">
+                    <span class="title">Request Explorer</span>
+                    <span class="meta">— pan &amp; zoom to stream logs on demand</span>
+                    <span class="spacer"></span>
+                    <span class="meta" id="explorerEnv">production</span>
+                </div>
+                <div class="explorer-body">
+                    <div class="canvas-container">
+                        <canvas id="canvas"></canvas>
+                    </div>
+                </div>
+            </section>
 
-        <div class="load-log" id="loadLog"></div>
+            <aside class="panel activity">
+                <div class="panel-header">
+                    <span class="title">Fetch Activity</span>
+                    <span class="spacer"></span>
+                    <span class="badge" id="activityBadge">0 fetches</span>
+                </div>
+                <div class="load-log" id="loadLog"></div>
+            </aside>
+        </div>
     </div>
 
 <script>
@@ -206,6 +574,7 @@
     let isLoading = false;
     let loadDebounceTimer = null;
     let timeline = null;
+    let fetchCount = 0;
 
     function getHourKey(date) {
         return new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours()).getTime();
@@ -234,13 +603,31 @@
     }
 
     function updateStats() {
-        document.getElementById('itemCount').textContent = allItems.length;
+        document.getElementById('itemCount').textContent = allItems.length.toLocaleString();
         document.getElementById('blockCount').textContent = cache.size;
+        document.getElementById('activityBadge').textContent = `${fetchCount} fetch${fetchCount === 1 ? '' : 'es'}`;
+
+        // Derived stat: error rate (% of 4xx + 5xx) for realism
+        let errors = 0;
+        for (const item of allItems) {
+            if (item.category === '4xx Client Error' || item.category === '5xx Server Error') errors++;
+        }
+        const rate = allItems.length ? (errors / allItems.length) * 100 : 0;
+        const el = document.getElementById('errorRate');
+        el.textContent = rate.toFixed(1) + '%';
+        el.classList.remove('ok', 'warn', 'bad');
+        el.classList.add(rate < 8 ? 'ok' : rate < 15 ? 'warn' : 'bad');
+        document.getElementById('errorHint').textContent = `${errors.toLocaleString()} of ${allItems.length.toLocaleString()} responses`;
     }
 
     function formatRange(start, end) {
         const opts = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
         return `${start.toLocaleString(undefined, opts)} – ${end.toLocaleString(undefined, opts)}`;
+    }
+
+    function setLoadingUI(active) {
+        document.getElementById('loadingIndicator').classList.toggle('active', active);
+        document.getElementById('idlePill').style.display = active ? 'none' : 'inline-flex';
     }
 
     async function loadRange(start, end) {
@@ -250,7 +637,7 @@
         if (uncached.length === 0) return;
 
         isLoading = true;
-        document.getElementById('loadingIndicator').classList.add('active');
+        setLoadingUI(true);
 
         logEntry(`Fetching <span class="count">${uncached.length} hour block(s)</span> for range <span class="range">${formatRange(start, end)}</span>`);
 
@@ -260,6 +647,7 @@
             cache.set(block.getTime(), logs);
             return logs;
         }));
+        fetchCount += uncached.length;
 
         // Merge new items with existing
         const newItems = results.flat();
@@ -272,7 +660,7 @@
         updateStats();
 
         isLoading = false;
-        document.getElementById('loadingIndicator').classList.remove('active');
+        setLoadingUI(false);
     }
 
     function onRangeChange(start, end) {
@@ -287,6 +675,36 @@
         }, 200);
     }
 
+    // --- Cosmetic UI controls (environment selector + live toggle + refresh) ---
+    const envColors = { production: '#12b76a', staging: '#f79009', development: '#6366f1' };
+    document.getElementById('envSelect').addEventListener('change', (e) => {
+        const env = e.target.value;
+        document.getElementById('envDot').style.background = envColors[env];
+        document.getElementById('explorerEnv').textContent = env;
+        logEntry(`Switched environment → <span class="range">${env}</span>`);
+    });
+
+    document.getElementById('liveToggle').addEventListener('click', (e) => {
+        e.currentTarget.classList.toggle('active');
+        const on = e.currentTarget.classList.contains('active');
+        logEntry(`Live tail ${on ? 'enabled' : 'paused'}`);
+    });
+
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+        cache.clear();
+        allItems = [];
+        fetchCount = 0;
+        timeline.setItems(allItems);
+        updateStats();
+        logEntry('Cache cleared — refetching visible range');
+        const r = timeline.getRange ? timeline.getRange() : null;
+        if (r && r.start && r.end) {
+            loadRange(new Date(r.start), new Date(r.end));
+        } else {
+            loadRange(defaultStart, defaultEnd);
+        }
+    });
+
     // --- Initialize ---
     const now = new Date();
     const defaultStart = new Date(now.getTime() - 15 * 60000); // 15 minutes ago
@@ -297,6 +715,13 @@
         responsive: true,
         verticalFill: 'fill-canvas',
         stackMode: 'compact',
+        style: {
+            font: {
+                family: "Geist, system-ui, -apple-system, Roboto, sans-serif",
+                size: 12
+            }
+        },
+        grouping: { collapsible: true },
         range: {
             start: defaultStart,
             end: defaultEnd,

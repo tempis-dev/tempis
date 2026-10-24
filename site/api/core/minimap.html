@@ -1,7 +1,6 @@
 <h1>Minimap</h1>
 <p class="subtitle">A compact overview bar for navigating large timelines.</p>
 
-<h2>Overview</h2>
 <p>The minimap renders a thin horizontal bar at the bottom of the canvas showing the full data range. Coloured indicators mark where items exist in time, and a highlighted rectangle shows the current viewport position. Click or drag the minimap to navigate.</p>
 
 <div class="api-demo" style="height: 400px;"><canvas id="demo-minimap"></canvas></div>
@@ -33,7 +32,7 @@
   });
 </script>
 
-<h2>TempisTimelineMinimapOptions</h2>
+<h2 id="TempisTimelineMinimapOptions">TempisTimelineMinimapOptions</h2>
 <p>Provide a <code>minimap</code> config object to enable the minimap. Omit it entirely to disable.</p>
 
 <table>
@@ -66,11 +65,11 @@ const timeline = new TempisTimeline('#canvas', {
   <li><strong>Drag</strong> the minimap to scrub through the timeline continuously.</li>
   <li>The viewport indicator shows the currently visible range relative to the full data extent.</li>
   <li>Item indicators use their background colour, grouped by row to reflect the timeline's grouping structure.</li>
-  <li>The minimap respects RTL mode — time flows right-to-left when <code>rtl: true</code>.</li>
+  <li>The minimap respects RTL mode: time flows right-to-left when <code>rtl: true</code>.</li>
 </ul>
 
 <div class="note">The minimap is hidden during image export via <code>toImage()</code>. Exported images show only the timeline content without navigation chrome.</div>
 
 <h2>When to Use</h2>
-<p>The minimap is most useful when the timeline spans a large time range and users frequently zoom into specific sections. It provides spatial context — users can always see where they are relative to the full dataset.</p>
+<p>The minimap is most useful when the timeline spans a large time range and users frequently zoom into specific sections. It provides spatial context, so users can always see where they are relative to the full dataset.</p>
 <p>For timelines that show all data at once without zooming, the minimap adds little value and can be omitted.</p>

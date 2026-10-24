@@ -287,16 +287,16 @@ export interface TempisTimelineFont {
 }
 
 export interface TempisTimelineItemStyle {
-    /** The background color of the item. Will also be used to style the marker for point-in-time items unless a border is defined. */
+    /** The background colour of the item. Will also be used to style the marker for point-in-time items unless a border is defined. */
     backgroundColor?: string;
 
-    /** The font color of the item. */
+    /** The font colour of the item. */
     fontColor?: string;
 
     /** The amount of padding to apply to the item. */
     padding?: number;
 
-    /** The border color. Will also be used to style the marker for point-in-time items. */
+    /** The border colour. Will also be used to style the marker for point-in-time items. */
     borderColor?: string;
 
     /** The border thickness. */
@@ -452,7 +452,7 @@ export interface TempisTimelineCategory {
     /** The category label. */
     label: string;
 
-    /** The style to apply to items in this category. The backgroundColor property will be applied as the legend key color. */
+    /** The style to apply to items in this category. The backgroundColor property will be applied as the legend key colour. */
     style?: TempisTimelineItemStyle;
 }
 
@@ -477,7 +477,7 @@ export interface TempisTimelineBandStyle {
     /** The colour of the band. */
     color?: string;
 
-    /** The border color. */
+    /** The border colour. */
     borderColor?: string;
 
     /** The border thickness. */

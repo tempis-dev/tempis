@@ -1,42 +1,69 @@
 <h1>Creating a Timeline</h1>
 <p class="subtitle">Create a new timeline instance.</p>
 
+<p>Constructing a timeline renders it immediately, attaches the canvas event listeners, and (with <code>responsive: true</code>) starts a <code>ResizeObserver</code> on the parent. Call <a href="#core/constructor$destroy"><code>destroy()</code></a> before the canvas leaves the DOM to release all of these.</p>
+
 <pre><code class="language-typescript">new TempisTimeline(context: string | HTMLCanvasElement, options: TempisTimelineOptions)</code></pre>
 
-<p>The <code>context</code> parameter accepts either a CSS selector string pointing to a <code>&lt;canvas&gt;</code> element, or a direct reference to one.</p>
+<p>The <code>context</code> parameter accepts either a CSS selector string pointing to a <code>&lt;canvas&gt;</code> element, or a direct reference to one. <code>items</code> is the only required option.</p>
 
-<pre><code class="language-typescript">// Using a selector
-const timeline = new TempisTimeline('#my-canvas', { items: [...] });
+<h2>Minimal Example</h2>
+<pre><code class="language-typescript">import { TempisTimeline } from '@tempis/timeline';
 
-// Using an element reference
-const canvas = document.getElementById('my-canvas') as HTMLCanvasElement;
-const timeline = new TempisTimeline(canvas, { items: [...] });</code></pre>
+const timeline = new TempisTimeline('#timeline', {
+  responsive: true,
+  range: { start: '2026-01-01', end: '2026-02-01', position: 'bottom' },
+  items: [
+    { id: 1, label: 'Discovery', start: '2026-01-05', end: '2026-01-15', grouping: 'Phase 1' },
+    { id: 2, label: 'Build',     start: '2026-01-12', end: '2026-01-28', grouping: 'Phase 1' },
+    { id: 3, label: 'Launch',    start: '2026-01-30',                    grouping: 'Phase 1' }
+  ]
+});
+
+// Pass an element reference instead of a selector if you prefer.
+const canvas = document.getElementById('timeline') as HTMLCanvasElement;
+const timeline2 = new TempisTimeline(canvas, { items: [] });</code></pre>
 
 <h2>TempisTimelineOptions</h2>
 <table>
   <thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
   <tbody>
-    <tr><td><code>items</code></td><td><code>TempisTimelineItem[]</code></td><td>required</td><td>The items to display.</td></tr>
+    <tr><td><code>items</code></td><td><a href="#core/items$TempisTimelineItem"><code>TempisTimelineItem[]</code></a></td><td>required</td><td>The items to display.</td></tr>
     <tr><td><code>responsive</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Whether to automatically resize the canvas to match parent container dimensions.</td></tr>
-    <tr><td><code>verticalFill</code></td><td><code>"content" | "fill-canvas" | "grow-canvas"</code></td><td><code>"content"</code></td><td>Defines how the timeline fills vertical space.</td></tr>
+    <tr><td><code>verticalFill</code></td><td><a href="#core/layout$TempisTimelineVerticalFillMode"><code>TempisTimelineVerticalFillMode</code></a><br><span class="type-values">"content" | "fill-canvas" | "grow-canvas"</span></td><td><code>"content"</code></td><td>Defines how the timeline fills vertical space.</td></tr>
     <tr><td><code>rtl</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Whether to use right-to-left rendering.</td></tr>
-    <tr><td><code>stackMode</code></td><td><code>"compact" | "stable"</code></td><td><code>"stable"</code></td><td>The item stacking behaviour.</td></tr>
-    <tr><td><code>selection</code></td><td><code>"none" | "single" | "multi"</code></td><td><code>"none"</code></td><td>Item selection mode.</td></tr>
-    <tr><td><code>categories</code></td><td><code>TempisTimelineCategory[]</code></td><td>—</td><td>Item categories.</td></tr>
-    <tr><td><code>bands</code></td><td><code>TempisTimelineBand[]</code></td><td>—</td><td>Timeline bands.</td></tr>
-    <tr><td><code>dependencies</code></td><td><code>TempisTimelineDependency[]</code></td><td>—</td><td>Item dependencies rendered as connector arrows.</td></tr>
-    <tr><td><code>range</code></td><td><code>TempisTimelineRangeOptions</code></td><td>—</td><td>Range configuration.</td></tr>
-    <tr><td><code>legend</code></td><td><code>TempisTimelineLegendOptions</code></td><td>—</td><td>Legend configuration.</td></tr>
-    <tr><td><code>tooltip</code></td><td><code>TempisTimelineTooltipOptions</code></td><td>—</td><td>Tooltip configuration.</td></tr>
-    <tr><td><code>style</code></td><td><code>TempisTimelineStyleOptions</code></td><td>—</td><td>Style overrides.</td></tr>
-    <tr><td><code>scrollbar</code></td><td><code>TempisTimelineScrollbarOptions</code></td><td>—</td><td>Scrollbar options.</td></tr>
-    <tr><td><code>grouping</code></td><td><code>TempisTimelineGroupingOptions</code></td><td>—</td><td>Grouping options.</td></tr>
-    <tr><td><code>accessibility</code></td><td><code>TempisTimelineAccessibilityOptions</code></td><td>—</td><td>Accessibility options (keyboard, ARIA).</td></tr>
-    <tr><td><code>minimap</code></td><td><code>TempisTimelineMinimapOptions</code></td><td>—</td><td>Minimap overview bar. Provide to enable.</td></tr>
+    <tr><td><code>stackMode</code></td><td><a href="#core/layout$TempisTimelineStackMode"><code>TempisTimelineStackMode</code></a><br><span class="type-values">"compact" | "stable"</span></td><td><code>"stable"</code></td><td>The item stacking behaviour.</td></tr>
+    <tr><td><code>selection</code></td><td><a href="#core/selection$TempisTimelineItemSelectionMode"><code>TempisTimelineItemSelectionMode</code></a><br><span class="type-values">"none" | "single" | "multi"</span></td><td><code>"none"</code></td><td>Item selection mode.</td></tr>
+    <tr><td><code>categories</code></td><td><a href="#core/categories$TempisTimelineCategory"><code>TempisTimelineCategory[]</code></a></td><td> - </td><td>Item categories.</td></tr>
+    <tr><td><code>bands</code></td><td><a href="#core/bands$TempisTimelineBand"><code>TempisTimelineBand[]</code></a></td><td> - </td><td>Timeline bands.</td></tr>
+    <tr><td><code>dependencies</code></td><td><a href="#core/dependencies$TempisTimelineDependency"><code>TempisTimelineDependency[]</code></a></td><td> - </td><td>Item dependencies rendered as connector arrows.</td></tr>
+    <tr><td><code>range</code></td><td><a href="#core/range$TempisTimelineRangeOptions"><code>TempisTimelineRangeOptions</code></a></td><td> - </td><td>Range configuration.</td></tr>
+    <tr><td><code>legend</code></td><td><a href="#core/legend$TempisTimelineLegendOptions"><code>TempisTimelineLegendOptions</code></a></td><td> - </td><td>Legend configuration.</td></tr>
+    <tr><td><code>tooltip</code></td><td><a href="#core/tooltips$TempisTimelineTooltipOptions"><code>TempisTimelineTooltipOptions</code></a></td><td> - </td><td>Tooltip configuration.</td></tr>
+    <tr><td><code>style</code></td><td><a href="#core/styling$TempisTimelineStyleOptions"><code>TempisTimelineStyleOptions</code></a></td><td> - </td><td>Style overrides.</td></tr>
+    <tr><td><code>scrollbar</code></td><td><a href="#core/scrollbar$TempisTimelineScrollbarOptions"><code>TempisTimelineScrollbarOptions</code></a></td><td> - </td><td>Scrollbar options.</td></tr>
+    <tr><td><code>grouping</code></td><td><a href="#core/grouping$TempisTimelineGroupingOptions"><code>TempisTimelineGroupingOptions</code></a></td><td> - </td><td>Grouping options.</td></tr>
+    <tr><td><code>accessibility</code></td><td><a href="#core/accessibility$TempisTimelineAccessibilityOptions"><code>TempisTimelineAccessibilityOptions</code></a></td><td> - </td><td>Accessibility options (keyboard, ARIA).</td></tr>
+    <tr><td><code>minimap</code></td><td><a href="#core/minimap$TempisTimelineMinimapOptions"><code>TempisTimelineMinimapOptions</code></a></td><td> - </td><td>Minimap overview bar. Provide to enable.</td></tr>
   </tbody>
 </table>
 
-<div class="note">When using <code>responsive: true</code>, the canvas must be inside a container with explicit dimensions. The timeline resizes to fill its parent — if the parent has no width or height, the canvas will collapse to zero.</div>
+<div class="note">When using <code>responsive: true</code>, the canvas must be inside a container with explicit dimensions. The timeline resizes to fill its parent. If the parent has no width or height, the canvas will collapse to zero.</div>
+
+<h2>Callbacks</h2>
+<p>Pass any of these in the same options object to respond to user interaction. See <a href="#core/callbacks">Callbacks</a> for full detail and a live demo.</p>
+<table>
+  <thead><tr><th>Callback</th><th>Signature</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>onItemClick</code></td><td><code>(id: string | number) =&gt; void</code></td><td>An item was clicked.</td></tr>
+    <tr><td><code>onItemDoubleClick</code></td><td><code>(id: string | number) =&gt; void</code></td><td>An item was double-clicked.</td></tr>
+    <tr><td><code>onItemContextClick</code></td><td><code>(id: string | number, position: { x: number; y: number }) =&gt; void</code></td><td>An item was right-clicked. Receives viewport coordinates for positioning a custom menu.</td></tr>
+    <tr><td><code>onItemHover</code></td><td><code>(id: string | number | null) =&gt; void</code></td><td>The pointer entered an item, or left all items (<code>null</code>).</td></tr>
+    <tr><td><code>onSelectionChange</code></td><td><code>(changes: SelectionChangeEvent[]) =&gt; void</code></td><td>Selection changed. Providing this puts selection into controlled mode (see <a href="#core/selection">Selection</a>).</td></tr>
+    <tr><td><code>onRangeChange</code></td><td><code>(start: Date, end: Date) =&gt; void</code></td><td>The visible range changed from panning or zooming.</td></tr>
+    <tr><td><code>onGroupToggle</code></td><td><code>(group: string, collapsed: boolean) =&gt; void</code></td><td>A group header was clicked to collapse or expand. Does not fire for programmatic calls.</td></tr>
+  </tbody>
+</table>
 
 <h2>Instance Methods</h2>
 <table>
@@ -55,14 +82,25 @@ const timeline = new TempisTimeline(canvas, { items: [...] });</code></pre>
     <tr><td><code>setSelection(ids)</code></td><td>Programmatically select items by ID.</td><td><a href="#core/selection">Selection</a></td></tr>
     <tr><td><code>getSelection()</code></td><td>Get selected item IDs.</td><td><a href="#core/selection">Selection</a></td></tr>
     <tr><td><code>clearSelection()</code></td><td>Deselect all items.</td><td><a href="#core/selection">Selection</a></td></tr>
-    <tr><td><code>toImage(options?)</code></td><td>Export as PNG, JPEG, or WebP blob.</td><td><a href="#core/image-export">Image Export</a></td></tr>
-    <tr><td><code>redraw()</code></td><td>Force a redraw.</td><td>—</td></tr>
-    <tr><td><code>destroy()</code></td><td>Clean up all listeners and resources.</td><td>—</td></tr>
+    <tr><td><code>toImage(options?)</code></td><td>Export as a PNG, JPEG, or WebP blob. Returns a <code>Promise&lt;Blob&gt;</code>.</td><td><a href="#core/image-export">Image Export</a></td></tr>
+    <tr><td><code>redraw()</code></td><td>Force a redraw.</td><td> - </td></tr>
+    <tr><td><code>destroy()</code></td><td>Clean up all listeners and resources.</td><td> - </td></tr>
   </tbody>
 </table>
 
-<h3>destroy()</h3>
-<p>Removes all event listeners, disconnects observers, cancels animations, and clears the canvas. Always call this before removing the timeline from the DOM to prevent memory leaks.</p>
-<div class="note">In single-page applications, always call <code>destroy()</code> when removing the timeline from the DOM to prevent memory leaks from orphaned event listeners and resize observers.</div>
+<h3 id="destroy">destroy()</h3>
+<p>Removes the canvas event listeners, disconnects the resize observer, cancels in-flight animations, tears down the tooltip and legend views, and clears the canvas. Call it before the canvas leaves the DOM; otherwise the listeners and observer keep the instance alive.</p>
 <pre><code class="language-typescript">timeline.destroy();</code></pre>
-<p>In frameworks like React, the <code>&lt;TempisTimeline&gt;</code> component handles this automatically on unmount.</p>
+<p>The React and Vue components call this for you on unmount.</p>
+
+<h2>Static Methods</h2>
+<p>These are set on the class, not an instance, and apply globally. Register a date adapter before constructing any timeline.</p>
+<table>
+  <thead><tr><th>Method</th><th>Description</th><th>Details</th></tr></thead>
+  <tbody>
+    <tr><td><code>TempisTimeline.registerDateAdapter(adapter)</code></td><td>Replace the native date implementation.</td><td><a href="#core/date-adapters">Date adapters</a></td></tr>
+    <tr><td><code>TempisTimeline.getDateAdapter()</code></td><td>Get the active adapter.</td><td><a href="#core/date-adapters">Date adapters</a></td></tr>
+    <tr><td><code>TempisTimeline.setGlobalPalette(colors)</code></td><td>Set the palette used for categories with no explicit colour.</td><td><a href="#core/color-palette">Colour palette</a></td></tr>
+    <tr><td><code>TempisTimeline.getGlobalPalette()</code></td><td>Get the current palette.</td><td><a href="#core/color-palette">Colour palette</a></td></tr>
+  </tbody>
+</table>

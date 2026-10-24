@@ -3,23 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Examples — Tempis Timeline</title>
-  <meta name="description" content="Interactive examples of Tempis Timeline. See grouping, categories, dependencies, selection, tooltips, minimap, RTL, and more in action.">
+  <title>Examples | Tempis Timeline</title>
+  <meta name="description" content="Live Tempis Timeline examples: scheduling dashboards, Gantt-style dependencies, streaming data, lazy loading, minimap, custom tooltips, timezones, RTL layout and image export.">
   <link rel="canonical" href="https://tempis.dev/examples.html">
-  <meta property="og:title" content="Examples — Tempis Timeline">
-  <meta property="og:description" content="Interactive examples of Tempis Timeline. See grouping, categories, dependencies, selection, and more in action.">
+  <meta property="og:title" content="Examples | Tempis Timeline">
+  <meta property="og:description" content="Live Tempis Timeline examples: scheduling dashboards, Gantt-style dependencies, streaming data, tooltips, timezones and more.">
   <meta property="og:url" content="https://tempis.dev/examples.html">
   <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="https://tempis.dev/images/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Tempis Timeline: a canvas-rendered project timeline with grouped tasks, dependencies and bands.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://tempis.dev/images/og-image.png">
   <link rel="icon" type="image/png" href="images/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <nav>
     <div class="nav-inner">
       <a href="index.html" class="logo">
-        <img src="images/logo.png" alt="Tempis">
-        Tempis
+        <img src="images/logo.png" alt=""> Tempis
       </a>
       <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
@@ -28,156 +34,236 @@
         <li><a href="api.html">API</a></li>
         <li><a href="pricing.html">Pricing</a></li>
       </ul>
-      <a href="https://github.com/tempis-dev/tempis" class="nav-github" aria-label="GitHub">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-      </a>
+      <div class="nav-right">
+        <a href="https://github.com/tempis-dev/tempis" class="nav-github" aria-label="Tempis on GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        </a>
+      </div>
       <button class="nav-burger" aria-label="Menu" onclick="document.querySelector('.mobile-menu').classList.add('open');document.querySelector('.mobile-menu-overlay').classList.add('active');">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
     </div>
   </nav>
   <div class="mobile-menu-overlay" onclick="document.querySelector('.mobile-menu').classList.remove('open');this.classList.remove('active');"></div>
   <div class="mobile-menu">
     <button class="mobile-menu-close" aria-label="Close menu" onclick="this.parentElement.classList.remove('open');document.querySelector('.mobile-menu-overlay').classList.remove('active');">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
     <a href="index.html">Home</a>
     <a href="get-started.html">Get Started</a>
-    <a href="examples.html">Examples</a>
+    <a href="examples.html" class="active">Examples</a>
     <a href="api.html">API</a>
     <a href="pricing.html">Pricing</a>
-    <a href="https://github.com/tempis-dev/tempis" class="mobile-menu-github" aria-label="GitHub"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></a>
+    <a href="examples/playground.html">Playground</a>
+    <a href="https://github.com/tempis-dev/tempis" class="mobile-menu-github">GitHub</a>
   </div>
 
-  <div class="page-wrapper">
-    <h1>Examples</h1>
-    <p>A collection of live demos showing how the timeline handles everything from real-time data streams to image export. All interactive, all running in the browser.</p>
+  <div class="page-wrapper" style="max-width: 1180px;">
+    <div class="page-head">
+      <h1>Examples</h1>
+      <p>Live builds running the real library, from example applications to focused single-feature demos. Each one is a single HTML file you can view source on and reuse.</p>
+    </div>
 
-    <div class="examples-featured">
-      <a href="examples/playground.html" class="example-featured-card">
-        <img class="example-featured-img" src="images/examples/playground_tile.png">
-        <div class="example-featured-text">
-          <h3>🎮 Playground</h3>
-          <p>Interactive testing environment with controls for all timeline options.</p>
-        </div>
-      </a>
-      <a href="examples/dashboard.html" class="example-featured-card">
-        <img class="example-featured-img" src="images/examples/dashboard_tile.png">
-        <div class="example-featured-text">
-          <h3>🚛 Fleet Dashboard</h3>
-          <p>Material-style dashboard with KPI cards, charts, timeline-driven detail form, and region filtering.</p>
-        </div>
-      </a>
-      <a href="examples/streaming-data.html" class="example-featured-card">
-        <img class="example-featured-img" src="images/examples/crypto_tile.png">
-        <div class="example-featured-text">
-          <h3>📡 Crypto Price Stream</h3>
-          <p>Live cryptocurrency prices via WebSocket with color-coded movements.</p>
-        </div>
-      </a>
-      <a href="examples/production-downtime.html" class="example-featured-card">
-        <img class="example-featured-img" src="images/examples/production_tile.png">
-        <div class="example-featured-text">
-          <h3>🏭 Production Downtime</h3>
-          <p>Downtime tracking with selection-driven detail panels.</p>
-        </div>
-      </a>
-      <a href="examples/lazy-loading.html" class="example-featured-card">
-        <img class="example-featured-img" src="images/examples/logs_tile.png">
-        <div class="example-featured-text">
-          <h3>🔄 Lazy Loading</h3>
-          <p>Server logs loaded on demand as you pan the timeline.</p>
-        </div>
-      </a>
-      <a href="examples/custom-tooltips.html" class="example-featured-card">
-        <img class="example-featured-img" src="images/examples/tooltips_tile.png">
-        <div class="example-featured-text">
-          <h3>💬 Custom Tooltips</h3>
-          <p>Rich tooltip cards with assignee details, status, and progress.</p>
-        </div>
-      </a>
-      <a href="examples/timezones.html" class="example-featured-card">
-        <img class="example-featured-img" src="images/examples/flights_tile.png">
-        <div class="example-featured-text">
-          <h3>🌍 Timezone Explorer</h3>
-          <p>Flight schedule with a Luxon date adapter. Switch timezones live.</p>
-        </div>
-      </a>
-      <a href="examples/band-demo.html" class="example-featured-card">
-        <img class="example-featured-img" src="images/examples/bands_tile.png">
-        <div class="example-featured-text">
-          <h3>📊 Server Monitoring</h3>
-          <p>Kubernetes overview with bands for maintenance and incidents.</p>
-        </div>
-      </a>
-      <a href="examples/rtl-demo.html" class="example-featured-card">
-        <img class="example-featured-img" src="images/examples/rtl_tile.png">
-        <div class="example-featured-text">
-          <h3>🌐 RTL Schedule</h3>
-          <p>Arabic project schedule with full right-to-left layout support.</p>
-        </div>
-      </a>
-      <a href="examples/color-palettes.html" class="example-featured-card">
-        <img class="example-featured-img" src="images/examples/palette_tile.png">
-        <div class="example-featured-text">
-          <h3>🎨 Color Palettes</h3>
-          <p>Switch palettes and watch the timeline update instantly.</p>
-        </div>
-      </a>
-      <a href="examples/selection-grid.html" class="example-featured-card">
-        <img class="example-featured-img" src="images/examples/ext_selection_tile.png">
-        <div class="example-featured-text">
-          <h3>📋 External Selection</h3>
-          <p>Select items from a table and focus them on the timeline.</p>
-        </div>
-      </a>
-      <a href="examples/to-image.html" class="example-featured-card">
-        <img class="example-featured-img" src="images/examples/toimage_tile.png">
-        <div class="example-featured-text">
-          <h3>📸 Export to Image</h3>
-          <p>Download the timeline as PNG, JPEG, or WebP with DPR control.</p>
-        </div>
-      </a>
-      <a href="examples/item-styles.html" class="example-featured-card">
-        <img class="example-featured-img" src="images/examples/item_style_tile.png">
-        <div class="example-featured-text">
-          <h3>🎬 Per-Item Styles</h3>
-          <p>Unique visual treatment per item — borders, colours, radius.</p>
-        </div>
-      </a>
-      <a href="examples/dependencies.html" class="example-featured-card">
-        <img class="example-featured-img" src="images/examples/dependencies_tile.png">
-        <div class="example-featured-text">
-          <h3>🔗 Dependencies</h3>
-          <p>Mobile app launch schedule with dependency arrows across planning, design, dev, QA, and release.</p>
-        </div>
-      </a>
-      <a href="examples/context-menu.html" class="example-featured-card">
-        <img class="example-featured-img" src="images/examples/context_menu_tile.png">
-        <div class="example-featured-text">
-          <h3>📝 Context Menu</h3>
-          <p>Film production schedule — right-click to manage tasks with contextual actions.</p>
-        </div>
-      </a>
-      <a href="examples/progress.html" class="example-featured-card">
-        <img class="example-featured-img" src="images/examples/progress_tile.png">
-        <div class="example-featured-text">
-          <h3>📊 Progress Indicator</h3>
-          <p>Product development timeline with progress fill bars showing task completion.</p>
-        </div>
-      </a>
-      <a href="examples/minimap.html" class="example-featured-card">
-        <img class="example-featured-img" src="images/examples/minimap_tile.png">
-        <div class="example-featured-text">
-          <h3>🗺️ Minimap</h3>
-          <p>Annual engineering roadmap with a minimap overview bar for quick navigation.</p>
-        </div>
-      </a>
+    <section class="ex-group">
+      <p class="eyebrow">Applications</p>
+      <p class="group-intro">Complete, self-contained example apps showing the timeline working as one component inside a larger interface, each with its own layout, controls and surrounding panels.</p>
+      <div class="ex-grid">
+        <a href="examples/project-planner.html" class="ex-card">
+          <img src="images/examples/pp_tile.png" alt="Gantt-style project planner with phases, dependency arrows and progress bars" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Project Planner</h3>
+            <p>An editable Gantt planner with a collapsible phase tree and dependency arrows. Add or remove tasks, edit their dates, assignee and dependencies in the drawer, manage coloured schedule bands, and jump between zoom presets.</p>
+            <div class="tag-row"><span class="tag">Dependencies</span><span class="tag">Progress bars</span><span class="tag">Grouping</span><span class="tag">Zoom presets</span><span class="tag">Bands</span><span class="tag">Notes</span><span class="tag">Editable items</span></div>
+          </div>
+        </a>
+        <a href="examples/dashboard.html" class="ex-card">
+          <img src="images/examples/dashboard_tile.png" alt="Fleet maintenance dashboard with KPI cards above a grouped timeline" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Fleet Maintenance Dashboard</h3>
+            <p>A full maintenance-scheduling app. KPI cards, region filters, a detail/edit panel and a right-click menu all wired to the timeline.</p>
+            <div class="tag-row"><span class="tag">Selection</span><span class="tag">Live updates</span><span class="tag">Context menu</span><span class="tag">Filtering</span><span class="tag">Detail panel</span></div>
+          </div>
+        </a>
+        <a href="examples/streaming-data.html" class="ex-card">
+          <img src="images/examples/crypto_tile.png" alt="Live trading terminal with a watchlist beside a streaming timeline" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Live Trading Terminal</h3>
+            <p>A market-monitor app streaming real Binance trades over a WebSocket. A live watchlist sits beside the timeline, which appends ticks and follows the latest price.</p>
+            <div class="tag-row"><span class="tag">Live data</span><span class="tag">Auto-follow</span><span class="tag">Streaming</span><span class="tag">Filtering</span><span class="tag">Detail dialog</span></div>
+          </div>
+        </a>
+        <a href="examples/lazy-loading.html" class="ex-card">
+          <img src="images/examples/logs_tile.png" alt="Request log explorer loading more entries while panning" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Request Log Explorer</h3>
+            <p>An observability tool that fetches request logs on demand as you pan and zoom, with cache stats, an error-rate metric and a live fetch-activity feed.</p>
+            <div class="tag-row"><span class="tag">Lazy loading</span><span class="tag">Pan &amp; zoom</span><span class="tag">Grouping</span><span class="tag">Live metrics</span><span class="tag">Collapsible groups</span></div>
+          </div>
+        </a>
+        <a href="examples/dashboard-builder.html" class="ex-card">
+          <img src="images/examples/db_tile.png" alt="Drag-and-drop dashboard builder with a timeline widget among other cards" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Dashboard Builder</h3>
+            <p>A drag-and-drop dashboard composer. Drop in a timeline widget, resize it in the grid and repoint it at a different data source from the inspector, all live.</p>
+            <div class="tag-row"><span class="tag">Responsive</span><span class="tag">Live updates</span><span class="tag">Drag &amp; drop</span><span class="tag">Resizable</span></div>
+          </div>
+        </a>
+        <a href="examples/production-downtime.html" class="ex-card">
+          <img src="images/examples/production_tile.png" alt="Plant operations console with OEE tiles and a downtime timeline" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Plant Operations Console</h3>
+            <p>An industrial OEE monitoring console. Availability, MTTR and downtime KPIs sit above the timeline, with a side panel that swaps to full event details on selection.</p>
+            <div class="tag-row"><span class="tag">Selection</span><span class="tag">Grouping</span><span class="tag">Detail panel</span><span class="tag">Range presets</span><span class="tag">Live metrics</span></div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section class="ex-group">
+      <p class="eyebrow">Features</p>
+      <div class="ex-grid">
+        <a href="examples/selection-grid.html" class="ex-card">
+          <img src="images/examples/ext_selection_tile.png" alt="Table of rows synchronised with timeline selection" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Table-driven selection</h3>
+            <p>Controlled selection kept in sync both ways between a table and the timeline.</p>
+            <div class="tag-row"><span class="tag">Selection</span><span class="tag">Two-way sync</span><span class="tag">Controlled state</span></div>
+          </div>
+        </a>
+        <a href="examples/context-menu.html" class="ex-card">
+          <img src="images/examples/context_menu_tile.png" alt="Right-click context menu open over a timeline item" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Context menu</h3>
+            <p>A film production schedule where right-clicking an item opens contextual actions at the pointer.</p>
+            <div class="tag-row"><span class="tag">Context menu</span><span class="tag">Selection</span><span class="tag">Grouping</span></div>
+          </div>
+        </a>
+        <a href="examples/dependencies.html" class="ex-card">
+          <img src="images/examples/dependencies_tile.png" alt="Timeline with dependency arrows between tasks" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Dependencies</h3>
+            <p>An app launch plan with finish-to-start arrows routed across planning, design, build, QA and release.</p>
+            <div class="tag-row"><span class="tag">Dependencies</span><span class="tag">Grouping</span><span class="tag">Progress bars</span></div>
+          </div>
+        </a>
+        <a href="examples/minimap.html" class="ex-card">
+          <img src="images/examples/minimap_tile.png" alt="Annual roadmap with a minimap bar beneath it" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Minimap</h3>
+            <p>A year-long roadmap with the overview bar enabled for jumping between quarters.</p>
+            <div class="tag-row"><span class="tag">Minimap</span><span class="tag">Pan &amp; zoom</span><span class="tag">Grouping</span></div>
+          </div>
+        </a>
+        <a href="examples/progress.html" class="ex-card">
+          <img src="images/examples/progress_tile.png" alt="Timeline items with partial progress fill bars" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Progress bars</h3>
+            <p>Completion shown as a fill inside each range item, clipped to the item's corner radius.</p>
+            <div class="tag-row"><span class="tag">Progress bars</span><span class="tag">Per-item styling</span></div>
+          </div>
+        </a>
+        <a href="examples/custom-tooltips.html" class="ex-card">
+          <img src="images/examples/tooltips_tile.png" alt="Rich tooltip card showing task detail" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Custom tooltips</h3>
+            <p>Tooltip content built from your own DOM, with assignee, status and progress.</p>
+            <div class="tag-row"><span class="tag">Custom tooltips</span><span class="tag">Progress bars</span></div>
+          </div>
+        </a>
+        <a href="examples/item-styles.html" class="ex-card">
+          <img src="images/examples/item_style_tile.png" alt="Timeline items with varied borders, colours and radii" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Per-item styling</h3>
+            <p>Borders, dash patterns, colours and radii applied per item to encode status.</p>
+            <div class="tag-row"><span class="tag">Per-item styling</span><span class="tag">Colour palettes</span></div>
+          </div>
+        </a>
+        <a href="examples/color-palettes.html" class="ex-card">
+          <img src="images/examples/palette_tile.png" alt="Same timeline rendered in several colour palettes" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Colour palettes</h3>
+            <p>Categories without an explicit colour draw from the global palette. Swap it at runtime.</p>
+            <div class="tag-row"><span class="tag">Colour palettes</span><span class="tag">Live updates</span></div>
+          </div>
+        </a>
+        <a href="examples/band-demo.html" class="ex-card">
+          <img src="images/examples/bands_tile.png" alt="Kubernetes cluster timeline with shaded maintenance bands" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Bands</h3>
+            <p>Cluster events with maintenance windows and incident periods shaded behind the items.</p>
+            <div class="tag-row"><span class="tag">Bands</span><span class="tag">Grouping</span></div>
+          </div>
+        </a>
+        <a href="examples/timezones.html" class="ex-card">
+          <img src="images/examples/flights_tile.png" alt="Flight schedule with a timezone selector" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Timezones</h3>
+            <p>A Luxon date adapter registered in place of the native one, with the display zone switchable live.</p>
+            <div class="tag-row"><span class="tag">Timezones</span><span class="tag">Date adapters</span></div>
+          </div>
+        </a>
+        <a href="examples/rtl-demo.html" class="ex-card">
+          <img src="images/examples/rtl_tile.png" alt="Arabic project schedule laid out right to left" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Right to left</h3>
+            <p>An Arabic project schedule with the axis, items, legend and tooltips all mirrored.</p>
+            <div class="tag-row"><span class="tag">RTL layout</span><span class="tag">Grouping</span></div>
+          </div>
+        </a>
+        <a href="examples/to-image.html" class="ex-card">
+          <img src="images/examples/toimage_tile.png" alt="Festival schedule with image export controls" loading="lazy">
+          <div class="ex-card-body">
+            <h3>Image export</h3>
+            <p>Export the current view as PNG, JPEG or WebP, with device pixel ratio and background colour options.</p>
+            <div class="tag-row"><span class="tag">Image export</span><span class="tag">Grouping</span></div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <div class="callout">
+      <div>
+        <h2>Playground</h2>
+        <p>Toggle options, switch stack modes and edit data against a live timeline, without writing any code.</p>
+      </div>
+      <a href="examples/playground.html" class="btn btn-outline">Open playground</a>
     </div>
   </div>
 
   <footer>
-    <p>Tempis Timeline is source-available. Free for non-commercial use. <a href="pricing.html">Commercial licence</a> required for business use.</p><p style="margin-top: 8px; font-size: 0.85em; opacity: 0.6;"><a href="terms.html">Terms</a> &middot; <a href="privacy.html">Privacy</a> &middot; <a href="changelog.html">Changelog</a></p>
+    <div class="footer-inner">
+      <div class="footer-cols">
+        <div class="footer-brand">
+          <a href="index.html" class="logo"><img src="images/logo.png" alt=""> Tempis</a>
+          <p>Canvas-rendered timelines for JavaScript and TypeScript.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Docs</h4>
+          <a href="get-started.html">Get started</a>
+          <a href="api.html">API reference</a>
+          <a href="examples.html">Examples</a>
+          <a href="llms.txt">llms.txt</a>
+        </div>
+        <div class="footer-col">
+          <h4>Project</h4>
+          <a href="https://github.com/tempis-dev/tempis">GitHub</a>
+          <a href="changelog.html">Changelog</a>
+          <a href="https://github.com/tempis-dev/tempis/issues">Issues</a>
+          <a href="https://www.npmjs.com/package/@tempis/timeline">npm</a>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="pricing.html">Pricing</a>
+          <a href="terms.html">Terms</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="mailto:info@tempis.dev">Contact</a>
+        </div>
+      </div>
+      <div class="footer-base">
+        <span>Source-available. Free for non-commercial use; a <a href="pricing.html">commercial licence</a> is required for business use.</span>
+        <span>&copy; 2026 Tempis</span>
+      </div>
+    </div>
   </footer>
 </body>
 </html>

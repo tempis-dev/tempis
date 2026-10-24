@@ -2,13 +2,13 @@
 <p class="subtitle">Update timeline data without recreating the instance.</p>
 
 <h2>How It Works</h2>
-<p>The <code>items</code>, <code>categories</code>, <code>bands</code>, <code>dependencies</code>, and <code>selection</code> props are watched with Vue's <code>watch()</code>. When their values change, the component calls the corresponding <code>setItems()</code>, <code>setCategories()</code>, <code>setBands()</code>, <code>setDependencies()</code>, or <code>setSelection()</code> method on the existing core instance — no destroy/recreate cycle.</p>
+<p>The <code>items</code>, <code>categories</code>, <code>bands</code>, <code>dependencies</code>, and <code>selection</code> props are watched with Vue's <code>watch()</code>. When their values change, the component calls the corresponding <code>setItems()</code>, <code>setCategories()</code>, <code>setBands()</code>, <code>setDependencies()</code>, or <code>setSelection()</code> method on the existing core instance, with no destroy/recreate cycle.</p>
 
 <p>This makes the following patterns efficient:</p>
 <ul>
-  <li>Streaming data — push new items into a reactive array.</li>
-  <li>Filtering — swap the items array based on user input.</li>
-  <li>Dynamic categories — toggle visibility by updating the categories list.</li>
+  <li>Streaming data: push new items into a reactive array.</li>
+  <li>Filtering: swap the items array based on user input.</li>
+  <li>Dynamic categories: toggle visibility by updating the categories list.</li>
 </ul>
 
 <h2>Example: Dynamic Filtering</h2>

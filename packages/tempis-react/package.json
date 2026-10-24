@@ -1,6 +1,6 @@
 {
   "name": "@tempis/react",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "React wrapper for the Tempis Timeline canvas library",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -50,7 +50,7 @@
   },
   "sideEffects": false,
   "peerDependencies": {
-    "@tempis/timeline": "^1.0.0",
+    "@tempis/timeline": "^1.4.0",
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },
